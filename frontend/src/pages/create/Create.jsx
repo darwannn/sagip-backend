@@ -88,6 +88,7 @@ const Create = ({ mode }) => {
   const { id } = useParams();
 
   useEffect(() => {
+
     if (mode === 'update') {
       const fetchBlogDetails = async () => {
         try {

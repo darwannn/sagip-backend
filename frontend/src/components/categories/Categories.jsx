@@ -49,6 +49,8 @@ const Categories = () => {
   }, []);
 
   useEffect(() => {
+
+    
     if (activeCategory === 'all') {
       setFilteredBlogs(
         blogs.map((blog) => ({
