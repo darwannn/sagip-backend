@@ -10,6 +10,9 @@ import Navbar from '../../components/navbar/Navbar'
 import { format } from 'timeago.js'
 import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai'
 
+
+import { toast } from 'react-toastify';
+
 const BlogDetails = () => {
   const [blogDetails, setBlogDetails] = useState("")
   const [isLiked, setIsLiked] = useState(false)
@@ -42,15 +45,18 @@ const BlogDetails = () => {
   }
 
   // delete
-  const handleDeleteBlog = async() => {
+  const handleDeleteBlog = async () => {
     try {
-      const options = {"Authorization": `Bearer ${token}`}
-      await request(`/blog/deleteBlog/${id}`, "DELETE", options)
+      const options = { "Authorization": `Bearer ${token}` }
+      const data =  await request(`/blog/deleteBlog/${id}`, "DELETE", options)
+      const { message } = data;
+      toast.success(message);
       navigate(`/`);
     } catch (error) {
       console.error(error)
     }
-  }
+  };
+  
 
 
   return (
@@ -98,7 +104,7 @@ const BlogDetails = () => {
             </div>
           </div>
           <div className={classes.authorAndCreatedAt}>
-            <span><span>Author:</span> {blogDetails?.userId?.username}</span>
+{/*             <span><span>Author:</span> {blogDetails?.userId?.username}</span> */}
             <span><span>Created At:</span> {format(blogDetails?.createdAt)}</span>
           </div>
         </div>

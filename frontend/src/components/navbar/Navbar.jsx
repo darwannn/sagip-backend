@@ -6,16 +6,16 @@ import { useState } from 'react'
 import { logout } from '../../redux/authSlice'
 import { useDispatch } from 'react-redux'
 
-import { ToastContainer, toast } from 'react-toastify';
+/* import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+ */
 const Navbar = () => {
   const dispatch = useDispatch()
 
 const handleLogout = () => {
   dispatch(logout())
 }
-const notify = () => toast("Wow so easy!");
+/* const notify = () => toast("Wow so easy!"); */
   const [showModal, setShowModal] = useState(false)
 
   return (
@@ -25,8 +25,8 @@ const notify = () => toast("Wow so easy!");
           <Link to='/'>Home</Link>
         </div>
         <ul className={classes.center}>
-        <button onClick={notify}>Notify!</button>
-        <ToastContainer />
+        {/* <button onClick={notify}>Notify!</button> */}
+ {/*        <ToastContainer /> */}
         </ul>
         <div className={classes.right}>
           <img onClick={() => setShowModal(prev => !prev)} src={womanImg} className={classes.img} />

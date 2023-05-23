@@ -34,7 +34,7 @@ blogController.get('/featured', async (req, res) => {
 blogController.post('/', verifyToken, async (req, res) => {
     try {
         const blog = await Blog.create({ ...req.body, userId: req.user.id })
-        return res.status(201).json(blog)
+        return res.status(201).json({ message: 'Blog created successfully', blog })
     } catch (error) {
         return res.status(500).json(error)
     }
@@ -51,7 +51,7 @@ blogController.put("/updateBlog/:id", verifyToken, async (req, res) => {
             .findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
             .populate('userId', '-password')
 
-        return res.status(200).json(updatedBlog)
+        return res.status(200).json({ message: 'Blog updated successfully', updatedBlog })
     } catch (error) {
         return res.status(500).json(error.message)
     }
@@ -86,10 +86,18 @@ blogController.delete('/deleteBlog/:id', verifyToken, async(req, res) => {
         
         await Blog.findByIdAndDelete(req.params.id)
 
-        return res.status(200).json({msg: "Successfully deleted the blog"})
+        return res.status(200).json({message: "Successfully deleted the blog"})
     } catch (error) {
         return res.status(500).json(error)
     }
 })
-
+blogController.get('/getLikedBlogs/:userId', async (req, res) => {
+    try {
+      const likedBlogs = await Blog.find({ likes: req.params.userId }).populate("userId", "-password");
+      return res.status(200).json(likedBlogs);
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  });
+  
 module.exports = blogController

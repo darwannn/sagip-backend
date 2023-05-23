@@ -9,6 +9,9 @@ import { AiOutlineCloseCircle } from 'react-icons/ai';
 import { request } from '../../utils/fetchApi';
 import { useParams } from 'react-router-dom';
 
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -72,7 +75,11 @@ const Create = ({ mode }) => {
       };
 
       const data = await request('/blog', 'POST', options, body);
-      navigate(`/blogDetails/${data._id}`);
+     const { message, blog } = data;
+     console.log(message);
+     toast.success(message);
+      navigate(`/blogDetails/${blog._id}`);
+     // toast.success(data._id);
     } catch (error) {
       console.error(error);
     }
@@ -110,11 +117,17 @@ const Create = ({ mode }) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       };
-      await request(`/blog/updateBlog/${id}`, 'PUT', options, {
+      const data = await request(`/blog/updateBlog/${id}`, 'PUT', options, {
         title,
         desc,
         category,
       });
+
+      const { message } = data;
+
+      toast.success(message);
+
+
       navigate(`/blogDetails/${id}`);
     } catch (error) {
       console.error(error);
@@ -124,6 +137,7 @@ const Create = ({ mode }) => {
   return (
     <>
       <Navbar />
+      <ToastContainer />
       <div className={classes.container}>
         <div className={classes.wrapper}>
           <h2 className={classes.title}>{mode} Blog</h2>
