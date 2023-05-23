@@ -1,0 +1,25 @@
+
+
+# testing
+/frontend/coverage
+
+# production
+/frontend/build
+
+
+
+
+#.install backend.cmd
+#.install frontend.cmd
+#.run frontend.cmd
+#.run backend.cmd
+#.gitignore
+#.run.cmd
+
+
+/backend/.pnp
+/backend.pnp.js
+
+/backend/node_modules
+/frontend/node_modules
+
