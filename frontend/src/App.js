@@ -1,8 +1,9 @@
 import './App.css';
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BlogHome from './pages/BlogHome/BlogHome';
 import Home from './pages/Home';
 import LikedPost from './pages/LikedPost';
+import Error from './pages/Error';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
@@ -13,26 +14,34 @@ import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+/* const Error = () => {
+  return <h1>404 Not Found</h1>;
+}; */
 
-function App() {
-  const { user } = useSelector((state) => state.auth)
+const App = () => {
+  const { user } = useSelector((state) => state.auth);
+  const location = useLocation();
 
   return (
-    <div>     <ToastContainer />
+    <div>
+      <ToastContainer />
       <Routes>
-        <Route path='/' element={user ? <BlogHome /> : <Navigate to='/login' />} />
-        <Route path='/home' element={user ? <Home /> : <Navigate to='/login' />} />
-        <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />
-        <Route path='/register' element={!user ? <Register /> : <Navigate to='/' />} />
-        <Route path='/create' element={user ? <Create mode={"create"} /> : <Navigate to='/login' />} />
-        <Route path='/blogDetails/:id' element={user ? <BlogDetails /> : <Navigate to='/login' />} />
-        <Route path='/updateBlog/:id' element={user ? <Create mode={"update"} /> : <Navigate to='/login' />} />
+        <Route path="/" element={user ? <BlogHome /> : <Navigate to="/login" />} />
+        <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
+        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+        <Route path="/create" element={user ? <Create mode="create" /> : <Navigate to="/login" />} />
+        <Route path="/blogDetails/:id" element={user ? <BlogDetails /> : <Navigate to="/login" />} />
+        <Route path="/updateBlog/:id" element={user ? <Create mode="update" /> : <Navigate to="/login" />} />
 
-        <Route path='/likedPosts' element={user ? <LikedPost /> : <Navigate to='/login' />} />
-{/*         <Route path='/forgot-password' element={user ? <ForgotPassword /> : <Navigate to='/login' />} /> */}
+        <Route path="/likedPosts" element={user ? <LikedPost /> : <Navigate to="/login" />} />
+        {/* <Route path="/forgot-password" element={user ? <ForgotPassword /> : <Navigate to="/login" />} */}
+
+        {/* 404 error handling */}
+        {location.pathname !== "/" && <Route path="*" element={<Error />} />}
       </Routes>
     </div>
   );
-}
+};
 
 export default App;

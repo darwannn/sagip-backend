@@ -1,10 +1,10 @@
-const homeController = require("express").Router();
+const apiController = require("express").Router();
 const axios = require('axios');
 const { DateTime } = require('luxon');
 
 const municipality = "Malolos";
 
-homeController.get('/signal', async (req, res) => {
+apiController.get('/signal', async (req, res) => {
   try {
     const url = 'https://pagasa.chlod.net/api/v1/bulletin/list';
     const { data } = await axios.get(url);
@@ -32,7 +32,7 @@ homeController.get('/signal', async (req, res) => {
     const link = bulletins[maxIndex].link;
 
     const filename = link.substring(link.lastIndexOf('/') + 1);
-    console.log(count);
+/*     console.log(count); */
     let counter = 0;
     let looping = true;
 
@@ -101,4 +101,21 @@ homeController.get('/signal', async (req, res) => {
   }
 });
 
-module.exports = homeController;
+
+apiController.get('/weather', async (req, res) => {
+  const cityName = 'Malolos'; // Replace with the desired city name
+  const API_KEY = '16cefabed3121dd5031b8ab75149ab61'; // Replace with your OpenWeatherMap API key
+
+  try {
+    const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}`);
+    const data = response.data;
+
+    const weatherDescription = data.weather[0].description;
+
+    res.json({ weather: weatherDescription });
+  } catch (error) {
+    return res.status(500).json({ message: 'An error occurred' });
+  }
+});
+
+module.exports = apiController;
