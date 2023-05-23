@@ -1,7 +1,9 @@
 import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom'
-import Home from './pages/home/Home';
+import BlogHome from './pages/BlogHome/BlogHome';
+import Home from './pages/Home';
 import LikedPost from './pages/LikedPost';
+import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/login/Login';
 import Register from './pages/register/Register';
 import Create from './pages/create/Create';
@@ -18,7 +20,8 @@ function App() {
   return (
     <div>     <ToastContainer />
       <Routes>
-        <Route path='/' element={user ? <Home /> : <Navigate to='/login' />} />
+        <Route path='/' element={user ? <BlogHome /> : <Navigate to='/login' />} />
+        <Route path='/home' element={user ? <Home /> : <Navigate to='/login' />} />
         <Route path='/login' element={!user ? <Login /> : <Navigate to='/' />} />
         <Route path='/register' element={!user ? <Register /> : <Navigate to='/' />} />
         <Route path='/create' element={user ? <Create mode={"create"} /> : <Navigate to='/login' />} />
@@ -26,6 +29,7 @@ function App() {
         <Route path='/updateBlog/:id' element={user ? <Create mode={"update"} /> : <Navigate to='/login' />} />
 
         <Route path='/likedPosts' element={user ? <LikedPost /> : <Navigate to='/login' />} />
+{/*         <Route path='/forgot-password' element={user ? <ForgotPassword /> : <Navigate to='/login' />} /> */}
       </Routes>
     </div>
   );

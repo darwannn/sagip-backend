@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const dotenv = require('dotenv').config()
 const cors = require('cors')
 const authController = require('./controllers/authController')
+const apiController = require('./controllers/apiController')
 const blogController = require('./controllers/blogController')
 const multer = require('multer')
 const app = express()
@@ -19,6 +20,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use('/auth', authController)
 app.use('/blog', blogController)
+app.use('/api', apiController)
 
 // multer
 const storage = multer.diskStorage({

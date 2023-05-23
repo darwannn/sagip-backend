@@ -39,6 +39,7 @@ const Login = () => {
         <form onSubmit={handleLogin}>
           <input type="email" placeholder='Email...' onChange={(e) => setEmail(e.target.value)} />
           <input type="password" placeholder='Password...' onChange={(e) => setPassword(e.target.value)} />
+          <p>Forgot Password? <Link to='/forgot-password'>Register</Link></p>
           <button type="submit">Login</button>
           <p>Don't have an account? <Link to='/register'>Register</Link></p>
         </form>
