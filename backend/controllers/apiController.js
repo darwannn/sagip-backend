@@ -124,18 +124,38 @@ apiController.post('/send-sms', async (req, res) => {
 
   // if (isEmpty(message)) error["message"] = 'Required field'
   // if (isEmpty(location)) error["location"] = 'Required field'
-  const contactNumber = "09395372592"; // Replace with the desired contact number
+
+  let contactNumbers = [];
+
+  if (location === "all") {
+    // Get all contact numbers of users with the municipality of Malolos
+    contactNumbers = await getAllContactNumbersInMunicipality("Malolos");
+  } else {
+    // Split the comma-separated list of barangays
+    const barangays = location.split(",");
+
+    // Get all contact numbers of users with the specified barangays
+    contactNumbers = await getAllContactNumbersInBarangays(barangays);
+  }
+
+
+
+
+
+
+  //sendBulkSMS(message,contactNumbers);
+  //const contactNumber = "09395372592"; // Replace with the desired contact number
 
   try {
     
-    // const smsResponse = await sendSMS(message, contactNumber);
-    // console.log(smsResponse);
+    const smsResponse = await sendBulkSMS(message, contactNumbers);
+    console.log(smsResponse);
 
-    // if (smsResponse.error === 0) {
-    //   return res.status(200).json({ success: true, message: smsResponse.message });
-    // } else {
-    //   return res.status(400).json({ success: false, message: smsResponse.message });
-    // }
+    if (smsResponse.error === 0) {
+      return res.status(200).json({ success: true, message: smsResponse.message });
+    } else {
+      return res.status(400).json({ success: false, message: smsResponse.message });
+    }
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error: " + error });
   }
@@ -163,38 +183,72 @@ const sendSMS = async (message, contactNumber) => {
       throw error;
     });
 };
-
-module.exports = {
-  sendSMS,
-  apiController,
-};
-
-
-/* const sendSMS = (message, contactNumber) => {
-  const smsData = {
-    token: process.env.SMS_API,
+const sendBulkSMS = async (message, contactNumbers) => {
+  const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
     device_id: process.env.DEVICE_ID,
-    sim: "0",
+    sim: 0,
     urgent: "1"
+  }));
+
+  const params = {
+    token:  process.env.SMS_API,
+    smsdata: smsData
   };
 
-  axios
-    .post('https://smsgateway24.com/getdata/addsms', null, {
-      params: smsData
-    })
-    .then(function (response) {
-      console.log(response.data);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-}; */
+  return axios.post("https://smsgateway24.com/getdata/addsms",null, {params}).then(function (response) {
+    
+  return response.data;
+})
+.catch(function (error) {
+  throw error;
+});
+ 
+  
 
+    
+};
+
+const isEmpty = (value) => {
+  if (value == "") {
+    return true
+  }
+}
+
+
+// Function to get all contact numbers of users with the municipality of Malolos
+const getAllContactNumbersInMunicipality = async (municipality) => {
+  try {
+    const users = await User.find({ municipality: municipality });
+    const contactNumbers = users.map(user => user.contactNumber);
+    return contactNumbers;
+  } catch (error) {
+    return res.status(500).json({
+      success:false,
+      message:"Internal Server Error" + error,
+    })
+  }
+};
+
+// Function to get all contact numbers of users with the specified barangays
+const getAllContactNumbersInBarangays = async (barangays) => {
+  try {
+    const users = await User.find({ barangay: { $in: barangays } });
+    const contactNumbers = users.map(user => user.contactNumber);
+    return contactNumbers;
+  } catch (error) {
+    return res.status(500).json({
+      success:false,
+      message:"Internal Server Error" + error,
+    })
+  }
+};
 
 
 module.exports = {
   sendSMS,
   apiController,
 };
+
+
