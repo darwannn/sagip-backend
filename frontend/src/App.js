@@ -14,11 +14,20 @@ import BlogDetails from './pages/blogDetails/BlogDetails';
 import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import NewPassword from './pages/NewPassword';
+import SendAlert from './pages/SendAlert';
 
 /* const Error = () => {
   return <h1>404 Not Found</h1>;
 }; */
 
+
+/* 
+saka na lang ayusin access
+nakakalito
+....
+
+*/
 const App = () => {
   const { user, token } = useSelector((state) => state.auth);
   const location = useLocation();
@@ -30,31 +39,31 @@ const App = () => {
       <Routes>
         {/* una kasi */}
         <Route path="/" element={
-          user? user.status == "unverified"?<Navigate to="/register/contact-verification" />:<BlogHome/>: <Navigate to="/login" />
+          user  && user.access == "login" ? user.status == "unverified"?<Navigate to="/register/contact-verification" />:<BlogHome/>: <Navigate to="/login" />
           } />
-        <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
-        <Route path="/login" element={user ? user.status == "unverified"?<Login />:<Navigate to="/" />: <Login/>} 
+        <Route path="/home" element={ <Home />}/>
+
+        
+        <Route path="/login" element={<Login/>} 
         
         />
-        <Route path="/register" element={user ? user.status == "unverified"?<Register />:<Navigate to="/" />:  <Register />}   />
-
-
-
+        <Route path="/register" element={<Register />}   />
+        <Route path="/send-alert" element={<SendAlert />}   />
 
         <Route path="/create" element={user ? <Create mode="create" /> : <Navigate to="/login" />} />
         <Route path="/blogDetails/:id" element={user ? <BlogDetails /> : <Navigate to="/login" />} />
         <Route path="/updateBlog/:id" element={user ? <Create mode="update" /> : <Navigate to="/login" />} />
 
         <Route path="/likedPosts" element={user ? <LikedPost /> : <Navigate to="/login" />} />
-        <Route path="/forgot-password" element={user ? <Navigate to="/login" />:<ForgotPassword /> } />
+        <Route path="/forgot-password" element={<ForgotPassword /> } />
         <Route path="/register/contact-verification" element={
-          user? user.status == "unverified"?<ContactVerification />:<Navigate to="/" />: <ContactVerification />
+          user? user.status == "unverified" || user.status != "banned"?<ContactVerification type="register"/>:<Navigate to="/" />: <ContactVerification  type="register"/>
           } />
-      {/*   <Route path="/forgot-password/new-password'" element={
-          user? user.status == "unverified"?<ContactVerification />:<Navigate to="/" />: <ContactVerification />
+        <Route path="/forgot-password/contact-verification" element={
+          user? user.status != "unverified" || user.status != "banned" ?<ContactVerification type="forgot-password" />:<Navigate to="/" />: <ContactVerification type="forgot-password"/>
           } />
- */}
-
+   <Route path="/new-password" element={ <NewPassword/>
+          } />
         {/* 404 error handling */}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}
       </Routes>

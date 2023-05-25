@@ -118,37 +118,83 @@ apiController.get('/weather', async (req, res) => {
   }
 });
 
-
-const sendVerificationCode =  (contactNumber,verificationCode) => {
-  console.log(contactNumber);
-  console.log(verificationCode);
-  const smsData = { 
-       "token": "7ad8a90a6ee7c7258c4d6943addd1557", 
-       sendto: contactNumber,
-       body: `Your SAGIP verification code is ${verificationCode}`,
-"device_id": "10609",
-"sim":"0",
-"timetosend": "2021-08-01 12:00",
-"customerid" : "19921",
-"urgent": "1"
-    };
+apiController.post('/send-sms', async (req, res) => {
+  const { message, location } = req.body;
 
 
-  axios.post('https://smsgateway24.com/getdata/addsms', {},
-  {
-    params: smsData
+  // if (isEmpty(message)) error["message"] = 'Required field'
+  // if (isEmpty(location)) error["location"] = 'Required field'
+  const contactNumber = "09395372592"; // Replace with the desired contact number
+
+  try {
+    
+    // const smsResponse = await sendSMS(message, contactNumber);
+    // console.log(smsResponse);
+
+    // if (smsResponse.error === 0) {
+    //   return res.status(200).json({ success: true, message: smsResponse.message });
+    // } else {
+    //   return res.status(400).json({ success: false, message: smsResponse.message });
+    // }
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal Server Error: " + error });
   }
-  
-) 
-.then(function (response) {
-  
-  console.log(response.data);
+});
 
-})
-}
+const sendSMS = async (message, contactNumber) => {
+  const smsData = {
+    token: process.env.SMS_API,
+    sendto: contactNumber,
+    body: message,
+    device_id: process.env.DEVICE_ID,
+    sim: "0",
+    urgent: "1"
+  };
+
+  return axios
+    .post('https://smsgateway24.com/getdata/addsms', null, {
+      params: smsData
+    })
+    .then(function (response) {
+    
+      return response.data;
+    })
+    .catch(function (error) {
+      throw error;
+    });
+};
+
+module.exports = {
+  sendSMS,
+  apiController,
+};
+
+
+/* const sendSMS = (message, contactNumber) => {
+  const smsData = {
+    token: process.env.SMS_API,
+    sendto: contactNumber,
+    body: message,
+    device_id: process.env.DEVICE_ID,
+    sim: "0",
+    urgent: "1"
+  };
+
+  axios
+    .post('https://smsgateway24.com/getdata/addsms', null, {
+      params: smsData
+    })
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+}; */
+
 
 
 module.exports = {
-  sendVerificationCode,
+  sendSMS,
   apiController,
 };

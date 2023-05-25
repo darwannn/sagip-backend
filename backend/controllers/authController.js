@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
 const verifyToken = require('../middlewares/verifyToken')
-const { sendVerificationCode, apiController } = require('./apiController')
+const { sendSMS, apiController } = require('./apiController')
 
 const currentDate = new Date()
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000)
@@ -173,7 +173,7 @@ authController.post('/register', async (req, res) => {
          
             console.log("success");
          
-            /*  sendVerificationCode(user.contactNumber,user.verificationCode) */
+           /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
           /*   if (process.env.ENVIRONMENT === 'production') {
                 return   res.status(200).json({
                     success:true,
@@ -184,13 +184,25 @@ authController.post('/register', async (req, res) => {
 
            // const { ...userData } = user._doc;
 
-            return res.status(200).json({
+           /*  return res.status(200).json({
               success: true,
               message: "Please verify contact number",
               user: user._doc,
               token: generateToken(user._id)
             });
-                
+                 */
+           
+          return res.status(200).json({
+            success: true,
+            message: "Please verify contact number",
+            user: {
+              for: "register",
+              id: user._doc._id,
+              code: user._doc.verificationCode,
+              userType: user._doc.userType
+            },
+            token: generateToken(user._id)
+          });
 
               /*   return  res.status(200).json({
                     success:true,
@@ -231,9 +243,9 @@ authController.post('/register', async (req, res) => {
 authController.post('/contact-verification', verifyToken, async (req, res) => {
   try {
     const error = {};
-    const { code } = req.body;
+    const { code,type } = req.body;
     const userId = req.user.id; 
-  
+
 /*     const userId = "646de7d73b43cfb85af16d77" */
     if (isEmpty(code)) {
       error["code"] = 'Required field';
@@ -251,16 +263,45 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
       } else {
         if (code == user.verificationCode) {
           // Code matches, update user status to 'semi-verified'
-          user.status = 'semi-verified';
-          user.verificationCode = 111111;
+
+          if(user.verificationCode == "unverified") {
+                      user.status = 'semi-verified';
+          }
+          user.verificationCode = 0;
           await user.save();
    
-          return res.status(200).json({
+         /*  return res.status(200).json({
             success: true,
             message: "Please verify contact number",
             user: user._doc,
             token: generateToken(user._id)
+          }); */
+              
+          if(type == "register")
+          return res.status(200).json({
+            success: true,
+            message: "Login Successfully",
+            user: {
+              for: "login",
+              id: user._doc._id,
+              code: user._doc.verificationCode,
+              userType: user._doc.userType
+            },
+            token: generateToken(user._id)
           });
+              
+          if(type == "forgot-password")
+          return res.status(200).json({
+            success: true,
+            message: "Enter your new-password",
+            user: {
+              for: "new-password",
+              id: user._doc._id,
+              userType: user._doc.userType
+            },
+            token: generateToken(user._id)
+          });
+          
               
         } else {
           error['code'] = 'Incorrect code';
@@ -332,16 +373,20 @@ authController.post('/login', async (req, res) => {
         })
           } else { */
               
-          
-          
-          const { password, ...userData } = user._doc;
 
-      return res.status(200).json({
-        success: true,
-        message: "Login Successfully",
-        user: userData,
-        token: generateToken(user._id)
-      });
+ 
+
+          return res.status(200).json({
+            success: true,
+            message: "Login Successfully",
+            user: {
+              for: "login",
+              id: user._doc._id,
+              userType: user._doc.userType
+            },
+            token: generateToken(user._id)
+          });
+          
           
           
           
@@ -394,7 +439,7 @@ authController.post('/forgot-password', async (req, res) => {
       // Checking if an account with the given identifier exists
       accountExists = await checkIdentifier(identifier);
       if (!accountExists) {
-        error['error'] = 'Account does not exist';
+        error['identifier'] = 'Account does not exist';
       }
 
       
@@ -413,14 +458,27 @@ authController.post('/forgot-password', async (req, res) => {
 
 
       if (user) {
+      /*     sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
         // Sending a verification code to the user (code not shown)
         // Responding with success message and user information
         return res.status(200).json({
           success: true,
+          message: "Message has been sent to",
+          user: {
+            for: "forgot-password",
+            id: user._doc._id,
+            code: user._doc.verificationCode,
+            userType: user._doc.userType
+          },
+          token: generateToken(user._id)
+        });
+        
+       /*  return res.status(200).json({
+          success: true,
           message: "Login Successfully",
           user: user._doc,
           token: generateToken(user._id)
-        });
+        }); */
       } else {
         error['error'] = 'Database Error';
         error["success"] = false;
@@ -434,6 +492,61 @@ authController.post('/forgot-password', async (req, res) => {
       return res.status(400).json(error);
     }
 
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
+authController.post('/new-password', verifyToken,  async (req, res) => {
+  // Variable declaration
+
+  try {
+    const error = {};
+  const password = req.body.password
+
+  // if (isEmpty(password)) {
+  //   error["password"] = 'Required field'
+  // } else {
+  //   if (verifyPassword(password)) {
+  //     error['password'] = 'password requirement did not match'
+  //   }
+  // }
+
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt)
+
+  if (Object.keys(error).length == 0) {
+
+    console.log(req.user);
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      verificationCode: 0,
+      password: hashedPassword
+    });
+    
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "Change Successfully. Login Now",
+        // user: {
+        //   for: "login",
+        //   id: user._doc._id,
+        //   userType: user._doc.userType
+        // },
+        //token: generateToken(user._id)
+      });
+    } else {
+      error['message'] = 'Database Error'
+    }
+
+  }
+
+  if (Object.keys(error).length != 0) {
+    console.log("error");
+    res.status(400).json(error)
+  }
   } catch (error) {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({

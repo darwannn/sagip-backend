@@ -29,7 +29,7 @@ const ForgotPassword = () => {
           if(success) {
           dispatch(forgotPassword(data))
           toast.success(message);
-            navigate('/forgot-password/new-password');
+            navigate('/forgot-password/contact-verification');
         }
           else {
             if(message != "input error") {

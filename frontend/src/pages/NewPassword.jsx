@@ -5,16 +5,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import { contactVerification } from '../redux/authSlice'
+import { newPassword } from '../redux/authSlice'
 
-const ContactVerification = ({type}) => {
-  const [code, setCode] = useState('');
+const NewPassword = () => {
+  const [password, setPassword] = useState('');
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
 
-  const handleContactVerification = async (e) => {
+  const handleNewPassword = async (e) => {
     e.preventDefault();
 
     try {
@@ -26,23 +26,17 @@ const ContactVerification = ({type}) => {
         Authorization: `Bearer ${token}`,
       };
 
-      const data = await request('/auth/contact-verification', 'POST', options, { code,type });
+      const data = await request('/auth/new-password', 'POST', options, { password });
       console.log(data);
       
       const { success, message } = data;
       if (success) {
         toast.success(message);
         // navigate('/');
-              dispatch(contactVerification(data));
-              if(type=="register") {
-        
-                navigate('/');
-              } 
-              if(type=="forgot-password") {
-        
-                navigate('/new-password');
-              } 
-
+              dispatch(newPassword(data));
+    
+    
+                navigate('/login');
       } else {
         if (message !== 'input error') {
           toast.error(message);
@@ -61,13 +55,13 @@ const ContactVerification = ({type}) => {
 
   return (
     <>
-      <h2>ContactVerification</h2>
-      <form onSubmit={handleContactVerification}>
-        <input type="number" placeholder="" onChange={(e) => setCode(e.target.value)} />
-        <button type="submit">ContactVerification</button>
+      <h2>NewPassword</h2>
+      <form onSubmit={handleNewPassword}>
+        <input type="text" placeholder="" onChange={(e) => setPassword(e.target.value)} />
+        <button type="submit">NewPassword</button>
       </form>
     </>
   );
 };
 
-export default ContactVerification;
+export default NewPassword;
