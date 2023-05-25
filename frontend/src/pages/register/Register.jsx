@@ -56,23 +56,19 @@ const Register = () => {
         contactNumber,
       });
       
-      dispatch(register(data));
-
+      
       const { success, message } = data;
-    if(success) {
+      if(success) {
+    dispatch(register(data));
     toast.success(message);
-    // navigate('/');  
+     navigate('/register/contact-verification');  
   }
     else {
-if(message != "input error") {
-  toast.success(message);
-}  else {
-  // do input message error here
-}
-    
-   
-
-
+      if(message != "input error") {
+        toast.success(message);
+      }  else {
+        // do input message error here
+      }
     } }catch (error) {
       console.error(error);
     }

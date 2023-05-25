@@ -119,8 +119,6 @@ apiController.get('/weather', async (req, res) => {
 });
 
 
-
-
 const sendVerificationCode =  (contactNumber,verificationCode) => {
   console.log(contactNumber);
   console.log(verificationCode);

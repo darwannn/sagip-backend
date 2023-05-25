@@ -3,7 +3,7 @@ const User = require("../models/User")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
-
+const verifyToken = require('../middlewares/verifyToken')
 const { sendVerificationCode, apiController } = require('./apiController')
 
 const currentDate = new Date()
@@ -174,13 +174,25 @@ authController.post('/register', async (req, res) => {
             console.log("success");
             console.log('====================================');
             /*  sendVerificationCode(user.contactNumber,user.verificationCode) */
-            if (process.env.ENVIRONMENT === 'production') {
+          /*   if (process.env.ENVIRONMENT === 'production') {
                 return   res.status(200).json({
                     success:true,
                 message:"Please verify contact number",
               })
-            } else {
-                return  res.status(200).json({
+            } else { */
+
+
+           // const { ...userData } = user._doc;
+
+            return res.status(200).json({
+              success: true,
+              message: "Please verify contact number",
+              user: user._doc,
+              token: generateToken(user._id)
+            });
+                
+
+              /*   return  res.status(200).json({
                     success:true,
                 _id: user.id,
                 name: user.email,
@@ -188,8 +200,8 @@ authController.post('/register', async (req, res) => {
                 codeExpiration:user.codeExpiration,
                 token: generateToken(user._id),
                 message:"Please verify contact number",
-              })
-            }
+              }) */
+          /*   } */
            
           } else {
             console.log('====================================');
@@ -216,73 +228,150 @@ authController.post('/register', async (req, res) => {
     }
 })
 
-authController.post('/login', async (req, res) => {
-    try {
-        // const user = await User.findOne({email: req.body.email})
-        // if(!user){
-        //     throw new Error("Invalid credentials")
-        // }
-
-        // const comparePass = await bcrypt.compare(req.body.password, user.password)
-        // if(!comparePass){
-        //     throw new Error("Invalid credentials")
-        // }
-
-        // const {password, ...others} = user._doc
-        // const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '5h'})        
-
-
-        const error = {};
-        const {
-          identifier,
-          password
-        } = req.body
-      
-      
-        if (isEmpty(identifier)) error["identifier"] = 'Required field'
-        if (isEmpty(password)) error["password"] = 'Required field'
-      
-      
-        let user = await checkIdentifier(identifier)
-      
-        if (!user) {
-          error['error'] = 'Accoutn does not exist'
-        }
-      
-        if (Object.keys(error).length == 0) {
-      
-          if (user && (await bcrypt.compare(password, user.password))) {
-      
-            if (process.env.NODE_ENV === 'production') {
-                return res.status(200).json({
-                message:"Login Succefully",
-              })
-            } else {
-                return res.status(200).json({
-                _id: user.id,
-                name: user.email,
-                verificationCode: user.verficationCode,
-                codeExpiration:user.codeExpiration,
-                token: generateToken(user._id),
-              })
-            }
-          } else {
-            error['password'] = 'Incorrect'
-          }
-        }
-      
-        if (Object.keys(error).length != 0) {
-            return res.status(400).json(error)
-        }
-
-        return res.status(200).json({user: others, token})
-    } catch (error) {
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
-        return res.status(500).json(error) 
+authController.post('/contact-verification', verifyToken, async (req, res) => {
+  try {
+    const error = {};
+    const { code } = req.body;
+    const userId = req.user.id; 
+  
+/*     const userId = "646de7d73b43cfb85af16d77" */
+    if (isEmpty(code)) {
+      error["code"] = 'Required field';
+    } else if (isNumber(code)) {
+      error['code'] = 'Invalid code';
     }
+
+    if (Object.keys(error).length == 0) {
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(500).json({
+          success:false,
+          message:"User Not Found" + error,
+        })
+      } else {
+        if (code == user.verificationCode) {
+          // Code matches, update user status to 'semi-verified'
+          // user.status = 'semi-verified';
+          // await user.save();
+          return res.status(200).json({ message: 'Code verified successfully' });
+        } else {
+          error['code'] = 'Incorrect code';
+      
+        }
+      }
+    }
+    
+
+      if (Object.keys(error).length != 0) {
+          //console.log("error");
+          error["success"] = false;
+          error["message"] = "input error";
+     
+          return res.status(400).json(error)
+          
+        }
+    } catch (error) {
+        return res.status(500).json({
+        success:false,
+        message:"Internal Server Error" + error,
+      })
+    }
+  })
+
+
+authController.post('/login', async (req, res) => {
+  try {
+      // const user = await User.findOne({email: req.body.email})
+      // if(!user){
+      //     throw new Error("Invalid credentials")
+      // }
+
+      // const comparePass = await bcrypt.compare(req.body.password, user.password)
+      // if(!comparePass){
+      //     throw new Error("Invalid credentials")
+      // }
+
+      // const {password, ...others} = user._doc
+      // const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '5h'})        
+
+
+      const error = {};
+      const {
+        identifier,
+        password
+      } = req.body
+    
+    
+      if (isEmpty(identifier)) error["identifier"] = 'Required field'
+      if (isEmpty(password)) error["password"] = 'Required field'
+    
+    
+      let user = await checkIdentifier(identifier)
+    
+      if (!user) {
+        error['error'] = 'Accoutn does not exist'
+      }
+    
+      if (Object.keys(error).length == 0) {
+    
+        if (user && (await bcrypt.compare(password, user.password))) {
+    
+         /*  if (process.env.NODE_ENV === 'production') {
+           
+            return   res.status(200).json({
+              success:true,
+          message:"Login Succefully",
+        })
+          } else { */
+              
+          
+          
+          const { password, ...userData } = user._doc;
+
+      return res.status(200).json({
+        success: true,
+        message: "Login Successfully",
+        user: userData,
+        token: generateToken(user._id)
+      });
+          
+          
+          
+          
+          
+          // return res.status(200).json({
+          //       success:true,
+          // message:"Login Succefully",
+          //     _id: user.id,
+          //     name: user.email,
+          //     verificationCode: user.verficationCode,
+          //     codeExpiration:user.codeExpiration,
+          //     token: generateToken(user._id),
+          //   })
+
+
+          
+         /*  } */
+        } else {
+          error['password'] = 'Incorrect'
+        }
+      }
+    
+      if (Object.keys(error).length != 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+   
+        return res.status(400).json(error)
+        
+      }
+  } catch (error) {
+      return res.status(500).json({
+      success:false,
+      message:"Internal Server Error" + error,
+    })
+  }
 })
+
 
 
 /* functions ---------------------------------------- */

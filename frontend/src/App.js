@@ -20,9 +20,10 @@ import 'react-toastify/dist/ReactToastify.css';
 }; */
 
 const App = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const location = useLocation();
-
+  console.log('User:', user);
+  console.log('TokenA:', token);
   return (
     <div>
       <ToastContainer />
@@ -36,8 +37,9 @@ const App = () => {
         <Route path="/updateBlog/:id" element={user ? <Create mode="update" /> : <Navigate to="/login" />} />
 
         <Route path="/likedPosts" element={user ? <LikedPost /> : <Navigate to="/login" />} />
-        <Route path="/forgot-password" element={user ? <ForgotPassword /> : <Navigate to="/login" />} />
-        <Route path="/contact-password" element={user ? <ContactVerification /> : <Navigate to="/login" />} />
+    {/*     <Route path="/forgot-password" element={user ? <ForgotPassword /> : <Navigate to="/login" />} /> */}
+        <Route path="/register/contact-verfication" element={user ? <ContactVerification /> : <Navigate to="/login" />} />
+{/*         <Route path="/register/contact-verfication" element={user ? <ContactVerification /> : <ContactVerification />} /> */}
 
         {/* 404 error handling */}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}
