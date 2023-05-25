@@ -118,4 +118,39 @@ apiController.get('/weather', async (req, res) => {
   }
 });
 
-module.exports = apiController;
+
+
+
+const sendVerificationCode =  (contactNumber,verificationCode) => {
+  console.log(contactNumber);
+  console.log(verificationCode);
+  const smsData = { 
+       "token": "7ad8a90a6ee7c7258c4d6943addd1557", 
+       sendto: contactNumber,
+       body: `Your SAGIP verification code is ${verificationCode}`,
+"device_id": "10609",
+"sim":"0",
+"timetosend": "2021-08-01 12:00",
+"customerid" : "19921",
+"urgent": "1"
+    };
+
+
+  axios.post('https://smsgateway24.com/getdata/addsms', {},
+  {
+    params: smsData
+  }
+  
+) 
+.then(function (response) {
+  
+  console.log(response.data);
+
+})
+}
+
+
+module.exports = {
+  sendVerificationCode,
+  apiController,
+};

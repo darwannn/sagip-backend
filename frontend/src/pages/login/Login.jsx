@@ -7,7 +7,7 @@ import {useDispatch} from 'react-redux'
 import { login } from '../../redux/authSlice'
 
 const Login = () => {
-  const [email, setEmail] = useState("")
+  const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -15,7 +15,7 @@ const Login = () => {
   const handleLogin = async(e) => {
     e.preventDefault()
 
-    if(email === '' || password === "") return
+  /*   if(email === '' || password === "") return */
 
     try {
       const options = {
@@ -23,7 +23,8 @@ const Login = () => {
       } 
 
 
-      const data = await request("/auth/login", 'POST', options, {email, password})
+      const data = await request("/auth/login", 'POST', options, { identifier,
+        password})
        console.log(data)
       dispatch(login(data))
       navigate('/')
@@ -37,7 +38,7 @@ const Login = () => {
       <div className={classes.wrapper}>
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
-          <input type="email" placeholder='Email...' onChange={(e) => setEmail(e.target.value)} />
+          <input type="text" placeholder='Ident...' onChange={(e) => setIdentifier(e.target.value)} />
           <input type="password" placeholder='Password...' onChange={(e) => setPassword(e.target.value)} />
           <p>Forgot Password? <Link to='/forgot-password'>Register</Link></p>
           <button type="submit">Login</button>

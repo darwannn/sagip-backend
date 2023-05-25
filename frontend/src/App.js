@@ -6,6 +6,7 @@ import LikedPost from './pages/LikedPost';
 import Error from './pages/Error';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/login/Login';
+import ContactVerification from './pages/ContactVerification';
 import Register from './pages/register/Register';
 import Create from './pages/create/Create';
 import BlogDetails from './pages/blogDetails/BlogDetails';
@@ -35,7 +36,8 @@ const App = () => {
         <Route path="/updateBlog/:id" element={user ? <Create mode="update" /> : <Navigate to="/login" />} />
 
         <Route path="/likedPosts" element={user ? <LikedPost /> : <Navigate to="/login" />} />
-        {/* <Route path="/forgot-password" element={user ? <ForgotPassword /> : <Navigate to="/login" />} */}
+        <Route path="/forgot-password" element={user ? <ForgotPassword /> : <Navigate to="/login" />} />
+        <Route path="/contact-password" element={user ? <ContactVerification /> : <Navigate to="/login" />} />
 
         {/* 404 error handling */}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}
