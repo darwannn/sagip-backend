@@ -88,6 +88,11 @@ const userSchema = mongoose.Schema(
       //required: [true, 'Please add a password'],
 
     },
+    status: {
+      type: String,
+      //required: [true, 'Please add a password'],
+
+    },
   },
   {
     timestamps: { createdAt: 'dateCreated', updatedAt: 'dateModified' }

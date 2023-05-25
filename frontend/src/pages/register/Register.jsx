@@ -9,7 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
-
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,14 +24,13 @@ const Register = () => {
   const [gender, setGender] = useState('');
   const [birthdate, setBirthdate] = useState('');
   const [contactNumber, setContactNumber] = useState('');
-
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  
   const handleRegister = async (e) => {
     e.preventDefault();
-
-
+    
     if (password !== confirmPassword) {
       console.log("Passwords do not match");
       return;
@@ -59,10 +58,12 @@ const Register = () => {
       
       const { success, message } = data;
       if(success) {
-    dispatch(register(data));
-    toast.success(message);
-     navigate('/register/contact-verification');  
-  }
+        dispatch(register(data));
+        toast.success(message);
+        
+        navigate('/register/contact-verification');  
+     return; // Add this return statement to exit the function and prevent further execution
+    }
     else {
       if(message != "input error") {
         toast.success(message);
@@ -73,7 +74,7 @@ const Register = () => {
       console.error(error);
     }
   };
-
+  
   return (
     <div className={classes.container}>
       <div className={classes.wrapper}>

@@ -28,18 +28,32 @@ const App = () => {
     <div>
       <ToastContainer />
       <Routes>
-        <Route path="/" element={user ? <BlogHome /> : <Navigate to="/login" />} />
+        {/* una kasi */}
+        <Route path="/" element={
+          user? user.status == "unverified"?<Navigate to="/register/contact-verification" />:<BlogHome/>: <Navigate to="/login" />
+          } />
         <Route path="/home" element={user ? <Home /> : <Navigate to="/login" />} />
-        <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
-        <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
+        <Route path="/login" element={user ? user.status == "unverified"?<Login />:<Navigate to="/" />: <Login/>} 
+        
+        />
+        <Route path="/register" element={user ? user.status == "unverified"?<Register />:<Navigate to="/" />:  <Register />}   />
+
+
+
+
         <Route path="/create" element={user ? <Create mode="create" /> : <Navigate to="/login" />} />
         <Route path="/blogDetails/:id" element={user ? <BlogDetails /> : <Navigate to="/login" />} />
         <Route path="/updateBlog/:id" element={user ? <Create mode="update" /> : <Navigate to="/login" />} />
 
         <Route path="/likedPosts" element={user ? <LikedPost /> : <Navigate to="/login" />} />
-    {/*     <Route path="/forgot-password" element={user ? <ForgotPassword /> : <Navigate to="/login" />} /> */}
-        <Route path="/register/contact-verfication" element={user ? <ContactVerification /> : <Navigate to="/login" />} />
-{/*         <Route path="/register/contact-verfication" element={user ? <ContactVerification /> : <ContactVerification />} /> */}
+        <Route path="/forgot-password" element={user ? <Navigate to="/login" />:<ForgotPassword /> } />
+        <Route path="/register/contact-verification" element={
+          user? user.status == "unverified"?<ContactVerification />:<Navigate to="/" />: <ContactVerification />
+          } />
+      {/*   <Route path="/forgot-password/new-password'" element={
+          user? user.status == "unverified"?<ContactVerification />:<Navigate to="/" />: <ContactVerification />
+          } />
+ */}
 
         {/* 404 error handling */}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}

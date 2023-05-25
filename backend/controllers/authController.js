@@ -170,9 +170,9 @@ authController.post('/register', async (req, res) => {
           })
       
           if (user) {
-            console.log('====================================');
+         
             console.log("success");
-            console.log('====================================');
+         
             /*  sendVerificationCode(user.contactNumber,user.verificationCode) */
           /*   if (process.env.ENVIRONMENT === 'production') {
                 return   res.status(200).json({
@@ -204,16 +204,16 @@ authController.post('/register', async (req, res) => {
           /*   } */
            
           } else {
-            console.log('====================================');
+
             console.log("error");
-            console.log('====================================');
+
               error['error'] = 'Database Error'
             return  res.status(400)
           }
         }
       
         if (Object.keys(error).length != 0) {
-          //console.log("error");
+   
           error["success"] = false;
           error["message"] = "input error";
      
@@ -251,9 +251,17 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
       } else {
         if (code == user.verificationCode) {
           // Code matches, update user status to 'semi-verified'
-          // user.status = 'semi-verified';
-          // await user.save();
-          return res.status(200).json({ message: 'Code verified successfully' });
+          user.status = 'semi-verified';
+          user.verificationCode = 111111;
+          await user.save();
+   
+          return res.status(200).json({
+            success: true,
+            message: "Please verify contact number",
+            user: user._doc,
+            token: generateToken(user._id)
+          });
+              
         } else {
           error['code'] = 'Incorrect code';
       
@@ -372,6 +380,68 @@ authController.post('/login', async (req, res) => {
   }
 })
 
+authController.post('/forgot-password', async (req, res) => {
+  // Variable declaration
+  let accountExists;
+  try {
+    const error = {};
+    const identifier = req.body.identifier;
+
+    // Checking if the 'identifier' field is empty
+    if (isEmpty(identifier)) {
+      error["identifier"] = 'Required field';
+    } else {
+      // Checking if an account with the given identifier exists
+      accountExists = await checkIdentifier(identifier);
+      if (!accountExists) {
+        error['error'] = 'Account does not exist';
+      }
+
+      
+    }
+
+    // If there are no errors so far
+    if (Object.keys(error).length == 0) {
+      // Generating a verification code
+      let generatedCode = await generateCode();
+      console.log(accountExists.id);
+      // Updating the user's verification code and code expiration using 'User.updateById'
+      const user = await User.findByIdAndUpdate(accountExists.id, {
+        verificationCode: generatedCode,
+        codeExpiration: codeExpiration,
+      });
+
+
+      if (user) {
+        // Sending a verification code to the user (code not shown)
+        // Responding with success message and user information
+        return res.status(200).json({
+          success: true,
+          message: "Login Successfully",
+          user: user._doc,
+          token: generateToken(user._id)
+        });
+      } else {
+        error['error'] = 'Database Error';
+        error["success"] = false;
+      }
+    }
+
+    // If there are errors, respond with error messages
+    if (Object.keys(error).length != 0) {
+      error["success"] = false;
+      error["message"] = "Input error";
+      return res.status(400).json(error);
+    }
+
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
 
 
 /* functions ---------------------------------------- */

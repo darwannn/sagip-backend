@@ -29,8 +29,9 @@ const ContactVerification = () => {
       const { success, message } = data;
       if (success) {
         
+        // navigate('/');
               dispatch(contactVerification(data));
-        navigate('/');
+               navigate('/');
       } else {
         if (message !== 'input error') {
           toast.error(message);

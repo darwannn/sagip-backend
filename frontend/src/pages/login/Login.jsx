@@ -33,7 +33,7 @@ const Login = () => {
         if(success) {
         dispatch(login(data))
         toast.success(message);
-         navigate('/');  
+         navigate('/register/contact-verification');  
       }
         else {
           if(message != "input error") {
