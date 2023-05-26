@@ -1,6 +1,7 @@
 const apiController = require("express").Router();
 const axios = require('axios');
 const { DateTime } = require('luxon');
+const User = require("../models/User")
 
 const municipality = "Malolos";
 
@@ -119,46 +120,64 @@ apiController.get('/weather', async (req, res) => {
 });
 
 apiController.post('/send-sms', async (req, res) => {
-  const { message, location } = req.body;
+  const error = {};
+  const { alertMessage, location } = req.body;
 
+  if (isEmpty(alertMessage)) error["alertMessage"] = 'Required field'
+  if (isEmpty(location)) error["location"] = 'Required field'
 
-  // if (isEmpty(message)) error["message"] = 'Required field'
-  // if (isEmpty(location)) error["location"] = 'Required field'
-
+  if (Object.keys(error).length == 0) {
   let contactNumbers = [];
 
-  if (location === "all") {
+  if (location == "All") {
     // Get all contact numbers of users with the municipality of Malolos
     contactNumbers = await getAllContactNumbersInMunicipality("Malolos");
+    if(!Array.isArray(contactNumbers)) {
+      return res.status(500).json({
+      success:false,
+      message:"Internal Server Error" + contactNumbers,
+    })
+    }
   } else {
-    // Split the comma-separated list of barangays
-    const barangays = location.split(",");
 
     // Get all contact numbers of users with the specified barangays
-    contactNumbers = await getAllContactNumbersInBarangays(barangays);
+    contactNumbers = await getAllContactNumbersInBarangays("Malolos", location);
+    if(!Array.isArray(contactNumbers)) {
+      return res.status(500).json({
+      success:false,
+      message:"Internal Server Error" + contactNumbers,
+    })
+    }
   }
 
 
 
 
 
-
-  //sendBulkSMS(message,contactNumbers);
-  //const contactNumber = "09395372592"; // Replace with the desired contact number
-
+  console.log(contactNumbers);
   try {
-    
-    const smsResponse = await sendBulkSMS(message, contactNumbers);
+    const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
     console.log(smsResponse);
 
-    if (smsResponse.error === 0) {
-      return res.status(200).json({ success: true, message: smsResponse.message });
-    } else {
-      return res.status(400).json({ success: false, message: smsResponse.message });
-    }
+    // if (smsResponse.error === 0) {
+    //   return res.status(200).json({ success: true, message: smsResponse.message });
+    // } else {
+    //   return res.status(400).json({ success: false, message: smsResponse.message });
+    // }
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error: " + error });
   }
+
+  }
+  if (Object.keys(error).length != 0) {
+   
+    error["success"] = false;
+    error["message"] = "input error";
+
+    return res.status(400).json(error)
+    
+  }
+
 });
 
 const sendSMS = async (message, contactNumber) => {
@@ -183,7 +202,11 @@ const sendSMS = async (message, contactNumber) => {
       throw error;
     });
 };
+
+
+
 const sendBulkSMS = async (message, contactNumbers) => {
+  console.log("bulky");
   const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
@@ -197,13 +220,17 @@ const sendBulkSMS = async (message, contactNumbers) => {
     smsdata: smsData
   };
 
-  return axios.post("https://smsgateway24.com/getdata/addsms",null, {params}).then(function (response) {
-    
-  return response.data;
-})
-.catch(function (error) {
-  throw error;
-});
+  return axios
+  .post('https://smsgateway24.com/getdata/addsms', null, {
+    params: params
+  })
+  .then(function (response) {
+  
+    return response.data;
+  })
+  .catch(function (error) {
+    throw error;
+  });
  
   
 
@@ -224,24 +251,24 @@ const getAllContactNumbersInMunicipality = async (municipality) => {
     const contactNumbers = users.map(user => user.contactNumber);
     return contactNumbers;
   } catch (error) {
-    return res.status(500).json({
+   /*  return res.status(500).json({
       success:false,
       message:"Internal Server Error" + error,
-    })
+    }) */
+    return "Internal Server Error" + error;
   }
 };
 
+
 // Function to get all contact numbers of users with the specified barangays
-const getAllContactNumbersInBarangays = async (barangays) => {
+const getAllContactNumbersInBarangays = async (municipality, location) => {
   try {
-    const users = await User.find({ barangay: { $in: barangays } });
+    const barangays = location.split(","); // Split the location string into an array of barangays
+    const users = await User.find({ barangay: { $in: barangays }, municipality });
     const contactNumbers = users.map(user => user.contactNumber);
     return contactNumbers;
   } catch (error) {
-    return res.status(500).json({
-      success:false,
-      message:"Internal Server Error" + error,
-    })
+    return "Internal Server Error: " + error;
   }
 };
 

@@ -39,7 +39,7 @@ const App = () => {
       <Routes>
         {/* una kasi */}
         <Route path="/" element={
-          user  && user.access == "login" ? user.status == "unverified"?<Navigate to="/register/contact-verification" />:<BlogHome/>: <Navigate to="/login" />
+          user  && user.for == "login" ? user.status == "unverified"?<Navigate to="/register/contact-verification" />:<BlogHome/>: <Navigate to="/login" />
           } />
         <Route path="/home" element={ <Home />}/>
 
