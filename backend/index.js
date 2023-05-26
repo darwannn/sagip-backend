@@ -4,7 +4,7 @@ const dotenv = require('dotenv').config()
 const cors = require('cors')
 const authController = require('./controllers/authController')
 const { sendVerificationCode, apiController } = require('./controllers/apiController')
-const blogController = require('./controllers/blogController')
+const safetyTipController = require('./controllers/safetyTipController')
 const multer = require('multer')
 const app = express()
 
@@ -19,7 +19,7 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use('/auth', authController)
-app.use('/blog', blogController)
+app.use('/safety-tips', safetyTipController)
 app.use('/api', apiController)
 
 // multer

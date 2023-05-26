@@ -290,7 +290,7 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
             },
             token: generateToken(user._id)
           });
-              
+       
           if(type == "forgot-password")
           return res.status(200).json({
             success: true,
@@ -410,7 +410,7 @@ authController.post('/login', async (req, res) => {
         error["success"] = false;
         error["message"] = "input error";
    
-        return res.status(400).json(error)
+        return res.status(500).json(error)
         
       }
   } catch (error) {
@@ -464,6 +464,9 @@ authController.post('/forgot-password', async (req, res) => {
               message:"Account banned. Please contact the CDRRMO",
             })
           } else {
+      
+            console.log("Current COde: " +generatedCode);
+     
         return res.status(200).json({
           success: true,
           message: "Message has been sent to",
@@ -475,6 +478,7 @@ authController.post('/forgot-password', async (req, res) => {
           },
           token: generateToken(user._id)
         });
+      
       }
        /*  return res.status(200).json({
           success: true,

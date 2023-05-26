@@ -119,7 +119,7 @@ apiController.get('/weather', async (req, res) => {
   }
 });
 
-apiController.post('/send-sms', async (req, res) => {
+apiController.post('/send-alert', async (req, res) => {
   const error = {};
   const { alertMessage, location } = req.body;
 
@@ -156,14 +156,15 @@ apiController.post('/send-sms', async (req, res) => {
 
   console.log(contactNumbers);
   try {
+   /*  const smsResponse = await sendSMS("alertMessage", "09395372592"); */
     const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
     console.log(smsResponse);
 
-    // if (smsResponse.error === 0) {
-    //   return res.status(200).json({ success: true, message: smsResponse.message });
-    // } else {
-    //   return res.status(400).json({ success: false, message: smsResponse.message });
-    // }
+    if (smsResponse.error === 0) {
+      return res.status(200).json({ success: true, message: smsResponse.message });
+    } else {
+      return res.status(400).json({ success: false, message: smsResponse.message });
+    }
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error: " + error });
   }
@@ -185,11 +186,13 @@ const sendSMS = async (message, contactNumber) => {
     token: process.env.SMS_API,
     sendto: contactNumber,
     body: message,
-    device_id: process.env.DEVICE_ID,
     sim: "0",
+    device_id: process.env.DEVICE_ID,
     urgent: "1"
   };
-
+  console.log('====================================');
+  console.log(smsData);
+  console.log('====================================');
   return axios
     .post('https://smsgateway24.com/getdata/addsms', null, {
       params: smsData
@@ -203,15 +206,13 @@ const sendSMS = async (message, contactNumber) => {
     });
 };
 
-
-
 const sendBulkSMS = async (message, contactNumbers) => {
-  console.log("bulky");
+  console.log(process.env.DEVICE_ID,);
   const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
+    sim: "0",
     device_id: process.env.DEVICE_ID,
-    sim: 0,
     urgent: "1"
   }));
 
@@ -220,10 +221,8 @@ const sendBulkSMS = async (message, contactNumbers) => {
     smsdata: smsData
   };
 
-  return axios
-  .post('https://smsgateway24.com/getdata/addsms', null, {
-    params: params
-  })
+  return axios.post('https://smsgateway24.com/getdata/addalotofsms', params)
+
   .then(function (response) {
   
     return response.data;

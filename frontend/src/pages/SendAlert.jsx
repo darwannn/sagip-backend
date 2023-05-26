@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { request } from '../utils/fetchApi';
+import { request } from '../utils/axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -22,11 +22,12 @@ const SendAlert = () => {
           'Content-Type': 'application/json'
         } 
   
-        const data = await request("/api/send-sms", 'POST', options, {alertMessage,location})
+        const data = await request("/api/send-alert", 'POST', options, {alertMessage,location})
        
          // console.log('Token:', data.token);
           console.log(data);
           const { success, message } = data;
+          console.log(message);
           if(success) {
           
           toast.success(message);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { request } from '../utils/fetchApi';
+import { request } from '../utils/axios';
 function Home() {
   const [signal, setSignal] = useState(null);
   const [weather, setWeather] = useState(null);

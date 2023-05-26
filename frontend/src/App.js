@@ -1,15 +1,15 @@
 import './App.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import BlogHome from './pages/BlogHome/BlogHome';
+import SafetyTips from './pages/SafetyTips';
 import Home from './pages/Home';
-import LikedPost from './pages/LikedPost';
+import SavedSafetyTips from './pages/SavedSafetyTips';
 import Error from './pages/Error';
 import ForgotPassword from './pages/ForgotPassword';
-import Login from './pages/login/Login';
+import Login from './pages/Login';
 import ContactVerification from './pages/ContactVerification';
-import Register from './pages/register/Register';
-import Create from './pages/create/Create';
-import BlogDetails from './pages/blogDetails/BlogDetails';
+import Register from './pages/Register';
+import SafetyTipsInput from './pages/SafetyTipsInput';
+import SafetyTipDetails from './pages/SafetyTipDetails';
 
 import { useSelector } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
@@ -37,34 +37,29 @@ const App = () => {
     <div>
       <ToastContainer />
       <Routes>
-        {/* una kasi */}
-        <Route path="/" element={
-          user  && user.for == "login" ? user.status == "unverified"?<Navigate to="/register/contact-verification" />:<BlogHome/>: <Navigate to="/login" />
-          } />
-        <Route path="/home" element={ <Home />}/>
+   
+        <Route path="/" element={ <Home />}/>
 
-        
-        <Route path="/login" element={<Login/>} 
-        
-        />
+        <Route path="/login" element={<Login/>}/>
+
         <Route path="/register" element={<Register />}   />
+        <Route path="/register/contact-verification" element={user? user.status == "unverified" || user.status != "banned"?<ContactVerification type="register"/>:<Navigate to="/" />: <ContactVerification  type="register"/>} />
+
+        <Route path="/forgot-password" element={<ForgotPassword /> } />
+        <Route path="/forgot-password/contact-verification" element={user? user.status != "unverified" || user.status != "banned" ?<ContactVerification type="forgot-password" />:<Navigate to="/" />: <ContactVerification type="forgot-password"/>} />
+        <Route path="/new-password" element={ <NewPassword/>} />
+
+
         <Route path="/send-alert" element={<SendAlert />}   />
 
-        <Route path="/create" element={user ? <Create mode="create" /> : <Navigate to="/login" />} />
-        <Route path="/blogDetails/:id" element={user ? <BlogDetails /> : <Navigate to="/login" />} />
-        <Route path="/updateBlog/:id" element={user ? <Create mode="update" /> : <Navigate to="/login" />} />
+        <Route path="/safety-tips" element={<SafetyTips/>} />
 
-        <Route path="/likedPosts" element={user ? <LikedPost /> : <Navigate to="/login" />} />
-        <Route path="/forgot-password" element={<ForgotPassword /> } />
-        <Route path="/register/contact-verification" element={
-          user? user.status == "unverified" || user.status != "banned"?<ContactVerification type="register"/>:<Navigate to="/" />: <ContactVerification  type="register"/>
-          } />
-        <Route path="/forgot-password/contact-verification" element={
-          user? user.status != "unverified" || user.status != "banned" ?<ContactVerification type="forgot-password" />:<Navigate to="/" />: <ContactVerification type="forgot-password"/>
-          } />
-   <Route path="/new-password" element={ <NewPassword/>
-          } />
-        {/* 404 error handling */}
+        <Route path="/safety-tips/add" element={user ? <SafetyTipsInput type="add" /> : <Navigate to="/login" />} />
+        <Route path="/safety-tips/:id" element={user ? <SafetyTipDetails /> : <Navigate to="/login" />} />
+        <Route path="/safety-tips/update/:id" element={user ? <SafetyTipsInput type="update" /> : <Navigate to="/login" />} />
+        <Route path="/safety-tips/saved" element={user ? <SavedSafetyTips /> : <Navigate to="/login" />} />
+ 
+ 
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}
       </Routes>
     </div>
