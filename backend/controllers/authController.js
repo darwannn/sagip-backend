@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const axios = require('axios')
 const verifyToken = require('../middlewares/verifyToken')
+// const isBanned = require('../middlewares/authMiddleware')
 const { sendSMS, apiController } = require('./apiController')
 
 const currentDate = new Date()
@@ -264,7 +265,7 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
         if (code == user.verificationCode) {
           // Code matches, update user status to 'semi-verified'
 
-          if(user.verificationCode == "unverified") {
+          if(user.status == "unverified") {
                       user.status = 'semi-verified';
           }
           user.verificationCode = 0;
@@ -330,20 +331,6 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
 
 authController.post('/login', async (req, res) => {
   try {
-      // const user = await User.findOne({email: req.body.email})
-      // if(!user){
-      //     throw new Error("Invalid credentials")
-      // }
-
-      // const comparePass = await bcrypt.compare(req.body.password, user.password)
-      // if(!comparePass){
-      //     throw new Error("Invalid credentials")
-      // }
-
-      // const {password, ...others} = user._doc
-      // const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '5h'})        
-
-
       const error = {};
       const {
         identifier,
@@ -358,8 +345,10 @@ authController.post('/login', async (req, res) => {
       let user = await checkIdentifier(identifier)
     
       if (!user) {
-        error['error'] = 'Accoutn does not exist'
+        error['identifier'] = 'Accoutn does not exist'
       }
+
+    
     
       if (Object.keys(error).length == 0) {
     
@@ -374,19 +363,26 @@ authController.post('/login', async (req, res) => {
           } else { */
               
 
- 
+          if (user.status == "banned") {
+            return res.status(500).json({
+              success:false,
+              message:"Account banned. Please contact the CDRRMO",
+            })
+          } else {
+            
+            return res.status(200).json({
+              success: true,
+              message: "Login Successfully",
+              user: {
+                for: "login",
+                id: user._doc._id,
+                userType: user._doc.userType
+              },
+              token: generateToken(user._id)
+            });
+            
+          }
 
-          return res.status(200).json({
-            success: true,
-            message: "Login Successfully",
-            user: {
-              for: "login",
-              id: user._doc._id,
-              userType: user._doc.userType
-            },
-            token: generateToken(user._id)
-          });
-          
           
           
           
@@ -461,6 +457,13 @@ authController.post('/forgot-password', async (req, res) => {
       /*     sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
         // Sending a verification code to the user (code not shown)
         // Responding with success message and user information
+       
+          if (user.status == "banned") {
+            return res.status(500).json({
+              success:false,
+              message:"Account banned. Please contact the CDRRMO",
+            })
+          } else {
         return res.status(200).json({
           success: true,
           message: "Message has been sent to",
@@ -472,7 +475,7 @@ authController.post('/forgot-password', async (req, res) => {
           },
           token: generateToken(user._id)
         });
-        
+      }
        /*  return res.status(200).json({
           success: true,
           message: "Login Successfully",
@@ -625,6 +628,8 @@ const generateCode = async () => {
     });
     return accountExists;
   }
+
+
   
   const generateToken = (id) => {
     return jwt.sign({

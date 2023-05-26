@@ -272,7 +272,6 @@ const getAllContactNumbersInBarangays = async (municipality, location) => {
   }
 };
 
-
 module.exports = {
   sendSMS,
   apiController,
