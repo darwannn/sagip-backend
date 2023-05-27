@@ -26,10 +26,16 @@ const upload = multer({ storage });
 emergencyFacilityController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
     const error = {};
     try {
-      const { title, content, category } = req.body;
+      const {  name,
+        latitude,
+        longitude,
+        image,
+        category,
+        } = req.body;
   
-      if (isEmpty(title)) error["title"] = 'Required field';
-      if (isEmpty(content)) error["content"] = 'Required field';
+      if (isEmpty(name)) error["name"] = 'Required field';
+      if (isEmpty(latitude)) error["latitude"] = 'Required field';
+      if (isEmpty(longitude)) error["latitude"] = 'Required field';
       if (isEmpty(category)) error["category"] = 'Required field';
       if (!req.file) error["image"] = 'Required field';
   
@@ -47,18 +53,18 @@ emergencyFacilityController.post('/add', verifyToken, upload.single('image'), as
       }
 
       if (Object.keys(error).length === 0) {
-        const EmergencyFacility = await EmergencyFacility.create({
-          title,
-          content,
-          category,
+        const emergencyFacility = await EmergencyFacility.create({
+          name,
+          latitude,
+          longitude,
           image: req.file.filename,
-          userId: req.user.id
+          category,
         });
-        if (EmergencyFacility) {
+        if (emergencyFacility) {
         return res.status(200).json({
           success: true,
-          message: "EmergencyFacility created successfully",
-          EmergencyFacility
+          message: "Emergency Facility created successfully",
+          emergencyFacility
         });
     } else {
         return res.status(500).json({
@@ -85,7 +91,7 @@ emergencyFacilityController.post('/add', verifyToken, upload.single('image'), as
 /* get all */
 emergencyFacilityController.get('/', async (req, res) => {
     try {
-        const safetyTips = await EmergencyFacility.find({}).populate("userId", '-password')
+        const safetyTips = await EmergencyFacility.find({})
         console.log("dasd");
         console.log(safetyTips);
         return res.status(200).json(safetyTips)
@@ -100,12 +106,11 @@ emergencyFacilityController.get('/', async (req, res) => {
 /* get specific  */
 emergencyFacilityController.get('/:id', async (req, res) => {
     try {
-        const EmergencyFacility = await EmergencyFacility.findById(req.params.id).populate("userId", '-password')
+        const emergencyFacility = await EmergencyFacility.findById(req.params.id)
         
-        EmergencyFacility.views += 1
-        console.log(EmergencyFacility);
-        await EmergencyFacility.save()
-        return res.status(200).json(EmergencyFacility)
+        
+        console.log(emergencyFacility);
+        return res.status(200).json(emergencyFacility)
     } catch (error) {
         return res.status(500).json({
             success:false,
@@ -118,11 +123,19 @@ emergencyFacilityController.get('/:id', async (req, res) => {
 emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
   const error = {};
   try {
-    const { title, content, category, hasChanged } = req.body;
-    console.log(hasChanged);
-    if (isEmpty(title)) error["title"] = 'Required field';
-    if (isEmpty(content)) error["content"] = 'Required field';
+    const {  name,
+      latitude,
+      longitude,
+      image,
+      category,
+      hasChanged
+      } = req.body;
+
+    if (isEmpty(name)) error["name"] = 'Required field';
+    if (isEmpty(latitude)) error["latitude"] = 'Required field';
+    if (isEmpty(longitude)) error["latitude"] = 'Required field';
     if (isEmpty(category)) error["category"] = 'Required field';
+    if (!req.file) error["image"] = 'Required field';
 
     if (hasChanged == true) {
       if (!req.file) error["image"] = 'Required field';
@@ -138,7 +151,9 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
     }
 
     if (Object.keys(error).length === 0) {
-      const updateFields = { title, content, category, userId: req.user.id };
+      const updateFields = { name, latitude,
+        longitude,
+        category };
       let imagePath = '';
 
       if (hasChanged && req.file) {
@@ -149,10 +164,10 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
           imagePath = `public/images/${deletedSafetyTip.image}`;
         }
       }
+  
+      const emergencyFacility = await EmergencyFacility.findByIdAndUpdate(req.params.id, updateFields, { new: true });
 
-      const EmergencyFacility = await EmergencyFacility.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-
-      if (EmergencyFacility) {
+      if (emergencyFacility) {
         if (hasChanged && req.file) {
           fs.unlink(imagePath, (err) => {
             if (err) {
@@ -163,7 +178,9 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
             }
           });
         }
-
+console.log('====================================');
+console.log(emergencyFacility);
+console.log('====================================');
         return res.status(200).json({
           success: true,
           message: "EmergencyFacility updated successfully",

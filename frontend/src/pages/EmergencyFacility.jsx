@@ -22,13 +22,10 @@ const EmergencyFacility = () => {
     
     useEffect(() => {
       const fetchSafetyTipDetails = async () => {
-        console.log('====================================');
-        console.log("LOG");
-        console.log(id);
-        console.log('====================================');
+
         try {
           const options = { 'Authorization': `Bearer ${token}` };
-          const data = await request(`/safety-tips/${id}`, 'GET', options);
+          const data = await request(`/emergency-facility/${id}`, 'GET', options);
           setSafetyTipDetails(data);
         } catch (error) {
           console.error(error);
@@ -37,6 +34,7 @@ const EmergencyFacility = () => {
     
       if (id) {
         setisModalShown(true);
+        setType("update")
         fetchSafetyTipDetails();
       } else {
         setisModalShown(false);
@@ -50,10 +48,10 @@ const EmergencyFacility = () => {
     const handleDeleteBlog = async () => {
       try {
         const options = { "Authorization": `Bearer ${token}` };
-        const data = await request(`/safety-tips/delete/${id}`, "DELETE", options);
+        const data = await request(`/emergency-facility/delete/${id}`, "DELETE", options);
         const { message } = data;
         toast.success(message);
-        navigate(`/safety-tips`);
+        navigate(`/emergency-facility`);
       } catch (error) {
         console.error(error);
       }
@@ -63,8 +61,9 @@ const EmergencyFacility = () => {
 
 
 const [type, setType] = useState('update');
-const [title, setTitle] = useState('');
-const [content, setContent] = useState('');
+const [name, setName] = useState('');
+const [latitude, setLatitude] = useState('');
+const [longitude, setLongitude] = useState('');
 const [image, setImage] = useState(null);
 const [imageName, setImageName] = useState('');
 const [hasChanged, setHasChanged] = useState(false);
@@ -96,8 +95,9 @@ const handleAddSafetyTip = async (e) => {
 
   try {
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
+    formData.append('name', name);
+    formData.append('latitude', latitude);
+    formData.append('longitude', longitude);
     formData.append('category', category);
     formData.append('hasChanged', hasChanged);
  
@@ -108,16 +108,15 @@ const handleAddSafetyTip = async (e) => {
       };
 
     
-const data = await request("/safety-tips/add", "POST", options, formData, true);
-/* 
-    const data = await request('/safety-tips/add', 'POST', options, formData); */
+const data = await request("/emergency-facility/add", "POST", options, formData, true);
+
     console.log(data);
 
 
     const { success, message } = data;
     if (success) {
       toast.success(message);
-      navigate(`/safety-tips/${data.safetyTip._id}`);
+      navigate(`/emergency-facility/${data.safetyTip._id}`);
     } else {
       if (message !== 'input error') {
         toast.error(message);
@@ -138,10 +137,10 @@ useEffect(() => {
         const options = {
           Authorization: `Bearer ${token}`,
         };
-        const data = await request(`/safety-tips/${id}`, 'GET', options);
-
-        setTitle(data.title);
-        setContent(data.content);
+        const data = await request(`/emergency-facility/${id}`, 'GET', options);
+        setName(data.name);
+        setLatitude(data.latitude);
+        setLongitude(data.longitude);
         setCategory(data.category);
         setImageUrl(`http://localhost:5000/images/${data.image}`);
         console.log(data.category);
@@ -150,9 +149,16 @@ useEffect(() => {
         console.error(error);
       }
     };
-    fetchSafetyTipDetails();
+
+    if (id) {
+      setisModalShown(true);
+      fetchSafetyTipDetails();
+    } else {
+      setisModalShown(false);
+    }
+
   }
-}, [id, setTitle, setContent, setCategory, token]);
+}, [id, setName, setLatitude, setCategory, token]);
 
 const handleUpdateSafetyTip = async (e) => {
   e.preventDefault();
@@ -160,8 +166,9 @@ const handleUpdateSafetyTip = async (e) => {
   try {
   
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
+    formData.append('name', name);
+    formData.append('latitude', latitude);
+    formData.append('longitude', longitude);
     formData.append('category', category);
     formData.append('hasChanged', hasChanged);
  
@@ -172,10 +179,10 @@ const handleUpdateSafetyTip = async (e) => {
       };
 
     
-      const data = await request(`/safety-tips/update/${id}`, "PUT", options, formData,true);
+      const data = await request(`/emergency-facility/update/${id}`, "PUT", options, formData,true);
 
 /* 
-    const data = await request('/safety-tips/add', 'POST', options, formData); */
+    const data = await request('/emergency-facility/add', 'POST', options, formData); */
     console.log(data);
 
 
@@ -183,7 +190,7 @@ const handleUpdateSafetyTip = async (e) => {
     const { success, message } = data;
     if (success) {
       toast.success(message);
-    /*   navigate(`/safety-tips/${id}`); */
+    /*   navigate(`/emergency-facility/${id}`); */
     } else {
       if (message !== 'input error') {
         toast.error(message);
@@ -209,29 +216,26 @@ const handleUpdateSafetyTip = async (e) => {
 
 /* _________________________________ */
 
-  const [EmergencyFacility, setEmergencyFacility] = useState([]);
+  const [emergencyFacility, setEmergencyFacility] = useState([]);
   const [filteredEmergencyFacility, setFilteredEmergencyFacility] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const { user } = useSelector((state) => state.auth);
   const [searchQuery, setSearchQuery] = useState('');
   
   const categories = [
-    'All',
-    'Police',
-    'Fire Station',
-    'Hospital',
-    'Evacuation Area',
+    'all',
+    'police',
+    'fire station',
+    'hospital',
+    'evacuation area',
   ];
 
   useEffect(() => {
-    
-    console.log('====================================');
-    console.log(id);
-    console.log('====================================');
+
 
     const fetchEmergencyFacility = async () => {
       try {
-        const data = await request('/safety-tips/', 'GET');
+        const data = await request('/emergency-facility/', 'GET');
         setEmergencyFacility(data);
         setFilteredEmergencyFacility(data);
       } catch (error) {
@@ -244,26 +248,17 @@ const handleUpdateSafetyTip = async (e) => {
 
   useEffect(() => {
     if (activeCategory === 'all') {
-      setFilteredEmergencyFacility(EmergencyFacility);
-    } else {
-      setFilteredEmergencyFacility(EmergencyFacility.filter((emergencyFacility) =>
-        emergencyFacility.category.toLowerCase() === activeCategory.toLowerCase()
-      ));
-    }
-  }, [activeCategory, EmergencyFacility]);
-
-  useEffect(() => {
-    if (activeCategory === 'all') {
-      setFilteredEmergencyFacility(EmergencyFacility.filter((emergencyFacility) =>
-        emergencyFacility.title.toLowerCase().includes(searchQuery.toLowerCase())
+      
+      setFilteredEmergencyFacility(emergencyFacility.filter((emergencyFacility) =>
+        emergencyFacility.name.toLowerCase().includes(searchQuery.toLowerCase())
       ));
     } else {
-      setFilteredEmergencyFacility(EmergencyFacility.filter((emergencyFacility) =>
+      setFilteredEmergencyFacility(emergencyFacility.filter((emergencyFacility) =>
         emergencyFacility.category.toLowerCase() === activeCategory.toLowerCase() &&
-        emergencyFacility.title.toLowerCase().includes(searchQuery.toLowerCase())
+        emergencyFacility.name.toLowerCase().includes(searchQuery.toLowerCase())
       ));
     }
-  }, [activeCategory, searchQuery, EmergencyFacility]);
+  }, [activeCategory, searchQuery, emergencyFacility]);
 
   return (
     <>
@@ -277,7 +272,7 @@ const handleUpdateSafetyTip = async (e) => {
       <div>
         <input
           type="text"
-          placeholder="Search EmergencyFacility"
+          placeholder="Search emergencyFacility"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -292,19 +287,21 @@ const handleUpdateSafetyTip = async (e) => {
       {filteredEmergencyFacility.length > 0 ? (
   <div>
     {filteredEmergencyFacility.map((emergencyFacility) => (
-      <Link to={`/emergency-facility/${emergencyFacility._id}`} key={emergencyFacility._id}>
-        <div>
+      <Link to={`/emergency-facility/${emergencyFacility._id}`} key={emergencyFacility._id}
+      >
+        {/* <div onClick={()=> setType("update")}> */}
           <div>
-            <span>{emergencyFacility.category}</span>
+          <div>
+            <span> {emergencyFacility.name}</span>
           </div>
-          <h4>{emergencyFacility.title}</h4>
+          <h4>{emergencyFacility._id}</h4>
         </div>
         <br></br>
       </Link>
     ))}
   </div>
 ) : (
-  <h3>No EmergencyFacility</h3>
+  <h3>No emergencyFacility</h3>
 )}
 
       
@@ -316,40 +313,6 @@ const handleUpdateSafetyTip = async (e) => {
 
       { isModalShown && (
   <>
-    {/* <Link to="/emergency-facility">
-      Close <AiOutlineArrowRight />
-    </Link>
-    <div>
-      <img src={`http://localhost:5000/images/${safetyTipDetails?.image}`} style={{ width: "300px" }} />
-      <div>
-        <h3>{safetyTipDetails?.title}</h3>
-        {safetyTipDetails?.userId?._id === user.id && (
-          <div>
-            <Link to={`/safety-tips/update/${safetyTipDetails?._id}`}>
-              <AiFillEdit />
-            </Link>
-            <div>
-              <AiFillDelete onClick={handleDeleteBlog} />
-            </div>
-          </div>
-        )}
-      </div>
-      <div>
-        <p>
-          <span>contentription: </span>
-          <span dangerouslySetInnerHTML={{ __html: safetyTipDetails?.content }} />
-        </p>
-        <div>
-          <span>{safetyTipDetails?.views} views</span>
-          <span>{safetyTipDetails?.saves?.length} saves</span>
-        </div>
-      </div>
-      <div>
-        <span>
-          <span>Created At:</span> {format(safetyTipDetails?.createdAt)}
-        </span>
-      </div>
-    </div> */}
     <div>
         <div>
           <Link to="/emergency-facility">
@@ -359,13 +322,15 @@ const handleUpdateSafetyTip = async (e) => {
           <form onSubmit={type === 'add' ? handleAddSafetyTip : handleUpdateSafetyTip} encType="multipart/form-data">
             <div>
               <label>Title: </label>
-              <input type="text" placeholder="Title..." value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input type="text" placeholder="name..." value={name} onChange={(e) =>setName(e.target.value)} />
             </div>
             <div>
               <label>Description: </label>
-              <input type="text" placeholder="Title..." value={content} onChange={setContent} />
-              
-            
+              <input type="text" placeholder="latitude..." value={latitude} onChange={(e) =>setLatitude(e.target.value)} />
+            </div>
+            <div>
+              <label>Description: </label>
+              <input type="text" placeholder="longitude..." value={longitude} onChange={(e) => setLongitude(e.target.value)} />
             </div>
             <div>
               <label>Category: </label>

@@ -6,10 +6,14 @@ const EmergencyFacilitySchema = new mongoose.Schema({
     required: true,
   },
   latitude: {
-    type: String,
+    type: Number,
     required: true,
   },
   longitude: {
+    type: Number,
+    required: true,
+  },
+  category: {
     type: String,
     required: true,
   },

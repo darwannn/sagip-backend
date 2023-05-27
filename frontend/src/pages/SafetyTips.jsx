@@ -47,7 +47,7 @@ const SafetyTips = () => {
     fetchSafetyTips();
   }, []);
 
-  useEffect(() => {
+/*   useEffect(() => {
 
     
     if (activeCategory === 'all') {
@@ -69,7 +69,7 @@ const SafetyTips = () => {
         }));
       });
     }
-  }, [activeCategory, safetyTips, user.id]);
+  }, [activeCategory, safetyTips, user.id]); */
 
   const handleSavedSafetyTips = async (safetyTipsId) => {
     try {
