@@ -1,7 +1,7 @@
 const safetyTipController = require("express").Router()
 const SafetyTip = require("../models/SafetyTip")
 const verifyToken = require('../middlewares/verifyToken')
-const { isEmpty } = require('./functionController')
+const {isEmpty,isImage,isLessThanSize} = require('./functionController')
 
 const express = require("express");
 const multer = require("multer");
@@ -23,94 +23,57 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 safetyTipController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
-  const error = {};
-  try {
-    const { title, content, category } = req.body;
+    const error = {};
+    try {
+      const { title, content, category } = req.body;
+  
+      if (isEmpty(title)) error["title"] = 'Required field';
+      if (isEmpty(content)) error["content"] = 'Required field';
+      if (isEmpty(category)) error["category"] = 'Required field';
+      if (!req.file) error["image"] = 'Required field';
+  
+      // Multer file filter validation
 
-    if (isEmpty(title)) error["title"] = 'Required field';
-    if (isEmpty(content)) error["content"] = 'Required field';
-    if (isEmpty(category)) error["category"] = 'Required field';
-
-    if (Object.keys(error).length === 0) {
-      const safetyTip = await SafetyTip.create({
-        title,
-        content,
-        category,
-        image: req.file.filename,
-        userId: req.user.id
-      });
-      
-      return res.status(200).json({
-        success: true,
-        message: "SafetyTip created successfully",
-        safetyTip
-      });
-    }
-
-    if (Object.keys(error).length !== 0) {
-      error["success"] = false;
-      error["message"] = "input error";
-      return res.status(400).json(error);
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error
-    });
+  
+      // Check file extension
+   
+  if (isImage(req.file)) {
+    error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
   }
-});
-
-safetyTipController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
-  const error = {};
-  try {
-    const { title, content, category } = req.body;
-    const { id } = req.params;
-
-    if (isEmpty(title)) error["title"] = 'Required field';
-    if (isEmpty(content)) error["content"] = 'Required field';
-    if (isEmpty(category)) error["category"] = 'Required field';
-
-    if (Object.keys(error).length === 0) {
-      let updateData = {
-        title,
-        content,
-        category,
-      };
-
-      if (req.file) {
-        updateData.image = req.file.filename;
+ 
+      if (isLessThanSize(req.file,10 * 1024 * 1024)) {
+        error["image"] = 'File size should be less than 10MB';
       }
 
-      const safetyTip = await SafetyTip.findByIdAndUpdate(id, updateData, { new: true });
-
-      if (!safetyTip) {
-        return res.status(404).json({
-          success: false,
-          message: "SafetyTip not found",
+      if (Object.keys(error).length === 0) {
+        const safetyTip = await SafetyTip.create({
+          title,
+          content,
+          category,
+          image: req.file.filename,
+          userId: req.user.id
+        });
+        
+        return res.status(200).json({
+          success: true,
+          message: "SafetyTip created successfully",
+          safetyTip
         });
       }
-
-      return res.status(200).json({
-        success: true,
-        message: "SafetyTip updated successfully",
-        safetyTip
+  
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "Input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error
       });
     }
+  });
 
-    if (Object.keys(error).length !== 0) {
-      error["success"] = false;
-      error["message"] = "input error";
-      return res.status(400).json(error);
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error
-    });
-  }
-});
-
-module.exports = safetyTipController;
 
 /* get all */
 safetyTipController.get('/', async (req, res) => {
