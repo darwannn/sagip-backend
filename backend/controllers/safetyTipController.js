@@ -116,60 +116,80 @@ safetyTipController.get('/:id', async (req, res) => {
 
 
 safetyTipController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
-    const error = {};
-    try {
-      const { title, content, category, hasChanged } = req.body;
-  console.log(hasChanged);
-      if (isEmpty(title)) error["title"] = 'Required field';
-      if (isEmpty(content)) error["content"] = 'Required field';
-      if (isEmpty(category)) error["category"] = 'Required field';
-  
-      if (hasChanged == true) {
-        if (!req.file) error["image"] = 'Required field';
-        else {
-          if (isImage(req.file)) {
-            error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
-          }
-        
-          if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-            error["image"] = 'File size should be less than 10MB';
-          }
+  const error = {};
+  try {
+    const { title, content, category, hasChanged } = req.body;
+    console.log(hasChanged);
+    if (isEmpty(title)) error["title"] = 'Required field';
+    if (isEmpty(content)) error["content"] = 'Required field';
+    if (isEmpty(category)) error["category"] = 'Required field';
+
+    if (hasChanged == true) {
+      if (!req.file) error["image"] = 'Required field';
+      else {
+        if (isImage(req.file)) {
+          error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
+        }
+      
+        if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+          error["image"] = 'File size should be less than 10MB';
         }
       }
-  
-      if (Object.keys(error).length === 0) {
-        const updateFields = { title, content, category, userId: req.user.id };
-        if (hasChanged && req.file) {
-          updateFields.image = req.file.filename;
-        }
-  
-        const safetyTip = await SafetyTip.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-        if (safetyTip) {
-          return res.status(200).json({
-            success: true,
-            message: "SafetyTip updated successfully",
-            safetyTip
-          });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "DB Error",
-          });
-        }
-      }
-  
-      if (Object.keys(error).length !== 0) {
-        error["success"] = false;
-        error["message"] = "Input error";
-        return res.status(400).json(error);
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error" + error
-      });
     }
-  });
+
+    if (Object.keys(error).length === 0) {
+      const updateFields = { title, content, category, userId: req.user.id };
+      let imagePath = '';
+
+      if (hasChanged && req.file) {
+        updateFields.image = req.file.filename;
+
+        const deletedSafetyTip = await SafetyTip.findById(req.params.id);
+        if (deletedSafetyTip) {
+          imagePath = `public/images/${deletedSafetyTip.image}`;
+        }
+      }
+
+      const safetyTip = await SafetyTip.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+
+      if (safetyTip) {
+        if (hasChanged && req.file) {
+          fs.unlink(imagePath, (err) => {
+            if (err) {
+              return res.status(500).json({
+                success: false,
+                message: 'Error deleting the image',
+              });
+            }
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "SafetyTip updated successfully",
+          safetyTip
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "DB Error",
+        });
+      }
+    }
+
+    if (Object.keys(error).length !== 0) {
+      error["success"] = false;
+      error["message"] = "Input error";
+      return res.status(400).json(error);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error
+    });
+  }
+});
+
   
 
 safetyTipController.delete('/delete/:id', verifyToken, async (req, res) => {
@@ -186,17 +206,19 @@ safetyTipController.delete('/delete/:id', verifyToken, async (req, res) => {
         const imagePath = `public/images/${deletedSafetyTip.image}`;
         fs.unlink(imagePath, (err) => {
           if (err) {
-            console.error(err);
+          
             return res.status(500).json({
               success: false,
               message: 'Error deleting the image ',
             });
+          } else {
+
+            return res.status(200).json({
+              success: true,
+              message: 'SafetyTip  deleted successfully',
+            });
           }
        
-          return res.status(200).json({
-            success: true,
-            message: 'SafetyTip and image file deleted successfully',
-          });
         });
       } else {
         return res.status(500).json({

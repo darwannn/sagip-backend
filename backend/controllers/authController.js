@@ -2,6 +2,7 @@ const authController = require('express').Router()
 const User = require("../models/User")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const {isEmpty,isImage,isLessThanSize} = require('./functionController')
 
 const verifyToken = require('../middlewares/verifyToken')
 // const isBanned = require('../middlewares/authMiddleware')
@@ -585,12 +586,12 @@ const generateCode = async () => {
     }
   }
   
-  
+/*   
   const isEmpty = (value) => {
     if (value == "") {
       return true
     }
-  }
+  } */
   
   const isNumber = (value) => {
     if (isNaN(Number(value))) {
