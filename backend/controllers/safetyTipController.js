@@ -7,6 +7,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 
+const fs = require('fs');
 
 
 // Multer configuration for file uploads
@@ -53,12 +54,18 @@ safetyTipController.post('/add', verifyToken, upload.single('image'), async (req
           image: req.file.filename,
           userId: req.user.id
         });
-        
+        if (safetyTip) {
         return res.status(200).json({
           success: true,
           message: "SafetyTip created successfully",
           safetyTip
         });
+    } else {
+        return res.status(500).json({
+          success:false,
+          message:"DB Error",
+        })
+      }
       }
   
       if (Object.keys(error).length !== 0) {
@@ -108,74 +115,103 @@ safetyTipController.get('/:id', async (req, res) => {
 })
 
 
-
-safetyTipController.put("/update/:id", verifyToken, async (req, res) => {
-   
-
-          const error = {};
-          try {
-              const {title, content,category, image} = req.body;
-               if (isEmpty(title)) error["title"] = 'Required field'
-               if (isEmpty(content)) error["content"] = 'Required field'
-               if (isEmpty(category)) error["category"] = 'Required field'
-      
-               if (Object.keys(error).length == 0) {
-    
-            /*     const safetyTip = await SafetyTip.findById(req.params.id)
-                if (safetyTip.userId.toString() !== req.user.id.toString()) {
-                    throw new Error("You can update only your own posts")
-                } */
-        
-                const updatedSafetyTip = await SafetyTip
-                    .findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
-                    .populate('userId', '-password')
-        
-                return res.status(200).json({
-                    success: true,
-                    message: "Safety Tip updated successfully",
-                  });
-               }
-        
-              if (Object.keys(error).length != 0) {
-                  error["success"] = false;
-                  error["message"] = "input error";
-                  return res.status(400).json(error)
-                  
-                }
-          } catch (error) {
-              return res.status(500).json({
-                  success:false,
-                  message:"Internal Server Error" + error,
-                })
-          }
-})
-
-
-safetyTipController.delete('/delete/:id', verifyToken, async(req, res) => {
-    
-
-
-  
-    
+safetyTipController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
+    const error = {};
     try {
-        const safetyTip = await SafetyTip.findById(req.params.id)
-       /*  if(safetyTip.userId.toString() !== req.user.id.toString()){
-            throw new Error("You can delete only your own posts")
-        } */
+      const { title, content, category, hasChanged } = req.body;
+  console.log(hasChanged);
+      if (isEmpty(title)) error["title"] = 'Required field';
+      if (isEmpty(content)) error["content"] = 'Required field';
+      if (isEmpty(category)) error["category"] = 'Required field';
+  
+      if (hasChanged == true) {
+        if (!req.file) error["image"] = 'Required field';
+        else {
+          if (isImage(req.file)) {
+            error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
+          }
         
-        await SafetyTip.findByIdAndDelete(req.params.id)
-        return res.status(200).json({
+          if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+            error["image"] = 'File size should be less than 10MB';
+          }
+        }
+      }
+  
+      if (Object.keys(error).length === 0) {
+        const updateFields = { title, content, category, userId: req.user.id };
+        if (hasChanged && req.file) {
+          updateFields.image = req.file.filename;
+        }
+  
+        const safetyTip = await SafetyTip.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+        if (safetyTip) {
+          return res.status(200).json({
             success: true,
-            message: "SafetyTip deleted successfully",
+            message: "SafetyTip updated successfully",
+            safetyTip
           });
-
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "DB Error",
+          });
+        }
+      }
+  
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "Input error";
+        return res.status(400).json(error);
+      }
     } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error" + error,
-          })
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error
+      });
     }
-})
+  });
+  
+
+safetyTipController.delete('/delete/:id', verifyToken, async (req, res) => {
+    try {
+     /*  const safetyTip = await SafetyTip.findById(req.params.id);
+      if(safetyTip.userId.toString() !== req.user.id.toString()){
+          throw new Error("You can delete only your own posts")
+      } */
+  
+      const deletedSafetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
+  
+      if (deletedSafetyTip) {
+ 
+        const imagePath = `public/images/${deletedSafetyTip.image}`;
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({
+              success: false,
+              message: 'Error deleting the image ',
+            });
+          }
+       
+          return res.status(200).json({
+            success: true,
+            message: 'SafetyTip and image file deleted successfully',
+          });
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: 'DB Error',
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Internal Server Error' + error,
+      });
+    }
+  });
+  
 
 
 safetyTipController.put('/saves/:id', verifyToken, async (req, res) => {

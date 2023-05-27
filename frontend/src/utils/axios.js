@@ -22,8 +22,13 @@ export const request = async (url, method, headers = {}, body = {}, isNotStringi
             return data
 
         case 'PUT':
+            if (isNotStringified) {
+                res = await fetch(BASE_URL + url, { headers, method, body })
+                data = await res.json()
+            } else {
             res = await fetch(BASE_URL + url, { headers, method, body: JSON.stringify({ ...body }) })
             data = await res.json()
+            }
             return data
 
         case 'DELETE':

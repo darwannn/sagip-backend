@@ -16,8 +16,10 @@ const Create = ({ type }) => {
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
   const [imageName, setImageName] = useState('');
+  const [hasChanged, setHasChanged] = useState(false);
   const [category, setCategory] = useState('');
   const navigate = useNavigate();
+  const [imageUrl, setImageUrl] = useState('');
   const { token } = useSelector((state) => state.auth);
 
   const categories = [
@@ -33,12 +35,20 @@ const Create = ({ type }) => {
   const onChangeFile = (e) => {
     setImage(e.target.files[0]);
     setImageName(e.target.files[0].name);
+    setHasChanged(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageUrl(reader.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
   };
 
   const handleCloseImage = () => {
     setImage(null);
     setImageName('');
+    setImageUrl('');
   };
+
 
   const handleAddSafetyTip = async (e) => {
     e.preventDefault();
@@ -48,6 +58,7 @@ const Create = ({ type }) => {
       formData.append('title', title);
       formData.append('content', content);
       formData.append('category', category);
+      formData.append('hasChanged', hasChanged);
    
         formData.append('image', image);
    
@@ -92,6 +103,7 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
           setTitle(data.title);
           setContent(data.content);
           setCategory(data.category);
+          setImageUrl(`http://localhost:5000/images/${data.image}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -106,28 +118,37 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
     e.preventDefault();
 
     try {
-      const options = {
-        Authorization: `Bearer ${token}`,
-      };
-
+    
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', content);
       formData.append('category', category);
-      
-      const data = await request(`/safety-tips/update/${id}`, 'PUT', options, formData);
+      formData.append('hasChanged', hasChanged);
+   
+        formData.append('image', image);
+   
+        const options = {
+          Authorization: `Bearer ${token}`,
+        };
 
+      
+        const data = await request(`/safety-tips/update/${id}`, "PUT", options, formData,true);
+
+/* 
+      const data = await request('/safety-tips/add', 'POST', options, formData); */
       console.log(data);
+
+
 
       const { success, message } = data;
       if (success) {
         toast.success(message);
-        navigate(`/safety-tips/${id}`);
+      /*   navigate(`/safety-tips/${id}`); */
       } else {
         if (message !== 'input error') {
           toast.error(message);
         } else {
-          // handle input message error here
+        
         }
       }
     } catch (error) {
@@ -173,6 +194,10 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
                   {imageName} <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
                 </p>
               )}
+
+{imageUrl && (
+  <img src={imageUrl} alt="Selected" />
+)}
             </div>
             <div>
               <button type="submit">Submit form</button>

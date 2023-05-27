@@ -35,7 +35,7 @@ const SafetyTipDetails = () => {
   const handleSavedSafetyTip = async () => {
     try {
       const options = { "Authorization": `Bearer ${token}` };
-      await request(`/safety-tips/saved/${id}`, "PUT", options);
+      await request(`/safety-tips/saves/${id}`, "PUT", options);
       setIsSaved((prev) => !prev);
     } catch (error) {
       console.error(error);
@@ -103,8 +103,8 @@ const SafetyTipDetails = () => {
           </div>
           <div>
             <p>
-              <span>Description: </span>
-              <span dangerouslySetInnerHTML={{ __html: safetyTipDetails?.desc }} />
+              <span>contentription: </span>
+              <span dangerouslySetInnerHTML={{ __html: safetyTipDetails?.content }} />
             </p>
             <div>
               <span>{safetyTipDetails?.views} views</span>
