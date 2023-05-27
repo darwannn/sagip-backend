@@ -15,7 +15,10 @@ mongoose.set('strictQuery', false);
 mongoose.connect(process.env.MONGO_URL, () => console.log('MongoDB has been started successfully'))
 
 // routes
-app.use('/images', express.static('public/images'))
+
+/* app.use('/static', express.static('public')) */
+
+app.use(express.static('public'))
 
 app.use(cors())
 app.use(express.json())

@@ -52,7 +52,7 @@ const SavedSafetyTips = () => {
           {savedSafetyTips.map((safetyTip) => (
             <div key={safetyTip._id} >
               <Link to={`/safety-tips/${safetyTip._id}`}>
-                <img src={`http://localhost:5000/images/${safetyTip.photo}`} alt="Blog"  style={{width:"300px"}}/>
+                <img src={`http://localhost:5000/images/${safetyTip.image}`} alt="Blog"  style={{width:"300px"}}/>
               </Link>
               <div >
                 <div >

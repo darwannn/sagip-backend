@@ -63,7 +63,7 @@ const SafetyTipDetails = () => {
           Go Back <AiOutlineArrowRight />
         </Link>
         <div>
-          <img src={`http://localhost:5000/images/${safetyTipDetails?.photo}`} style={{ width: "300px" }} />
+          <img src={`http://localhost:5000/images/${safetyTipDetails?.image}`} style={{ width: "300px" }} />
           <div>
             <h3>{safetyTipDetails?.title}</h3>
             {safetyTipDetails?.userId?._id === user.id ? (

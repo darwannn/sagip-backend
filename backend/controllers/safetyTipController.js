@@ -3,38 +3,115 @@ const SafetyTip = require("../models/SafetyTip")
 const verifyToken = require('../middlewares/verifyToken')
 const { isEmpty } = require('./functionController')
 
-safetyTipController.post('/add', verifyToken, async (req, res) => {
-    const error = {};
-    try {
-        const {title, content,category, image} = req.body;
-         if (isEmpty(title)) error["title"] = 'Required field'
-         if (isEmpty(content)) error["content"] = 'Required field'
-         if (isEmpty(category)) error["category"] = 'Required field'
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
 
-         if (Object.keys(error).length == 0) {
 
-             const safetyTip = await SafetyTip.create({ ...req.body, userId: req.user.id })
-             return res.status(200).json({
-                success: true,
-                message: "SafetyTip created successfully",
-              });
-         }
-  
-        if (Object.keys(error).length != 0) {
-   
-            error["success"] = false;
-            error["message"] = "input error";
-        
-            return res.status(400).json(error)
-            
-          }
-    } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error" + error,
-          })
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/images');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
+safetyTipController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
+  const error = {};
+  try {
+    const { title, content, category } = req.body;
+
+    if (isEmpty(title)) error["title"] = 'Required field';
+    if (isEmpty(content)) error["content"] = 'Required field';
+    if (isEmpty(category)) error["category"] = 'Required field';
+
+    if (Object.keys(error).length === 0) {
+      const safetyTip = await SafetyTip.create({
+        title,
+        content,
+        category,
+        image: req.file.filename,
+        userId: req.user.id
+      });
+      
+      return res.status(200).json({
+        success: true,
+        message: "SafetyTip created successfully",
+        safetyTip
+      });
     }
-})
+
+    if (Object.keys(error).length !== 0) {
+      error["success"] = false;
+      error["message"] = "input error";
+      return res.status(400).json(error);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error
+    });
+  }
+});
+
+safetyTipController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
+  const error = {};
+  try {
+    const { title, content, category } = req.body;
+    const { id } = req.params;
+
+    if (isEmpty(title)) error["title"] = 'Required field';
+    if (isEmpty(content)) error["content"] = 'Required field';
+    if (isEmpty(category)) error["category"] = 'Required field';
+
+    if (Object.keys(error).length === 0) {
+      let updateData = {
+        title,
+        content,
+        category,
+      };
+
+      if (req.file) {
+        updateData.image = req.file.filename;
+      }
+
+      const safetyTip = await SafetyTip.findByIdAndUpdate(id, updateData, { new: true });
+
+      if (!safetyTip) {
+        return res.status(404).json({
+          success: false,
+          message: "SafetyTip not found",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "SafetyTip updated successfully",
+        safetyTip
+      });
+    }
+
+    if (Object.keys(error).length !== 0) {
+      error["success"] = false;
+      error["message"] = "input error";
+      return res.status(400).json(error);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error
+    });
+  }
+});
+
+module.exports = safetyTipController;
+
 /* get all */
 safetyTipController.get('/', async (req, res) => {
     try {
@@ -110,28 +187,6 @@ safetyTipController.put("/update/:id", verifyToken, async (req, res) => {
           }
 })
 
-/* safetyTipController.put('/saves/:id', verifyToken, async (req, res) => {
-    try {
-        const safetyTip = await SafetyTip.findById(req.params.id)
-        if(safetyTip.saves.includes(req.user.id)){
-            safetyTip.saves = safetyTip.saves.filter((userId) => userId !== req.user.id)
-            await safetyTip.save()
-
-            return res.status(200).json({msg: 'Successfully unliked the safetyTip'})
-        } else {
-            safetyTip.saves.push(req.user.id)
-            await safetyTip.save()
-
-            return res.status(200).json({msg: "Successfully liked the safetyTip"})
-        }
-
-    } catch (error) {
-        return res.status(500).json({
-        success:false,
-        message:"Internal Server Error" + error,
-      })
-    }
-}) */
 
 safetyTipController.delete('/delete/:id', verifyToken, async(req, res) => {
     
@@ -158,6 +213,28 @@ safetyTipController.delete('/delete/:id', verifyToken, async(req, res) => {
           })
     }
 })
+
+
+safetyTipController.put('/saves/:id', verifyToken, async (req, res) => {
+    try {
+        const safetyTip = await SafetyTip.findById(req.params.id)
+        if(safetyTip.saves.includes(req.user.id)){
+            safetyTip.saves = safetyTip.saves.filter((userId) => userId !== req.user.id)
+            await safetyTip.save()
+
+            return res.status(200).json({msg: 'Successfully unliked the safetyTip'})
+        } else {
+            safetyTip.saves.push(req.user.id)
+            await safetyTip.save()
+
+            return res.status(200).json({msg: "Successfully liked the safetyTip"})
+        }
+
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+})
+
 safetyTipController.get('/saved/:userId', async (req, res) => {
     try {
       const likedSafetyTips = await SafetyTip.find({ saves: req.params.userId }).populate("userId", "-password");
