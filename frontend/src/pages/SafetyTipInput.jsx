@@ -55,21 +55,12 @@ const Create = ({ type }) => {
           Authorization: `Bearer ${token}`,
         };
 
-        const data = await fetch("http://localhost:5000/safety-tips/add", {
-            method: "POST",
-            body: formData,
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-        });
-
+      
+const data = await request("/safety-tips/add", "POST", options, formData, true);
 /* 
       const data = await request('/safety-tips/add', 'POST', options, formData); */
       console.log(data);
 
-
-     /*  const data = await axios.post("http://localhost:5000/safety-tips/add", formData);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}` */
 
       const { success, message } = data;
       if (success) {
