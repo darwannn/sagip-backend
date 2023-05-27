@@ -101,9 +101,12 @@ const SafetyTips = () => {
   return (
     <>
     <Navbar />
-        <h3>Select a category</h3>
+    <br></br>
+      <br></br>
+    <Link to='/safety-tips/add'>Create</Link>
+     
         <div>
-        <Link to="/safety-tips/saved">Liked Posts</Link>
+        <Link to="/safety-tips/saved">Saved Posts</Link>
       </div>
         <div>
         <input

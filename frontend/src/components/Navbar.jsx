@@ -28,7 +28,6 @@ navigate('/login')
         </ul>
         <div >
           
-              <Link to='/safety-tips/add'>Create</Link>
               <span onClick={handleLogout}>Logout</span>
            
           

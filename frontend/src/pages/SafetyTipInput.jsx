@@ -11,7 +11,7 @@ import 'react-quill/dist/quill.snow.css';
 import Navbar from '../components/Navbar';
 import { request } from '../utils/axios';
 
-const Create = ({ type }) => {
+const SafetyTipInput = ({ type }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
@@ -209,4 +209,4 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
   );
 };
 
-export default Create;
+export default SafetyTipInput;

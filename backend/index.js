@@ -5,6 +5,7 @@ const cors = require('cors')
 const authController = require('./controllers/authController')
 const { sendVerificationCode, apiController } = require('./controllers/apiController')
 const safetyTipController = require('./controllers/safetyTipController')
+const emergencyFacilityController = require('./controllers/emergencyFacilityController')
 const multer = require('multer')
 const app = express()
 
@@ -23,9 +24,12 @@ app.use(express.static('public'))
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
+
 app.use('/auth', authController)
 app.use('/safety-tips', safetyTipController)
+app.use('/emergency-facility', emergencyFacilityController)
 app.use('/api', apiController)
+
 app.use(bodyParser.json());
 // multer
 const storage = multer.diskStorage({

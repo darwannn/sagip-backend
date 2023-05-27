@@ -19,6 +19,8 @@ import SendAlert from './pages/SendAlert';
 import jwtDecode from 'jwt-decode';
 import { logout } from './redux/authSlice'; // Assuming the logout action is defined in authSlice
 
+import EmergencyFacility from './pages/EmergencyFacility';
+
 const App = () => {
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -124,6 +126,37 @@ const App = () => {
             )
           }
         />
+
+
+
+<Route
+          path="/emergency-facility"
+          element={
+              <EmergencyFacility />
+          }
+        />
+         <Route
+          path="/emergency-facility/:id"
+          element={
+            <EmergencyFacility />
+        }
+        />
+         <Route
+          path="/emergency-facility/add"
+          element={
+            <EmergencyFacility />
+        }
+        />
+
+
+
+
+
+
+
+
+
+
 
         {location.pathname !== "/" && (
           <Route path="*" element={<Error />} />
