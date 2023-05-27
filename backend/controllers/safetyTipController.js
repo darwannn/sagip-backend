@@ -2,6 +2,15 @@ const safetyTipController = require("express").Router()
 const SafetyTip = require("../models/SafetyTip")
 const verifyToken = require('../middlewares/verifyToken')
 
+
+safetyTipController.post('/add', verifyToken, async (req, res) => {
+    try {
+        const safetyTip = await SafetyTip.create({ ...req.body, userId: req.user.id })
+        return res.status(201).json({ message: 'SafetyTip created successfully', safetyTip })
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+})
 /* get all */
 safetyTipController.get('/', async (req, res) => {
     try {
@@ -29,14 +38,6 @@ safetyTipController.get('/:id', async (req, res) => {
 })
 
 
-safetyTipController.post('/add', verifyToken, async (req, res) => {
-    try {
-        const safetyTip = await SafetyTip.create({ ...req.body, userId: req.user.id })
-        return res.status(201).json({ message: 'SafetyTip created successfully', safetyTip })
-    } catch (error) {
-        return res.status(500).json(error)
-    }
-})
 
 safetyTipController.put("/update/:id", verifyToken, async (req, res) => {
     try {

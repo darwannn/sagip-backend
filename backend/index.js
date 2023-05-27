@@ -8,6 +8,8 @@ const safetyTipController = require('./controllers/safetyTipController')
 const multer = require('multer')
 const app = express()
 
+const bodyParser = require('body-parser');
+
 // connect db
 mongoose.set('strictQuery', false);
 mongoose.connect(process.env.MONGO_URL, () => console.log('MongoDB has been started successfully'))
@@ -21,7 +23,7 @@ app.use(express.urlencoded({extended: true}))
 app.use('/auth', authController)
 app.use('/safety-tips', safetyTipController)
 app.use('/api', apiController)
-
+app.use(bodyParser.json());
 // multer
 const storage = multer.diskStorage({
     destination: function(req, file, cb){

@@ -8,59 +8,126 @@ import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/Login';
 import ContactVerification from './pages/ContactVerification';
 import Register from './pages/Register';
-import SafetyTipsInput from './pages/SafetyTipsInput';
+import SafetyTipInput from './pages/SafetyTipInput';
 import SafetyTipDetails from './pages/SafetyTipDetails';
-
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NewPassword from './pages/NewPassword';
 import SendAlert from './pages/SendAlert';
+import jwtDecode from 'jwt-decode';
+import { logout } from './redux/authSlice'; // Assuming the logout action is defined in authSlice
 
-/* const Error = () => {
-  return <h1>404 Not Found</h1>;
-}; */
-
-
-/* 
-saka na lang ayusin access
-nakakalito
-....
-
-*/
 const App = () => {
   const { user, token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const location = useLocation();
   console.log('User:', user);
   console.log('TokenA:', token);
+
+  const checkTokenExpiration = () => {
+    if (token) {
+      // Decode the JWT token to extract the expiration time
+      const decodedToken = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      
+      if (decodedToken.exp < currentTime) {
+        dispatch(logout());
+      } else {
+        console.log('====================================');
+        console.log("not expired");
+        console.log('====================================');
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkTokenExpiration();
+  }, [token]);
+
   return (
     <div>
       <ToastContainer />
       <Routes>
-   
-        <Route path="/" element={ <Home />}/>
+        <Route path="/" element={<Home />} />
 
-        <Route path="/login" element={<Login/>}/>
+        <Route path="/login" element={<Login />} />
 
-        <Route path="/register" element={<Register />}   />
-        <Route path="/register/contact-verification" element={user? user.status == "unverified" || user.status != "banned"?<ContactVerification type="register"/>:<Navigate to="/" />: <ContactVerification  type="register"/>} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register/contact-verification"
+          element={
+            user && user.status === "unverified" ? (
+              <ContactVerification type="register" />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
 
-        <Route path="/forgot-password" element={<ForgotPassword /> } />
-        <Route path="/forgot-password/contact-verification" element={user? user.status != "unverified" || user.status != "banned" ?<ContactVerification type="forgot-password" />:<Navigate to="/" />: <ContactVerification type="forgot-password"/>} />
-        <Route path="/new-password" element={ <NewPassword/>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/forgot-password/contact-verification"
+          element={
+            user && user.status !== "unverified" ? (
+              <ContactVerification type="forgot-password" />
+            ) : (
+              <Navigate to="/" />
+            )
+          }
+        />
+        <Route path="/new-password" element={<NewPassword />} />
 
+        <Route path="/send-alert" element={<SendAlert />} />
 
-        <Route path="/send-alert" element={<SendAlert />}   />
+        <Route path="/safety-tips" element={<SafetyTips />} />
 
-        <Route path="/safety-tips" element={<SafetyTips/>} />
+        <Route
+          path="/safety-tips/add"
+          element={
+            user ? (
+              <SafetyTipInput type="add" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/safety-tips/:id"
+          element={
+            user ? (
+              <SafetyTipDetails />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/safety-tips/update/:id"
+          element={
+            user ? (
+              <SafetyTipInput type="update" />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route
+          path="/safety-tips/saved"
+          element={
+            user ? (
+              <SavedSafetyTips />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
 
-        <Route path="/safety-tips/add" element={user ? <SafetyTipsInput type="add" /> : <Navigate to="/login" />} />
-        <Route path="/safety-tips/:id" element={user ? <SafetyTipDetails /> : <Navigate to="/login" />} />
-        <Route path="/safety-tips/update/:id" element={user ? <SafetyTipsInput type="update" /> : <Navigate to="/login" />} />
-        <Route path="/safety-tips/saved" element={user ? <SavedSafetyTips /> : <Navigate to="/login" />} />
- 
- 
-        {location.pathname !== "/" && <Route path="*" element={<Error />} />}
+        {location.pathname !== "/" && (
+          <Route path="*" element={<Error />} />
+        )}
       </Routes>
     </div>
   );

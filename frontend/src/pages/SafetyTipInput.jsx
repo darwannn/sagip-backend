@@ -42,65 +42,64 @@ const Create = ({ type }) => {
     setImage(null);
   };
 
-  const handleCreateBlog = async (e) => {
-    e.preventDefault();
-/* console.log(type); */
-    try {
-      const formData = new FormData();
+ const handleAddSafetyTip = async (e) => {
+  e.preventDefault();
 
-      let filename = null;
-      if (image) {
-        filename = crypto.randomUUID() + image.name;
-        formData.append('filename', filename);
-        formData.append('image', image);
+  try {
+    const formData = new FormData();
 
-        await fetch(`http://localhost:5000/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-      } /* else {
-        return;
-      } */
+    let filename = null;
+    if (image) {
+      filename = crypto.randomUUID() + image.name;
+      formData.append('filename', filename);
+      formData.append('image', image);
 
-      const options = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      };
-
-      const body = {
-        title,
-        content,
-        category,
-        image:filename,
-      };
-
-      const data = await request('/safety-tips/add', 'POST', options, body);
-      console.log(data);
-      
-      const { success, message } = data;
-      if (success) {
-        toast.success(message);
-      
-        navigate(`/safety-tips/${data.safetyTip._id}`);
-      } else {
-        if (message !== 'input error') {
-          toast.error(message);
-        } else {
-          // handle input message error here
-          toast.error(message);
-        }
-      }
-    } catch (error) {
-      console.error(error);
+      await fetch(`http://localhost:5000/upload`, {
+        method: 'POST',
+        body: formData,
+      });
     }
-  };
+
+    const options = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+
+    const body = {
+      title,
+      content,
+      category,
+      image: filename, // Add the uploaded image filename to the body
+    };
+
+    const data = await request('/safety-tips/add', 'POST', options, body);
+    console.log(data);
+
+    const { success, message } = data;
+    if (success) {
+      toast.success(message);
+
+      navigate(`/safety-tips/${data.safetyTip._id}`);
+    } else {
+      if (message !== 'input error') {
+        toast.error(message);
+      } else {
+        // handle input message error here
+        toast.error(message);
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
   const { id } = useParams();
 
   useEffect(() => {
 
     if (type === 'update') {
-      const fetchBlogDetails = async () => {
+      const fetchSafetyTipDetails = async () => {
         try {
           const options = {
             Authorization: `Bearer ${token}`,
@@ -116,11 +115,11 @@ const Create = ({ type }) => {
           console.error(error);
         }
       };
-      fetchBlogDetails();
+      fetchSafetyTipDetails();
     }
   }, [id, type, setTitle, setContent, setCategory, token]);
 
-  const handleUpdateBlog = async (e) => {
+  const handleUpdateSafetyTip = async (e) => {
     e.preventDefault();
 
     try {
@@ -162,8 +161,8 @@ const Create = ({ type }) => {
         <Link to="/safety-tips">
           Go Back <AiOutlineArrowRight />
         </Link>
-          <h2>{type} Blog</h2>
-          <form onSubmit={type === 'add' ? handleCreateBlog : handleUpdateBlog} encType="multipart/form-data">
+          <h2>{type} SafetyTip</h2>
+          <form onSubmit={type === 'add' ? handleAddSafetyTip : handleUpdateSafetyTip} encType="multipart/form-data">
             <div >
               <label>Title: </label>
               <input

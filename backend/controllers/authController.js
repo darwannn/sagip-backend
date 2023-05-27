@@ -2,7 +2,7 @@ const authController = require('express').Router()
 const User = require("../models/User")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const axios = require('axios')
+
 const verifyToken = require('../middlewares/verifyToken')
 // const isBanned = require('../middlewares/authMiddleware')
 const { sendSMS, apiController } = require('./apiController')
