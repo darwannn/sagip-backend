@@ -1,389 +1,168 @@
-import React from 'react';
-import { useEffect } from 'react';
-import { request } from '../utils/axios';
-import { format } from 'timeago.js';
 
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import { AiFillEdit, AiFillDelete, AiOutlineArrowRight } from 'react-icons/ai';
-import { toast } from 'react-toastify';
-import { AiOutlineCloseCircle } from 'react-icons/ai';
+import { FaLocationArrow, FaTimes } from 'react-icons/fa'
 
-const EmergencyFacility = () => {
-
-    const [safetyTipDetails, setSafetyTipDetails] = useState("");
-    const [isModalShown, setisModalShown] = useState(false);
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const { token } = useSelector((state) => state.auth);
-    
-  /*   useEffect(() => {
-      const fetchSafetyTipDetails = async () => {
-
-        try {
-          const options = { 'Authorization': `Bearer ${token}` };
-          const data = await request(`/emergency-facility/${id}`, 'GET', options);
-          setSafetyTipDetails(data);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-    
-      if (id) {
-        setisModalShown(true);
-        setType("update")
-        fetchSafetyTipDetails();
-      } else {
-        setisModalShown(false);
-      }
-    }, [id, token]); */
-    
-  
-    const deleteEmergencyFacility = async () => {
-      try {
-        const options = { "Authorization": `Bearer ${token}` };
-        const data = await request(`/emergency-facility/delete/${id}`, "DELETE", options);
-        const { message } = data;
-        toast.success(message);
-        navigate(`/manage/emergency-facility`);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-/* ____________________________________ */
+import {
+  useJsApiLoader,
+  GoogleMap,
+  Marker,
+  Autocomplete,
+  DirectionsRenderer,
+} from '@react-google-maps/api'
+import { useRef, useState } from 'react'
 
 
-const [type, setType] = useState('update');
-const [name, setName] = useState('');
-const [latitude, setLatitude] = useState('');
-const [longitude, setLongitude] = useState('');
-const [image, setImage] = useState(null);
-const [imageName, setImageName] = useState('');
-const [hasChanged, setHasChanged] = useState(false);
-const [category, setCategory] = useState('');
-const [imageUrl, setImageUrl] = useState('');
+const center = { lat: 48.8584, lng: 2.2945 }
 
+function EmergencyFacility() {
+  const mapAPI = process.env.REACT_APP_MAP_API;
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: mapAPI,
+    libraries: ['places'],
+  })
 
+  const [map, setMap] = useState(/** @type google.maps.Map */ (null))
+  const [directionsResponse, setDirectionsResponse] = useState(null)
+  const [distance, setDistance] = useState('')
+  const [duration, setDuration] = useState('')
+  const [steps, setSteps] = useState([])
 
-const onChangeFile = (e) => {
-  setImage(e.target.files[0]);
-  setImageName(e.target.files[0].name);
-  setHasChanged(true);
-  const reader = new FileReader();
-  reader.onload = () => {
-    setImageUrl(reader.result);
-  };
-  reader.readAsDataURL(e.target.files[0]);
-};
+  /** @type React.MutableRefObject<HTMLInputElement> */
+  const originRef = useRef()
+  /** @type React.MutableRefObject<HTMLInputElement> */
+  const destiantionRef = useRef()
 
-const handleCloseImage = () => {
-  setImage(null);
-  setImageName('');
-  setImageUrl('');
-};
-
-
-const addEmergencyFacility = async (e) => {
-  e.preventDefault();
-
-  try {
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('latitude', latitude);
-    formData.append('longitude', longitude);
-    formData.append('category', category);
-    formData.append('hasChanged', hasChanged);
- 
-      formData.append('image', image);
- 
-      const options = {
-        Authorization: `Bearer ${token}`,
-      };
-
-    
-const data = await request("/emergency-facility/add", "POST", options, formData, true);
-
-    console.log(data);
-
-
-    const { success, message } = data;
-    if (success) {
-      toast.success(message);
-      navigate(`/manage/emergency-facility`);
-      setisModalShown(false);
-      //handleAddEmergencyFacility();
-      setShouldFetchData(true);
-    } else {
-      if (message !== 'input error') {
-        toast.error(message);
-      } else {
-        toast.error(message);
-      }
-    }
-  } catch (error) {
-    console.error(error);
+  if (!isLoaded) {
+    return "<SkeletonText />"
   }
-};
 
-
-useEffect(() => {
-  if (type === 'update') {
-    const fetchSafetyTipDetails = async () => {
-      try {
-        const options = {
-          Authorization: `Bearer ${token}`,
-        };
-        const data = await request(`/emergency-facility/${id}`, 'GET', options);
-    console.log('====================================');
-    console.log(data);
-    console.log('====================================');
-        if(data.message != "not found") {
-
-          setName(data.name);
-          setLatitude(data.latitude);
-          setLongitude(data.longitude);
-          setCategory(data.category);
-          setImageUrl(`http://localhost:5000/images/${data.image}`);
-      
-        } else {
-          navigate(`/manage/emergency-facility`);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    if (id) {
-      setisModalShown(true);
-      fetchSafetyTipDetails();
-    } else {
-      setisModalShown(false);
+  async function calculateRoute() {
+    if (originRef.current.value === '' || destiantionRef.current.value === '') {
+      return
     }
-
+    // eslint-disable-next-line no-undef
+    const directionsService = new google.maps.DirectionsService()
+    const results = await directionsService.route({
+      origin: originRef.current.value,
+      destination: destiantionRef.current.value,
+      // eslint-disable-next-line no-undef
+      travelMode: google.maps.TravelMode.DRIVING,
+    })
+    setDirectionsResponse(results)
+    setDistance(results.routes[0].legs[0].distance.text)
+    setDuration(results.routes[0].legs[0].duration.text)
+    setSteps(results.routes[0].legs[0].steps)
+    console.log(results);
   }
-}, [id, setName, setLatitude, setCategory, token]);
 
-const updateEmergencyFacility = async (e) => {
-  e.preventDefault();
-
-  try {
-  
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('latitude', latitude);
-    formData.append('longitude', longitude);
-    formData.append('category', category);
-    formData.append('hasChanged', hasChanged);
+  function clearRoute() {
  
-      formData.append('image', image);
- 
-      const options = {
-        Authorization: `Bearer ${token}`,
-      };
-
-    
-      const data = await request(`/emergency-facility/update/${id}`, "PUT", options, formData,true);
-
-/* 
-    const data = await request('/emergency-facility/add', 'POST', options, formData); */
-    console.log(data);
-
-
-
-    const { success, message } = data;
-    if (success) {
-      toast.success(message);
-    /*   navigate(`/manage/emergency-facility/${id}`); */
-    } else {
-      if (message !== 'input error') {
-        toast.error(message);
-      } else {
-      
-      }
-    }
-  } catch (error) {
-    console.error(error);
+    setDirectionsResponse(null)
+    setDistance('')
+    setDuration('')
+    originRef.current.value = ''
+    destiantionRef.current.value = ''
   }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-/* _________________________________ */
-
-  const [emergencyFacility, setEmergencyFacility] = useState([]);
-  const [filteredEmergencyFacility, setFilteredEmergencyFacility] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const { user } = useSelector((state) => state.auth);
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  const categories = [
-    'all',
-    'police',
-    'fire station',
-    'hospital',
-    'evacuation area',
-  ];
-
-  const [shouldFetchData, setShouldFetchData] = useState(true);
-
-  useEffect(() => {
-    const fetchEmergencyFacility = async () => {
-      try {
-        const data = await request('/emergency-facility/', 'GET');
-        setEmergencyFacility(data);
-        setFilteredEmergencyFacility(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-  
-    if (shouldFetchData) {
-      fetchEmergencyFacility();
-      setShouldFetchData(false);
-    }
-  }, [shouldFetchData]);
-  
- 
-  
-
-  useEffect(() => {
-    if (activeCategory === 'all') {
-      
-      setFilteredEmergencyFacility(emergencyFacility.filter((emergencyFacility) =>
-        emergencyFacility.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-    } else {
-      setFilteredEmergencyFacility(emergencyFacility.filter((emergencyFacility) =>
-        emergencyFacility.category.toLowerCase() === activeCategory.toLowerCase() &&
-        emergencyFacility.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-    }
-  }, [activeCategory, searchQuery, emergencyFacility]);
-
   return (
-    <>
-      <Navbar />
-      <br></br>
-      <br></br>
-      <Link to="/manage/emergency-facility/add" onClick={() => {setisModalShown(true); setType("add")}}>
-  Add
-</Link>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Search emergencyFacility"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+    <div
+      style={{
+        position: 'relative',
+        flexDirection: 'column',
+        alignItems: 'center',
+        height: '100vh',
+        width: '100vw',
+      }}
+    >
+      <div style={{  height: '50%', width: '100%' }}>
+        {/* Google Map Box */}
+        <GoogleMap
+          center={center}
+          zoom={15}
+          mapContainerStyle={{ width: '100%', height: '100%' }}
+          options={{
+            zoomControl: false,
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+          }}
+          onLoad={map => setMap(map)}
+        >
+          <Marker position={center} />
+          {directionsResponse && (
+            <DirectionsRenderer directions={directionsResponse} />
+          )}
+        </GoogleMap>
       </div>
-      <div>
-        {categories.map((category) => (
-          <span style={{ margin: "10px" }} key={category} onClick={() => setActiveCategory(category)}>
-            {category}
-          </span>
-        ))}
-      </div>
-      {filteredEmergencyFacility.length > 0 ? (
-  <div>
-    {filteredEmergencyFacility.map((emergencyFacility) => (
-      <Link to={`/manage/emergency-facility/${emergencyFacility._id}`} key={emergencyFacility._id}
+      <div
+        style={{
+          padding: 16,
+          borderRadius: 'lg',
+          margin: 16,
+          backgroundColor: 'white',
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+          minWidth: 'container.md',
+          zIndex: 1,
+        }}
       >
-        {/* <div onClick={()=> setType("update")}> */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+        <Autocomplete>
+              <input type='text' placeholder='Origin' ref={originRef} />
+            </Autocomplete>
+            <Autocomplete>
+              <input
+                type='text'
+                placeholder='Destination'
+                ref={destiantionRef}
+              />
+            </Autocomplete>
+
           <div>
-          <div>
-            <span> {emergencyFacility.name}</span>
+            <button style={{ backgroundColor: 'pink', color: 'white', padding: '8px 16px' }} type='submit' onClick={calculateRoute}>
+              Calculate Route
+            </button>
+            <button style={{ marginLeft: 8 }} onClick={clearRoute}>
+              Clear Route
+            </button>
           </div>
-          <h4>{emergencyFacility._id}</h4>
         </div>
-        <br></br>
-      </Link>
-    ))}
-  </div>
-) : (
-  <h3>No emergencyFacility</h3>
-)}
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div>Distance: {distance}</div>
+          <div>Duration: {duration}</div>
+          <button
+            style={{ borderRadius: '50%', width: 32, height: 32, backgroundColor: 'lightblue' }}
+            onClick={() => {
+              map.panTo(center)
+              map.setZoom(15)
+            }}
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+            >
+              <path d='M21 12H3M21 12L15 16M21 12L15 8'></path>
+            </svg>
+          </button>
+        </div>
 
-      
-      
-      <br></br>
-      <br></br>
-      <br></br>
-      <br></br>
-
-      { isModalShown && (
-  <>
-    <div>
+        {/* Display the steps */}
         <div>
-          <Link to="/manage/emergency-facility">
-            Go Back <AiOutlineArrowRight />
-          </Link>
-          <h2>{type} SafetyTip</h2>
-          <form onSubmit={type === 'add' ? addEmergencyFacility : updateEmergencyFacility} encType="multipart/form-data">
-          <div>
-                  <AiFillDelete onClick={deleteEmergencyFacility} />
-                </div>
-            <div>
-              <label>Title: </label>
-              <input type="text" placeholder="name..." value={name} onChange={(e) =>setName(e.target.value)} />
+          {steps.map((step, index) => (
+            
+            <div key={index}>
+            <div >{step.duration.text}</div>
+            <div>{step.distance.text}</div>
+            <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
+            <br></br>
             </div>
-            <div>
-              <label>Description: </label>
-              <input type="text" placeholder="latitude..." value={latitude} onChange={(e) =>setLatitude(e.target.value)} />
-            </div>
-            <div>
-              <label>Description: </label>
-              <input type="text" placeholder="longitude..." value={longitude} onChange={(e) => setLongitude(e.target.value)} />
-            </div>
-            <div>
-              <label>Category: </label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="image">
-                Image: <span>Upload here</span>
-              </label>
-              <input id="image" type="file" onChange={onChangeFile} />
-              {image && (
-                <p>
-                  {imageName} <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
-                </p>
-              )}
-
-{imageUrl && (
-  <img src={imageUrl} alt="Selected" />
-)}
-            </div>
-            <div>
-              <button type="submit">Submit form</button>
-            </div>
-          </form>
+          ))}
         </div>
       </div>
-  </>
-)}
+    </div>
+  )
+}
 
-    </>
-  );
-};
-
-export default EmergencyFacility;
+export default EmergencyFacility
