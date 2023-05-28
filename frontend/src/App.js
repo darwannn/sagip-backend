@@ -1,6 +1,6 @@
 import './App.css';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import SafetyTips from './pages/SafetyTips';
+import ManageSafetyTips from './pages/ManageSafetyTips';
 import Home from './pages/Home';
 import SavedSafetyTips from './pages/SavedSafetyTips';
 import Error from './pages/Error';
@@ -36,7 +36,10 @@ const App = () => {
 
       
       if (decodedToken.exp < currentTime) {
-        dispatch(logout());
+       /*  dispatch(logout()); */
+       console.log('====================================');
+       console.log("expired");
+       console.log('====================================');
       } else {
         console.log('====================================');
         console.log("not expired");
@@ -92,10 +95,10 @@ const App = () => {
 
         <Route path="/send-alert" element={<SendAlert />} />
 
-        <Route path="/safety-tips" element={<SafetyTips />} />
+        <Route path="/manage/safety-tips" element={<ManageSafetyTips />} />
 
         <Route
-          path="/safety-tips/add"
+          path="/manage/safety-tips/add"
           element={
             user ? (
               <SafetyTipInput type="add" />
@@ -105,7 +108,7 @@ const App = () => {
           }
         />
         <Route
-          path="/safety-tips/:id"
+          path="/manage/safety-tips/:id"
           element={
             user ? (
               <SafetyTipDetails />
@@ -115,7 +118,7 @@ const App = () => {
           }
         />
         <Route
-          path="/safety-tips/update/:id"
+          path="/manage/safety-tips/update/:id"
           element={
             user ? (
               <SafetyTipInput type="update" />
@@ -125,7 +128,7 @@ const App = () => {
           }
         />
         <Route
-          path="/safety-tips/saved"
+          path="/manage/safety-tips/saved"
           element={
             user ? (
               <SavedSafetyTips />
@@ -138,19 +141,19 @@ const App = () => {
 
 
 <Route
-          path="/emergency-facility"
+          path="/manage/emergency-facility"
           element={
               <EmergencyFacility />
           }
         />
          <Route
-          path="/emergency-facility/:id"
+          path="/manage/emergency-facility/:id"
           element={
             <EmergencyFacility />
         }
         />
          <Route
-          path="/emergency-facility/add"
+          path="/manage/emergency-facility/add"
           element={
             <EmergencyFacility />
         }

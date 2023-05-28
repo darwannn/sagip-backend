@@ -20,7 +20,7 @@ const EmergencyFacility = () => {
     const navigate = useNavigate();
     const { token } = useSelector((state) => state.auth);
     
-    useEffect(() => {
+  /*   useEffect(() => {
       const fetchSafetyTipDetails = async () => {
 
         try {
@@ -39,19 +39,16 @@ const EmergencyFacility = () => {
       } else {
         setisModalShown(false);
       }
-    }, [id, token]);
-    
-    // Rest of the component code...
+    }, [id, token]); */
     
   
-    // delete
     const deleteEmergencyFacility = async () => {
       try {
         const options = { "Authorization": `Bearer ${token}` };
         const data = await request(`/emergency-facility/delete/${id}`, "DELETE", options);
         const { message } = data;
         toast.success(message);
-        navigate(`/emergency-facility`);
+        navigate(`/manage/emergency-facility`);
       } catch (error) {
         console.error(error);
       }
@@ -116,7 +113,7 @@ const data = await request("/emergency-facility/add", "POST", options, formData,
     const { success, message } = data;
     if (success) {
       toast.success(message);
-      navigate(`/emergency-facility`);
+      navigate(`/manage/emergency-facility`);
       setisModalShown(false);
       //handleAddEmergencyFacility();
       setShouldFetchData(true);
@@ -153,7 +150,7 @@ useEffect(() => {
           setImageUrl(`http://localhost:5000/images/${data.image}`);
       
         } else {
-          navigate(`/emergency-facility`);
+          navigate(`/manage/emergency-facility`);
         }
       } catch (error) {
         console.error(error);
@@ -200,7 +197,7 @@ const updateEmergencyFacility = async (e) => {
     const { success, message } = data;
     if (success) {
       toast.success(message);
-    /*   navigate(`/emergency-facility/${id}`); */
+    /*   navigate(`/manage/emergency-facility/${id}`); */
     } else {
       if (message !== 'input error') {
         toast.error(message);
@@ -281,7 +278,7 @@ const updateEmergencyFacility = async (e) => {
       <Navbar />
       <br></br>
       <br></br>
-      <Link to="/emergency-facility/add" onClick={() => {setisModalShown(true); setType("add")}}>
+      <Link to="/manage/emergency-facility/add" onClick={() => {setisModalShown(true); setType("add")}}>
   Add
 </Link>
 
@@ -303,7 +300,7 @@ const updateEmergencyFacility = async (e) => {
       {filteredEmergencyFacility.length > 0 ? (
   <div>
     {filteredEmergencyFacility.map((emergencyFacility) => (
-      <Link to={`/emergency-facility/${emergencyFacility._id}`} key={emergencyFacility._id}
+      <Link to={`/manage/emergency-facility/${emergencyFacility._id}`} key={emergencyFacility._id}
       >
         {/* <div onClick={()=> setType("update")}> */}
           <div>
@@ -331,7 +328,7 @@ const updateEmergencyFacility = async (e) => {
   <>
     <div>
         <div>
-          <Link to="/emergency-facility">
+          <Link to="/manage/emergency-facility">
             Go Back <AiOutlineArrowRight />
           </Link>
           <h2>{type} SafetyTip</h2>

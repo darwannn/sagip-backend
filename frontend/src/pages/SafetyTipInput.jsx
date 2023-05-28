@@ -76,7 +76,7 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
       const { success, message } = data;
       if (success) {
         toast.success(message);
-        navigate(`/safety-tips/${data.safetyTip._id}`);
+        navigate(`/manage/safety-tips/${data.safetyTip._id}`);
       } else {
         if (message !== 'input error') {
           toast.error(message);
@@ -143,7 +143,7 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
       const { success, message } = data;
       if (success) {
         toast.success(message);
-      /*   navigate(`/safety-tips/${id}`); */
+      /*   navigate(`/manage/safety-tips/${id}`); */
       } else {
         if (message !== 'input error') {
           toast.error(message);
@@ -161,7 +161,7 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
       <Navbar />
       <div>
         <div>
-          <Link to="/safety-tips">
+          <Link to="/manage/safety-tips">
             Go Back <AiOutlineArrowRight />
           </Link>
           <h2>{type} SafetyTip</h2>

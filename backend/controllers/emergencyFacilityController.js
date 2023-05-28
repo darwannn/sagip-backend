@@ -123,7 +123,7 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
     if (isEmpty(category)) error["category"] = 'Required field';
    
 
-    if (hasChanged === true) {
+    if (hasChanged == "true") {
 
       if (!req.file) error["image"] = 'Required field';
       else {

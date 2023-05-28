@@ -1,7 +1,7 @@
 const safetyTipController = require("express").Router()
 const SafetyTip = require("../models/SafetyTip")
 const verifyToken = require('../middlewares/verifyToken')
-const {isEmpty,isImage,isLessThanSize} = require('./functionController')
+const { isEmpty, isImage, isLessThanSize } = require('./functionController')
 const upload = require('../middlewares/uploadMiddleware')
 
 const fs = require('fs');
@@ -20,7 +20,7 @@ safetyTipController.post('/add', verifyToken, upload.single('image'), async (req
   if (isImage(req.file)) {
     error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
   }
- 
+
       if (isLessThanSize(req.file,10 * 1024 * 1024)) {
         error["image"] = 'File size should be less than 10MB';
       }
@@ -65,8 +65,8 @@ safetyTipController.post('/add', verifyToken, upload.single('image'), async (req
 safetyTipController.get('/', async (req, res) => {
     try {
         const safetyTips = await SafetyTip.find({}).populate("userId", '-password')
-        console.log("dasd");
-        console.log(safetyTips);
+     
+   
         return res.status(200).json(safetyTips)
     } catch (error) {
         return res.status(500).json({
@@ -82,7 +82,7 @@ safetyTipController.get('/:id', async (req, res) => {
         const safetyTip = await SafetyTip.findById(req.params.id).populate("userId", '-password')
         
         safetyTip.views += 1
-        console.log(safetyTip);
+
         await safetyTip.save()
         return res.status(200).json(safetyTip)
     } catch (error) {
@@ -98,14 +98,14 @@ safetyTipController.put('/update/:id', verifyToken, upload.single('image'), asyn
   const error = {};
   try {
     const { title, content, category, hasChanged } = req.body;
-    console.log(hasChanged);
+  
     if (isEmpty(title)) error["title"] = 'Required field';
     if (isEmpty(content)) error["content"] = 'Required field';
     if (isEmpty(category)) error["category"] = 'Required field';
 
-    if (hasChanged == true) {
+    if (hasChanged == "true") {
       if (!req.file) error["image"] = 'Required field';
-      else {
+    
         if (isImage(req.file)) {
           error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
         }
@@ -113,9 +113,9 @@ safetyTipController.put('/update/:id', verifyToken, upload.single('image'), asyn
         if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
           error["image"] = 'File size should be less than 10MB';
         }
-      }
+      
     }
-
+ 
     if (Object.keys(error).length === 0) {
       const updateFields = { title, content, category, userId: req.user.id };
       let imagePath = '';

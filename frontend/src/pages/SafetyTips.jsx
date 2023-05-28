@@ -103,10 +103,10 @@ const SafetyTips = () => {
     <Navbar />
     <br></br>
       <br></br>
-    <Link to='/safety-tips/add'>Create</Link>
+    <Link to='/manage/safety-tips/add'>Create</Link>
      
         <div>
-        <Link to="/safety-tips/saved">Saved Posts</Link>
+        <Link to="/manage/safety-tips/saved">Saved Posts</Link>
       </div>
         <div>
         <input
@@ -132,7 +132,7 @@ const SafetyTips = () => {
             <div >
               {filteredSafetyTips.map((safetyTip) => (
                 <div key={safetyTip._id} >
-                  <Link to={`/safety-tips/${safetyTip._id}`}>
+                  <Link to={`/manage/safety-tips/${safetyTip._id}`}>
                     <img src={`http://localhost:5000/images/${safetyTip.image}`} alt="" style={{width:"300px"}}/>
                   </Link>
                   <div >
@@ -144,7 +144,7 @@ const SafetyTips = () => {
                       {/* <span><span>Author:</span> {safetyTip.userId.username}</span> */}
                       {/* <span><span>Posted:</span> {format(safetyTip.createdAt)}</span> */}
                     </div>
-                    <Link to={`/safety-tips/${safetyTip._id}`} >
+                    <Link to={`/manage/safety-tips/${safetyTip._id}`} >
                       Read More <FiArrowRight />
                     </Link>
                     {safetyTip.isLiked ? (

@@ -51,7 +51,7 @@ const SavedSafetyTips = () => {
         <div >
           {savedSafetyTips.map((safetyTip) => (
             <div key={safetyTip._id} >
-              <Link to={`/safety-tips/${safetyTip._id}`}>
+              <Link to={`/manage/safety-tips/${safetyTip._id}`}>
                 <img src={`http://localhost:5000/images/${safetyTip.image}`} alt="Blog"  style={{width:"300px"}}/>
               </Link>
               <div >
@@ -63,7 +63,7 @@ const SavedSafetyTips = () => {
                   {/* <span><span>Author:</span> {safetyTip.userId.username}</span> */}
                   {/* <span><span>Posted:</span> {format(safetyTip.createdAt)}</span> */}
                 </div>
-                <Link to={`/safety-tips/${safetyTip._id}`} >
+                <Link to={`/manage/safety-tips/${safetyTip._id}`} >
                   Read More <FiArrowRight />
                 </Link>
                 {safetyTip.isLiked ? (

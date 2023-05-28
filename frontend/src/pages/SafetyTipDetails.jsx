@@ -29,7 +29,7 @@ const SafetyTipDetails = () => {
         setIsSaved(data.saves.includes(user.id));
 
         } else {
-          navigate(`/safety-tips`);
+          navigate(`/manage/safety-tips`);
         }
 
 
@@ -64,7 +64,7 @@ const SafetyTipDetails = () => {
       const data = await request(`/safety-tips/delete/${id}`, "DELETE", options);
       const { message } = data;
       toast.success(message);
-      navigate(`/safety-tips`);
+      navigate(`/manage/safety-tips`);
     } catch (error) {
       console.error(error);
     }
@@ -74,7 +74,7 @@ const SafetyTipDetails = () => {
     <>
       <Navbar />
       <div>
-        <Link to="/safety-tips">
+        <Link to="/manage/safety-tips">
           Go Back <AiOutlineArrowRight />
         </Link>
         <div>
@@ -83,7 +83,7 @@ const SafetyTipDetails = () => {
             <h3>{safetyTipDetails?.title}</h3>
             {safetyTipDetails?.userId?._id === user.id ? (
               <div>
-                <Link to={`/safety-tips/update/${safetyTipDetails?._id}`}>
+                <Link to={`/manage/safety-tips/update/${safetyTipDetails?._id}`}>
                   <AiFillEdit />
                 </Link>
                 <div>
