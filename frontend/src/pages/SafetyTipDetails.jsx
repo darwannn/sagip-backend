@@ -57,18 +57,6 @@ const SafetyTipDetails = () => {
     }
   };
 
-  // delete
-  const handleDeleteBlog = async () => {
-    try {
-      const options = { "Authorization": `Bearer ${token}` };
-      const data = await request(`/safety-tips/delete/${id}`, "DELETE", options);
-      const { message } = data;
-      toast.success(message);
-      navigate(`/manage/safety-tips`);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <>
@@ -82,25 +70,15 @@ const SafetyTipDetails = () => {
           <div>
             <h3>{safetyTipDetails?.title}</h3>
             {safetyTipDetails?.userId?._id === user.id ? (
-              <div>
-                <Link to={`/manage/safety-tips/update/${safetyTipDetails?._id}`}>
-                  <AiFillEdit />
-                </Link>
+              <div> {isSaved ? (
                 <div>
-                  <AiFillDelete onClick={handleDeleteBlog} />
+                  <AiFillLike onClick={handleSavedSafetyTip} />
                 </div>
-                <>
-                {isSaved ? (
-                  <div>
-                    <AiFillLike onClick={handleSavedSafetyTip} />
-                  </div>
-                ) : (
-                  <div>
-                    <AiOutlineLike onClick={handleSavedSafetyTip} />
-                  </div>
-                )}
-              </>
-              </div>
+              ) : (
+                <div>
+                  <AiOutlineLike onClick={handleSavedSafetyTip} />
+                </div>
+              )}</div>
               
             ) : (
               <>

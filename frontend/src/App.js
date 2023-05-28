@@ -37,10 +37,11 @@ const App = () => {
 
       
       if (decodedToken.exp < currentTime) {
-       /*  dispatch(logout()); */
-       console.log('====================================');
-       console.log("expired");
-       console.log('====================================');
+        console.log('====================================');
+        console.log("expired");
+        console.log('====================================');
+       /*  dispatch(logout());
+        Navigate("/login"); */
       } else {
         console.log('====================================');
         console.log("not expired");

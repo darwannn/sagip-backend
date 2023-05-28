@@ -3,18 +3,21 @@ import { request } from '../utils/axios';
 import { format } from 'timeago.js';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import Navbar from '../components/Navbar';
-import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
+import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai';
 import { FiArrowRight } from 'react-icons/fi';
 import moment from 'moment';
-
+import { toast } from 'react-toastify';
 const SafetyTips = () => {
   const [safetyTips, setSafetyTips] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { user, token } = useSelector((state) => state.auth);
-
+  const navigate = useNavigate();
+  const { id } = useParams();
   const categories = [
     'all',
     'nature',
@@ -36,7 +39,26 @@ const SafetyTips = () => {
       }
     };
     fetchSafetyTips();
-  }, []);
+  }, [safetyTips]);
+    // delete
+    const handleDeleteBlog = async (id) => {
+      try {
+        const options = { "Authorization": `Bearer ${token}` };
+        const data = await request(`/safety-tips/delete/${id}`, "DELETE", options);
+        const updatedSafetyTips = safetyTips.filter((tip) => tip._id !== id);
+    setSafetyTips(updatedSafetyTips);
+        const { message } = data;
+        console.log('====================================');
+        console.log(data);
+        console.log('====================================');
+        toast.success(message);
+        navigate(`/manage/safety-tips`);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    
+  
 
   const filteredSafetyTips = safetyTips.filter((safetyTip) => {
     const categoryMatch =
@@ -73,6 +95,17 @@ const SafetyTips = () => {
           <Link to={`/manage/safety-tips/${row._id}`}>
             Read More <FiArrowRight />
           </Link>
+          <div>
+                <Link to={`/manage/safety-tips/update/${row._id}`}>
+                  <AiFillEdit />
+                </Link>
+                <div>
+                <AiFillDelete onClick={() => handleDeleteBlog(row._id)} />
+                </div>
+                <>
+               
+              </>
+              </div>
         </>
       ),
     },
