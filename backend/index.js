@@ -11,13 +11,11 @@ const app = express()
 
 const bodyParser = require('body-parser');
 
-// connect db
+
 mongoose.set('strictQuery', false);
 mongoose.connect(process.env.MONGO_URL, () => console.log('MongoDB has been started successfully'))
 
-// routes
 
-/* app.use('/static', express.static('public')) */
 
 app.use(express.static('public'))
 
