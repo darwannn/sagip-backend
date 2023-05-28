@@ -22,11 +22,26 @@ const SafetyTipDetails = () => {
       try {
         const options = { 'Authorization': `Bearer ${token}` };
         const data = await request(`/safety-tips/${id}`, 'GET', options);
-        setSafetyTipDetails(data);
+       
+  if(data.message != "not found") { 
+
+          setSafetyTipDetails(data);
         setIsSaved(data.saves.includes(user.id));
+
+        } else {
+          navigate(`/safety-tips`);
+        }
+
+
+
+
       } catch (error) {
         console.error(error);
       }
+
+
+
+
     };
     fetchSafetyTipDetails();
   }, [id]);

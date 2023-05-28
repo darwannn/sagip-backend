@@ -2,26 +2,9 @@ const safetyTipController = require("express").Router()
 const SafetyTip = require("../models/SafetyTip")
 const verifyToken = require('../middlewares/verifyToken')
 const {isEmpty,isImage,isLessThanSize} = require('./functionController')
-
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
+const upload = require('../middlewares/uploadMiddleware')
 
 const fs = require('fs');
-
-
-// Multer configuration for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage });
 
 safetyTipController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
     const error = {};
@@ -32,11 +15,7 @@ safetyTipController.post('/add', verifyToken, upload.single('image'), async (req
       if (isEmpty(content)) error["content"] = 'Required field';
       if (isEmpty(category)) error["category"] = 'Required field';
       if (!req.file) error["image"] = 'Required field';
-  
-      // Multer file filter validation
 
-  
-      // Check file extension
    
   if (isImage(req.file)) {
     error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
@@ -107,10 +86,10 @@ safetyTipController.get('/:id', async (req, res) => {
         await safetyTip.save()
         return res.status(200).json(safetyTip)
     } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error" + error,
-          })
+      return res.status(500).json({
+        success: false,
+        message: "not found"
+      });
     }
 })
 

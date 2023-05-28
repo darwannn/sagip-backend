@@ -1,27 +1,12 @@
 const emergencyFacilityController = require("express").Router()
 const EmergencyFacility = require("../models/EmergencyFacility")
 const verifyToken = require('../middlewares/verifyToken')
+const upload = require('../middlewares/uploadMiddleware')
 const {isEmpty,isImage,isLessThanSize} = require('./functionController')
 
 
-const multer = require("multer");
-const path = require("path");
-
 const fs = require('fs');
 
-
-// Multer configuration for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/images');
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ storage });
 
 emergencyFacilityController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
     const error = {};
@@ -107,15 +92,16 @@ emergencyFacilityController.get('/', async (req, res) => {
 emergencyFacilityController.get('/:id', async (req, res) => {
     try {
         const emergencyFacility = await EmergencyFacility.findById(req.params.id)
-        
-        
-        console.log(emergencyFacility);
-        return res.status(200).json(emergencyFacility)
+       
+          console.log(emergencyFacility);
+          return res.status(200).json(emergencyFacility)
+
+      
     } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error" + error,
-          })
+      return res.status(500).json({
+        success: false,
+        message: "not found"
+      });
     }
 })
 
@@ -135,9 +121,10 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
     if (isEmpty(latitude)) error["latitude"] = 'Required field';
     if (isEmpty(longitude)) error["latitude"] = 'Required field';
     if (isEmpty(category)) error["category"] = 'Required field';
-    if (!req.file) error["image"] = 'Required field';
+   
 
-    if (hasChanged == true) {
+    if (hasChanged === true) {
+
       if (!req.file) error["image"] = 'Required field';
       else {
         if (isImage(req.file)) {
@@ -178,9 +165,7 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
             }
           });
         }
-console.log('====================================');
-console.log(emergencyFacility);
-console.log('====================================');
+
         return res.status(200).json({
           success: true,
           message: "EmergencyFacility updated successfully",

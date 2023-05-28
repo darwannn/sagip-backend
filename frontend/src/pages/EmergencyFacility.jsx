@@ -45,7 +45,7 @@ const EmergencyFacility = () => {
     
   
     // delete
-    const handleDeleteBlog = async () => {
+    const deleteEmergencyFacility = async () => {
       try {
         const options = { "Authorization": `Bearer ${token}` };
         const data = await request(`/emergency-facility/delete/${id}`, "DELETE", options);
@@ -90,7 +90,7 @@ const handleCloseImage = () => {
 };
 
 
-const handleAddSafetyTip = async (e) => {
+const addEmergencyFacility = async (e) => {
   e.preventDefault();
 
   try {
@@ -118,7 +118,8 @@ const data = await request("/emergency-facility/add", "POST", options, formData,
       toast.success(message);
       navigate(`/emergency-facility`);
       setisModalShown(false);
-      handleAddEmergencyFacility();
+      //handleAddEmergencyFacility();
+      setShouldFetchData(true);
     } else {
       if (message !== 'input error') {
         toast.error(message);
@@ -140,13 +141,20 @@ useEffect(() => {
           Authorization: `Bearer ${token}`,
         };
         const data = await request(`/emergency-facility/${id}`, 'GET', options);
-        setName(data.name);
-        setLatitude(data.latitude);
-        setLongitude(data.longitude);
-        setCategory(data.category);
-        setImageUrl(`http://localhost:5000/images/${data.image}`);
-        console.log(data.category);
-        console.log(category);
+    console.log('====================================');
+    console.log(data);
+    console.log('====================================');
+        if(data.message != "not found") {
+
+          setName(data.name);
+          setLatitude(data.latitude);
+          setLongitude(data.longitude);
+          setCategory(data.category);
+          setImageUrl(`http://localhost:5000/images/${data.image}`);
+      
+        } else {
+          navigate(`/emergency-facility`);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -162,7 +170,7 @@ useEffect(() => {
   }
 }, [id, setName, setLatitude, setCategory, token]);
 
-const handleUpdateSafetyTip = async (e) => {
+const updateEmergencyFacility = async (e) => {
   e.preventDefault();
 
   try {
@@ -251,12 +259,7 @@ const handleUpdateSafetyTip = async (e) => {
     }
   }, [shouldFetchData]);
   
-  // Function to handle adding a new emergency facility
-  const handleAddEmergencyFacility = async () => {
-    // Code to add the new facility
-    // After successfully adding the facility, trigger data fetching
-    setShouldFetchData(true);
-  };
+ 
   
 
   useEffect(() => {
@@ -332,7 +335,10 @@ const handleUpdateSafetyTip = async (e) => {
             Go Back <AiOutlineArrowRight />
           </Link>
           <h2>{type} SafetyTip</h2>
-          <form onSubmit={type === 'add' ? handleAddSafetyTip : handleUpdateSafetyTip} encType="multipart/form-data">
+          <form onSubmit={type === 'add' ? addEmergencyFacility : updateEmergencyFacility} encType="multipart/form-data">
+          <div>
+                  <AiFillDelete onClick={deleteEmergencyFacility} />
+                </div>
             <div>
               <label>Title: </label>
               <input type="text" placeholder="name..." value={name} onChange={(e) =>setName(e.target.value)} />

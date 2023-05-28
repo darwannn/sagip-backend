@@ -75,8 +75,8 @@ const SafetyTips = () => {
     try {
       const options = { Authorization: `Bearer ${token}` };
       await request(`/safety-tips/saves/${safetyTipsId}`, 'PUT', options);
-      setFilteredSafetyTips((prevBlogs) =>
-        prevBlogs.map((safetyTip) =>
+      setFilteredSafetyTips((prevSafetyTip) =>
+        prevSafetyTip.map((safetyTip) =>
           safetyTip._id === safetyTipsId ? { ...safetyTip, isLiked: !safetyTip.isLiked } : safetyTip
         )
       );
@@ -133,7 +133,7 @@ const SafetyTips = () => {
               {filteredSafetyTips.map((safetyTip) => (
                 <div key={safetyTip._id} >
                   <Link to={`/safety-tips/${safetyTip._id}`}>
-                    <img src={`http://localhost:5000/images/${safetyTip.image}`} alt="Blog" style={{width:"300px"}}/>
+                    <img src={`http://localhost:5000/images/${safetyTip.image}`} alt="" style={{width:"300px"}}/>
                   </Link>
                   <div >
                     <div >
