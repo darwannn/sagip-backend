@@ -116,7 +116,9 @@ const data = await request("/emergency-facility/add", "POST", options, formData,
     const { success, message } = data;
     if (success) {
       toast.success(message);
-      navigate(`/emergency-facility/${data.safetyTip._id}`);
+      navigate(`/emergency-facility`);
+      setisModalShown(false);
+      handleAddEmergencyFacility();
     } else {
       if (message !== 'input error') {
         toast.error(message);
@@ -230,9 +232,9 @@ const handleUpdateSafetyTip = async (e) => {
     'evacuation area',
   ];
 
+  const [shouldFetchData, setShouldFetchData] = useState(true);
+
   useEffect(() => {
-
-
     const fetchEmergencyFacility = async () => {
       try {
         const data = await request('/emergency-facility/', 'GET');
@@ -242,9 +244,20 @@ const handleUpdateSafetyTip = async (e) => {
         console.error(error);
       }
     };
-    fetchEmergencyFacility();
-
-  }, []);
+  
+    if (shouldFetchData) {
+      fetchEmergencyFacility();
+      setShouldFetchData(false);
+    }
+  }, [shouldFetchData]);
+  
+  // Function to handle adding a new emergency facility
+  const handleAddEmergencyFacility = async () => {
+    // Code to add the new facility
+    // After successfully adding the facility, trigger data fetching
+    setShouldFetchData(true);
+  };
+  
 
   useEffect(() => {
     if (activeCategory === 'all') {
