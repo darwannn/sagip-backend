@@ -38,8 +38,12 @@ const Login = () => {
         else {
           if(message != "input error") {
             toast.error(message);
-          }  else {
-            // do input message error here
+            if (message.includes("attempts")) {
+              navigate('/login/contact-verification');
+            } 
+          } 
+          
+          else {
             toast.error(message);
           }
         }

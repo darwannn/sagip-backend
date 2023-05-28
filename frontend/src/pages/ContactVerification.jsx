@@ -30,17 +30,26 @@ const ContactVerification = ({type}) => {
       console.log(data);
       
       const { success, message } = data;
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
       if (success) {
         toast.success(message);
         // navigate('/');
-              dispatch(contactVerification(data));
-              if(type=="register") {
-        
-                navigate('/');
+        dispatch(contactVerification(data));
+        if(type=="register") {
+          
+          navigate('/login');
               } 
               if(type=="forgot-password") {
-        
+                
                 navigate('/new-password');
+              } 
+              console.log('====================================');
+              console.log(type);
+              console.log('====================================');
+              if(type=="login") {
+                navigate('/login');
               } 
 
       } else {

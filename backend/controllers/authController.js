@@ -257,6 +257,7 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
           if(user.status == "unverified") {
                       user.status = 'semi-verified';
           }
+          user.attempt = 0;
           user.verificationCode = 0;
           await user.save();
    
@@ -291,11 +292,26 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
             },
             token: generateToken(user._id)
           });
+          if(type == "login")
+          return res.status(200).json({
+            success: true,
+            message: "Verified successfully ",
+            user: {
+              for: "login",
+              id: user._doc._id,
+              userType: user._doc.userType
+            },
+            token: generateToken(user._id)
+          });
           
               
         } else {
           error['code'] = 'Incorrect code';
-      
+          user.attempt += 1
+          await user.save()
+          console.log('====================================');
+          console.log(user);
+          console.log('====================================');
         }
       }
     }
@@ -318,47 +334,50 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
   })
 
 
-authController.post('/login', async (req, res) => {
-  try {
+  authController.post('/login', async (req, res) => {
+    try {
       const error = {};
       const {
         identifier,
         password
       } = req.body
-    
-    
+  
       if (isEmpty(identifier)) error["identifier"] = 'Required field'
       if (isEmpty(password)) error["password"] = 'Required field'
-    
-    
+  
       let user = await checkIdentifier(identifier)
-    
+  
       if (!user) {
-        error['identifier'] = 'Accoutn does not exist'
+        error['identifier'] = 'Account does not exist'
       }
-
-    
-    
+  
       if (Object.keys(error).length == 0) {
-    
-        if (user && (await bcrypt.compare(password, user.password))) {
-    
-         /*  if (process.env.NODE_ENV === 'production') {
-           
-            return   res.status(200).json({
-              success:true,
-          message:"Login Succefully",
-        })
-          } else { */
-              
+        if (user.attempt >= 2) {
 
+          let generatedCode = await generateCode();
+          user.verificationCode = generatedCode;
+          await user.save();
+
+          return res.status(500).json({
+            success: false,
+            message: "Maximum login attempts exceeded.",
+            attempt: true,
+          });
+        } else {
+        if (user && (await bcrypt.compare(password, user.password))) {
           if (user.status == "banned") {
             return res.status(500).json({
-              success:false,
-              message:"Account banned. Please contact the CDRRMO",
+              success: false,
+              message: "Account banned. Please contact the CDRRMO",
             })
           } else {
-            
+            // Check if the user has exceeded the maximum number of attempts
+         
+  
+            // Reset the attempt number if the password is correct
+            user.attempt = 0;
+            await user.save();
+  
             return res.status(200).json({
               success: true,
               message: "Login Successfully",
@@ -369,46 +388,34 @@ authController.post('/login', async (req, res) => {
               },
               token: generateToken(user._id)
             });
-            
           }
-
-          
-          
-          
-          
-          
-          // return res.status(200).json({
-          //       success:true,
-          // message:"Login Succefully",
-          //     _id: user.id,
-          //     name: user.email,
-          //     verificationCode: user.verficationCode,
-          //     codeExpiration:user.codeExpiration,
-          //     token: generateToken(user._id),
-          //   })
-
-
-          
-         /*  } */
         } else {
-          error['password'] = 'Incorrect'
+          error['password'] = 'Incorrect';
+          console.log('====================================');
+          console.log(user.attempt);
+          console.log('====================================');
+          // Increment the attempt number if the password is incorrect
+          user.attempt++;
+          await user.save();
+  
+        
         }
       }
-    
+      }
+  
       if (Object.keys(error).length != 0) {
         error["success"] = false;
-        error["message"] = "input error";
-   
-        return res.status(500).json(error)
-        
+        error["message"] = "Input error";
+        return res.status(500).json(error);
       }
-  } catch (error) {
+    } catch (error) {
       return res.status(500).json({
-      success:false,
-      message:"Internal Server Error" + error,
-    })
-  }
-})
+        success: false,
+        message: "Internal Server Error" + error,
+      })
+    }
+  })
+  
 
 authController.post('/forgot-password', async (req, res) => {
   // Variable declaration
