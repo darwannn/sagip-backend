@@ -553,6 +553,113 @@ authController.post('/new-password', verifyToken,  async (req, res) => {
 });
 
 
+
+authController.put('/resend-code', verifyToken,  async (req, res) => {
+
+
+  try {
+
+      
+    const codeExpiration = new Date(currentDate.getTime() + 30 * 60000)
+      let generatedCode = await generateCode();
+   
+      const user = await User.findByIdAndUpdate(req.user.id, {
+        verificationCode: generatedCode,
+        codeExpiration: codeExpiration,
+      });
+
+
+      if (user) {
+      
+            console.log("Current COde: " +generatedCode);
+     
+        return res.status(200).json({
+          success: true,
+          message: "Verification code has been resent.",
+          user: {
+            for: "forgot-password",
+            id: user._doc._id,
+            code: user._doc.verificationCode,
+            userType: user._doc.userType
+          },
+          token: generateToken(user._id)
+        });
+      
+
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "DB Error",
+        });
+      }
+    
+
+
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
+authController.post('/new-password', verifyToken,  async (req, res) => {
+  // Variable declaration
+
+  try {
+    const error = {};
+  const password = req.body.password
+
+  // if (isEmpty(password)) {
+  //   error["password"] = 'Required field'
+  // } else {
+  //   if (verifyPassword(password)) {
+  //     error['password'] = 'password requirement did not match'
+  //   }
+  // }
+
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt)
+
+  if (Object.keys(error).length == 0) {
+
+    console.log(req.user);
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      verificationCode: 0,
+      password: hashedPassword
+    });
+    
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "Change Successfully. Login Now",
+        // user: {
+        //   for: "login",
+        //   id: user._doc._id,
+        //   userType: user._doc.userType
+        // },
+        //token: generateToken(user._id)
+      });
+    } else {
+      error['message'] = 'Database Error'
+    }
+
+  }
+
+  if (Object.keys(error).length != 0) {
+    console.log("error");
+    res.status(400).json(error)
+  }
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
+
+
 /* functions ---------------------------------------- */
 
 const generateCode = async () => {

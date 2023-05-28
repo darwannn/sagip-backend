@@ -48,12 +48,40 @@ const ContactVerification = ({type}) => {
           toast.error(message);
         } else {
           // handle input message error here
+          toast.error(message);
         }
       }
 
 
 
 
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleResendCode = async () => {
+    try {
+      const options = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      };
+
+      // Send request to resend verification code
+      const data = await request('/auth/resend-code', 'PUT', options);
+
+      const { success, message } = data;
+      if (success) {
+  
+      toast.success(message);
+
+      } else {
+          toast.error(message);
+     
+      
+        }
+      
+     
     } catch (error) {
       console.error(error);
     }
@@ -66,6 +94,11 @@ const ContactVerification = ({type}) => {
         <input type="number" placeholder="" onChange={(e) => setCode(e.target.value)} />
         <button type="submit">ContactVerification</button>
       </form>
+
+      {/* should be outside the form */}
+        <button onClick={handleResendCode} >
+            Resend Code
+          </button>
     </>
   );
 };
