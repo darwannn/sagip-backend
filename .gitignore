@@ -17,7 +17,7 @@
 #.run.cmd
 
 
-/backend/.pnp
+/backend .pnp
 /backend.pnp.js
 
 /backend/node_modules
