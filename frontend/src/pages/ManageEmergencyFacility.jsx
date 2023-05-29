@@ -64,6 +64,7 @@ const ManageEmergencyFacility = () => {
   const [image, setImage] = useState(null);
   const [imageName, setImageName] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [isFull, setIsFull] = useState(false);
 
   const [hasChanged, setHasChanged] = useState(false);
 
@@ -156,6 +157,7 @@ const ManageEmergencyFacility = () => {
             setName(data.name);
             setLatitude(data.latitude);
             setLongitude(data.longitude);
+            setIsFull(data.isFull);
             setCategory(data.category);
              setMarkerLatLng({ lat:data.latitude, lng:data.longitude });
             setImageUrl(`http://localhost:5000/images/${data.image}`);
@@ -200,6 +202,8 @@ const ManageEmergencyFacility = () => {
         url = '/emergency-facility/add';
         method = 'POST';
       } else if (type === 'update') {
+        formData.append('isFull', isFull);
+
         url = `/emergency-facility/update/${id}`;
         method = 'PUT';
       }
@@ -477,8 +481,17 @@ setLongitude(longitude)
                   /> */}
                 </div>
                 <div>
+                  {type == "update"&& 
+                     <div>
+                  <label>isFUll</label>
+                  <input type="checkbox" onChange={(e) => setIsFull(e.target.checked)} checked={isFull}/>
+                  </div>
+                  
+                  }
+                  
+                  
                   <label>Category: </label>
-                  <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <select value='is Full' onChange={(e) => setCategory(e.target.checked)}>
                     <option value="" hidden>
                       Select a category
                     </option>

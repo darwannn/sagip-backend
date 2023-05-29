@@ -97,7 +97,9 @@ function EmergencyFacility() {
     const { latLng } = event;
     const latitude = latLng.lat();
     const longitude = latLng.lng();
-  
+
+setLatitude(latitude)
+  setLongitude(longitude)
     setMarkerLatLng({ latitude, longitude });
     console.log(emergencyFacility);
 
@@ -107,8 +109,14 @@ function EmergencyFacility() {
     setImage(`http://localhost:5000/images/${emergencyFacility.image}`);
  
     setIsFull(emergencyFacility.isFull);
-
+   
   }
+
+
+  
+  
+
+
   
   async function calculateRoute() {
     if (originRef.current.value === '' || destiantionRef.current.value === '') {
@@ -130,13 +138,9 @@ function EmergencyFacility() {
     console.log(results);
   }
 
-  function clearRoute() {
-    setDirectionsResponse(null)
-    setDistance('')
-    setDuration('')
-    originRef.current.value = ''
-    destiantionRef.current.value = ''
-  }
+
+
+
 
   function getCurrentLocation() {
     if (navigator.geolocation) {
@@ -151,8 +155,8 @@ function EmergencyFacility() {
        console.log(latitude);
        console.log(longitude);
       // Fly to marker location with animation
-    map.panTo({ lat:latitude, lng:longitude  });
-  
+ /*    map.panTo({ lat:latitude, lng:longitude  }); */
+ originRef.current.value = `${latitude},${longitude} `
         },
         error => {
           console.log('Error getting current location:', error);
@@ -196,9 +200,95 @@ function EmergencyFacility() {
           category: {category}
           name: {name}
           <br />
-          isFull: {isFull}
+        { isFull&& "Full"}
           <img src={image} alt="" height={"100px"} />
+          <div
+        style={{
+          padding: 16,
+          borderRadius: 'lg',
+          margin: 16,
+          backgroundColor: 'white',
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+          minWidth: 'container.md',
+          zIndex: 1,
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <Autocomplete
+            bounds={bounds}
+            restrictions={restrictions}
+            options={{
+              strictBounds: true,
+            }}
+          >
+            <input type='text' placeholder='Origin' ref={originRef} />
+          </Autocomplete>
+          <Autocomplete
+            bounds={bounds}
+            restrictions={restrictions}
+            options={{
+              strictBounds: true,
+            }}
+          >
+            <input
+              type='text'
+              placeholder='Destination'
+              ref={destiantionRef}
+            />
+          </Autocomplete>
+
+          <div>
+            <button style={{ backgroundColor: 'pink', color: 'white', padding: '8px 16px' }} type='submit' onClick={calculateRoute}>
+              Calculate Route
+            </button>
+            <button  onClick={()=>  destiantionRef.current.value = `${latitude}, ${longitude} `}>
+              Show Direction
+            </button>
+         
+            <button style={{ marginLeft: 8 }} onClick={getCurrentLocation}>
+              Get Current Location
+            </button>
+          </div>
         </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <div>Distance: {distance}</div>
+          <div>Duration: {duration}</div>
+          <button
+            style={{ borderRadius: '50%', width: 32, height: 32, backgroundColor: 'lightblue' }}
+            onClick={() => {
+              map.panTo(center)
+              map.setZoom(15)
+            }}
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='2'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+            >
+              <path d='M21 12H3M21 12L15 16M21 12L15 8'></path>
+            </svg>
+          </button>
+        </div>
+
+        {/* Display the steps */}
+        <div>
+          {steps.map((step, index) => (
+            <div key={index}>
+              <div >{step.duration.text}</div>
+              <div>{step.distance.text}</div>
+              <div dangerouslySetInnerHTML={{ __html: step.instructions }} onClick={()=> {map.panTo({lat:step.end_location.toJSON().lat, lng:step.end_location.toJSON().lng}); console.log();}}/>
+              <br></br>
+            </div>
+          ))}
+        </div>
+      </div>
+        </div>
+
+        
       )}
 
       <div style={{  height: '50%', width: '100%' }}>
@@ -245,89 +335,7 @@ function EmergencyFacility() {
           )}
         </GoogleMap>
       </div>
-      <div
-        style={{
-          padding: 16,
-          borderRadius: 'lg',
-          margin: 16,
-          backgroundColor: 'white',
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-          minWidth: 'container.md',
-          zIndex: 1,
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <Autocomplete
-            bounds={bounds}
-            restrictions={restrictions}
-            options={{
-              strictBounds: true,
-            }}
-          >
-            <input type='text' placeholder='Origin' ref={originRef} />
-          </Autocomplete>
-          <Autocomplete
-            bounds={bounds}
-            restrictions={restrictions}
-            options={{
-              strictBounds: true,
-            }}
-          >
-            <input
-              type='text'
-              placeholder='Destination'
-              ref={destiantionRef}
-            />
-          </Autocomplete>
-
-          <div>
-            <button style={{ backgroundColor: 'pink', color: 'white', padding: '8px 16px' }} type='submit' onClick={calculateRoute}>
-              Calculate Route
-            </button>
-            <button style={{ marginLeft: 8 }} onClick={clearRoute}>
-              Clear Route
-            </button>
-            <button style={{ marginLeft: 8 }} onClick={getCurrentLocation}>
-              Get Current Location
-            </button>
-          </div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>Distance: {distance}</div>
-          <div>Duration: {duration}</div>
-          <button
-            style={{ borderRadius: '50%', width: 32, height: 32, backgroundColor: 'lightblue' }}
-            onClick={() => {
-              map.panTo(center)
-              map.setZoom(15)
-            }}
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-            >
-              <path d='M21 12H3M21 12L15 16M21 12L15 8'></path>
-            </svg>
-          </button>
-        </div>
-
-        {/* Display the steps */}
-        <div>
-          {steps.map((step, index) => (
-            <div key={index}>
-              <div >{step.duration.text}</div>
-              <div>{step.distance.text}</div>
-              <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
-              <br></br>
-            </div>
-          ))}
-        </div>
-      </div>
+      
     </div>
   )
 }

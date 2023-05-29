@@ -114,7 +114,8 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
       longitude,
       image,
       category,
-      hasChanged
+      hasChanged,
+      isFull
       } = req.body;
 
     if (isEmpty(name)) error["name"] = 'Required field';
@@ -140,7 +141,7 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
     if (Object.keys(error).length === 0) {
       const updateFields = { name, latitude,
         longitude,
-        category };
+        category, isFull };
       let imagePath = '';
 
       if (hasChanged && req.file) {
