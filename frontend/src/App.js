@@ -1,58 +1,67 @@
 import './App.css';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import ManageSafetyTips from './pages/ManageSafetyTips';
-import Home from './pages/Home';
-import SavedSafetyTips from './pages/SavedSafetyTips';
-import Error from './pages/Error';
-import ForgotPassword from './pages/ForgotPassword';
-import Login from './pages/Login';
-import ContactVerification from './pages/ContactVerification';
-import Register from './pages/Register';
-import SafetyTipInput from './pages/SafetyTipInput';
-import SafetyTipDetails from './pages/SafetyTipDetails';
-import { useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
+import { Routes, Route, Navigate, useLocation,useNavigate } from 'react-router-dom';
+import jwtDecode from 'jwt-decode';
+import { logout } from './redux/authSlice'; 
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import NewPassword from './pages/NewPassword';
-import SendAlert from './pages/SendAlert';
-import jwtDecode from 'jwt-decode';
-import { logout } from './redux/authSlice'; // Assuming the logout action is defined in authSlice
 
-import ManageEmergencyFacility from './pages/ManageEmergencyFacility';
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux';
+
+
+import Home from './pages/Home';
+import Error from './pages/Error';
+
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import NewPassword from './pages/NewPassword';
+import ContactVerification from './pages/ContactVerification';
+
+import SafetyTips from './pages/SafetyTips';
+import SavedSafetyTips from './pages/SavedSafetyTips';
+import SafetyTipDetails from './pages/SafetyTipDetails';
+
+import ManageSafetyTips from './pages/ManageSafetyTips';
+import SafetyTipInput from './pages/SafetyTipInput';
+
 import EmergencyFacility from './pages/EmergencyFacility';
+import ManageEmergencyFacility from './pages/ManageEmergencyFacility';
+
+import SendAlert from './pages/SendAlert';
+
 
 const App = () => {
+
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const location = useLocation();
+
   console.log('User:', user);
   console.log('TokenA:', token);
 
-  const checkTokenExpiration = () => {
-    if (token) {
-      // Decode the JWT token to extract the expiration time
-      const decodedToken = jwtDecode(token);
-      const currentTime = Math.floor(Date.now() / 1000);
-
-      
-      if (decodedToken.exp < currentTime) {
-        console.log('====================================');
-        console.log("expired");
-        console.log('====================================');
-       /*  dispatch(logout());
-        Navigate("/login"); */
-      } else {
-        console.log('====================================');
-        console.log("not expired");
-        console.log('====================================');
-      }
-    }
-  };
 
   useEffect(() => {
     checkTokenExpiration();
   }, [token]);
+
+  const checkTokenExpiration = () => {
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      if (decodedToken.exp < currentTime) {
+        console.log("expired");
+        dispatch(logout());
+        navigate(`/login`);
+      } else {
+        console.log("not expired");
+      }
+    }
+  };
+
 
   return (
     <div>
@@ -96,6 +105,8 @@ const App = () => {
         <Route path="/new-password" element={<NewPassword />} />
 
         <Route path="/send-alert" element={<SendAlert />} />
+
+        <Route path="/safety-tips" element={<SafetyTips />} />
 
         <Route path="/manage/safety-tips" element={<ManageSafetyTips />} />
 
@@ -176,7 +187,7 @@ const App = () => {
 
 
 
-
+      {/* if no route path found*/}
         {location.pathname !== "/" && (
           <Route path="*" element={<Error />} />
         )}

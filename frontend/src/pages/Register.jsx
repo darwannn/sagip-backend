@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+
+import { useState } from 'react';
+
 import { Link, useNavigate } from 'react-router-dom';
-import { request } from '../utils/axios';
+
 import { register } from '../redux/authSlice';
 import { useDispatch } from 'react-redux';
-/* import classes from './register.module.css'; */
 
-import { toast, ToastContainer } from 'react-toastify';
+import { request } from '../utils/axios';
+
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+
 const Register = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,8 +31,6 @@ const Register = () => {
   const [birthdate, setBirthdate] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -55,14 +59,12 @@ const Register = () => {
         contactNumber,
       });
       
-      
       const { success, message } = data;
       if(success) {
         dispatch(register(data));
         toast.success(message);
-        
         navigate('/register/contact-verification');  
-     return; // Add this return statement to exit the function and prevent further execution
+     return; 
     }
     else {
       if(message != "input error") {
@@ -80,7 +82,6 @@ const Register = () => {
       <div >
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
-     
           <input
             type="email"
             placeholder="Email..."

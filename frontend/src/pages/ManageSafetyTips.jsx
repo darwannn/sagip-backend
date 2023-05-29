@@ -1,33 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { request } from '../utils/axios';
-import { format } from 'timeago.js';
-import { Link } from 'react-router-dom';
+
+import { Link,useNavigate,useParams } from 'react-router-dom';
+
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+
+import { request } from '../utils/axios';
+import { safetyTipsCategory } from '../utils/categories';
+
+import { toast } from 'react-toastify';
+import moment from 'moment';
 import DataTable from 'react-data-table-component';
-import Navbar from '../components/Navbar';
+
 import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai';
 import { FiArrowRight } from 'react-icons/fi';
-import moment from 'moment';
-import { toast } from 'react-toastify';
+
+import Navbar from '../components/Navbar';
+
 const SafetyTips = () => {
-  const [safetyTips, setSafetyTips] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const { user, token } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
+  
   const { id } = useParams();
-  const categories = [
-    'all',
-    'nature',
-    'music',
-    'travel',
-    'design',
-    'programming',
-    'fun',
-    'fashion',
-  ];
+  const navigate = useNavigate();
+
+  const {  token } = useSelector((state) => state.auth);
+  
+  const [safetyTips, setSafetyTips] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(safetyTipsCategory[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   useEffect(() => {
     const fetchSafetyTips = async () => {
@@ -40,17 +39,22 @@ const SafetyTips = () => {
     };
     fetchSafetyTips();
   }, [safetyTips]);
-    // delete
+  
+  const filteredSafetyTips = safetyTips.filter((safetyTip) => {
+    const categoryMatch =
+      activeCategory === safetyTipsCategory[0] || safetyTip.category.toLowerCase() === activeCategory.toLowerCase();
+    const searchMatch = safetyTip.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return categoryMatch && searchMatch;
+  });
+
     const handleDeleteBlog = async (id) => {
       try {
         const options = { "Authorization": `Bearer ${token}` };
         const data = await request(`/safety-tips/delete/${id}`, "DELETE", options);
         const updatedSafetyTips = safetyTips.filter((tip) => tip._id !== id);
-    setSafetyTips(updatedSafetyTips);
+      setSafetyTips(updatedSafetyTips);
         const { message } = data;
-        console.log('====================================');
-        console.log(data);
-        console.log('====================================');
         toast.success(message);
         navigate(`/manage/safety-tips`);
       } catch (error) {
@@ -58,16 +62,6 @@ const SafetyTips = () => {
       }
     };
     
-  
-
-  const filteredSafetyTips = safetyTips.filter((safetyTip) => {
-    const categoryMatch =
-      activeCategory === 'all' || safetyTip.category.toLowerCase() === activeCategory.toLowerCase();
-    const searchMatch = safetyTip.title.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return categoryMatch && searchMatch;
-  });
-
   const columns = [
     {
       name: 'Image',
@@ -103,26 +97,12 @@ const SafetyTips = () => {
                 <AiFillDelete onClick={() => handleDeleteBlog(row._id)} />
                 </div>
                 <>
-               
               </>
               </div>
         </>
       ),
     },
   ];
-
-  const customNoDataComponent = () => (
-    <div style={{ textAlign: 'center' }}>
-      <DataTable
-        columns={columns}
-        data={[]}
-        noHeader
-        pagination
-        paginationPerPage={10}
-        paginationRowsPerPageOptions={[10, 20, 30]}
-      />
-    </div>
-  );
 
   return (
     <>
@@ -145,7 +125,7 @@ const SafetyTips = () => {
           onChange={(e) => setActiveCategory(e.target.value)}
           style={{ margin: '10px' }}
         >
-          {categories.map((category) => (
+          {safetyTipsCategory.map((category) => (
             <option key={category} value={category}>
               {category}
             </option>
@@ -153,7 +133,6 @@ const SafetyTips = () => {
         </select>
       </div>
       <div>
-        {filteredSafetyTips.length > 0 ? (
           <DataTable
             columns={columns}
             data={filteredSafetyTips}
@@ -161,9 +140,6 @@ const SafetyTips = () => {
             paginationPerPage={10}
             paginationRowsPerPageOptions={[10, 20, 30]}
           />
-        ) : (
-          customNoDataComponent()
-        )}
       </div>
     </>
   );

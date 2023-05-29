@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { request } from '../utils/axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
+import React, { useState } from 'react';
+
+import { useNavigate } from 'react-router-dom';
+
+import { useDispatch, useSelector } from 'react-redux';
 import { newPassword } from '../redux/authSlice'
 
-const NewPassword = () => {
-  const [password, setPassword] = useState('');
 
+import { request } from '../utils/axios';
+
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+const NewPassword = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const { token } = useSelector((state) => state.auth);
+  const [password, setPassword] = useState('');
 
   const handleNewPassword = async (e) => {
     e.preventDefault();
-
     try {
-
-
-     
       const options = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
@@ -32,10 +34,7 @@ const NewPassword = () => {
       const { success, message } = data;
       if (success) {
         toast.success(message);
-        // navigate('/');
               dispatch(newPassword(data));
-    
-    
                 navigate('/login');
       } else {
         if (message !== 'input error') {
@@ -44,10 +43,6 @@ const NewPassword = () => {
           // handle input message error here
         }
       }
-
-
-
-
     } catch (error) {
       console.error(error);
     }

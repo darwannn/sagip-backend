@@ -1,34 +1,26 @@
-import React from 'react';
-import { useEffect } from 'react';
-import { useState } from 'react';
-import { request } from '../utils/axios';
-import { format } from 'timeago.js';
+
+import { useEffect,useState } from 'react';
+
 import { Link } from 'react-router-dom';
+
 import { useSelector } from 'react-redux'
+
+import { request } from '../utils/axios';
+import { safetyTipsCategory } from '../utils/categories';
 
 import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
 import { FiArrowRight } from 'react-icons/fi';
-import Navbar from '../components/Navbar'
-const SafetyTips = () => {
-  const [safetyTips, setSafetyTips] = useState([]);
-  const [filteredSafetyTips, setFilteredSafetyTips] = useState([]);
-  const [activeCategory, setActiveCategory] = useState('all');
 
+import Navbar from '../components/Navbar'
+
+const SafetyTips = () => {
   const { user, token } = useSelector((state) => state.auth);
 
+  const [safetyTips, setSafetyTips] = useState([]);
+  const [filteredSafetyTips, setFilteredSafetyTips] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(safetyTipsCategory[0]);
   const [searchQuery, setSearchQuery] = useState('');
 
-
-  const categories = [
-    'all',
-    'nature',
-    'music',
-    'travel',
-    'design',
-    'programming',
-    'fun',
-    'fashion',
-  ];
 
   useEffect(() => {
     const fetchSafetyTips = async () => {
@@ -36,7 +28,7 @@ const SafetyTips = () => {
         const data = await request('/safety-tips/', 'GET');
         const savedSafetyTips = data.map((safetyTip) => ({
           ...safetyTip,
-          isLiked: safetyTip.saves.includes(user.id),
+          isSaved: safetyTip.saves.includes(user.id),
         }));
         setSafetyTips(savedSafetyTips);
         setFilteredSafetyTips(savedSafetyTips);
@@ -47,37 +39,13 @@ const SafetyTips = () => {
     fetchSafetyTips();
   }, []);
 
-/*   useEffect(() => {
-
-    
-    if (activeCategory === 'all') {
-      setFilteredSafetyTips(
-        safetyTips.map((safetyTip) => ({
-          ...safetyTip,
-          isLiked: safetyTip.saves.includes(user.id),
-        }))
-      );
-    } else {
-      setFilteredSafetyTips((prev) => {
-        const filteredSafetyTips = safetyTips.filter(
-          (safetyTip) => safetyTip.category.toLowerCase() === activeCategory.toLowerCase()
-        );
-
-        return filteredSafetyTips.map((safetyTip) => ({
-          ...safetyTip,
-          isLiked: safetyTip.saves.includes(user.id),
-        }));
-      });
-    }
-  }, [activeCategory, safetyTips, user.id]); */
-
   const handleSavedSafetyTips = async (safetyTipsId) => {
     try {
       const options = { Authorization: `Bearer ${token}` };
       await request(`/safety-tips/saves/${safetyTipsId}`, 'PUT', options);
       setFilteredSafetyTips((prevSafetyTip) =>
         prevSafetyTip.map((safetyTip) =>
-          safetyTip._id === safetyTipsId ? { ...safetyTip, isLiked: !safetyTip.isLiked } : safetyTip
+          safetyTip._id === safetyTipsId ? { ...safetyTip, isSaved: !safetyTip.isSaved } : safetyTip
         )
       );
     } catch (error) {
@@ -86,7 +54,7 @@ const SafetyTips = () => {
   };
 
   useEffect(() => {
-    if (activeCategory === 'all') {
+    if (activeCategory === safetyTipsCategory[0]) {
       setFilteredSafetyTips(safetyTips.filter((safetyTip) =>
         safetyTip.title.toLowerCase().includes(searchQuery.toLowerCase())
       ));
@@ -119,7 +87,7 @@ const SafetyTips = () => {
         </div>
         <div >
           <div >
-            {categories.map((category) => (
+            {safetyTipsCategory.map((category) => (
               <span style={{margin:"10px"}}
                 key={category}
                 onClick={() => setActiveCategory(category)}
@@ -147,7 +115,7 @@ const SafetyTips = () => {
                     <Link to={`/manage/safety-tips/${safetyTip._id}`} >
                       Read More <FiArrowRight />
                     </Link>
-                    {safetyTip.isLiked ? (
+                    {safetyTip.isSaved ? (
                       <div >
                         <AiFillLike onClick={() => handleSavedSafetyTips(safetyTip._id)} />
                       </div>

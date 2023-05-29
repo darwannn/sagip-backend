@@ -1,19 +1,24 @@
-import React from 'react'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import { request } from '../utils/axios'
 
-import {useDispatch} from 'react-redux'
-import { login } from '../redux/authSlice'
+import { useState } from 'react'
 
-import { toast, ToastContainer } from 'react-toastify';
+import { Link, useNavigate } from 'react-router-dom'
+
+import { login } from '../redux/authSlice'
+import {useDispatch} from 'react-redux'
+
+
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState("")
-  const [password, setPassword] = useState("")
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
+
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword] = useState("")
+  
 
   const handleLogin = async(e) => {
     e.preventDefault()

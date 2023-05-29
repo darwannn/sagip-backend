@@ -1,21 +1,25 @@
-import React from 'react';
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+import { useParams,useNavigate, Link } from 'react-router-dom';
+
 import { useSelector } from 'react-redux';
-import { useEffect } from 'react';
+
 import { request } from '../utils/axios';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+
 import { format } from 'timeago.js';
+
 import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai';
-import { toast } from 'react-toastify';
+
+import Navbar from '../components/Navbar';
+
 
 const SafetyTipDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, token } = useSelector((state) => state.auth);
+
   const [safetyTipDetails, setSafetyTipDetails] = useState("");
   const [isSaved, setIsSaved] = useState(false);
-  const { id } = useParams();
-  const { user, token } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSafetyTipDetails = async () => {
@@ -24,7 +28,7 @@ const SafetyTipDetails = () => {
         const data = await request(`/safety-tips/${id}`, 'GET', options);
        
   if(data.message != "not found") { 
-
+console.log(data);
           setSafetyTipDetails(data);
         setIsSaved(data.saves.includes(user.id));
 
@@ -32,16 +36,9 @@ const SafetyTipDetails = () => {
           navigate(`/manage/safety-tips`);
         }
 
-
-
-
       } catch (error) {
         console.error(error);
       }
-
-
-
-
     };
     fetchSafetyTipDetails();
   }, [id]);
@@ -57,7 +54,6 @@ const SafetyTipDetails = () => {
     }
   };
 
-
   return (
     <>
       <Navbar />
@@ -66,10 +62,10 @@ const SafetyTipDetails = () => {
           Go Back <AiOutlineArrowRight />
         </Link>
         <div>
-          <img src={`http://localhost:5000/images/${safetyTipDetails?.image}`} style={{ width: "300px" }} />
+          <img src={`http://localhost:5000/images/${safetyTipDetails.image}`} style={{ width: "300px" }} />
           <div>
-            <h3>{safetyTipDetails?.title}</h3>
-            {safetyTipDetails?.userId?._id === user.id ? (
+            <h3>{safetyTipDetails.title}</h3>
+            {safetyTipDetails.userId?._id === user.id ? (
               <div> {isSaved ? (
                 <div>
                   <AiFillLike onClick={handleSavedSafetyTip} />
@@ -97,19 +93,18 @@ const SafetyTipDetails = () => {
           <div>
             <p>
               <span>contentription: </span>
-              <span dangerouslySetInnerHTML={{ __html: safetyTipDetails?.content }} />
+              <span dangerouslySetInnerHTML={{ __html: safetyTipDetails.content }} />
             </p>
             <div>
-              <span>{safetyTipDetails?.views} views</span>
-              <span>{safetyTipDetails?.saves?.length} saves</span>
+              <span>{safetyTipDetails.views} views</span>
             </div>
           </div>
           <div>
             <span>
-              {/* <span>Author:</span> {safetyTipDetails?.userId?.username} */}
+    
             </span>
             <span>
-              <span>Created At:</span> {format(safetyTipDetails?.createdAt)}
+              <span>Created At:</span> {format(safetyTipDetails.createdAt)}
             </span>
           </div>
         </div>

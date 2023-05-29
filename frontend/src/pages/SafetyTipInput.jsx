@@ -1,95 +1,39 @@
-import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+
+import { Link, useParams, useNavigate } from 'react-router-dom';
+
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { AiOutlineCloseCircle, AiOutlineArrowRight } from 'react-icons/ai';
+
+import { request } from '../utils/axios';
+import { safetyTipsCategory } from '../utils/categories';
+
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+
+import { AiOutlineCloseCircle, AiOutlineArrowRight } from 'react-icons/ai';
+
 import Navbar from '../components/Navbar';
-import { request } from '../utils/axios';
 
 const SafetyTipInput = ({ type }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [image, setImage] = useState(null);
-  const [imageName, setImageName] = useState('');
-  const [hasChanged, setHasChanged] = useState(false);
-  const [category, setCategory] = useState('');
+  const { id } = useParams();
+
   const navigate = useNavigate();
-  const [imageUrl, setImageUrl] = useState('');
+
   const { token } = useSelector((state) => state.auth);
 
-  const categories = [
-    'nature',
-    'music',
-    'travel',
-    'design',
-    'programming',
-    'fun',
-    'fashion',
-  ];
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [category, setCategory] = useState('');
 
-  const onChangeFile = (e) => {
-    setImage(e.target.files[0]);
-    setImageName(e.target.files[0].name);
-    setHasChanged(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImageUrl(reader.result);
-    };
-    reader.readAsDataURL(e.target.files[0]);
-  };
+  const [image, setImage] = useState(null);
+  const [imageName, setImageName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
 
-  const handleCloseImage = () => {
-    setImage(null);
-    setImageName('');
-    setImageUrl('');
-  };
-
-
-  const handleAddSafetyTip = async (e) => {
-    e.preventDefault();
-
-    try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', content);
-      formData.append('category', category);
-      formData.append('hasChanged', hasChanged);
-   
-        formData.append('image', image);
-   
-        const options = {
-          Authorization: `Bearer ${token}`,
-        };
-
-      
-const data = await request("/safety-tips/add", "POST", options, formData, true);
-/* 
-      const data = await request('/safety-tips/add', 'POST', options, formData); */
-      console.log(data);
-
-
-      const { success, message } = data;
-      if (success) {
-        toast.success(message);
-        navigate(`/manage/safety-tips/${data.safetyTip._id}`);
-      } else {
-        if (message !== 'input error') {
-          toast.error(message);
-        } else {
-          toast.error(message);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const { id } = useParams();
+  const [hasChanged, setHasChanged] = useState(false);
+  
 
   useEffect(() => {
     if (type === 'update') {
@@ -114,46 +58,63 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
     }
   }, [id, type, setTitle, setContent, setCategory, token]);
 
-  const handleUpdateSafetyTip = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-    
       const formData = new FormData();
       formData.append('title', title);
       formData.append('content', content);
       formData.append('category', category);
       formData.append('hasChanged', hasChanged);
-   
-        formData.append('image', image);
-   
-        const options = {
-          Authorization: `Bearer ${token}`,
-        };
+      formData.append('image', image);
 
-      
-        const data = await request(`/safety-tips/update/${id}`, "PUT", options, formData,true);
+      const options = {
+        Authorization: `Bearer ${token}`,
+      };
 
-/* 
-      const data = await request('/safety-tips/add', 'POST', options, formData); */
+      let url, method;
+      if (type === 'add') {
+        url = '/safety-tips/add';
+        method = 'POST';
+      } else if (type === 'update') {
+        url = `/safety-tips/update/${id}`;
+        method = 'PUT';
+      }
+
+      const data = await request(url, method, options, formData, true);
       console.log(data);
-
-
 
       const { success, message } = data;
       if (success) {
         toast.success(message);
-      /*   navigate(`/manage/safety-tips/${id}`); */
+        navigate(`/manage/safety-tips/${type === 'add' ? data.safetyTip._id : id}`);
       } else {
         if (message !== 'input error') {
           toast.error(message);
         } else {
-        
+          toast.error(message);
         }
       }
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const onChangeFile = (e) => {
+    setImage(e.target.files[0]);
+    setImageName(e.target.files[0].name);
+    setHasChanged(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageUrl(reader.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
+
+  const handleCloseImage = () => {
+    setImage(null);
+    setImageName('');
+    setImageUrl('');
   };
 
   return (
@@ -164,8 +125,8 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
           <Link to="/manage/safety-tips">
             Go Back <AiOutlineArrowRight />
           </Link>
-          <h2>{type} SafetyTip</h2>
-          <form onSubmit={type === 'add' ? handleAddSafetyTip : handleUpdateSafetyTip} encType="multipart/form-data">
+          <h2>{type === 'add' ? 'Add' : 'Update'} Safety Tip</h2>
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div>
               <label>Title: </label>
               <input type="text" placeholder="Title..." value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -177,12 +138,16 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
             <div>
               <label>Category: </label>
               <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+  <option value="" hidden>
+    Select a category
+  </option>
+  {safetyTipsCategory.slice(1).map((category) => (
+    <option key={category} value={category}>
+      {category}
+    </option>
+  ))}
+</select>
+
             </div>
             <div>
               <label htmlFor="image">
@@ -194,13 +159,10 @@ const data = await request("/safety-tips/add", "POST", options, formData, true);
                   {imageName} <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
                 </p>
               )}
-
-{imageUrl && (
-  <img src={imageUrl} alt="Selected" />
-)}
+              {imageUrl && <img src={imageUrl} alt="Selected" />}
             </div>
             <div>
-              <button type="submit">Submit form</button>
+              <button type="submit">Submit</button>
             </div>
           </form>
         </div>

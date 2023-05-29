@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { request } from '../utils/axios';
+
+import { useEffect, useState } from 'react';
 function Home() {
   const [signal, setSignal] = useState(null);
   const [weather, setWeather] = useState(null);
@@ -15,13 +16,12 @@ function Home() {
         console.error('Error fetching data:', error);
       }
     };
-
     fetchData();
   }, []);
 
   return (
     <>
-    <div>Signal NUmber in Malolos <br></br>
+    <div>Malolos Signal NUmber <br></br>
       {signal && <div>{signal}</div>}
     </div>
 

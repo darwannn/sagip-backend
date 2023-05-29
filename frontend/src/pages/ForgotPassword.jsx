@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { request } from '../utils/axios';
-import { useDispatch, useSelector } from 'react-redux';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+import { useState } from 'react';
+
+import { useNavigate } from 'react-router-dom';
 
 import { forgotPassword } from '../redux/authSlice'
+import { useDispatch } from 'react-redux';
+
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const ForgotPassword = () => {
-    const [identifier, setIdentifier] = useState("")
   
     const dispatch = useDispatch()
     const navigate = useNavigate()
+
+    const [identifier, setIdentifier] = useState("")
   
     const handleLogin = async(e) => {
       e.preventDefault()
@@ -47,7 +53,7 @@ const ForgotPassword = () => {
   
     return (
       <>
-          <h2>Login</h2>
+          <h2>Forgot Pass</h2>
           <form onSubmit={handleLogin}>
             <input type="text" placeholder='Ident...' value={identifier} onChange={(e) => setIdentifier(e.target.value)} />
             <button type="submit">Forgot Pass</button>
