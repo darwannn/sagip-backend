@@ -1,11 +1,21 @@
+import { useEffect, useState,useRef } from 'react';
+
+import { useParams, useNavigate, Link } from 'react-router-dom';
+
+import { useSelector } from 'react-redux';
+
+import { request } from '../utils/axios';
+import { emergencyFacilityCategory } from '../utils/categories';
+
+import { toast } from 'react-toastify';
 import {
   useJsApiLoader,
   GoogleMap,
   Marker,
   Autocomplete,
   DirectionsRenderer,
+  StandaloneSearchBox
 } from '@react-google-maps/api'
-import { useRef, useState } from 'react'
 
 
 const center = { lat: 14.8448, lng: 120.8103 }
@@ -26,6 +36,44 @@ function EmergencyFacility() {
     libraries: ['places'],
   })
 
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth);
+
+  const [name, setName] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [category, setCategory] = useState('');
+  const [image, setImage] = useState('');
+  const [isFull, setIsFull] = useState('');
+ 
+
+  
+  const [emergencyFacility, setEmergencyFacility] = useState([]);
+  const [filteredEmergencyFacility, setFilteredEmergencyFacility] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(emergencyFacilityCategory[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [shouldFetchData, setShouldFetchData] = useState(true);
+
+  useEffect(() => {
+    const fetchEmergencyFacility = async () => {
+      try {
+        const data = await request('/emergency-facility/', 'GET');
+        setEmergencyFacility(data);
+        setFilteredEmergencyFacility(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (shouldFetchData) {
+      fetchEmergencyFacility();
+      setShouldFetchData(false);
+    }
+  }, [shouldFetchData]);
+
+/* ------------------- */
+
   const [map, setMap] = useState(/** @type google.maps.Map */ (null))
   const [directionsResponse, setDirectionsResponse] = useState(null)
   const [distance, setDistance] = useState('')
@@ -33,6 +81,8 @@ function EmergencyFacility() {
   const [steps, setSteps] = useState([])
   const [markerLatLng, setMarkerLatLng] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+
+  
 
   /** @type React.MutableRefObject<HTMLInputElement> */
   const originRef = useRef()
@@ -43,12 +93,21 @@ function EmergencyFacility() {
     return "<SkeletonText />"
   }
 
-  function handleMarkerClick(event) {
+  function handleMarkerClick(event, emergencyFacility) {
     const { latLng } = event;
     const latitude = latLng.lat();
     const longitude = latLng.lng();
   
     setMarkerLatLng({ latitude, longitude });
+    console.log(emergencyFacility);
+
+    setName(emergencyFacility.name);
+
+    setCategory(emergencyFacility.category);
+    setImage(`http://localhost:5000/images/${emergencyFacility.image}`);
+ 
+    setIsFull(emergencyFacility.isFull);
+
   }
   
   async function calculateRoute() {
@@ -128,9 +187,17 @@ function EmergencyFacility() {
       {/* Display the marker's latitude and longitude */}
       {markerLatLng && (
         <div>
-          Latitude: {markerLatLng.latitude}
+
           <br />
           Longitude: {markerLatLng.longitude}
+          Latitude: {markerLatLng.latitude}
+         
+          <br />
+          category: {category}
+          name: {name}
+          <br />
+          isFull: {isFull}
+          <img src={image} alt="" height={"100px"} />
         </div>
       )}
 
@@ -163,9 +230,15 @@ function EmergencyFacility() {
           }}
           onLoad={map => setMap(map)}
         >
-
-{userLocation&& <Marker position={userLocation} onClick={(marker) => handleMarkerClick(marker)} />}
+{userLocation&& <Marker position={userLocation} />}
         {/*   <Marker position={center} onClick={(marker) => handleMarkerClick(marker)} /> */}
+<div>
+          {filteredEmergencyFacility.map((emergencyFacility) => (
+       
+                 <Marker position={{ lat: emergencyFacility.latitude, lng: emergencyFacility.longitude}} onClick={(marker) => handleMarkerClick(marker,emergencyFacility)} />
+             
+          ))}
+        </div>
 
           {directionsResponse && (
             <DirectionsRenderer directions={directionsResponse} />

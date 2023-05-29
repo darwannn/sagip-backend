@@ -14,6 +14,7 @@ import {
   Marker,
   Autocomplete,
   DirectionsRenderer,
+  StandaloneSearchBox
 } from '@react-google-maps/api'
 
 import {
@@ -21,8 +22,9 @@ import {
   AiOutlineArrowRight,
   AiOutlineCloseCircle,
 } from 'react-icons/ai';
-
 import Navbar from '../components/Navbar';
+
+const libraries = ['places'];
 const center = { lat: 14.8448, lng: 120.8103 }
 const bounds = {
   north: 14.881784,  
@@ -34,6 +36,9 @@ const bounds = {
 const restrictions = {
   country: 'ph',
 }
+
+
+
 const ManageEmergencyFacility = () => {
 
 
@@ -66,11 +71,33 @@ const ManageEmergencyFacility = () => {
   const mapAPI = process.env.REACT_APP_MAP_API;
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: mapAPI,
-    libraries: ['places'],
+    libraries,
   })
 
   const [map, setMap] = useState(/** @type google.maps.Map */ (null))
   const [markerLatLng, setMarkerLatLng] = useState(null);
+  const [searchBox, setSearchBox] = useState(null);
+  const mapRef = useRef(null);
+
+  const onPlacesChanged = () => {
+    const places = searchBox.getPlaces();
+    if (places.length === 0) return;
+
+    const { geometry } = places[0];
+    const { location } = geometry;
+    const { lat, lng } = location;
+
+    if (mapRef.current) {
+      const map = mapRef.current;
+      const center = new  window.google.maps.LatLng(lat(), lng());
+      map.panTo(center);
+    }
+  };
+
+  const onSBLoad = ref => {
+    setSearchBox(ref);
+  };
+
   /* const [directionsResponse, setDirectionsResponse] = useState(null)
   const [distance, setDistance] = useState('')
   const [duration, setDuration] = useState('')
@@ -130,6 +157,7 @@ const ManageEmergencyFacility = () => {
             setLatitude(data.latitude);
             setLongitude(data.longitude);
             setCategory(data.category);
+             setMarkerLatLng({ lat:data.latitude, lng:data.longitude });
             setImageUrl(`http://localhost:5000/images/${data.image}`);
           } else {
             navigate(`/manage/emergency-facility`);
@@ -144,6 +172,7 @@ const ManageEmergencyFacility = () => {
       fetchSafetyTipDetails();
     } else {
       setisModalShown(false);
+      setMarkerLatLng(null)
     }
   }, [id, setName, setLatitude, setCategory, token]);
 
@@ -315,13 +344,41 @@ setLongitude(longitude)
               },
             ],
           }}
-          onLoad={map => setMap(map)}
+          onLoad={map => {
+            mapRef.current = map;
+          }}
           onClick={handleMarkerClick}
         >
 
       {markerLatLng && <Marker position={markerLatLng}     draggable={true}
               onDragEnd={handleMarkerClick}/>}
+            <StandaloneSearchBox
+            onPlacesChanged={onPlacesChanged}
+            onLoad={onSBLoad}
+          >
+            <input
+              type="text"
+              placeholder="Customized your placeholder"
+              style={{
+                boxSizing: 'border-box',
+                border: `1px solid transparent`,
+                width: `270px`,
+                height: `40px`,
+                padding: `0 12px`,
+                borderRadius: `3px`,
+                boxShadow: `0 2px 6px rgba(0, 0, 0, 0.3)`,
+                fontSize: `14px`,
+                outline: `none`,
+                margin: 'center',
+                textOverflow: `ellipses`,
+                position: 'absolute',
+                top: '40px',
+                marginLeft: '50%'
+              }}
+            />
+          </StandaloneSearchBox>
         </GoogleMap>
+      
       </div>
    
     </div>
