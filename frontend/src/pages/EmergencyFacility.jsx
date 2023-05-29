@@ -1,6 +1,3 @@
-
-import { FaLocationArrow, FaTimes } from 'react-icons/fa'
-
 import {
   useJsApiLoader,
   GoogleMap,
@@ -12,7 +9,16 @@ import { useRef, useState } from 'react'
 
 
 const center = { lat: 14.8448, lng: 120.8103 }
+const bounds = {
+  north: 14.881784,  
+  south: 14.795797,  
+  east: 120.855111,   
+  west: 120.781636,   
+};
 
+const restrictions = {
+  country: 'ph',
+}
 function EmergencyFacility() {
   const mapAPI = process.env.REACT_APP_MAP_API;
   const { isLoaded } = useJsApiLoader({
@@ -26,6 +32,7 @@ function EmergencyFacility() {
   const [duration, setDuration] = useState('')
   const [steps, setSteps] = useState([])
   const [markerLatLng, setMarkerLatLng] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   /** @type React.MutableRefObject<HTMLInputElement> */
   const originRef = useRef()
@@ -35,6 +42,7 @@ function EmergencyFacility() {
   if (!isLoaded) {
     return "<SkeletonText />"
   }
+
   function handleMarkerClick(event) {
     const { latLng } = event;
     const latitude = latLng.lat();
@@ -64,13 +72,38 @@ function EmergencyFacility() {
   }
 
   function clearRoute() {
- 
     setDirectionsResponse(null)
     setDistance('')
     setDuration('')
     originRef.current.value = ''
     destiantionRef.current.value = ''
   }
+
+  function getCurrentLocation() {
+    if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true, 
+      
+      };
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude,  longitude } = position.coords;
+          setUserLocation({ lat:latitude, lng:longitude });
+       console.log(latitude);
+       console.log(longitude);
+      // Fly to marker location with animation
+    map.panTo({ lat:latitude, lng:longitude  });
+  
+        },
+        error => {
+          console.log('Error getting current location:', error);
+        }, options
+      );
+    } else {
+      console.log('Geolocation is not supported by this browser.');
+    }
+  }
+
   return (
     <div
       style={{
@@ -81,25 +114,25 @@ function EmergencyFacility() {
         width: '100vw',
       }}
     >
-       <div>
-    {steps.map((step, index) => (
-      <div key={index}>
-        <div>{step.duration.text}</div>
-        <div>{step.distance.text}</div>
-        <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
-        <br />
+      <div>
+        {steps.map((step, index) => (
+          <div key={index}>
+            <div>{step.duration.text}</div>
+            <div>{step.distance.text}</div>
+            <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
+            <br />
+          </div>
+        ))}
       </div>
-    ))}
-  </div>
 
-  {/* Display the marker's latitude and longitude */}
-  {markerLatLng && (
-    <div>
-      Latitude: {markerLatLng.latitude}
-      <br />
-      Longitude: {markerLatLng.longitude}
-    </div>
-  )}
+      {/* Display the marker's latitude and longitude */}
+      {markerLatLng && (
+        <div>
+          Latitude: {markerLatLng.latitude}
+          <br />
+          Longitude: {markerLatLng.longitude}
+        </div>
+      )}
 
       <div style={{  height: '50%', width: '100%' }}>
         {/* Google Map Box */}
@@ -107,26 +140,32 @@ function EmergencyFacility() {
           center={center}
           zoom={15}
           mapContainerStyle={{ width: '100%', height: '100%' }}
-           options={{
-    zoomControl: false,
-    streetViewControl: false,
-    mapTypeControl: false,
-    fullscreenControl: false,
-    styles: [
-      {
-        featureType: 'poi',
-        elementType: 'labels',
-        stylers: [
-          {
-            visibility: 'off',
-          },
-        ],
-      },
-    ],
-  }}
+          options={{
+           /*  restriction: {
+              latLngBounds: bounds,
+              strictBounds: true,
+            }, */
+            zoomControl: true,
+            streetViewControl: true,
+            mapTypeControl: true,
+            fullscreenControl: false,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [
+                  {
+                    visibility: 'off',
+                  },
+                ],
+              },
+            ],
+          }}
           onLoad={map => setMap(map)}
         >
-          <Marker position={center} onClick={(marker) => handleMarkerClick(marker)} />
+
+{userLocation&& <Marker position={userLocation} onClick={(marker) => handleMarkerClick(marker)} />}
+        {/*   <Marker position={center} onClick={(marker) => handleMarkerClick(marker)} /> */}
 
           {directionsResponse && (
             <DirectionsRenderer directions={directionsResponse} />
@@ -145,16 +184,28 @@ function EmergencyFacility() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-        <Autocomplete>
-              <input type='text' placeholder='Origin' ref={originRef} />
-            </Autocomplete>
-            <Autocomplete>
-              <input
-                type='text'
-                placeholder='Destination'
-                ref={destiantionRef}
-              />
-            </Autocomplete>
+          <Autocomplete
+            bounds={bounds}
+            restrictions={restrictions}
+            options={{
+              strictBounds: true,
+            }}
+          >
+            <input type='text' placeholder='Origin' ref={originRef} />
+          </Autocomplete>
+          <Autocomplete
+            bounds={bounds}
+            restrictions={restrictions}
+            options={{
+              strictBounds: true,
+            }}
+          >
+            <input
+              type='text'
+              placeholder='Destination'
+              ref={destiantionRef}
+            />
+          </Autocomplete>
 
           <div>
             <button style={{ backgroundColor: 'pink', color: 'white', padding: '8px 16px' }} type='submit' onClick={calculateRoute}>
@@ -162,6 +213,9 @@ function EmergencyFacility() {
             </button>
             <button style={{ marginLeft: 8 }} onClick={clearRoute}>
               Clear Route
+            </button>
+            <button style={{ marginLeft: 8 }} onClick={getCurrentLocation}>
+              Get Current Location
             </button>
           </div>
         </div>
@@ -192,12 +246,11 @@ function EmergencyFacility() {
         {/* Display the steps */}
         <div>
           {steps.map((step, index) => (
-            
             <div key={index}>
-            <div >{step.duration.text}</div>
-            <div>{step.distance.text}</div>
-            <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
-            <br></br>
+              <div >{step.duration.text}</div>
+              <div>{step.distance.text}</div>
+              <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
+              <br></br>
             </div>
           ))}
         </div>

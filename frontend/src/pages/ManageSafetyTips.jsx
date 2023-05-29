@@ -111,6 +111,7 @@ const SafetyTips = () => {
       <br />
       <Link to="/manage/safety-tips/add">Create</Link>
       
+      <div>Published: {safetyTips.length}</div>
       <div>
         <input
           type="text"
