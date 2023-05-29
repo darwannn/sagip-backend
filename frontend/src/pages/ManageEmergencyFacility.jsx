@@ -1,29 +1,83 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useRef } from 'react';
+
 import { useParams, useNavigate, Link } from 'react-router-dom';
+
 import { useSelector } from 'react-redux';
+
 import { request } from '../utils/axios';
 import { emergencyFacilityCategory } from '../utils/categories';
+
 import { toast } from 'react-toastify';
 import {
-  AiFillEdit,
+  useJsApiLoader,
+  GoogleMap,
+  Marker,
+  Autocomplete,
+  DirectionsRenderer,
+} from '@react-google-maps/api'
+
+import {
   AiFillDelete,
   AiOutlineArrowRight,
   AiOutlineCloseCircle,
 } from 'react-icons/ai';
-import Navbar from '../components/Navbar';
 
+import Navbar from '../components/Navbar';
+const center = { lat: 14.8448, lng: 120.8103 }
+const bounds = {
+  north: 14.881784,  
+  south: 14.795797,  
+  east: 120.855111,   
+  west: 120.781636,   
+};
+
+const restrictions = {
+  country: 'ph',
+}
 const ManageEmergencyFacility = () => {
 
+
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
-
-
+  
   const [emergencyFacility, setEmergencyFacility] = useState([]);
   const [filteredEmergencyFacility, setFilteredEmergencyFacility] = useState([]);
   const [activeCategory, setActiveCategory] = useState(emergencyFacilityCategory[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [shouldFetchData, setShouldFetchData] = useState(true);
+
+  /* _________ */
+  const [type, setType] = useState('');
+  const [isModalShown, setisModalShown] = useState(false);
+
+  const [name, setName] = useState('');
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [category, setCategory] = useState('');
+  const [image, setImage] = useState(null);
+  const [imageName, setImageName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+
+  const [hasChanged, setHasChanged] = useState(false);
+
+
+  const mapAPI = process.env.REACT_APP_MAP_API;
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: mapAPI,
+    libraries: ['places'],
+  })
+
+  const [map, setMap] = useState(/** @type google.maps.Map */ (null))
+  const [markerLatLng, setMarkerLatLng] = useState(null);
+  /* const [directionsResponse, setDirectionsResponse] = useState(null)
+  const [distance, setDistance] = useState('')
+  const [duration, setDuration] = useState('')
+  const [steps, setSteps] = useState([])
+  const [markerLatLng, setMarkerLatLng] = useState(null);
+  const [userLocation, setUserLocation] = useState(null); */
+
 
   useEffect(() => {
     const fetchEmergencyFacility = async () => {
@@ -93,18 +147,8 @@ const ManageEmergencyFacility = () => {
     }
   }, [id, setName, setLatitude, setCategory, token]);
 
-  const [type, setType] = useState('');
-  const [isModalShown, setisModalShown] = useState(false);
-
-  const [name, setName] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [category, setCategory] = useState('');
-  const [image, setImage] = useState(null);
-  const [imageName, setImageName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-
-  const [hasChanged, setHasChanged] = useState(false);
+  
+  /* _________ */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -183,6 +227,34 @@ const ManageEmergencyFacility = () => {
     setImageUrl('');
   };
 
+
+
+
+
+
+
+    /** @type React.MutableRefObject<HTMLInputElement> */
+    const originRef = useRef()
+    /** @type React.MutableRefObject<HTMLInputElement> */
+    const destiantionRef = useRef()
+  
+    if (!isLoaded) {
+      return "<SkeletonText />"
+    }
+  
+
+    function handleMarkerClick(event) {
+      const { latLng } = event;
+      const latitude = latLng.lat();
+      const longitude = latLng.lng();
+    
+      setMarkerLatLng({ lat:latitude, lng:longitude });
+setLatitude(latitude)
+setLongitude(longitude)
+      console.log({ lat:latitude, lng:longitude });
+    }
+
+
   return (
     <>
       <Navbar />
@@ -204,7 +276,55 @@ const ManageEmergencyFacility = () => {
           ))}
         </div>
       </div>
+     
+      <div
+      style={{
+        position: 'relative',
+        flexDirection: 'column',
+        alignItems: 'center',
+        height: '100vh',
+        width: '100vw',
+      }}
+    >
+     
 
+      <div style={{  height: '50%', width: '100%' }}>
+        {/* Google Map Box */}
+        <GoogleMap
+          center={center}
+          zoom={15}
+          mapContainerStyle={{ width: '100%', height: '100%' }}
+          options={{
+           /*  restriction: {
+              latLngBounds: bounds,
+              strictBounds: true,
+            }, */
+            zoomControl: true,
+            streetViewControl: true,
+            mapTypeControl: true,
+            fullscreenControl: false,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [
+                  {
+                    visibility: 'off',
+                  },
+                ],
+              },
+            ],
+          }}
+          onLoad={map => setMap(map)}
+          onClick={handleMarkerClick}
+        >
+
+      {markerLatLng && <Marker position={markerLatLng}     draggable={true}
+              onDragEnd={handleMarkerClick}/>}
+        </GoogleMap>
+      </div>
+   
+    </div>
       <br />
       <br />
       <Link
@@ -281,21 +401,23 @@ const ManageEmergencyFacility = () => {
                 </div>
                 <div>
                   <label>latitude: </label>
-                  <input
+                  <div>{latitude}</div>
+                 {/*  <input
                     type="text"
                     placeholder="latitude..."
                     value={latitude}
                     onChange={(e) => setLatitude(e.target.value)}
-                  />
+                  /> */}
                 </div>
                 <div>
                   <label>longitude: </label>
-                  <input
+                  <div>{longitude}</div>
+                 {/*  <input
                     type="text"
                     placeholder="longitude..."
                     value={longitude}
                     onChange={(e) => setLongitude(e.target.value)}
-                  />
+                  /> */}
                 </div>
                 <div>
                   <label>Category: </label>
@@ -321,7 +443,7 @@ const ManageEmergencyFacility = () => {
                     </p>
                   )}
 
-                  {imageUrl && <img src={imageUrl} alt="Selected" />}
+                  {imageUrl && <img src={imageUrl} alt="Selected" height={"100px"}/>}
                 </div>
                 <div>
                   <button type="submit">Submit form</button>
