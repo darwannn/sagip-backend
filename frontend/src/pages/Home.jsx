@@ -24,7 +24,9 @@ function Home() {
     <div>Malolos Signal NUmber <br></br>
       {signal && <div>{signal}</div>}
     </div>
-
+    <h1 className="text-3xl font-bold underline">
+      Hello world!
+    </h1>
     <br></br>
     <br></br>
 

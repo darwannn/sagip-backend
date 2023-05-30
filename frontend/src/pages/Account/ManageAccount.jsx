@@ -151,7 +151,7 @@ const Account = ({user}) => {
       <div>Total: {
         residentAccounts.filter(account => account.userType === 'resident').length}
       </div> 
-        <div>Registered this month: {residentAccountsThisMonth.length}</div>
+        <div >Registered this month: {residentAccountsThisMonth.length}</div>
       </>
       :<div>Published: {
         residentAccounts.filter(account => account.userType !== 'resident').length}
