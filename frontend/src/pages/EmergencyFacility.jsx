@@ -29,11 +29,12 @@ const bounds = {
 const restrictions = {
   country: 'ph',
 }
+const libraries = ['places'];
 function EmergencyFacility() {
   const mapAPI = process.env.REACT_APP_MAP_API;
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: mapAPI,
-    libraries: ['places'],
+    libraries,
   })
 
   const { id } = useParams();
@@ -54,6 +55,7 @@ function EmergencyFacility() {
   const [activeCategory, setActiveCategory] = useState(emergencyFacilityCategory[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [shouldFetchData, setShouldFetchData] = useState(true);
+  const [transit, setTransit] = useState('');
 
   useEffect(() => {
     const fetchEmergencyFacility = async () => {
@@ -118,25 +120,28 @@ setLatitude(latitude)
 
 
   
-  async function calculateRoute() {
-    if (originRef.current.value === '' || destiantionRef.current.value === '') {
-      return
-    }
-    // eslint-disable-next-line no-undef
-    const directionsService = new google.maps.DirectionsService()
-    const results = await directionsService.route({
+  async function calculateRoute(transitType) {
+ 
+    
+    const directionsService = new window.google.maps.DirectionsService();
+    
+    const mapOptions = { 
       origin: originRef.current.value,
       destination: destiantionRef.current.value,
-      // eslint-disable-next-line no-undef
-      travelMode: google.maps.TravelMode.DRIVING,
-    })
-    setDirectionsResponse(results)
-    setDistance(results.routes[0].legs[0].distance.text)
-    setDuration(results.routes[0].legs[0].duration.text)
-    setSteps(results.routes[0].legs[0].steps)
+      travelMode: transitType
+    };
+    
+    const results = await directionsService.route(mapOptions);
+    setDirectionsResponse(results);
+    setDistance(results.routes[0].legs[0].distance.text);
+    setDuration(results.routes[0].legs[0].duration.text);
+    setSteps(results.routes[0].legs[0].steps);
     
     console.log(results);
   }
+  
+
+  
 
 
 
@@ -177,16 +182,7 @@ setLatitude(latitude)
         width: '100vw',
       }}
     >
-      <div>
-        {steps.map((step, index) => (
-          <div key={index}>
-            <div>{step.duration.text}</div>
-            <div>{step.distance.text}</div>
-            <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
-            <br />
-          </div>
-        ))}
-      </div>
+     
 
       {/* Display the marker's latitude and longitude */}
       {markerLatLng && (
@@ -286,6 +282,14 @@ setLatitude(latitude)
           ))}
         </div>
       </div>
+      <label>Walking</label>
+        <input type="radio" value="WALKING" onClick={(e)=> {setTransit(e.target.value);calculateRoute("WALKING")}} name='transitMode'/>
+        <label>DRIVING</label>
+        <input type="radio" value="DRIVING" onClick={(e)=> {setTransit(e.target.value);calculateRoute("DRIVING")}} name='transitMode'/>
+        <label>BIKING</label>
+        <input type="radio" value="BICYCLING" onClick={(e)=> {setTransit(e.target.value);calculateRoute("BICYCLING")}} name='transitMode'/>
+        <label>BIKING</label>
+        <input type="radio" value="TRANSIT" onClick={(e)=> {setTransit(e.target.value);calculateRoute("TRANSIT")}} name='transitMode'/>
         </div>
 
         
@@ -293,6 +297,7 @@ setLatitude(latitude)
 
       <div style={{  height: '50%', width: '100%' }}>
         {/* Google Map Box */}
+       
         <GoogleMap
           center={center}
           zoom={15}

@@ -491,7 +491,7 @@ setLongitude(longitude)
                   
                   
                   <label>Category: </label>
-                  <select value='is Full' onChange={(e) => setCategory(e.target.checked)}>
+                  <select onChange={(e) => setCategory(e.target.value)}>
                     <option value="" hidden>
                       Select a category
                     </option>
