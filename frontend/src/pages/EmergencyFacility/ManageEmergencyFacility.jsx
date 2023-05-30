@@ -4,8 +4,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 
 import { useSelector } from 'react-redux';
 
-import { request } from '../utils/axios';
-import { emergencyFacilityCategory } from '../utils/categories';
+import { request } from '../../utils/axios';
+import { emergencyFacilityCategory } from '../../utils/categories';
 
 import { toast } from 'react-toastify';
 import {
@@ -22,7 +22,7 @@ import {
   AiOutlineArrowRight,
   AiOutlineCloseCircle,
 } from 'react-icons/ai';
-import Navbar from '../components/Navbar';
+import Navbar from '../../components/Navbar';
 
 const libraries = ['places'];
 const center = { lat: 14.8448, lng: 120.8103 }

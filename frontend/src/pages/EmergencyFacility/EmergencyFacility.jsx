@@ -4,8 +4,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 
 import { useSelector } from 'react-redux';
 
-import { request } from '../utils/axios';
-import { emergencyFacilityCategory } from '../utils/categories';
+import { request } from '../../utils/axios';
+import { emergencyFacilityCategory } from '../../utils/categories';
 
 import { toast } from 'react-toastify';
 import {
@@ -234,9 +234,7 @@ setLatitude(latitude)
           </Autocomplete>
 
           <div>
-            <button style={{ backgroundColor: 'pink', color: 'white', padding: '8px 16px' }} type='submit' onClick={calculateRoute}>
-              Calculate Route
-            </button>
+          
             <button  onClick={()=>  destiantionRef.current.value = `${latitude}, ${longitude} `}>
               Show Direction
             </button>

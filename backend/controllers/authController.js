@@ -12,6 +12,44 @@ const currentDate = new Date()
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000)
 const dateTimeToday = new Date().toLocaleString();
 
+const upload = require('../middlewares/uploadMiddleware')
+
+const fs = require('fs');
+
+
+/* get all */
+authController.get('/', async (req, res) => {
+  try {
+      const user = await User.find({})
+   
+ 
+      return res.status(200).json(user)
+  } catch (error) {
+      return res.status(500).json({
+          success:false,
+          message:"Internal Server Error" + error,
+        })
+  }
+})
+
+/* get specific  */
+authController.get('/:id', async (req, res) => {
+  try {
+      const safetyTip = await User.findById(req.params.id)
+      
+      safetyTip.views += 1
+
+      await safetyTip.save()
+      return res.status(200).json(safetyTip)
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found"
+    });
+  }
+})
+
+
 
 authController.post('/register', async (req, res) => {
     try {
@@ -35,9 +73,286 @@ authController.post('/register', async (req, res) => {
           attempt,
           verificationCode,
           userType,
-          isResident,
+          status,
         } = req.body
+      console.log('====================================');
+      console.log(firstname);
+      console.log('====================================');
+        /* validation */
+      /*   const userExists = await User.findOne({
+          username
+        }) */
+       /*  const contactNumberExists = await User.findOne({
+          contactNumber
+        }) */
       
+      /*   if (isEmpty(username)) {
+          error["username"] = 'Required field'
+        } else {
+          if (userExists) {
+            error['usename'] = 'User already existsss'
+          } else {
+            if(isUsername(username) ){
+              error['usename'] = 'username must only be a number or character'
+            }
+          }
+        } */
+      
+     /*    if (isEmpty(contactNumber)) {
+          error["contact"] = 'Required field'
+        } else {
+          if (contactNumberExists) {
+            error['contact'] = 'Contact Number already exists'
+          } else {
+            if(isContactNumber(contactNumber)) {
+              error['contact'] = 'must be a number'
+            }
+          }
+        }
+      
+        if (isEmpty(firstname)) error["firstname"] = 'Required field'
+        if (isEmpty(lastname)) error["lastname"] = 'Required field'
+        if (isEmpty(birthdate)) error["birthdate"] = 'Required field'
+        if (isEmpty(gender)) error["gender"] = 'Required field'
+      
+      
+      
+        if (isEmpty(email)) {
+          error["email"] = 'Required field'
+        } else {
+          if (isEmail(email)) {
+            error['email'] = 'not email'
+          }
+        }
+      
+      
+       if (isResident === "true") {
+        region = "Region III"
+        province = "Bulacan"
+        municipality = "Malolos"
+      
+      } else {
+        if (isEmpty(region)) error["region"] = 'Required field'
+        if (isEmpty(province)) error["province"] = 'Required field'
+        if (isEmpty(municipality)) error["municipality"] = 'Required field'
+      }
+      if (isEmpty(barangay)) error["barangay"] = 'Required field'
+      if (isEmpty(street)) error["street"] = 'Required field'
+       
+      if (isEmpty(password)) {
+        error["password"] = 'Required field'
+      } else {
+        if (verifyPassword(password)) {
+          error['password'] = 'password requirement did not match'
+        }
+      }
+       */
+       
+      
+      
+      
+        if (Object.keys(error).length == 0) {
+
+          profilePicture = "user_no_image.png"
+          attempt = 0;
+      if(verificationCode!== 0) {
+        verificationCode = await generateCode();
+      }
+      
+          const salt = await bcrypt.genSalt(10)
+          const hashedPassword = await bcrypt.hash(password, salt)
+          const emptyString = "d"
+         
+          const unverifiedStatus = "unverified";
+          const falseStatus = false
+      
+      
+      
+          /* create */
+          const user = await User.create({
+              email,
+              password: hashedPassword,
+
+              region,
+              province,
+              municipality,
+              barangay,
+              street,
+
+              firstname,
+              middlename,
+              lastname,
+              gender,
+              birthdate,
+
+              contactNumber,
+
+            // username,
+            isOnline: falseStatus,
+            isBanned: falseStatus,
+      
+            profilePicture,
+            attempt,
+            verificationCode,
+            codeExpiration,
+            verificationPicture: emptyString,
+            userType,
+            status,
+          
+          })
+      
+          if (user) {
+         
+            console.log("success");
+         
+           /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
+          /*   if (process.env.ENVIRONMENT === 'production') {
+                return   res.status(200).json({
+                    success:true,
+                message:"Please verify contact number",
+              })
+            } else { */
+
+
+           // const { ...userData } = user._doc;
+
+           /*  return res.status(200).json({
+              success: true,
+              message: "Please verify contact number",
+              user: user._doc,
+              token: generateToken(user._id)
+            });
+                 */
+            if(verificationCode!== 0) { 
+          return res.status(200).json({
+            success: true,
+            message: "Please verify contact number",
+            user: {
+              for: "register",
+              id: user._doc._id,
+              code: user._doc.verificationCode,
+              userType: user._doc.userType
+            },
+            token: generateToken(user._id)
+          });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: "Added",
+          });
+        }
+
+              /*   return  res.status(200).json({
+                    success:true,
+                _id: user.id,
+                name: user.email,
+                verificationCode: user.verficationCode,
+                codeExpiration:user.codeExpiration,
+                token: generateToken(user._id),
+                message:"Please verify contact number",
+              }) */
+          /*   } */
+           
+          } else {
+
+            console.log("error");
+
+              error['error'] = 'Database Error'
+            return  res.status(400)
+          }
+        }
+      
+        if (Object.keys(error).length != 0) {
+   
+          error["success"] = false;
+          error["message"] = "input error";
+     
+          return res.status(400).json(error)
+          
+        }
+    } catch (error) {
+        return res.status(500).json({
+        success:false,
+        message:"Internal Server Error" + error,
+      })
+    }
+})
+
+authController.delete('/delete/:id', verifyToken, async (req, res) => {
+  try {
+   /*  const safetyTip = await SafetyTip.findById(req.params.id);
+    if(safetyTip.userId.toString() !== req.user.id.toString()){
+        throw new Error("You can delete only your own posts")
+    } */
+
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (user) {
+      if(user.profilePicture == "user_no_image.png"){
+      const imagePath = `public/images/${user.profilePicture}`;
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+        
+          return res.status(500).json({
+            success: false,
+            message: 'Error deleting the image ',
+          });
+        } else {
+
+          return res.status(200).json({
+            success: true,
+            message: 'SafetyTip  deleted successfully',
+          });
+        }
+        
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: 'SafetyTip  deleted successfully',
+      });
+    }
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: 'DB Erroree',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error' + error,
+    });
+  }
+});
+
+authController.put('/update/:id', async (req, res) => {
+    try {
+        const error = {};
+        let {
+
+          firstname,
+          middlename,
+          lastname,
+          contactNumber,
+          email,
+          region,
+          province,
+          municipality,
+          barangay,
+          street,
+          birthdate,
+          gender,
+          profilePicture,
+          attempt,
+          verificationCode,
+          userType,
+          status,
+  
+        } = req.body
+      console.log('====================================');
+      console.log(firstname);
+      console.log('====================================');
         /* validation */
       /*   const userExists = await User.findOne({
           username
@@ -119,72 +434,39 @@ authController.post('/register', async (req, res) => {
           verificationCode = await generateCode();
       
           const salt = await bcrypt.genSalt(10)
-          const hashedPassword = await bcrypt.hash(password, salt)
-          const emptyString = "d"
-          userType = "resident"
-          const unverifiedStatus = "unverified";
-          const falseStatus = false
-      
+
       
       
           /* create */
-          const user = await User.create({
-              email,
-              password: hashedPassword,
-
-              region,
-              province,
-              municipality,
-              barangay,
-              street,
-
-              firstname,
-              middlename,
-              lastname,
-              gender,
-              birthdate,
-
-              contactNumber,
-
-            // username,
-            isOnline: falseStatus,
-            isBanned: falseStatus,
-            password: hashedPassword,
+          const updateFields = {   
+            firstname,
+            middlename,
+            lastname,
+            contactNumber,
+            email,
+            region,
+            province,
+            municipality,
+            barangay,
+            street,
+            birthdate,
+            gender,
             profilePicture,
             attempt,
             verificationCode,
-            codeExpiration,
-            verificationPicture: emptyString,
             userType,
-            status: unverifiedStatus
-          })
+            status,
+        };
+          const user = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+
+        
       
           if (user) {
          
             console.log("success");
-         
-           /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
-          /*   if (process.env.ENVIRONMENT === 'production') {
-                return   res.status(200).json({
-                    success:true,
-                message:"Please verify contact number",
-              })
-            } else { */
-
-
-           // const { ...userData } = user._doc;
-
-           /*  return res.status(200).json({
-              success: true,
-              message: "Please verify contact number",
-              user: user._doc,
-              token: generateToken(user._id)
-            });
-                 */
-           
           return res.status(200).json({
             success: true,
-            message: "Please verify contact number",
+            message: "Updated Successfully",
             user: {
               for: "register",
               id: user._doc._id,
@@ -352,7 +634,7 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
       }
   
       if (Object.keys(error).length == 0) {
-        if (user.attempt >= 2) {
+        if (user.attempt >= 100) {
 
           let generatedCode = await generateCode();
           user.verificationCode = generatedCode;
@@ -550,6 +832,46 @@ authController.post('/new-password', verifyToken,  async (req, res) => {
     console.log("error");
     res.status(400).json(error)
   }
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
+authController.put('/reset-password/:id', verifyToken,  async (req, res) => {
+  // Variable declaration
+
+  try {
+    const error = {};
+  const password = req.body.password
+console.log(password);
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt)
+
+  if (Object.keys(error).length == 0) {
+
+    console.log(req.user.id);
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      attempt: 0,
+      password: hashedPassword
+    });
+    
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "Password reset successfully",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "DB Error",
+      });
+    }
+
+  }
+
   } catch (error) {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({

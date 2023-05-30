@@ -5,13 +5,13 @@ import { Link } from 'react-router-dom';
 
 import { useSelector } from 'react-redux'
 
-import { request } from '../utils/axios';
-import { safetyTipsCategory } from '../utils/categories';
+import { request } from '../../utils/axios';
+import { safetyTipsCategory } from '../../utils/categories';
 
 import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
 import { FiArrowRight } from 'react-icons/fi';
 
-import Navbar from '../components/Navbar'
+import Navbar from '../../components/Navbar'
 
 const SafetyTips = () => {
   const { user, token } = useSelector((state) => state.auth);

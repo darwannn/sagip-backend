@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { request } from '../utils/axios';
+import { request } from '../../utils/axios';
 
 import { AiFillLike, AiOutlineLike } from 'react-icons/ai';
 import { FiArrowRight } from 'react-icons/fi';

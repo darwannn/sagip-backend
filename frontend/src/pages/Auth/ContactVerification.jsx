@@ -2,10 +2,10 @@ import { useState } from 'react';
 
 import {useNavigate } from 'react-router-dom';
 
-import { contactVerification } from '../redux/authSlice'
+import { contactVerification } from '../../redux/authSlice'
 import { useDispatch, useSelector } from 'react-redux';
 
-import { request } from '../utils/axios';
+import { request } from '../../utils/axios';
 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

@@ -3,10 +3,10 @@ import { useState } from 'react';
 
 import { Link, useNavigate } from 'react-router-dom';
 
-import { register } from '../redux/authSlice';
+import { register } from '../../redux/authSlice';
 import { useDispatch } from 'react-redux';
 
-import { request } from '../utils/axios';
+import { request } from '../../utils/axios';
 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -55,6 +55,8 @@ const Register = () => {
         middlename,
         lastname,
         gender,
+        userType:"resident",
+        status:"unverified",
         birthdate,
         contactNumber,
       });

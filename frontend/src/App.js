@@ -13,23 +13,26 @@ import { useSelector, useDispatch } from 'react-redux';
 import Home from './pages/Home';
 import Error from './pages/Error';
 
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import NewPassword from './pages/NewPassword';
-import ContactVerification from './pages/ContactVerification';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+import NewPassword from './pages/Auth/NewPassword';
+import ContactVerification from './pages/Auth/ContactVerification';
 
-import SafetyTips from './pages/SafetyTips';
-import SavedSafetyTips from './pages/SavedSafetyTips';
-import SafetyTipDetails from './pages/SafetyTipDetails';
+import SafetyTips from './pages/SafetyTip/SafetyTips';
+import SavedSafetyTips from './pages/SafetyTip/SavedSafetyTips';
+import SafetyTipDetails from './pages/SafetyTip/SafetyTipDetails';
 
-import ManageSafetyTips from './pages/ManageSafetyTips';
-import SafetyTipInput from './pages/SafetyTipInput';
+import ManageSafetyTips from './pages/SafetyTip/ManageSafetyTips';
+import SafetyTipInput from './pages/SafetyTip/SafetyTipInput';
 
-import EmergencyFacility from './pages/EmergencyFacility';
-import ManageEmergencyFacility from './pages/ManageEmergencyFacility';
+import EmergencyFacility from './pages/EmergencyFacility/EmergencyFacility';
+import ManageEmergencyFacility from './pages/EmergencyFacility/ManageEmergencyFacility';
 
 import SendAlert from './pages/SendAlert';
+
+import ManageAccount from './pages/Account/ManageAccount';
+import AccountInput from './pages/Account/AccountInput';
 
 
 const App = () => {
@@ -104,7 +107,7 @@ const App = () => {
         />
         <Route path="/new-password" element={<NewPassword />} />
 
-        <Route path="/send-alert" element={<SendAlert />} />
+        <Route path="/manage/send-alert" element={<SendAlert />} />
 
         <Route path="/safety-tips" element={<SafetyTips />} />
 
@@ -175,6 +178,53 @@ const App = () => {
           path="/manage/emergency-facility/add"
           element={
             <ManageEmergencyFacility />
+        }
+        />
+
+
+
+         <Route
+          path="/manage/account/resident"
+          element={
+            <ManageAccount user="resident"/>
+        }
+        />
+         <Route
+          path="/manage/account/employee"
+          element={
+            <ManageAccount user="employee"/>
+        }
+        />
+         <Route
+          path="/manage/account/resident/identity-verification"
+          element={
+            <ManageAccount user="resident"/>
+        }
+        />
+     
+         <Route
+          path="/manage/account/resident/add"
+          element={
+            <AccountInput user="resident" type="add"/>
+        }
+        />
+         <Route
+          path="/manage/account/employee/add"
+          element={
+            <AccountInput user="employee" type="add"/>
+        }
+        />
+     
+         <Route
+          path="/manage/account/resident/update/:id"
+          element={
+            <AccountInput user="resident" type="update"/>
+        }
+        />
+         <Route
+          path="/manage/account/employee/update/:id"
+          element={
+            <AccountInput user="employee" type="update"/>
         }
         />
 

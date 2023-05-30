@@ -1,10 +1,10 @@
-import { request } from '../utils/axios';
+import { request } from '../../utils/axios';
 
 import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { forgotPassword } from '../redux/authSlice'
+import { forgotPassword } from '../../redux/authSlice'
 import { useDispatch } from 'react-redux';
 
 import { toast } from 'react-toastify';

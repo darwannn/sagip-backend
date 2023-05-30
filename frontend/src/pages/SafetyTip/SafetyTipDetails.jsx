@@ -4,13 +4,13 @@ import { useParams,useNavigate, Link } from 'react-router-dom';
 
 import { useSelector } from 'react-redux';
 
-import { request } from '../utils/axios';
+import { request } from '../../utils/axios';
 
 import { format } from 'timeago.js';
 
 import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai';
 
-import Navbar from '../components/Navbar';
+import Navbar from '../../components/Navbar';
 
 
 const SafetyTipDetails = () => {

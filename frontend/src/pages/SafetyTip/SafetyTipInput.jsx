@@ -4,8 +4,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 
 import { useSelector } from 'react-redux';
 
-import { request } from '../utils/axios';
-import { safetyTipsCategory } from '../utils/categories';
+import { request } from '../../utils/axios';
+import { safetyTipsCategory } from '../../utils/categories';
 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,7 +15,7 @@ import 'react-quill/dist/quill.snow.css';
 
 import { AiOutlineCloseCircle, AiOutlineArrowRight } from 'react-icons/ai';
 
-import Navbar from '../components/Navbar';
+import Navbar from '../../components/Navbar';
 
 const SafetyTipInput = ({ type }) => {
   const { id } = useParams();

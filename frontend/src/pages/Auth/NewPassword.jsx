@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { newPassword } from '../redux/authSlice'
+import { newPassword } from '../../redux/authSlice'
 
 
-import { request } from '../utils/axios';
+import { request } from '../../utils/axios';
 
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
