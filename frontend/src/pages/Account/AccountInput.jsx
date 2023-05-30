@@ -61,6 +61,7 @@ const AccountInput = ({ user, type }) => {
   
 
   useEffect(() => {
+    console.log(type);
     if (type === 'update') {
       const fetchAccountDetails = async () => {
         try {
@@ -114,10 +115,10 @@ console.log(data);
         middlename,
         lastname,
         gender,
-        userType:user,
+        userType,
         birthdate,
         contactNumber,
-        status,
+        status:"fully verified",
         userType,
         verificationCode:0
       }
@@ -136,7 +137,7 @@ console.log(data);
         middlename,
         lastname,
         gender,
-        userType:user,
+        userType,
         birthdate,
         contactNumber,
         status,
@@ -153,7 +154,7 @@ console.log(data);
      
         toast.success(message);
        
-        {user=="resident"?   navigate('/manage/account/resident'):navigate('/manage/account/employee')}
+        {user=="resident"?   navigate('/manage/account/resident'):navigate('/manage/account/staff')}
      return; 
     }
     else {
@@ -206,7 +207,7 @@ console.log("reset");
       <div>
         <div>
            
-          <Link to= {user=="resident"?"/manage/account/resident":"/manage/account/employee"}>
+          <Link to= {user=="resident"?"/manage/account/resident":"/manage/account/staff"}>
             Go Back <AiOutlineArrowRight />
           </Link>
           <h2>{type === 'add' ? 'Add' : 'Update'} Safety Tip</h2>
@@ -292,7 +293,7 @@ console.log("reset");
           />
           
                
-<button onClick={resetPassword}>resetPassword</button>
+
 
 {/* <input
 
@@ -302,21 +303,28 @@ console.log("reset");
             onChange={(e) => setAttempt(e.target.value)}
           />
  */}
+ {console.log(type)}
+ {type=="update"&&
+
+<>
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
   <option value="" hidden>
     Select a status
   </option>
-  {statusCategory.map((status, index) => (
+  {statusCategory.slice(1).map((status, index) => (
     <option key={index} value={status}>
       {status.toUpperCase()}
     </option>
   ))}
 </select>
+</>
+ }
+
 <select value={userType} onChange={(e) => setUserType(e.target.value)}>
   <option value="" hidden>
-    Select a status
+    Select a Type
   </option>
-  {userTypeCategory.map((userType, index) => (
+  {userTypeCategory.slice(1).map((userType, index) => (
     <option key={index} value={userType}>
       {userType.toUpperCase()}
     </option>
@@ -350,6 +358,7 @@ console.log("reset");
               <button type="submit">Submit</button>
             </div>
           </form>
+              <button onClick={resetPassword}>resetPassword</button>
         </div>
       </div>
     </>

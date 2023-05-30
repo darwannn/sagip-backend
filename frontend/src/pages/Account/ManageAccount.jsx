@@ -46,11 +46,38 @@ const Account = ({user}) => {
   const filteredAccounts = residentAccounts.filter((account) => {
     const categoryMatch =
       activeCategory === statusCategory[0] || account.status.toLowerCase() === activeCategory.toLowerCase();
-    const searchMatch = account.email.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const searchMatch =
+      account.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      account.contactNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      account.municipality.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      `${account.firstname} ${account.middlename} ${account.lastname}`.toLowerCase().includes(searchQuery.toLowerCase());
+    
+  
+    // Additional condition to filter by userType
+    const userTypeMatch =
+      (user === "staff" && ['responder', 'dispatcher', 'admin', 'super-admin'].includes(account.userType)) ||
+      (user === "resident" && account.userType === "resident");
+  
+    return categoryMatch && searchMatch && userTypeMatch;
+  });
+  
 
-    return categoryMatch && searchMatch;
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+  
+  const residentAccountsThisMonth = residentAccounts.filter(account => {
+    const accountDate = new Date(account.createdAt);
+    const accountMonth = accountDate.getMonth() + 1;
+    const accountYear = accountDate.getFullYear();
+  
+    return accountMonth === currentMonth && accountYear === currentYear && account.userType === 'resident';
   });
 
+  
+
+  
     const handleDeleteBlog = async (id) => {
       try {
         const options = { "Authorization": `Bearer ${token}` };
@@ -60,7 +87,7 @@ const Account = ({user}) => {
         const { message } = data;
         toast.success(message);
        /*  navigate(`/manage/safety-tips`); */
-       {user=="resident"?   navigate('/manage/account/resident'):navigate('/manage/account/employee')}
+       {user=="resident"?   navigate('/manage/account/resident'):navigate('/manage/account/staff')}
       } catch (error) {
         console.error(error);
       }
@@ -69,9 +96,10 @@ const Account = ({user}) => {
   const columns = [
     {
       name: 'Name',
-      selector: (row) => `${row.firstname} ${row.lastname}`,
+      selector: (row) => `${row.firstname} ${row.middlename ? row.middlename.split(' ').map(name => name.charAt(0)).join('') : ''} ${row.lastname}`,
     },
     {
+      
       name: 'Number',
       selector: (row) => row.contactNumber,
       sortable: true,
@@ -97,7 +125,7 @@ const Account = ({user}) => {
         <>
         
           <div>
-                <Link to={user=="resident"?`/manage/account/resident/update/${row._id}`:`/manage/account/employee/update/${row._id}`}>
+                <Link to={user=="resident"?`/manage/account/resident/update/${row._id}`:`/manage/account/staff/update/${row._id}`}>
                   <AiFillEdit />
                 </Link>
                 <div>
@@ -116,9 +144,26 @@ const Account = ({user}) => {
       <Navbar />
       <br />
       <br />
-      <Link to={user=="resident"?"/manage/account/resident/add":"/manage/account/employee/add"}>Create</Link>
+      {user == "resident" ? <Link to="/manage/account/staff/add">Create</Link> :<Link to="/manage/account/staff/add">Create</Link>}
       
-      <div>Published: {residentAccounts.length}</div>
+      {user == "resident" ?
+      <>
+      <div>Total: {
+        residentAccounts.filter(account => account.userType === 'resident').length}
+      </div> 
+        <div>Registered this month: {residentAccountsThisMonth.length}</div>
+      </>
+      :<div>Published: {
+        residentAccounts.filter(account => account.userType !== 'resident').length}
+        </div> 
+        }
+
+
+{
+
+
+  
+}
       <div>
         <input
           type="text"
@@ -127,6 +172,14 @@ const Account = ({user}) => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+
+      <Link to= "/manage/account/resident">
+            Resident
+          </Link>
+      <Link to= "/manage/account/staff">
+            Staff
+          </Link>
+
       <div>
         <select
           value={activeCategory}

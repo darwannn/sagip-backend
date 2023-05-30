@@ -190,9 +190,9 @@ const App = () => {
         }
         />
          <Route
-          path="/manage/account/employee"
+          path="/manage/account/staff"
           element={
-            <ManageAccount user="employee"/>
+            <ManageAccount user="staff"/>
         }
         />
          <Route
@@ -202,16 +202,16 @@ const App = () => {
         }
         />
      
-         <Route
+        {/*  <Route
           path="/manage/account/resident/add"
           element={
             <AccountInput user="resident" type="add"/>
         }
-        />
+        /> */}
          <Route
-          path="/manage/account/employee/add"
+          path="/manage/account/staff/add"
           element={
-            <AccountInput user="employee" type="add"/>
+            <AccountInput user="staff" type="add"/>
         }
         />
      
@@ -222,9 +222,9 @@ const App = () => {
         }
         />
          <Route
-          path="/manage/account/employee/update/:id"
+          path="/manage/account/staff/update/:id"
           element={
-            <AccountInput user="employee" type="update"/>
+            <AccountInput user="staff" type="update"/>
         }
         />
 

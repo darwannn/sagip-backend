@@ -16,14 +16,16 @@ export const safetyTipsCategory = [
   
   
   export const statusCategory = [
+    'all',
     'unverified',
-    'semi-verified',
-    'verified',
+    'semi verified',
+    'fully verified',
     'banned',
     'archived',
   ];
   
   export const userTypeCategory = [
+    'all',
     'resident',
     'responder',
     'dispatcher',
