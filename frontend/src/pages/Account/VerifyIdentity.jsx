@@ -16,10 +16,41 @@ import { FiArrowRight } from 'react-icons/fi';
 
 import Navbar from '../../components/Navbar';
 function VerifyIdentity() {
+  const navigate = useNavigate();
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  
   const [selfieImage, setSelfieImage] = useState(null);
   const { token,user } = useSelector((state) => state.auth);
+  const [contactNumber, setContactNumber] = useState("");
+
+  useEffect(() => {
+    console.log(user);
+
+      const fetchAccountDetails = async () => {
+        try {
+          const options = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          };
+          const data = await request(`/auth/${user.id}`, 'GET', options);
+console.log(data);
+setContactNumber(data.verificationRequestDate);
+if(data.status === "verified") {
+  navigate('/')
+}
+    
+      
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchAccountDetails();
+    
+  }, [token,user]);
+
+
   const handleStartCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
@@ -73,8 +104,9 @@ function VerifyIdentity() {
     else {
       if(message != "input error") {
         toast.success(message);
+        navigate(0)
       }  else {
-    
+        toast.error(message);
       }
     } }catch (error) {
       console.error(error);
@@ -83,6 +115,14 @@ function VerifyIdentity() {
 
   return (
     <div>
+      {contactNumber?(
+           
+              <>
+              We are verifying your request... 
+              </>):(
+              
+                     
+<>
       <h2>Verify Identity</h2>
       <div>
         <button onClick={handleStartCamera}>Start Camera</button>
@@ -101,6 +141,12 @@ function VerifyIdentity() {
           Submit
         </button>
       </form>
+      </>
+
+  )
+       
+       
+       }
     </div>
   );
 }

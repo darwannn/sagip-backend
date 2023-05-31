@@ -922,6 +922,51 @@ console.log(req.user.id);
 });
 
 
+authController.put('/verification-request/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      $unset: {
+        verificationRequestDate: Date.now(),
+      },
+    }, { new: true });
+
+    if (req.body.action !== "reject") {
+      user.status = "verified";
+      await user.save();
+    }
+
+
+    if (user) {
+      if (req.body.action === "reject") {
+        /* sendSMS(`Verification Request Rejected`, user.contactNumber); */
+        return res.status(200).json({
+          success: true,
+          message: "Verification Request Rejected",
+        });
+      } else {
+       /*  sendSMS(`Verification Request Approved`, user.contactNumber); */
+        return res.status(200).json({
+          success: true,
+          message: "Verification Request Approved",
+        });
+      }
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "DB Error",
+      });
+    }
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error " + error,
+    });
+  }
+});
+
+
+
 authController.put('/update/:id', upload.single('image'), async (req, res) => {
   try {
     const error = {};

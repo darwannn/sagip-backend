@@ -27,7 +27,7 @@ const SafetyTips = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalShown, setisModalShown] = useState(false);
-  const [safetyTipDetails, setSafetyTipDetails] = useState("");
+  const [verificationRequest, setVerificationRequest] = useState("");
 
   useEffect(() => {
     const fetchSafetyTips = async () => {
@@ -61,16 +61,17 @@ const SafetyTips = () => {
   }, [activeCategory, searchQuery, safetyTips]);
 
   useEffect(() => {
-    if (id) {
-      const fetchSafetyTipDetails = async () => {
-        try {
+    const fetchVerificationRequest = async () => {
+      try {
           const options = { 'Authorization': `Bearer ${token}` };
           const data = await request(`/auth/${id}`, 'GET', options);
          
     if(data.message != "not found") { 
   console.log(data);
-            setSafetyTipDetails(data);
-     
+            setVerificationRequest(data);
+     if(data.status !== "semi verified") {
+      navigate(`/manage/account/verification-request`);
+     }
   
           } else {
             navigate(`/manage/account/verification-request`);
@@ -80,15 +81,63 @@ const SafetyTips = () => {
           console.error(error);
         }
       };
-      fetchSafetyTipDetails();
+      
+      if (id) {
+        fetchVerificationRequest();
       setisModalShown(true);
-    
-    
     } else {
       setisModalShown(false);
     
     }
-  }, [id, token]);
+  }, [id, token,isModalShown]);
+
+
+  const handleReject = async (e) => {
+    e.preventDefault();
+
+    try {
+      const options = {     'Content-Type': 'application/json', Authorization: `Bearer ${token}`,};
+      const data = await request(`/auth/verification-request/${id}`, 'PUT',options,{action:"reject"});
+      const { success, message } = data;
+   console.log(data);
+
+      if(success) {
+     
+        toast.success(message);
+       
+     return; 
+    }
+    else {
+
+        toast.success(message);
+      
+    } }catch (error) {  
+      console.error(error);
+    }
+  };
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    try {
+      const options = {     'Content-Type': 'application/json', Authorization: `Bearer ${token}`,};
+      const data = await request(`/auth/verification-request/${id}`, 'PUT',options, {action:"approve"});
+      const { success, message } = data;
+   console.log(data);
+
+      if(success) {
+     
+        toast.success(message);
+       
+     return; 
+    }
+    else {
+
+        toast.success(message);
+      
+    } }catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -96,6 +145,7 @@ const SafetyTips = () => {
       
        
         <div>
+        <div>Total Request: {safetyTips.length}</div>
         <input
   type="text"
   placeholder="Search safetyTips"
@@ -117,7 +167,7 @@ const SafetyTips = () => {
                     <Link to={`/manage/account/verification-request/${safetyTip._id}`} >
                  
                     <h4>{ 
-                    `${safetyTip.firstname} ${safetyTipDetails&&safetyTipDetails.middlename.split(' ').map(name => name.charAt(0)).join('')}`}</h4>
+                    `${safetyTip.firstname} ${verificationRequest&&verificationRequest.middlename.split(' ').map(name => name.charAt(0)).join('')}`}</h4>
                     <h4>{ 
                     moment(safetyTip.verificationRequestDate).format('MMMM DD, YYYY HH:mm A')}</h4>
                     </Link>
@@ -141,26 +191,26 @@ const SafetyTips = () => {
           Go Back
         </Link>
           <div> Name: 
-            {  `${safetyTipDetails.firstname} ${safetyTipDetails&&safetyTipDetails.middlename.split(' ').map(name => name.charAt(0)).join('')} ${safetyTipDetails.lastname}`}
+            {  `${verificationRequest.firstname} ${verificationRequest&&verificationRequest.middlename.split(' ').map(name => name.charAt(0)).join('')} ${verificationRequest.lastname}`}
             </div>
          <br></br>
          <div> Address: 
-         {`${safetyTipDetails.street}, ${safetyTipDetails.barangay}, ${safetyTipDetails.municipality}`}
+         {`${verificationRequest.street}, ${verificationRequest.barangay}, ${verificationRequest.municipality}`}
           </div>  <br></br>
    
-         <div> Contact Number: #{safetyTipDetails.contactNumber}
+         <div> Contact Number: #{verificationRequest.contactNumber}
           </div>  <br></br>
-         <div> Date of Birth { moment(safetyTipDetails.birthdate).format('MMMM DD, YYYY')}
+         <div> Date of Birth { moment(verificationRequest.birthdate).format('MMMM DD, YYYY')}
           </div>  <br></br>
           <h4>Requested Created { 
-                    moment(safetyTipDetails.verificationRequestDate).format('MMMM DD, YYYY HH:mm A')}</h4>  <br></br>
+                    moment(verificationRequest.verificationRequestDate).format('MMMM DD, YYYY HH:mm A')}</h4>  <br></br>
           <h4>Date Created{ 
-                    moment(safetyTipDetails.createdAt).format('MMMM DD, YYYY HH:mm A')}</h4>
+                    moment(verificationRequest.createdAt).format('MMMM DD, YYYY HH:mm A')}</h4>
 
 
 {
-  safetyTipDetails.verificationPicture &&
-  safetyTipDetails.verificationPicture.map((picture, index) => (
+  verificationRequest.verificationPicture &&
+  verificationRequest.verificationPicture.map((picture, index) => (
     <img
       src={`http://localhost:5000/images/${picture}`}
       key={index}
@@ -171,9 +221,9 @@ const SafetyTips = () => {
 }
 
 
-                  {/*   <button onClick={handleReject}>Reject Verification</button>
+                    <button onClick={handleReject}>Reject Verification</button>
                     <br></br>
-                    <button onClick={handleVerify}>Verify</button> */}
+                    <button onClick={handleVerify}>Verify</button>
         </>
       )}
     </>
