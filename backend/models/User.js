@@ -69,10 +69,7 @@ const userSchema = mongoose.Schema(
       type: Date,
       //required: [true, 'Please add a codeExpiration'],
     },
-    verificationPicture: {
-      type: String,
-      //required: [true, 'Please add a verificationPicture'],
-    },
+  
     userType: {
       type: String,
       //required: [true, 'Please add a userType'],
@@ -84,7 +81,14 @@ const userSchema = mongoose.Schema(
     },
 
     isBanned: {
-      type: String,
+      type: Boolean,
+      default:false
+      //required: [true, 'Please add a password'],
+
+    },
+    isArchived: {
+      type: Boolean,
+      default:false
       //required: [true, 'Please add a password'],
 
     },
@@ -92,6 +96,15 @@ const userSchema = mongoose.Schema(
       type: String,
       //required: [true, 'Please add a password'],
 
+    },
+
+    verificationPicture: {
+      type: [String],
+      default: [],
+    },
+    
+    verificationRequestDate: {
+      type: Date,
     },
   },
   {

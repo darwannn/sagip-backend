@@ -31,8 +31,15 @@ import ManageEmergencyFacility from './pages/EmergencyFacility/ManageEmergencyFa
 
 import SendAlert from './pages/SendAlert';
 
+import ManageVerificationRequest from './pages/Account/ManageVerificationRequest';
+
+import EditPassword from './pages/Account/EditPassword';
 import ManageAccount from './pages/Account/ManageAccount';
 import AccountInput from './pages/Account/AccountInput';
+import VerifyIdentity from './pages/Account/VerifyIdentity';
+import EditPersonalInformation from './pages/Account/EditPersonalInformation';
+import EditContactNumber from './pages/Account/EditContactNumber';
+import PasswordVerification from './pages/Auth/PasswordVerification';
 
 
 const App = () => {
@@ -190,6 +197,18 @@ const App = () => {
         }
         />
          <Route
+          path="/manage/account/verification-request"
+          element={
+            <ManageVerificationRequest />
+        }
+        />
+         <Route
+          path="/manage/account/verification-request/:id"
+          element={
+            <ManageVerificationRequest />
+        }
+        />
+         <Route
           path="/manage/account/staff"
           element={
             <ManageAccount user="staff"/>
@@ -225,6 +244,36 @@ const App = () => {
           path="/manage/account/staff/update/:id"
           element={
             <AccountInput user="staff" type="update"/>
+        }
+        />
+         <Route
+          path="/verify-identity"
+          element={
+            <VerifyIdentity />
+        }
+        />
+         <Route
+          path="/profile/personal-information/edit"
+          element={
+            <EditPersonalInformation />
+        }
+        />
+         <Route
+          path="/profile/password/edit"
+          element={
+            <EditPassword />
+        }
+        />
+         <Route
+          path="/profile/contact-number/edit"
+          element={
+            <EditContactNumber />
+        }
+        />
+         <Route
+          path="/profile/password-verification"
+          element={
+            <PasswordVerification />
         }
         />
 

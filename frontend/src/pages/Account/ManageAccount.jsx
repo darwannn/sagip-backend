@@ -96,7 +96,7 @@ const Account = ({user}) => {
   const columns = [
     {
       name: 'Name',
-      selector: (row) => `${row.firstname} ${row.middlename ? row.middlename.split(' ').map(name => name.charAt(0)).join('') : ''} ${row.lastname}`,
+      selector: (row) => `${row.firstname} ${row.middlename.split(' ').map(name => name.charAt(0)).join('') } ${row.lastname}`,
     },
     {
       
@@ -144,7 +144,7 @@ const Account = ({user}) => {
       <Navbar />
       <br />
       <br />
-      {user == "resident" ? <Link to="/manage/account/staff/add">Create</Link> :<Link to="/manage/account/staff/add">Create</Link>}
+      {user == "resident" ? <Link to="/manage/account/verification-request">Verification Request</Link> :<Link to="/manage/account/staff/add">Create</Link>}
       
       {user == "resident" ?
       <>

@@ -28,7 +28,7 @@ const NewPassword = () => {
         Authorization: `Bearer ${token}`,
       };
 
-      const data = await request('/auth/new-password', 'POST', options, { password });
+      const data = await request('/auth/new-password', 'PUT', options, { password,  for: "new-password" });
       console.log(data);
       
       const { success, message } = data;
