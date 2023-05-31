@@ -1,11 +1,12 @@
 const authController = require('express').Router()
 const User = require("../models/User")
+const Notification = require("../models/Notification")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const {
   isEmpty,
   isImage,
-  isLessThanSize
+  isLessThanSize,createNotification
 } = require('./functionController')
 
 const verifyToken = require('../middlewares/verifyToken')
@@ -184,7 +185,7 @@ authController.post('/register', async (req, res) => {
         attempt,
         verificationCode,
         codeExpiration,
-        verificationPicture: emptyString,
+        verificationPicture,
         userType,
         status,
 
@@ -925,27 +926,48 @@ console.log(req.user.id);
 authController.put('/verification-request/:id', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, {
-      $unset: {
+    /*   $unset: {
         verificationRequestDate: Date.now(),
-      },
+      }, */
     }, { new: true });
 
-    if (req.body.action !== "reject") {
+    /* if (req.body.action === "reject") {
+      user.verificationPicture = [];
+    
+      await user.save();
+    } else {
       user.status = "verified";
       await user.save();
-    }
+    } */
 
 
     if (user) {
       if (req.body.action === "reject") {
         /* sendSMS(`Verification Request Rejected`, user.contactNumber); */
+        /* await Notification.create({
+          userId: req.params.id,
+          notifications: [
+            {
+              title: "Verification Request",
+              message: "Verification Request Rejected",
+              dateSent: Date.now(),
+              category: "error",
+              isRead: false
+            }
+          ]
+        }); */
+
+
+        await createNotification(req.params.id,"title","message","category")
         return res.status(200).json({
           success: true,
           message: "Verification Request Rejected",
         });
       } else {
+        await createNotification(req.params.id,"title","message","category")
        /*  sendSMS(`Verification Request Approved`, user.contactNumber); */
-        return res.status(200).json({
+      
+       return res.status(200).json({
           success: true,
           message: "Verification Request Approved",
         });

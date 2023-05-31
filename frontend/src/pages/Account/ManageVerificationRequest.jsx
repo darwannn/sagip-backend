@@ -36,7 +36,9 @@ const SafetyTips = () => {
         const filteredRecords = data.filter(
           (record) => record.verificationPicture.length !== 0 && record.status === "semi verified" &&  record.verificationRequestDate
         );
-      
+      console.log('====================================');
+      console.log(filteredRecords);
+      console.log('====================================');
         setSafetyTips(filteredRecords);
       } catch (error) {
         console.error(error);

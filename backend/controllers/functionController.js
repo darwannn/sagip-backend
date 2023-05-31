@@ -1,6 +1,7 @@
 
 
 const path = require("path");
+const Notification = require("../models/Notification")
   
   const isEmpty = (value) => {
     if (value == "") {
@@ -27,4 +28,23 @@ const path = require("path");
 
   }
 
-module.exports = {isEmpty,isImage,isLessThanSize}
+
+  const createNotification = async (id,title,message,category)=> {
+    await Notification.findOneAndUpdate(
+      { userId: id }, // Filter to find the notification by its ID
+      {
+        $push: {
+          notifications: {
+            title: title,
+            message: message,
+            dateSent: Date.now(),
+            category: category,
+            isRead: false
+          }
+        }
+      }
+    );
+    
+  }
+
+module.exports = {isEmpty,isImage,isLessThanSize,createNotification}
