@@ -54,16 +54,18 @@ const AccountInput = ({ user, type }) => {
   const [userType, setUserType] = useState('');
   const [status, setStatus] = useState('');
   
-
+  const [isArchived, setIsArchived] = useState(false);
+  const [isBanned, setIsBanned] = useState(false);
   
    
      
   
 
   useEffect(() => {
-    console.log(type);
+    console.log(token);
     if (type === 'update') {
       const fetchAccountDetails = async () => {
+        console.log(token);
         try {
           const options = {
             Authorization: `Bearer ${token}`,
@@ -86,6 +88,8 @@ console.log(data);
           setStatus(data.status);
           setUserType(data.userType);
           setAttempt(data.attempt);
+          setIsArchived(data.isArchived);
+          setIsBanned(data.isBanned);
      
 
       
@@ -120,7 +124,9 @@ console.log(data);
         contactNumber,
         status:"fully verified",
         userType,
-        verificationCode:0
+        verificationCode:0,
+        isBanned,
+        isArchived
       }
       
     } else if (type === 'update') {
@@ -218,13 +224,13 @@ console.log("reset");
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <input
+         {/*  <input
             type="password"
             placeholder="Password..."
           
             onChange={(e) => setPassword(e.target.value)}
           />
-     
+      */}
           <input
             type="text"
             placeholder="Region..."
@@ -330,19 +336,14 @@ console.log("reset");
     </option>
   ))}
 </select>
-           {/* <input
-            type="text"
-            placeholder="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          /> */}
-           {/* <input
-            type="text"
-            placeholder="type"
-            value={userType}
-            onChange={(e) => setUserType(e.target.value)}
-          /> */}
-               
+<div>
+                  <label>Archived</label>
+                  <input type="checkbox" onChange={(e) => setIsArchived(e.target.checked)} checked={isArchived}/>
+                  </div>
+                     <div>
+                  <label>isBanned</label>
+                  <input type="checkbox" onChange={(e) => setIsBanned(e.target.checked)} checked={isBanned}/>
+                  </div>
             
             
             
@@ -360,6 +361,10 @@ console.log("reset");
           </form>
               <button onClick={resetPassword}>resetPassword</button>
         </div>
+    
+                   
+                  
+                
       </div>
     </>
   );

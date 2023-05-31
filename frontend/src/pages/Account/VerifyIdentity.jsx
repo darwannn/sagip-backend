@@ -1,10 +1,25 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState , useRef} from 'react';
 
+import { Link,useNavigate,useParams } from 'react-router-dom';
+
+import { useSelector } from 'react-redux';
+
+import { request } from '../../utils/axios';
+import { statusCategory } from '../../utils/categories';
+
+import { toast } from 'react-toastify';
+import moment from 'moment';
+import DataTable from 'react-data-table-component';
+
+import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai';
+import { FiArrowRight } from 'react-icons/fi';
+
+import Navbar from '../../components/Navbar';
 function VerifyIdentity() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [selfieImage, setSelfieImage] = useState(null);
-
+  const { token,user } = useSelector((state) => state.auth);
   const handleStartCamera = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices
@@ -32,11 +47,38 @@ function VerifyIdentity() {
     tracks.forEach((track) => track.stop());
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-//
-  
-    setSelfieImage(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    e.preventDefault();
+
+
+    const formData = new FormData();
+    formData.append('identificationCardPicture', "picture.png");
+    formData.append('selfie', "selfie.png");
+
+
+    try {
+      const options = {     Authorization: `Bearer ${token}`,};
+     /*  const data = await request(url, method, options, formData); */
+      const data = await request(`/auth/verify-identity`, 'PUT', options, formData, true);
+      console.log(data);
+      const { success, message } = data;
+      if(success) {
+     
+        toast.success(message);
+       
+     return; 
+    }
+    else {
+      if(message != "input error") {
+        toast.success(message);
+      }  else {
+    
+      }
+    } }catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -55,7 +97,7 @@ function VerifyIdentity() {
           <img src={selfieImage} alt="Captured selfie" width="200" height="150" />
         )}
 
-        <button type="submit" disabled={!selfieImage}>
+        <button type="submit" >
           Submit
         </button>
       </form>

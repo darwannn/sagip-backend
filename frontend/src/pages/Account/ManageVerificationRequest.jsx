@@ -34,9 +34,9 @@ const SafetyTips = () => {
       try {
         const data = await request('/auth/', 'GET');
         const filteredRecords = data.filter(
-          (record) => record.verificationPicture === "" && record.status === "semi verified"
+          (record) => record.verificationPicture.length !== 0 && record.status === "semi verified" &&  record.verificationRequestDate
         );
-       
+      
         setSafetyTips(filteredRecords);
       } catch (error) {
         console.error(error);
@@ -59,7 +59,6 @@ const SafetyTips = () => {
       ));
     }
   }, [activeCategory, searchQuery, safetyTips]);
-
 
   useEffect(() => {
     if (id) {
@@ -120,7 +119,7 @@ const SafetyTips = () => {
                     <h4>{ 
                     `${safetyTip.firstname} ${safetyTipDetails&&safetyTipDetails.middlename.split(' ').map(name => name.charAt(0)).join('')}`}</h4>
                     <h4>{ 
-                    moment(safetyTip.createdAt).format('MMMM DD, YYYY HH:mm A')}</h4>
+                    moment(safetyTip.verificationRequestDate).format('MMMM DD, YYYY HH:mm A')}</h4>
                     </Link>
                 
                     
@@ -138,15 +137,43 @@ const SafetyTips = () => {
         <br></br>
         {isModalShown && (
         <>
-          <div>
+         <Link to="/manage/account/resident">
+          Go Back
+        </Link>
+          <div> Name: 
             {  `${safetyTipDetails.firstname} ${safetyTipDetails&&safetyTipDetails.middlename.split(' ').map(name => name.charAt(0)).join('')} ${safetyTipDetails.lastname}`}
+            </div>
          <br></br>
+         <div> Address: 
          {`${safetyTipDetails.street}, ${safetyTipDetails.barangay}, ${safetyTipDetails.municipality}`}
-          </div>
-          <h4>{ 
+          </div>  <br></br>
+   
+         <div> Contact Number: #{safetyTipDetails.contactNumber}
+          </div>  <br></br>
+         <div> Date of Birth { moment(safetyTipDetails.birthdate).format('MMMM DD, YYYY')}
+          </div>  <br></br>
+          <h4>Requested Created { 
+                    moment(safetyTipDetails.verificationRequestDate).format('MMMM DD, YYYY HH:mm A')}</h4>  <br></br>
+          <h4>Date Created{ 
                     moment(safetyTipDetails.createdAt).format('MMMM DD, YYYY HH:mm A')}</h4>
-                    <button>Reject Verification</button>
-                    <button> Verify</button>
+
+
+{
+  safetyTipDetails.verificationPicture &&
+  safetyTipDetails.verificationPicture.map((picture, index) => (
+    <img
+      src={`http://localhost:5000/images/${picture}`}
+      key={index}
+      style={{ width: "300px" }}
+      
+    />
+  ))
+}
+
+
+                  {/*   <button onClick={handleReject}>Reject Verification</button>
+                    <br></br>
+                    <button onClick={handleVerify}>Verify</button> */}
         </>
       )}
     </>

@@ -15,13 +15,27 @@ export const safetyTipsCategory = [
   ];
   
   
+ /*  export const statusCategory = [
+    'All',
+    'Unverified',
+    'Semi Verified',
+    'Fully Verified',
+
+  ];
+  
+  export const userTypeCategory = [
+    'All',
+    'Resident',
+    'Responder',
+    'Dispatcher',
+    'Admin',
+    'Super Admin',
+  ]; */
   export const statusCategory = [
     'all',
     'unverified',
     'semi verified',
     'fully verified',
-    'banned',
-    'archived',
   ];
   
   export const userTypeCategory = [
@@ -30,7 +44,7 @@ export const safetyTipsCategory = [
     'responder',
     'dispatcher',
     'admin',
-    'super-admin',
+    'super admin',
   ];
   
   

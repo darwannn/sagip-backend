@@ -159,11 +159,7 @@ const Account = ({user}) => {
         }
 
 
-{
 
-
-  
-}
       <div>
         <input
           type="text"

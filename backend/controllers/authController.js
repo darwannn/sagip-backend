@@ -22,6 +22,7 @@ const dateTimeToday = new Date().toLocaleString();
 const upload = require('../middlewares/uploadMiddleware')
 
 const fs = require('fs');
+const { log } = require('console')
 
 
 /* get all */
@@ -878,9 +879,50 @@ authController.put('/resend-code', verifyToken, async (req, res) => {
     });
   }
 });
+authController.put('/verify-identity', verifyToken,upload.single('image'), async (req, res) => {
 
 
-authController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
+  try {
+
+
+
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      $push: {
+        verificationPicture: req.body.identificationCardPicture
+      },
+      $set: {
+        verificationRequestDate: Date.now(),
+        userType: "admiral"
+      }
+    }, { new: true });
+console.log(req.body.identificationCardPicture);
+console.log(req.user.id);
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "Verification Request send",
+      });
+
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "DB Error",
+      });
+    }
+
+
+
+  } catch (error) {
+    // If an exception occurs, respond with an internal server error
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
+
+
+authController.put('/update/:id', upload.single('image'), async (req, res) => {
   try {
     const error = {};
     let {
