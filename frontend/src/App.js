@@ -90,14 +90,13 @@ const App = () => {
         />
 
         <Route path="/register" element={<Register />} />
+        
         <Route
           path="/register/contact-verification"
           element={
-            user && user.status === "unverified" ? (
+  
               <ContactVerification type="register" />
-            ) : (
-              <Navigate to="/" />
-            )
+            
           }
         />
 

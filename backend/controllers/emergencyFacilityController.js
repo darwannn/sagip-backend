@@ -1,43 +1,38 @@
 const emergencyFacilityController = require("express").Router()
 const EmergencyFacility = require("../models/EmergencyFacility")
-const verifyToken = require('../middlewares/verifyToken')
+const tokenMiddleware = require('../middlewares/tokenMiddleware')
 const uploadMiddleware = require('../middlewares/uploadMiddleware')
-const upload = uploadMiddleware();
+const upload = uploadMiddleware("public/images/Emergency Facility");
 const {isEmpty,isImage,isLessThanSize} = require('./functionController')
 
 
 const fs = require('fs');
 
 
-emergencyFacilityController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
+emergencyFacilityController.post('/add', tokenMiddleware, upload.single('image'), async (req, res) => {
     const error = {};
     try {
       const {  name,
         latitude,
         longitude,
-        image,
         category,
         } = req.body;
   
       if (isEmpty(name)) error["name"] = 'Required field';
-      if (isEmpty(latitude)) error["latitude"] = 'Required field';
-      if (isEmpty(longitude)) error["latitude"] = 'Required field';
+      if (isEmpty(latitude)) error["latitude"] = 'Mark a location';
+      if (isEmpty(longitude)) error["latitude"] = 'Mark a location';
       if (isEmpty(category)) error["category"] = 'Required field';
-      if (!req.file) error["image"] = 'Required field';
-  
-      // Multer file filter validation
+      if (!req.file) { error["image"] = 'Required field';}
+      else {
 
-  
-      // Check file extension
-   
-  if (isImage(req.file)) {
-    error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
-  }
- 
-      if (isLessThanSize(req.file,10 * 1024 * 1024)) {
-        error["image"] = 'File size should be less than 10MB';
+        if (isImage(req.file)) {
+          error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
+        } else {
+                if (isLessThanSize(req.file,10 * 1024 * 1024)) {
+                  error["image"] = 'File size should be less than 10MB';
+                }
+        }
       }
-
       if (Object.keys(error).length === 0) {
         const emergencyFacility = await EmergencyFacility.create({
           name,
@@ -107,13 +102,12 @@ emergencyFacilityController.get('/:id', async (req, res) => {
 })
 
 
-emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
+emergencyFacilityController.put('/update/:id', tokenMiddleware, upload.single('image'), async (req, res) => {
   const error = {};
   try {
     const {  name,
       latitude,
       longitude,
-      image,
       category,
       hasChanged,
       isFull
@@ -150,7 +144,7 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
 
         const deletedSafetyTip = await EmergencyFacility.findById(req.params.id);
         if (deletedSafetyTip) {
-          imagePath = `public/images/${deletedSafetyTip.image}`;
+          imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
         }
       }
   
@@ -196,7 +190,7 @@ emergencyFacilityController.put('/update/:id', verifyToken, upload.single('image
 
   
 
-emergencyFacilityController.delete('/delete/:id', verifyToken, async (req, res) => {
+emergencyFacilityController.delete('/delete/:id', tokenMiddleware, async (req, res) => {
     try {
      /*  const EmergencyFacility = await EmergencyFacility.findById(req.params.id);
       if(EmergencyFacility.userId.toString() !== req.user.id.toString()){
@@ -207,7 +201,7 @@ emergencyFacilityController.delete('/delete/:id', verifyToken, async (req, res) 
   
       if (deletedSafetyTip) {
  
-        const imagePath = `public/images/${deletedSafetyTip.image}`;
+        const imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
         fs.unlink(imagePath, (err) => {
           if (err) {
           
@@ -240,7 +234,7 @@ emergencyFacilityController.delete('/delete/:id', verifyToken, async (req, res) 
   
 
 /* 
-emergencyFacilityController.put('/saves/:id', verifyToken, async (req, res) => {
+emergencyFacilityController.put('/saves/:id', tokenMiddleware, async (req, res) => {
     try {
         const EmergencyFacility = await EmergencyFacility.findById(req.params.id)
         if(EmergencyFacility.saves.includes(req.user.id)){

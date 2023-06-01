@@ -1,48 +1,45 @@
+import { useState } from "react";
 
-import { useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
 
-import { Link, useNavigate } from 'react-router-dom';
+import { register } from "../../redux/authSlice";
+import { useDispatch } from "react-redux";
 
-import { register } from '../../redux/authSlice';
-import { useDispatch } from 'react-redux';
+import { request } from "../../utils/axios";
 
-import { request } from '../../utils/axios';
-
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [region, setRegion] = useState('');
-  const [province, setProvince] = useState('');
-  const [municipality, setMunicipality] = useState('');
-  const [barangay, setBarangay] = useState('');
-  const [street, setStreet] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [middlename, setMiddlename] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [gender, setGender] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  
-  
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [region, setRegion] = useState("");
+  const [province, setProvince] = useState("");
+  const [municipality, setMunicipality] = useState("");
+  const [barangay, setBarangay] = useState("");
+  const [street, setStreet] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [middlename, setMiddlename] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [gender, setGender] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+
   const handleRegister = async (e) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       console.log("Passwords do not match");
       return;
     }
-  
+
     try {
-      const options = { 'Content-Type': 'application/json' };
-      const data = await request('/auth/register', 'POST', options, {
+      const options = { "Content-Type": "application/json" };
+      const data = await request("/auth/register", "POST", options, {
         email,
         password,
         confirmPassword,
@@ -55,33 +52,33 @@ const Register = () => {
         middlename,
         lastname,
         gender,
-        userType:"resident",
-        status:"unverified",
+        userType: "resident",
+        status: "unverified",
         birthdate,
         contactNumber,
       });
-      
+
       const { success, message } = data;
-      if(success) {
+      if (success) {
         dispatch(register(data));
         toast.success(message);
-        navigate('/register/contact-verification');  
-     return; 
-    }
-    else {
-      if(message != "input error") {
-        toast.success(message);
-      }  else {
-        // do input message error here
+        navigate("/register/contact-verification");
+        return;
+      } else {
+        if (message !== "input error") {
+          toast.success(message);
+        } else {
+          // do input message error here
+        }
       }
-    } }catch (error) {
+    } catch (error) {
       console.error(error);
     }
   };
-  
+
   return (
-    <div >
-      <div >
+    <div>
+      <div>
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
           <input

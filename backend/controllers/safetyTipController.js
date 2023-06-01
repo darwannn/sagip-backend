@@ -1,15 +1,14 @@
 const safetyTipController = require("express").Router()
 const SafetyTip = require("../models/SafetyTip")
-const verifyToken = require('../middlewares/verifyToken')
+const tokenMiddleware = require('../middlewares/tokenMiddleware')
 const { isEmpty, isImage, isLessThanSize } = require('./functionController')
-
 
 const uploadMiddleware = require('../middlewares/uploadMiddleware')
 const upload = uploadMiddleware('public/images/Safety Tip'); 
 
 const fs = require('fs');
 
-safetyTipController.post('/add', verifyToken, upload.single('image'), async (req, res) => {
+safetyTipController.post('/add', tokenMiddleware, upload.single('image'), async (req, res) => {
     const error = {};
     try {
       const { title, content, category } = req.body;
@@ -17,16 +16,19 @@ safetyTipController.post('/add', verifyToken, upload.single('image'), async (req
       if (isEmpty(title)) error["title"] = 'Required field';
       if (isEmpty(content)) error["content"] = 'Required field';
       if (isEmpty(category)) error["category"] = 'Required field';
-      if (!req.file) error["image"] = 'Required field';
+     
+      if (!req.file) { error["image"] = 'Required field';}
+      else {
 
-   
-  if (isImage(req.file)) {
-    error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
-  }
-
-      if (isLessThanSize(req.file,10 * 1024 * 1024)) {
-        error["image"] = 'File size should be less than 10MB';
+        if (isImage(req.file)) {
+          error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
+        } else {
+                if (isLessThanSize(req.file,10 * 1024 * 1024)) {
+                  error["image"] = 'File size should be less than 10MB';
+                }
+        }
       }
+
 
       if (Object.keys(error).length === 0) {
         const safetyTip = await SafetyTip.create({
@@ -97,7 +99,7 @@ safetyTipController.get('/:id', async (req, res) => {
 })
 
 
-safetyTipController.put('/update/:id', verifyToken, upload.single('image'), async (req, res) => {
+safetyTipController.put('/update/:id', tokenMiddleware, upload.single('image'), async (req, res) => {
   const error = {};
   try {
     const { title, content, category, hasChanged } = req.body;
@@ -128,7 +130,7 @@ safetyTipController.put('/update/:id', verifyToken, upload.single('image'), asyn
 
         const deletedSafetyTip = await SafetyTip.findById(req.params.id);
         if (deletedSafetyTip) {
-          imagePath = `public/images/${deletedSafetyTip.image}`;
+          imagePath = `public/images/Safety Tip/${deletedSafetyTip.image}`;
         }
       }
 
@@ -174,7 +176,7 @@ safetyTipController.put('/update/:id', verifyToken, upload.single('image'), asyn
 
   
 
-safetyTipController.delete('/delete/:id', verifyToken, async (req, res) => {
+safetyTipController.delete('/delete/:id', tokenMiddleware, async (req, res) => {
     try {
      /*  const safetyTip = await SafetyTip.findById(req.params.id);
       if(safetyTip.userId.toString() !== req.user.id.toString()){
@@ -185,7 +187,7 @@ safetyTipController.delete('/delete/:id', verifyToken, async (req, res) => {
   
       if (deletedSafetyTip) {
  
-        const imagePath = `public/images/${deletedSafetyTip.image}`;
+        const imagePath = `public/images/Safety Tip/${deletedSafetyTip.image}`;
         fs.unlink(imagePath, (err) => {
           if (err) {
           
@@ -218,7 +220,7 @@ safetyTipController.delete('/delete/:id', verifyToken, async (req, res) => {
   
 
 
-safetyTipController.put('/saves/:id', verifyToken, async (req, res) => {
+safetyTipController.put('/saves/:id', tokenMiddleware, async (req, res) => {
     try {
         const safetyTip = await SafetyTip.findById(req.params.id)
         if(safetyTip.saves.includes(req.user.id)){

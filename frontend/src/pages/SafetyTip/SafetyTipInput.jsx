@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from "react-router-dom";
 
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
-import { request } from '../../utils/axios';
-import { safetyTipsCategory } from '../../utils/categories';
+import { request } from "../../utils/axios";
+import { safetyTipsCategory } from "../../utils/categories";
 
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-import { AiOutlineCloseCircle, AiOutlineArrowRight } from 'react-icons/ai';
+import { AiOutlineCloseCircle } from "react-icons/ai";
 
-import Navbar from '../../components/Navbar';
+import Navbar from "../../components/Navbar";
 
 const SafetyTipInput = ({ type }) => {
   const { id } = useParams();
@@ -24,30 +24,29 @@ const SafetyTipInput = ({ type }) => {
 
   const { token } = useSelector((state) => state.auth);
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("");
 
   const [image, setImage] = useState(null);
-  const [imageName, setImageName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageName, setImageName] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
 
   const [hasChanged, setHasChanged] = useState(false);
-  
 
   useEffect(() => {
-    if (type === 'update') {
+    if (type === "update") {
       const fetchSafetyTipDetails = async () => {
         try {
           const options = {
             Authorization: `Bearer ${token}`,
           };
-          const data = await request(`/safety-tips/${id}`, 'GET', options);
+          const data = await request(`/safety-tips/${id}`, "GET", options);
 
           setTitle(data.title);
           setContent(data.content);
           setCategory(data.category);
-          setImageUrl(`http://localhost:5000/images/${data.image}`);
+          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -56,29 +55,29 @@ const SafetyTipInput = ({ type }) => {
       };
       fetchSafetyTipDetails();
     }
-  }, [id, type, setTitle, setContent, setCategory, token]);
+  }, [type, setTitle, setContent, setCategory, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', content);
-      formData.append('category', category);
-      formData.append('hasChanged', hasChanged);
-      formData.append('image', image);
+      formData.append("title", title);
+      formData.append("content", content);
+      formData.append("category", category);
+      formData.append("hasChanged", hasChanged);
+      formData.append("image", image);
 
       const options = {
         Authorization: `Bearer ${token}`,
       };
 
       let url, method;
-      if (type === 'add') {
-        url = '/safety-tips/add';
-        method = 'POST';
-      } else if (type === 'update') {
+      if (type === "add") {
+        url = "/safety-tips/add";
+        method = "POST";
+      } else if (type === "update") {
         url = `/safety-tips/update/${id}`;
-        method = 'PUT';
+        method = "PUT";
       }
 
       const data = await request(url, method, options, formData, true);
@@ -87,9 +86,11 @@ const SafetyTipInput = ({ type }) => {
       const { success, message } = data;
       if (success) {
         toast.success(message);
-       /*  navigate(`/manage/safety-tips/${type === 'add' ? data.safetyTip._id : id}`); */
+        navigate(
+          `/manage/safety-tips/${type === "add" ? data.safetyTip._id : id}`
+        );
       } else {
-        if (message !== 'input error') {
+        if (message !== "input error") {
           toast.error(message);
         } else {
           toast.error(message);
@@ -113,8 +114,9 @@ const SafetyTipInput = ({ type }) => {
 
   const handleCloseImage = () => {
     setImage(null);
-    setImageName('');
-    setImageUrl('');
+    hasChanged(false);
+    setImageName("");
+    setImageUrl("");
   };
 
   return (
@@ -122,32 +124,42 @@ const SafetyTipInput = ({ type }) => {
       <Navbar />
       <div>
         <div>
-          <Link to="/manage/safety-tips">
-            Go Back <AiOutlineArrowRight />
-          </Link>
-          <h2>{type === 'add' ? 'Add' : 'Update'} Safety Tip</h2>
+          <Link to="/manage/safety-tips">Go Back</Link>
+          <h2>{type === "add" ? "Add" : "Update"} Safety Tip</h2>
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div>
               <label>Title: </label>
-              <input type="text" placeholder="Title..." value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input
+                type="text"
+                placeholder="Title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </div>
             <div>
               <label>Description: </label>
-              <ReactQuill value={content} onChange={setContent} readOnly={false} theme="snow" />
+              <ReactQuill
+                value={content}
+                onChange={setContent}
+                readOnly={false}
+                theme="snow"
+              />
             </div>
             <div>
-              <label>Category: </label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}>
-  <option value="" hidden>
-    Select a category
-  </option>
-  {safetyTipsCategory.slice(1).map((category) => (
-    <option key={category} value={category}>
-      {category}
-    </option>
-  ))}
-</select>
-
+              <label>Content: </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="" hidden>
+                  Select a category
+                </option>
+                {safetyTipsCategory.slice(1).map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label htmlFor="image">
@@ -156,7 +168,8 @@ const SafetyTipInput = ({ type }) => {
               <input id="image" type="file" onChange={onChangeFile} />
               {image && (
                 <p>
-                  {imageName} <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
+                  {imageName}{" "}
+                  <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
                 </p>
               )}
               {imageUrl && <img src={imageUrl} alt="Selected" />}

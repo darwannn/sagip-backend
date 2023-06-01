@@ -9,7 +9,7 @@ const {
   isLessThanSize,createNotification
 } = require('./functionController')
 
-const verifyToken = require('../middlewares/verifyToken')
+const tokenMiddleware = require('../middlewares/tokenMiddleware')
 // const isBanned = require('../middlewares/authMiddleware')
 const {
   sendSMS,
@@ -158,6 +158,7 @@ authController.post('/register', async (req, res) => {
       const falseStatus = false
 
 
+      
 
       /* create */
       const user = await User.create({
@@ -186,43 +187,32 @@ authController.post('/register', async (req, res) => {
         attempt,
         verificationCode,
         codeExpiration,
-        verificationPicture,
+  
         userType,
         status,
 
       })
 
-      if (user) {
+      const notification = await Notification.create({
+          userId: user._doc._id,
+          notifications: []
+        });
+      if (user && notification) {
 
         console.log("success");
 
         /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
-        /*   if (process.env.ENVIRONMENT === 'production') {
-              return   res.status(200).json({
-                  success:true,
-              message:"Please verify contact number",
-            })
-          } else { */
-
-
-        // const { ...userData } = user._doc;
-
-        /*  return res.status(200).json({
-           success: true,
-           message: "Please verify contact number",
-           user: user._doc,
-           token: generateToken(user._id)
-         });
-              */
+    
         if (verificationCode !== 0) {
+
           return res.status(200).json({
             success: true,
             message: "Please verify contact number",
             user: {
               for: "register",
               id: user._doc._id,
-              code: user._doc.verificationCode,
-              userType: user._doc.userType
+              userType: user._doc.userType,
+              status: user._doc.status
             },
             token: generateToken(user._id)
           });
@@ -233,16 +223,7 @@ authController.post('/register', async (req, res) => {
           });
         }
 
-        /*   return  res.status(200).json({
-              success:true,
-          _id: user.id,
-          name: user.email,
-          verificationCode: user.verficationCode,
-          codeExpiration:user.codeExpiration,
-          token: generateToken(user._id),
-          message:"Please verify contact number",
-        }) */
-        /*   } */
+    
 
       } else {
 
@@ -269,7 +250,7 @@ authController.post('/register', async (req, res) => {
   }
 })
 
-authController.delete('/delete/:id', verifyToken, async (req, res) => {
+authController.delete('/delete/:id', tokenMiddleware, async (req, res) => {
   try {
     /*  const safetyTip = await SafetyTip.findById(req.params.id);
      if(safetyTip.userId.toString() !== req.user.id.toString()){
@@ -318,7 +299,7 @@ authController.delete('/delete/:id', verifyToken, async (req, res) => {
 });
 
 
-authController.put('/update/contact-number', verifyToken, async (req, res) => {
+authController.put('/update/contact-number', tokenMiddleware, async (req, res) => {
   try {
     const error = {};
     let {
@@ -394,7 +375,7 @@ authController.put('/update/contact-number', verifyToken, async (req, res) => {
   }
 })
 
-authController.post('/contact-verification', verifyToken, async (req, res) => {
+authController.post('/contact-verification', tokenMiddleware, async (req, res) => {
   try {
     const error = {};
     const {
@@ -427,23 +408,18 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
           user.attempt = 0;
           user.verificationCode = 0;
           await user.save();
-
-          /*  return res.status(200).json({
-             success: true,
-             message: "Please verify contact number",
-             user: user._doc,
-             token: generateToken(user._id)
-           }); */
+        
+       
 
           if (type == "register")
             return res.status(200).json({
               success: true,
-              message: "Login Successfully",
+              message: "Verified successfully. You can now use your account!",
               user: {
                 for: "login",
                 id: user._doc._id,
-                code: user._doc.verificationCode,
-                userType: user._doc.userType
+                userType: user._doc.userType,
+                status: user._doc.status
               },
               token: generateToken(user._id)
             });
@@ -455,7 +431,8 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
               user: {
                 for: "new-password",
                 id: user._doc._id,
-                userType: user._doc.userType
+                userType: user._doc.userType,
+                status: user._doc.status
               },
               token: generateToken(user._id)
             });
@@ -466,7 +443,8 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
               user: {
                 for: "login",
                 id: user._doc._id,
-                userType: user._doc.userType
+                userType: user._doc.userType,
+                status: user._doc.status
               },
               token: generateToken(user._id)
             });
@@ -476,9 +454,7 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
           error['code'] = 'Incorrect code';
           user.attempt += 1
           await user.save()
-          console.log('====================================');
-          console.log(user);
-          console.log('====================================');
+
         }
       }
     }
@@ -500,7 +476,7 @@ authController.post('/contact-verification', verifyToken, async (req, res) => {
   }
 })
 
-authController.post('/password-verification', verifyToken, async (req, res) => {
+authController.post('/password-verification', tokenMiddleware, async (req, res) => {
   try {
 
     const {
@@ -534,9 +510,9 @@ authController.post('/password-verification', verifyToken, async (req, res) => {
       } else {
 
         return res.status(200).json({
-          success: true,
+          success: false,
           message: "Input error",
-          password: "Incorrect",
+          password: "Incorrect Password",
 
         });
 
@@ -613,17 +589,17 @@ authController.post('/login', async (req, res) => {
               user: {
                 for: "login",
                 id: user._doc._id,
-                userType: user._doc.userType
+                userType: user._doc.userType,
+                status: user._doc.status
               },
               token: generateToken(user._id)
             });
           }
         } else {
           error['password'] = 'Incorrect';
-          console.log('====================================');
+
           console.log(user.attempt);
-          console.log('====================================');
-          // Increment the attempt number if the password is incorrect
+
           user.attempt++;
           await user.save();
 
@@ -698,19 +674,12 @@ authController.post('/forgot-password', async (req, res) => {
             user: {
               for: "forgot-password",
               id: user._doc._id,
-              code: user._doc.verificationCode,
-              userType: user._doc.userType
+              userType: user._doc.userType,
+              status: user._doc.status
             },
             token: generateToken(user._id)
           });
-
         }
-        /*  return res.status(200).json({
-           success: true,
-           message: "Login Successfully",
-           user: user._doc,
-           token: generateToken(user._id)
-         }); */
       } else {
         error['error'] = 'Database Error';
         error["success"] = false;
@@ -732,7 +701,7 @@ authController.post('/forgot-password', async (req, res) => {
     });
   }
 });
-authController.put('/new-password' , verifyToken, async (req, res) => {
+authController.put('/new-password' , tokenMiddleware, async (req, res) => {
   // Variable declaration
 
   try {
@@ -791,7 +760,7 @@ authController.put('/new-password' , verifyToken, async (req, res) => {
     });
   }
 });
-authController.put('/reset-password/:id', verifyToken, async (req, res) => {
+authController.put('/reset-password/:id', tokenMiddleware, async (req, res) => {
   // Variable declaration
 
   try {
@@ -832,7 +801,7 @@ authController.put('/reset-password/:id', verifyToken, async (req, res) => {
   }
 });
 
-authController.put('/resend-code', verifyToken, async (req, res) => {
+authController.put('/resend-code', tokenMiddleware, async (req, res) => {
 
 
   try {
@@ -857,8 +826,8 @@ authController.put('/resend-code', verifyToken, async (req, res) => {
         user: {
           for: "forgot-password",
           id: user._doc._id,
-          code: user._doc.verificationCode,
-          userType: user._doc.userType
+          userType: user._doc.userType,
+          status: user._doc.status
         },
         token: generateToken(user._id)
       });
@@ -881,7 +850,7 @@ authController.put('/resend-code', verifyToken, async (req, res) => {
     });
   }
 });
-authController.put('/verify-identity', verifyToken,upload.single('image'), async (req, res) => {
+authController.put('/verify-identity', tokenMiddleware,upload.single('image'), async (req, res) => {
 
 
   try {
@@ -1094,58 +1063,6 @@ authController.put('/update/:id', upload.single('image'), async (req, res) => {
 
 
     if (Object.keys(error).length == 0) {
-
-      /*  profilePicture = "profile link"
-          attempt = 0;
-      
-          verificationCode = await generateCode();
-
-          const updateFields = {   
-            firstname,
-            middlename,
-            lastname,
-            contactNumber,
-            email,
-            region,
-            province,
-            municipality,
-            barangay,
-            street,
-            birthdate,
-            gender,
-            profilePicture,
-            attempt,
-            verificationCode,
-            userType,
-            status,
-        };
-          const user = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-
-        
-      
-          if (user) {
-         
-            console.log("success");
-          return res.status(200).json({
-            success: true,
-            message: "Updated Successfully",
-            user: {
-              for: "register",
-              id: user._doc._id,
-              code: user._doc.verificationCode,
-              userType: user._doc.userType
-            },
-            token: generateToken(user._id)
-          });
-
-          } else {
-
-            console.log("error");
-
-              error['error'] = 'Database Error'
-            return  res.status(400)
-          } */
-
 
       const updateFields = {
         firstname,

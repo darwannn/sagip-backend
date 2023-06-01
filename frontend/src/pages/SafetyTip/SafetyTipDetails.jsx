@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import { useParams,useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from "react-router-dom";
 
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
-import { request } from '../../utils/axios';
+import { request } from "../../utils/axios";
 
-import { format } from 'timeago.js';
+import { format } from "timeago.js";
 
-import { AiFillEdit, AiFillLike, AiFillDelete, AiOutlineArrowRight, AiOutlineLike } from 'react-icons/ai';
+import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 
-import Navbar from '../../components/Navbar';
-
+import Navbar from "../../components/Navbar";
 
 const SafetyTipDetails = () => {
   const { id } = useParams();
@@ -24,18 +23,16 @@ const SafetyTipDetails = () => {
   useEffect(() => {
     const fetchSafetyTipDetails = async () => {
       try {
-        const options = { 'Authorization': `Bearer ${token}` };
-        const data = await request(`/safety-tips/${id}`, 'GET', options);
-       
-  if(data.message != "not found") { 
-console.log(data);
-          setSafetyTipDetails(data);
-        setIsSaved(data.saves.includes(user.id));
+        const options = { Authorization: `Bearer ${token}` };
+        const data = await request(`/safety-tips/${id}`, "GET", options);
 
+        if (data.message !== "not found") {
+          console.log(data);
+          setSafetyTipDetails(data);
+          setIsSaved(data.saves.includes(user.id));
         } else {
           navigate(`/manage/safety-tips`);
         }
-
       } catch (error) {
         console.error(error);
       }
@@ -46,7 +43,7 @@ console.log(data);
   // like
   const handleSavedSafetyTip = async () => {
     try {
-      const options = { "Authorization": `Bearer ${token}` };
+      const options = { Authorization: `Bearer ${token}` };
       await request(`/safety-tips/saves/${id}`, "PUT", options);
       setIsSaved((prev) => !prev);
     } catch (error) {
@@ -58,24 +55,27 @@ console.log(data);
     <>
       <Navbar />
       <div>
-        <Link to="/manage/safety-tips">
-          Go Back <AiOutlineArrowRight />
-        </Link>
+        <Link to="/manage/safety-tips">Go Back</Link>
         <div>
-          <img src={`http://localhost:5000/images/${safetyTipDetails.image}`} style={{ width: "300px" }} />
+          <img
+            src={`http://localhost:5000/images/Safety Tip/${safetyTipDetails.image}`}
+            style={{ width: "300px" }}
+          />
           <div>
             <h3>{safetyTipDetails.title}</h3>
             {safetyTipDetails.userId?._id === user.id ? (
-              <div> {isSaved ? (
-                <div>
-                  <AiFillLike onClick={handleSavedSafetyTip} />
-                </div>
-              ) : (
-                <div>
-                  <AiOutlineLike onClick={handleSavedSafetyTip} />
-                </div>
-              )}</div>
-              
+              <div>
+                {" "}
+                {isSaved ? (
+                  <div>
+                    <AiFillLike onClick={handleSavedSafetyTip} />
+                  </div>
+                ) : (
+                  <div>
+                    <AiOutlineLike onClick={handleSavedSafetyTip} />
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 {isSaved ? (
@@ -93,16 +93,16 @@ console.log(data);
           <div>
             <p>
               <span>contentription: </span>
-              <span dangerouslySetInnerHTML={{ __html: safetyTipDetails.content }} />
+              <span
+                dangerouslySetInnerHTML={{ __html: safetyTipDetails.content }}
+              />
             </p>
             <div>
               <span>{safetyTipDetails.views} views</span>
             </div>
           </div>
           <div>
-            <span>
-    
-            </span>
+            <span></span>
             <span>
               <span>Created At:</span> {format(safetyTipDetails.createdAt)}
             </span>
