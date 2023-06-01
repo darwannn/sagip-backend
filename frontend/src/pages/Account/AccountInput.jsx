@@ -1,21 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate } from "react-router-dom";
 
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
-import { request } from '../../utils/axios';
-import { statusCategory,userTypeCategory } from '../../utils/categories';
+import { request } from "../../utils/axios";
+import { statusCategory, userTypeCategory } from "../../utils/categories";
 
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import "react-quill/dist/quill.snow.css";
 
-import { AiOutlineCloseCircle, AiOutlineArrowRight } from 'react-icons/ai';
-
-import Navbar from '../../components/Navbar';
+import Navbar from "../../components/Navbar";
 
 const AccountInput = ({ user, type }) => {
   const { id } = useParams();
@@ -24,54 +21,39 @@ const AccountInput = ({ user, type }) => {
 
   const { token } = useSelector((state) => state.auth);
 
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [region, setRegion] = useState("");
+  const [province, setProvince] = useState("");
+  const [municipality, setMunicipality] = useState("");
+  const [barangay, setBarangay] = useState("");
+  const [street, setStreet] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [middlename, setMiddlename] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [gender, setGender] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
 
-  const [image, setImage] = useState(null);
-  const [imageName, setImageName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [attempt, setAttempt] = useState("");
+  const [userType, setUserType] = useState("");
+  const [status, setStatus] = useState("");
 
-  const [hasChanged, setHasChanged] = useState(false);
-
-
-   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [region, setRegion] = useState('');
-  const [province, setProvince] = useState('');
-  const [municipality, setMunicipality] = useState('');
-  const [barangay, setBarangay] = useState('');
-  const [street, setStreet] = useState('');
-  const [firstname, setFirstname] = useState('');
-  const [middlename, setMiddlename] = useState('');
-  const [lastname, setLastname] = useState('');
-  const [gender, setGender] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-
-  const [attempt, setAttempt] = useState('');
-  const [userType, setUserType] = useState('');
-  const [status, setStatus] = useState('');
-  
   const [isArchived, setIsArchived] = useState(false);
   const [isBanned, setIsBanned] = useState(false);
-  
-   
-     
-  
 
   useEffect(() => {
     console.log(token);
-    if (type === 'update') {
+    if (type === "update") {
       const fetchAccountDetails = async () => {
         console.log(token);
         try {
           const options = {
             Authorization: `Bearer ${token}`,
           };
-          const data = await request(`/auth/${id}`, 'GET', options);
-console.log(data);
+          const data = await request(`/auth/${id}`, "GET", options);
+          console.log(data);
           setEmail(data.email);
           setPassword(data.password);
           setRegion(data.region);
@@ -90,26 +72,24 @@ console.log(data);
           setAttempt(data.attempt);
           setIsArchived(data.isArchived);
           setIsBanned(data.isBanned);
-     
-
-      
         } catch (error) {
           console.error(error);
         }
       };
       fetchAccountDetails();
     }
-  }, [id, type, setTitle, setContent, setCategory, token]);
+  }, [id, type, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let url, method,formData;
-    if (type === 'add') {
-      url = '/auth/register';
-      method = 'POST';
+    let url, method, formData;
+    if (type === "add") {
+      url = "/auth/register";
+      method = "POST";
       formData = {
         email,
         password,
+        confirmPassword: password,
         region,
         province,
         municipality,
@@ -119,20 +99,20 @@ console.log(data);
         middlename,
         lastname,
         gender,
-        userType,
+
         birthdate,
         contactNumber,
-        status:"fully verified",
+        status: "verified",
         userType,
-        verificationCode:0,
+        verificationCode: 0,
         isBanned,
-        isArchived
-      }
-      
-    } else if (type === 'update') {
+        isArchived,
+      };
+    } else if (type === "update") {
       url = `/auth/update/${id}`;
-      method = 'PUT';
+      method = "PUT";
       formData = {
+        id: id,
         email,
         region,
         province,
@@ -147,161 +127,166 @@ console.log(data);
         birthdate,
         contactNumber,
         status,
-        verificationCode:0
-      }
+        verificationCode: 0,
+      };
     }
 
     try {
-      const options = { 'Content-Type': 'application/json' };
+      const options = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
       const data = await request(url, method, options, formData);
-      
+
+      console.log(data);
+
       const { success, message } = data;
-      if(success) {
-     
+      if (success) {
         toast.success(message);
-       
-        {user=="resident"?   navigate('/manage/account/resident'):navigate('/manage/account/staff')}
-     return; 
-    }
-    else {
-      if(message != "input error") {
-        toast.success(message);
-      }  else {
-        // do input message error here
+
+        if (user === "resident") {
+          navigate("/manage/account/resident");
+        } else {
+          navigate("/manage/account/staff");
+        }
+        return;
+      } else {
+        if (message != "input error") {
+          toast.success(message);
+        } else {
+          // do input message error here
+        }
       }
-    } }catch (error) {
+    } catch (error) {
       console.error(error);
     }
   };
 
- 
-  
   const resetPassword = async (e) => {
     e.preventDefault();
-console.log("reset");
+    console.log("reset");
     try {
-
-      
-      const options = { 'Content-Type': 'application/json',   Authorization: `Bearer ${token}`, };
-      const data = await request(`/auth/reset-password/${id}`, 'PUT', options, {
-        password:"sagip",
+      const options = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      const data = await request(`/auth/reset-password/${id}`, "PUT", options, {
+        password: "sagip",
       });
-      
+
       const { success, message } = data;
       console.log(data);
-      if(success) {
-     
+      if (success) {
         toast.success(message);
-   /*      navigate('/account/');   */
-
-    }
-    else {
+        /*      navigate('/account/');   */
+      } else {
         toast.error(message);
-   
-    } }catch (error) {
+      }
+    } catch (error) {
       console.error(error);
     }
   };
-
-
-
- 
 
   return (
     <>
       <Navbar />
       <div>
         <div>
-           
-          <Link to= {user=="resident"?"/manage/account/resident":"/manage/account/staff"}>
-            Go Back <AiOutlineArrowRight />
+          <Link
+            to={
+              user == "resident"
+                ? "/manage/account/resident"
+                : "/manage/account/staff"
+            }
+          >
+            Go Back
           </Link>
-          <h2>{type === 'add' ? 'Add' : 'Update'} Safety Tip</h2>
+          <h2>
+            {type === "add" ? "Add" : "Update"}
+            {type === "resident" ? "Employee" : "Staff"}
+          </h2>
           <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <input
-            type="email"
-            placeholder="Email..."
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-         {/*  <input
+            <input
+              type="email"
+              placeholder="Email..."
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {/*  <input
             type="password"
             placeholder="Password..."
           
             onChange={(e) => setPassword(e.target.value)}
           />
       */}
-          <input
-            type="text"
-            placeholder="Region..."
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Province..."
-            value={province}
-            onChange={(e) => setProvince(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Municipality..."
-            value={municipality}
-            onChange={(e) => setMunicipality(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Barangay..."
-            value={barangay}
-            onChange={(e) => setBarangay(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Street..."
-            value={street}
-            onChange={(e) => setStreet(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="First Name..."
-            value={firstname}
-            onChange={(e) => setFirstname(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Middle Name..."
-            value={middlename}
-            onChange={(e) => setMiddlename(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Last Name..."
-            value={lastname}
-            onChange={(e) => setLastname(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Gender..."
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Birthdate..."
-            value={birthdate}
-            onChange={(e) => setBirthdate(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Contact Number..."
-            value={contactNumber}
-            onChange={(e) => setContactNumber(e.target.value)}
-          />
-          
-               
+            <input
+              type="text"
+              placeholder="Region..."
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Province..."
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Municipality..."
+              value={municipality}
+              onChange={(e) => setMunicipality(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Barangay..."
+              value={barangay}
+              onChange={(e) => setBarangay(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Street..."
+              value={street}
+              onChange={(e) => setStreet(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="First Name..."
+              value={firstname}
+              onChange={(e) => setFirstname(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Middle Name..."
+              value={middlename}
+              onChange={(e) => setMiddlename(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Last Name..."
+              value={lastname}
+              onChange={(e) => setLastname(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Gender..."
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Birthdate..."
+              value={birthdate}
+              onChange={(e) => setBirthdate(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Contact Number..."
+              value={contactNumber}
+              onChange={(e) => setContactNumber(e.target.value)}
+            />
 
-
-{/* <input
+            {/* <input
 
             type="text"
             placeholder="attempt"
@@ -309,62 +294,67 @@ console.log("reset");
             onChange={(e) => setAttempt(e.target.value)}
           />
  */}
- {console.log(type)}
- {type=="update"&&
+            {console.log(type)}
+            {type == "update" && (
+              <>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="" hidden>
+                    Select a status
+                  </option>
+                  {statusCategory.slice(1).map((status, index) => (
+                    <option key={index} value={status}>
+                      {status.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
 
-<>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
-  <option value="" hidden>
-    Select a status
-  </option>
-  {statusCategory.slice(1).map((status, index) => (
-    <option key={index} value={status}>
-      {status.toUpperCase()}
-    </option>
-  ))}
-</select>
-</>
- }
+            <select
+              value={userType}
+              onChange={(e) => setUserType(e.target.value)}
+            >
+              <option value="" hidden>
+                Select a Type
+              </option>
+              {userTypeCategory.slice(1).map((userType, index) => (
+                <option key={index} value={userType}>
+                  {userType.toUpperCase()}
+                </option>
+              ))}
+            </select>
 
-<select value={userType} onChange={(e) => setUserType(e.target.value)}>
-  <option value="" hidden>
-    Select a Type
-  </option>
-  {userTypeCategory.slice(1).map((userType, index) => (
-    <option key={index} value={userType}>
-      {userType.toUpperCase()}
-    </option>
-  ))}
-</select>
-<div>
+            {type === "update" && (
+              <>
+                <div>
                   <label>Archived</label>
-                  <input type="checkbox" onChange={(e) => setIsArchived(e.target.checked)} checked={isArchived}/>
-                  </div>
-                     <div>
+                  <input
+                    type="checkbox"
+                    onChange={(e) => setIsArchived(e.target.checked)}
+                    checked={isArchived}
+                  />
+                </div>
+                <div>
                   <label>isBanned</label>
-                  <input type="checkbox" onChange={(e) => setIsBanned(e.target.checked)} checked={isBanned}/>
-                  </div>
-            
-            
-            
-            
-            
-       
-        
-           
-          
+                  <input
+                    type="checkbox"
+                    onChange={(e) => setIsBanned(e.target.checked)}
+                    checked={isBanned}
+                  />
+                </div>
+              </>
+            )}
             <div>
-
-                
               <button type="submit">Submit</button>
             </div>
           </form>
-              <button onClick={resetPassword}>resetPassword</button>
+          {type === "update" && (
+            <button onClick={resetPassword}>resetPassword</button>
+          )}
         </div>
-    
-                   
-                  
-                
       </div>
     </>
   );

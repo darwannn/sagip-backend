@@ -63,6 +63,10 @@ authController.post("/register", async (req, res) => {
       status,
     } = req.body;
 
+    if (status === "verified") {
+      if (isEmpty(userType)) error["userType"] = "Required field";
+    }
+
     if (isEmpty(email)) {
       error["email"] = "Required field";
     } else {
@@ -126,10 +130,13 @@ authController.post("/register", async (req, res) => {
     if (Object.keys(error).length == 0) {
       profilePicture = "user_no_image.png";
       attempt = 0;
+
       if (verificationCode !== 0) {
         verificationCode = await generateCode();
       }
-
+      if (status === "verified") {
+        verificationCode = 0;
+      }
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -214,11 +221,6 @@ authController.post("/register", async (req, res) => {
 
 authController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
   try {
-    /*  const safetyTip = await SafetyTip.findById(req.params.id);
-     if(safetyTip.userId.toString() !== req.user.id.toString()){
-         throw new Error("You can delete only your own posts")
-     } */
-
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (user) {
@@ -233,14 +235,14 @@ authController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
           } else {
             return res.status(200).json({
               success: true,
-              message: "SafetyTip  deleted successfully",
+              message: "Account deleted successfully",
             });
           }
         });
       } else {
         return res.status(200).json({
           success: true,
-          message: "SafetyTip  deleted successfully",
+          message: "Account  deleted successfully",
         });
       }
     } else {
@@ -837,12 +839,13 @@ authController.put("/verification-request/:id", async (req, res) => {
 
 authController.put(
   "/update/:id",
-  tokenMiddleware,
+
   upload.single("image"),
   async (req, res) => {
     try {
       const error = {};
       let {
+        id,
         firstname,
         middlename,
         lastname,
@@ -871,8 +874,8 @@ authController.put(
           error["email"] = "not email";
         } else {
           if (await isEmailExists(email)) {
-            if (await isEmailOwner(req.user.id, email)) {
-              /*  error["email"] = "input new email"; */
+            if (await isEmailOwner(id, email)) {
+              /*   error["email"] = "input new email"; */
             } else {
               error["email"] = "email already exists";
             }
@@ -938,9 +941,9 @@ authController.put(
         if (hasChanged && req.file) {
           updateFields.profilePicture = req.file.filename;
 
-          const deletedSafetyTip = await User.findById(req.params.id);
-          if (deletedSafetyTip) {
-            imagePath = `public/images/User/${deletedSafetyTip.profilePicture}`;
+          const deletedAccount = await User.findById(req.params.id);
+          if (deletedAccount) {
+            imagePath = `public/images/User/${deletedAccount.profilePicture}`;
           }
         }
 

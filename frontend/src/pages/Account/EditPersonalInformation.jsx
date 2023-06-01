@@ -83,6 +83,7 @@ const AccountInput = ({ type }) => {
     e.preventDefault();
 
     const formData = new FormData();
+    formData.append("id", user.id);
     formData.append("email", email);
     formData.append("region", region);
     formData.append("province", province);
