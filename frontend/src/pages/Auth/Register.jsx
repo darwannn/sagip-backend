@@ -29,13 +29,14 @@ const Register = () => {
   const [birthdate, setBirthdate] = useState("");
   const [contactNumber, setContactNumber] = useState("");
 
+  const [isResident, setIsResident] = useState(false);
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
+    /*  if (password !== confirmPassword) {
       console.log("Passwords do not match");
-      return;
-    }
+    } */
 
     try {
       const options = { "Content-Type": "application/json" };
@@ -58,6 +59,8 @@ const Register = () => {
         contactNumber,
       });
 
+      console.log(data);
+
       const { success, message } = data;
       if (success) {
         dispatch(register(data));
@@ -66,9 +69,10 @@ const Register = () => {
         return;
       } else {
         if (message !== "input error") {
-          toast.success(message);
+          toast.error(message);
         } else {
           // do input message error here
+          toast.error(message);
         }
       }
     } catch (error) {
@@ -76,16 +80,52 @@ const Register = () => {
     }
   };
 
+  const handleCheckboxChange = (e) => {
+    setIsResident(e.target.checked);
+    setMunicipality(e.target.checked && "Malolos");
+    setRegion(e.target.checked && "Region III");
+    setProvince(e.target.checked && "Bulacan");
+  };
+
   return (
     <div>
       <div>
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
+          <div>
+            <label>Malolos resident?</label>
+            <input
+              type="checkbox"
+              onChange={handleCheckboxChange}
+              checked={isResident}
+            />
+          </div>
+          {!isResident && (
+            <>
+              <input
+                type="text"
+                placeholder="Region..."
+                onChange={(e) => setRegion(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Province..."
+                onChange={(e) => setProvince(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Municipality..."
+                onChange={(e) => setMunicipality(e.target.value)}
+              />
+            </>
+          )}
+
           <input
             type="email"
             placeholder="Email..."
             onChange={(e) => setEmail(e.target.value)}
           />
+
           <input
             type="password"
             placeholder="Password..."
@@ -96,21 +136,7 @@ const Register = () => {
             placeholder="Confirm Password..."
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <input
-            type="text"
-            placeholder="Region..."
-            onChange={(e) => setRegion(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Province..."
-            onChange={(e) => setProvince(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Municipality..."
-            onChange={(e) => setMunicipality(e.target.value)}
-          />
+
           <input
             type="text"
             placeholder="Barangay..."

@@ -16,7 +16,7 @@ const NewPassword = () => {
 
   const { token } = useSelector((state) => state.auth);
   const [password, setPassword] = useState("");
-
+  const [confirmPassword, setConfirmPassword] = useState("");
   const handleNewPassword = async (e) => {
     e.preventDefault();
     try {
@@ -27,6 +27,7 @@ const NewPassword = () => {
 
       const data = await request("/auth/new-password", "PUT", options, {
         password,
+        confirmPassword,
         for: "new-password",
       });
       console.log(data);
@@ -54,9 +55,14 @@ const NewPassword = () => {
       <h2>NewPassword</h2>
       <form onSubmit={handleNewPassword}>
         <input
-          type="text"
+          type="password"
           placeholder=""
           onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder=""
+          onChange={(e) => setConfirmPassword(e.target.value)}
         />
         <button type="submit">Continue</button>
       </form>

@@ -1,36 +1,34 @@
-const emergencyFacilityController = require("express").Router()
-const EmergencyFacility = require("../models/EmergencyFacility")
-const tokenMiddleware = require('../middlewares/tokenMiddleware')
-const uploadMiddleware = require('../middlewares/uploadMiddleware')
+const emergencyFacilityController = require("express").Router();
+const EmergencyFacility = require("../models/EmergencyFacility");
+const tokenMiddleware = require("../middlewares/tokenMiddleware");
+const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/Emergency Facility");
-const {isEmpty,isImage,isLessThanSize} = require('./functionController')
+const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
+const fs = require("fs");
 
-const fs = require('fs');
-
-
-emergencyFacilityController.post('/add', tokenMiddleware, upload.single('image'), async (req, res) => {
+emergencyFacilityController.post(
+  "/add",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
     const error = {};
     try {
-      const {  name,
-        latitude,
-        longitude,
-        category,
-        } = req.body;
-  
-      if (isEmpty(name)) error["name"] = 'Required field';
-      if (isEmpty(latitude)) error["latitude"] = 'Mark a location';
-      if (isEmpty(longitude)) error["latitude"] = 'Mark a location';
-      if (isEmpty(category)) error["category"] = 'Required field';
-      if (!req.file) { error["image"] = 'Required field';}
-      else {
+      const { name, latitude, longitude, category } = req.body;
 
+      if (isEmpty(name)) error["name"] = "Required field";
+      if (isEmpty(latitude)) error["latitude"] = "Mark a location";
+      if (isEmpty(longitude)) error["latitude"] = "Mark a location";
+      if (isEmpty(category)) error["category"] = "Required field";
+      if (!req.file) {
+        error["image"] = "Required field";
+      } else {
         if (isImage(req.file)) {
-          error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
+          error["image"] = "Only PNG, JPEG, and JPG files are allowed";
         } else {
-                if (isLessThanSize(req.file,10 * 1024 * 1024)) {
-                  error["image"] = 'File size should be less than 10MB';
-                }
+          if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+            error["image"] = "File size should be less than 10MB";
+          }
         }
       }
       if (Object.keys(error).length === 0) {
@@ -42,19 +40,19 @@ emergencyFacilityController.post('/add', tokenMiddleware, upload.single('image')
           category,
         });
         if (emergencyFacility) {
-        return res.status(200).json({
-          success: true,
-          message: "Emergency Facility created successfully",
-          emergencyFacility
-        });
-    } else {
-        return res.status(500).json({
-          success:false,
-          message:"DB Error",
-        })
+          return res.status(200).json({
+            success: true,
+            message: "Emergency Facility created successfully",
+            emergencyFacility,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "DB Error",
+          });
+        }
       }
-      }
-  
+
       if (Object.keys(error).length !== 0) {
         error["success"] = false;
         error["message"] = "Input error";
@@ -63,109 +61,159 @@ emergencyFacilityController.post('/add', tokenMiddleware, upload.single('image')
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error
+        message: "Internal Server Error" + error,
       });
     }
-  });
-
+  }
+);
 
 /* get all */
-emergencyFacilityController.get('/', async (req, res) => {
-    try {
-        const safetyTips = await EmergencyFacility.find({})
-        console.log("dasd");
-        console.log(safetyTips);
-        return res.status(200).json(safetyTips)
-    } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error" + error,
-          })
-    }
-})
+emergencyFacilityController.get("/", async (req, res) => {
+  try {
+    const safetyTips = await EmergencyFacility.find({});
+    console.log("dasd");
+    console.log(safetyTips);
+    return res.status(200).json(safetyTips);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
 
 /* get specific  */
-emergencyFacilityController.get('/:id', async (req, res) => {
-    try {
-        const emergencyFacility = await EmergencyFacility.findById(req.params.id)
-       
-          console.log(emergencyFacility);
-          return res.status(200).json(emergencyFacility)
+emergencyFacilityController.get("/:id", async (req, res) => {
+  try {
+    const emergencyFacility = await EmergencyFacility.findById(req.params.id);
 
-      
+    console.log(emergencyFacility);
+    return res.status(200).json(emergencyFacility);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
+  }
+});
+
+emergencyFacilityController.put(
+  "/update/:id",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    const error = {};
+    try {
+      const { name, latitude, longitude, category, hasChanged, isFull } =
+        req.body;
+
+      if (isEmpty(name)) error["name"] = "Required field";
+      if (isEmpty(latitude)) error["latitude"] = "Required field";
+      if (isEmpty(longitude)) error["latitude"] = "Required field";
+      if (isEmpty(category)) error["category"] = "Required field";
+
+      if (hasChanged === "true") {
+        if (!req.file) {
+          error["image"] = "Required field";
+        } else {
+          if (isImage(req.file)) {
+            error["image"] = "Only PNG, JPEG, and JPG files are allowed";
+          } else {
+            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+              error["image"] = "File size should be less than 10MB";
+            }
+          }
+        }
+      }
+
+      if (Object.keys(error).length === 0) {
+        const updateFields = { name, latitude, longitude, category, isFull };
+        let imagePath = "";
+
+        if (hasChanged && req.file) {
+          updateFields.image = req.file.filename;
+
+          const deletedSafetyTip = await EmergencyFacility.findById(
+            req.params.id
+          );
+          if (deletedSafetyTip) {
+            imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
+          }
+        }
+
+        const emergencyFacility = await EmergencyFacility.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+          { new: true }
+        );
+
+        if (emergencyFacility) {
+          if (hasChanged && req.file) {
+            fs.unlink(imagePath, (err) => {
+              if (err) {
+                return res.status(500).json({
+                  success: false,
+                  message: "Error deleting the image",
+                });
+              }
+            });
+          }
+
+          return res.status(200).json({
+            success: true,
+            message: "EmergencyFacility updated successfully",
+            EmergencyFacility,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "DB Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "Input error";
+        return res.status(400).json(error);
+      }
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "not found"
+        message: "Internal Server Error" + error,
       });
     }
-})
+  }
+);
 
+emergencyFacilityController.delete(
+  "/delete/:id",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      /*  const EmergencyFacility = await EmergencyFacility.findById(req.params.id);
+      if(EmergencyFacility.userId.toString() !== req.user.id.toString()){
+          throw new Error("You can delete only your own posts")
+      } */
 
-emergencyFacilityController.put('/update/:id', tokenMiddleware, upload.single('image'), async (req, res) => {
-  const error = {};
-  try {
-    const {  name,
-      latitude,
-      longitude,
-      category,
-      hasChanged,
-      isFull
-      } = req.body;
+      const deletedSafetyTip = await EmergencyFacility.findByIdAndDelete(
+        req.params.id
+      );
 
-    if (isEmpty(name)) error["name"] = 'Required field';
-    if (isEmpty(latitude)) error["latitude"] = 'Required field';
-    if (isEmpty(longitude)) error["latitude"] = 'Required field';
-    if (isEmpty(category)) error["category"] = 'Required field';
-   
-
-    if (hasChanged == "true") {
-
-      if (!req.file) error["image"] = 'Required field';
-      else {
-        if (isImage(req.file)) {
-          error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
-        }
-      
-        if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-          error["image"] = 'File size should be less than 10MB';
-        }
-      }
-    }
-
-    if (Object.keys(error).length === 0) {
-      const updateFields = { name, latitude,
-        longitude,
-        category, isFull };
-      let imagePath = '';
-
-      if (hasChanged && req.file) {
-        updateFields.image = req.file.filename;
-
-        const deletedSafetyTip = await EmergencyFacility.findById(req.params.id);
-        if (deletedSafetyTip) {
-          imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
-        }
-      }
-  
-      const emergencyFacility = await EmergencyFacility.findByIdAndUpdate(req.params.id, updateFields, { new: true });
-
-      if (emergencyFacility) {
-        if (hasChanged && req.file) {
-          fs.unlink(imagePath, (err) => {
-            if (err) {
-              return res.status(500).json({
-                success: false,
-                message: 'Error deleting the image',
-              });
-            }
-          });
-        }
-
-        return res.status(200).json({
-          success: true,
-          message: "EmergencyFacility updated successfully",
-          EmergencyFacility
+      if (deletedSafetyTip) {
+        const imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            return res.status(500).json({
+              success: false,
+              message: "Error deleting the image ",
+            });
+          } else {
+            return res.status(200).json({
+              success: true,
+              message: "EmergencyFacility  deleted successfully",
+            });
+          }
         });
       } else {
         return res.status(500).json({
@@ -173,65 +221,14 @@ emergencyFacilityController.put('/update/:id', tokenMiddleware, upload.single('i
           message: "DB Error",
         });
       }
-    }
-
-    if (Object.keys(error).length !== 0) {
-      error["success"] = false;
-      error["message"] = "Input error";
-      return res.status(400).json(error);
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error
-    });
-  }
-});
-
-  
-
-emergencyFacilityController.delete('/delete/:id', tokenMiddleware, async (req, res) => {
-    try {
-     /*  const EmergencyFacility = await EmergencyFacility.findById(req.params.id);
-      if(EmergencyFacility.userId.toString() !== req.user.id.toString()){
-          throw new Error("You can delete only your own posts")
-      } */
-  
-      const deletedSafetyTip = await EmergencyFacility.findByIdAndDelete(req.params.id);
-  
-      if (deletedSafetyTip) {
- 
-        const imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-          
-            return res.status(500).json({
-              success: false,
-              message: 'Error deleting the image ',
-            });
-          } else {
-
-            return res.status(200).json({
-              success: true,
-              message: 'EmergencyFacility  deleted successfully',
-            });
-          }
-       
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: 'DB Error',
-        });
-      }
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: 'Internal Server Error' + error,
+        message: "Internal Server Error" + error,
       });
     }
-  });
-  
+  }
+);
 
 /* 
 emergencyFacilityController.put('/saves/:id', tokenMiddleware, async (req, res) => {
@@ -265,5 +262,5 @@ emergencyFacilityController.get('/saved/:userId', async (req, res) => {
           })
     }
   }); */
-  
-module.exports = emergencyFacilityController
+
+module.exports = emergencyFacilityController;

@@ -1,54 +1,47 @@
-const authController = require('express').Router()
-const User = require("../models/User")
-const Notification = require("../models/Notification")
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const authController = require("express").Router();
+const User = require("../models/User");
+const Notification = require("../models/Notification");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const {
   isEmpty,
   isImage,
-  isLessThanSize,createNotification
-} = require('./functionController')
+  isLessThanSize,
+  createNotification,
+} = require("./functionController");
 
-const tokenMiddleware = require('../middlewares/tokenMiddleware')
+const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
-const {
-  sendSMS,
-  apiController
-} = require('./apiController')
+const { sendSMS, apiController } = require("./apiController");
 
-const currentDate = new Date()
-const codeExpiration = new Date(currentDate.getTime() + 30 * 60000)
+const currentDate = new Date();
+const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
 const dateTimeToday = new Date().toLocaleString();
 
-const uploadMiddleware = require('../middlewares/uploadMiddleware')
-const upload = uploadMiddleware();
+const uploadMiddleware = require("../middlewares/uploadMiddleware");
+const upload = uploadMiddleware("public/images/User");
 
-const fs = require('fs');
-const { log } = require('console')
-
+const fs = require("fs");
+const { log } = require("console");
 
 /* get all */
-authController.get('/', async (req, res) => {
+authController.get("/", async (req, res) => {
   try {
-    const user = await User.find({})
+    const user = await User.find({});
 
-
-    return res.status(200).json(user)
+    return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error" + error,
-    })
+    });
   }
-})
+});
 
-
-
-authController.post('/register', async (req, res) => {
+authController.post("/register", async (req, res) => {
   try {
     const error = {};
     let {
-
       firstname,
       middlename,
       lastname,
@@ -62,105 +55,84 @@ authController.post('/register', async (req, res) => {
       birthdate,
       gender,
       password,
+      confirmPassword,
       profilePicture,
       attempt,
       verificationCode,
       userType,
       status,
-    } = req.body
+    } = req.body;
 
-    /* validation */
-    /*   const userExists = await User.findOne({
-        username
-      }) */
-    /*  const contactNumberExists = await User.findOne({
-       contactNumber
-     }) */
-
-    /*   if (isEmpty(username)) {
-        error["username"] = 'Required field'
+    if (isEmpty(email)) {
+      error["email"] = "Required field";
+    } else {
+      if (isEmail(email)) {
+        error["email"] = "not email";
       } else {
-        if (userExists) {
-          error['usename'] = 'User already existsss'
-        } else {
-          if(isUsername(username) ){
-            error['usename'] = 'username must only be a number or character'
-          }
+        if (await isEmailExists(email)) {
+          error["email"] = "email already exists";
         }
-      } */
+      }
+    }
 
-    /*    if (isEmpty(contactNumber)) {
-         error["contact"] = 'Required field'
-       } else {
-         if (contactNumberExists) {
-           error['contact'] = 'Contact Number already exists'
-         } else {
-           if(isContactNumber(contactNumber)) {
-             error['contact'] = 'must be a number'
-           }
-         }
-       }
-     
-       if (isEmpty(firstname)) error["firstname"] = 'Required field'
-       if (isEmpty(lastname)) error["lastname"] = 'Required field'
-       if (isEmpty(birthdate)) error["birthdate"] = 'Required field'
-       if (isEmpty(gender)) error["gender"] = 'Required field'
-     
-     
-     
-       if (isEmpty(email)) {
-         error["email"] = 'Required field'
-       } else {
-         if (isEmail(email)) {
-           error['email'] = 'not email'
-         }
-       }
-     
-     
-      if (isResident === "true") {
-       region = "Region III"
-       province = "Bulacan"
-       municipality = "Malolos"
-     
-     } else {
-       if (isEmpty(region)) error["region"] = 'Required field'
-       if (isEmpty(province)) error["province"] = 'Required field'
-       if (isEmpty(municipality)) error["municipality"] = 'Required field'
-     }
-     if (isEmpty(barangay)) error["barangay"] = 'Required field'
-     if (isEmpty(street)) error["street"] = 'Required field'
-      
-     if (isEmpty(password)) {
-       error["password"] = 'Required field'
-     } else {
-       if (verifyPassword(password)) {
-         error['password'] = 'password requirement did not match'
-       }
-     }
-      */
+    if (isEmpty(contactNumber)) {
+      error["contact"] = "Required field";
+    } else {
+      if (isContactNumber(contactNumber)) {
+        error["contact"] = "must be a number";
+      } else {
+        if (await isContactNumberExists(contactNumber)) {
+          error["contact"] = "Contact Number already exists";
+        }
+      }
+    }
 
+    if (isEmpty(firstname)) error["firstname"] = "Required field";
+    if (isEmpty(middlename)) error["middlename"] = "Required field";
+    if (isEmpty(lastname)) error["lastname"] = "Required field";
+    if (isEmpty(birthdate)) error["birthdate"] = "Required field";
+    if (isEmpty(gender)) error["gender"] = "Required field";
 
+    /*  if (isResident === "true") {
+      region = "Region III";
+      province = "Bulacan";
+      municipality = "Malolos";
+    } else { */
+    if (isEmpty(region)) error["region"] = "Required field";
+    if (isEmpty(province)) error["province"] = "Required field";
+    if (isEmpty(municipality)) error["municipality"] = "Required field";
+    /*  } */
+    if (isEmpty(barangay)) error["barangay"] = "Required field";
+    if (isEmpty(street)) error["street"] = "Required field";
 
+    /* if (isEmpty(password)) {
+      error["password"] = "Required field";
+    } else {
+      if (verifyPassword(password)) {
+        error["password"] = "password requirement did not match";
+      }
+    } */
+
+    /* if (isEmpty(confirmPassword)) {
+      error["confirmPassword"] = "Required field";
+    } else {
+      if (!isEmpty(password)) {
+        if (password !== confirmPassword) {
+          error["confirmPassword"] = "password did not match";
+        }
+      }
+    } */
 
     if (Object.keys(error).length == 0) {
-
-      profilePicture = "user_no_image.png"
+      profilePicture = "user_no_image.png";
       attempt = 0;
       if (verificationCode !== 0) {
         verificationCode = await generateCode();
       }
 
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
-      const emptyString = "d"
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
-      const unverifiedStatus = "unverified";
-      const falseStatus = false
-
-
-      
-
-      /* create */
       const user = await User.create({
         email,
         password: hashedPassword,
@@ -179,32 +151,28 @@ authController.post('/register', async (req, res) => {
 
         contactNumber,
 
-        // username,
-        isOnline: falseStatus,
-        isBanned: falseStatus,
+        isOnline: false,
+        isBanned: false,
 
         profilePicture,
         attempt,
         verificationCode,
         codeExpiration,
-  
+
         userType,
         status,
-
-      })
+      });
 
       const notification = await Notification.create({
-          userId: user._doc._id,
-          notifications: []
-        });
+        userId: user._doc._id,
+        notifications: [],
+      });
       if (user && notification) {
-
         console.log("success");
 
         /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
-    
-        if (verificationCode !== 0) {
 
+        if (verificationCode !== 0) {
           return res.status(200).json({
             success: true,
             message: "Please verify contact number",
@@ -212,9 +180,9 @@ authController.post('/register', async (req, res) => {
               for: "register",
               id: user._doc._id,
               userType: user._doc.userType,
-              status: user._doc.status
+              status: user._doc.status,
             },
-            token: generateToken(user._id)
+            token: generateToken(user._id),
           });
         } else {
           return res.status(200).json({
@@ -222,35 +190,29 @@ authController.post('/register', async (req, res) => {
             message: "Added",
           });
         }
-
-    
-
       } else {
-
         console.log("error");
 
-        error['error'] = 'Database Error'
-        return res.status(400)
+        error["error"] = "Database Error";
+        return res.status(400);
       }
     }
 
     if (Object.keys(error).length != 0) {
-
       error["success"] = false;
       error["message"] = "input error";
 
-      return res.status(400).json(error)
-
+      return res.status(400).json(error);
     }
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error" + error,
-    })
+    });
   }
-})
+});
 
-authController.delete('/delete/:id', tokenMiddleware, async (req, res) => {
+authController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
   try {
     /*  const safetyTip = await SafetyTip.findById(req.params.id);
      if(safetyTip.userId.toString() !== req.user.id.toString()){
@@ -261,304 +223,258 @@ authController.delete('/delete/:id', tokenMiddleware, async (req, res) => {
 
     if (user) {
       if (user.profilePicture == "user_no_image.png") {
-        const imagePath = `public/images/${user.profilePicture}`;
+        const imagePath = `public/images/User/${user.profilePicture}`;
         fs.unlink(imagePath, (err) => {
           if (err) {
-
             return res.status(500).json({
               success: false,
-              message: 'Error deleting the image ',
+              message: "Error deleting the image ",
             });
           } else {
-
             return res.status(200).json({
               success: true,
-              message: 'SafetyTip  deleted successfully',
+              message: "SafetyTip  deleted successfully",
             });
           }
-
         });
       } else {
         return res.status(200).json({
           success: true,
-          message: 'SafetyTip  deleted successfully',
+          message: "SafetyTip  deleted successfully",
         });
       }
     } else {
       return res.status(500).json({
         success: false,
-        message: 'DB Erroree',
+        message: "DB Erroree",
       });
     }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Internal Server Error' + error,
+      message: "Internal Server Error" + error,
     });
   }
 });
 
+authController.put(
+  "/update/contact-number",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const error = {};
+      let { contactNumber } = req.body;
 
-authController.put('/update/contact-number', tokenMiddleware, async (req, res) => {
-  try {
-    const error = {};
-    let {
-
-      contactNumber,
-
-    } = req.body
-
-
-    const contactNumberExists = await User.findOne({
-      contactNumber
-    })
-
-    if (isEmpty(contactNumber)) {
-      error["contact"] = 'Required field'
-    } else {
-      if (isContactNumber(contactNumber)) {
-        error['contact'] = 'must be a number'
-      } else {
-        if ((await isContactNumberExists(contactNumber))) {
-          if ((await isContactNumberOwner(req.user.id, contactNumber))) {
-            error['contact'] = 'input new contact numebr'
-          } else {
-            error['contact'] = 'Contact Number already exists'
-          }
-        }
-      }
-
-    }
-
-    if (Object.keys(error).length == 0) {
-
-      const updateFields = {
-
+      const contactNumberExists = await User.findOne({
         contactNumber,
-
-      };
-
-
-      const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
-        new: true
       });
 
-      if (user) {
-
-        return res.status(200).json({
-          success: true,
-          message: "Number updated successfully",
-
-        });
+      if (isEmpty(contactNumber)) {
+        error["contact"] = "Required field";
       } else {
-        return res.status(500).json({
-          success: false,
-          message: "DB Error",
-        });
-      }
-
-    }
-
-    if (Object.keys(error).length != 0) {
-
-      error["success"] = false;
-      error["message"] = "input error";
-
-      return res.status(400).json(error)
-
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    })
-  }
-})
-
-authController.post('/contact-verification', tokenMiddleware, async (req, res) => {
-  try {
-    const error = {};
-    const {
-      code,
-      type
-    } = req.body;
-    const userId = req.user.id;
-
-    /*     const userId = "646de7d73b43cfb85af16d77" */
-    if (isEmpty(code)) {
-      error["code"] = 'Required field';
-    } else if (isNumber(code)) {
-      error['code'] = 'Invalid code';
-    }
-
-    if (Object.keys(error).length == 0) {
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(500).json({
-          success: false,
-          message: "User Not Found" + error,
-        })
-      } else {
-        if (code == user.verificationCode) {
-          // Code matches, update user status to 'semi-verified'
-
-          if (user.status == "unverified") {
-            user.status = 'semi-verified';
-          }
-          user.attempt = 0;
-          user.verificationCode = 0;
-          await user.save();
-        
-       
-
-          if (type == "register")
-            return res.status(200).json({
-              success: true,
-              message: "Verified successfully. You can now use your account!",
-              user: {
-                for: "login",
-                id: user._doc._id,
-                userType: user._doc.userType,
-                status: user._doc.status
-              },
-              token: generateToken(user._id)
-            });
-
-          if (type == "forgot-password")
-            return res.status(200).json({
-              success: true,
-              message: "Enter your new-password",
-              user: {
-                for: "new-password",
-                id: user._doc._id,
-                userType: user._doc.userType,
-                status: user._doc.status
-              },
-              token: generateToken(user._id)
-            });
-          if (type == "login")
-            return res.status(200).json({
-              success: true,
-              message: "Verified successfully ",
-              user: {
-                for: "login",
-                id: user._doc._id,
-                userType: user._doc.userType,
-                status: user._doc.status
-              },
-              token: generateToken(user._id)
-            });
-
-
+        if (isContactNumber(contactNumber)) {
+          error["contact"] = "must be a number";
         } else {
-          error['code'] = 'Incorrect code';
-          user.attempt += 1
-          await user.save()
-
+          if (await isContactNumberExists(contactNumber)) {
+            if (await isContactNumberOwner(req.user.id, contactNumber)) {
+              error["contact"] = "input new contact numebr";
+            } else {
+              error["contact"] = "Contact Number already exists";
+            }
+          }
         }
       }
-    }
 
+      if (Object.keys(error).length == 0) {
+        const updateFields = {
+          contactNumber,
+        };
 
-    if (Object.keys(error).length != 0) {
-      //console.log("error");
-      error["success"] = false;
-      error["message"] = "input error";
-
-      return res.status(400).json(error)
-
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    })
-  }
-})
-
-authController.post('/password-verification', tokenMiddleware, async (req, res) => {
-  try {
-
-    const {
-      password
-    } = req.body;
-
-
-    console.log("req.body");
-    if (isEmpty(password)) {
-
-      return res.status(200).json({
-        success: true,
-        message: "Input error",
-        password: "Required field",
-
-      });
-
-
-    } else {
-      const user = await User.findOne({
-        _id: req.user.id
-      });
-
-      if (user && (await bcrypt.compare(password, user.password))) {
-        return res.status(200).json({
-          success: true,
-          message: "Password match",
-          for: "edit-password",
+        const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
+          new: true,
         });
 
-      } else {
-
-        return res.status(200).json({
-          success: false,
-          message: "Input error",
-          password: "Incorrect Password",
-
-        });
-
-
-
+        if (user) {
+          return res.status(200).json({
+            success: true,
+            message: "Contact Number updated successfully",
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "DB Error",
+          });
+        }
       }
 
+      if (Object.keys(error).length != 0) {
+        error["success"] = false;
+        error["message"] = "input error";
 
-
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error,
+      });
     }
-
-
-
-
-
-
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    })
   }
-})
+);
 
+authController.post(
+  "/contact-verification",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const error = {};
+      const { code, type } = req.body;
+      const userId = req.user.id;
 
-authController.post('/login', async (req, res) => {
+      /*     const userId = "646de7d73b43cfb85af16d77" */
+      if (isEmpty(code)) {
+        error["code"] = "Required field";
+      } else if (isNumber(code)) {
+        error["code"] = "Invalid code";
+      }
+
+      if (Object.keys(error).length == 0) {
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(500).json({
+            success: false,
+            message: "User Not Found" + error,
+          });
+        } else {
+          if (code == user.verificationCode) {
+            // Code matches, update user status to 'semi-verified'
+
+            if (user.status == "unverified") {
+              user.status = "semi-verified";
+            }
+            user.attempt = 0;
+            user.verificationCode = 0;
+            await user.save();
+
+            if (type == "register")
+              return res.status(200).json({
+                success: true,
+                message: "Verified successfully. You can now use your account!",
+                user: {
+                  for: "login",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(user._id),
+              });
+
+            if (type == "forgot-password")
+              return res.status(200).json({
+                success: true,
+                message: "Enter your new-password",
+                user: {
+                  for: "new-password",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(user._id),
+              });
+            if (type == "login")
+              return res.status(200).json({
+                success: true,
+                message: "Verified successfully ",
+                user: {
+                  for: "login",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(user._id),
+              });
+          } else {
+            error["code"] = "Incorrect code";
+            user.attempt += 1;
+            await user.save();
+          }
+        }
+      }
+
+      if (Object.keys(error).length != 0) {
+        //console.log("error");
+        error["success"] = false;
+        error["message"] = "input error";
+
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error,
+      });
+    }
+  }
+);
+
+authController.post(
+  "/password-verification",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const { password } = req.body;
+
+      console.log("req.body");
+      if (isEmpty(password)) {
+        return res.status(200).json({
+          success: true,
+          message: "Input error",
+          password: "Required field",
+        });
+      } else {
+        const user = await User.findOne({
+          _id: req.user.id,
+        });
+
+        if (user && (await bcrypt.compare(password, user.password))) {
+          return res.status(200).json({
+            success: true,
+            message: "Password match",
+            for: "edit-password",
+          });
+        } else {
+          return res.status(200).json({
+            success: false,
+            message: "Input error",
+            password: "Incorrect Password",
+          });
+        }
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error,
+      });
+    }
+  }
+);
+
+authController.post("/login", async (req, res) => {
   try {
     const error = {};
-    const {
-      identifier,
-      password
-    } = req.body
+    const { identifier, password } = req.body;
 
-    if (isEmpty(identifier)) error["identifier"] = 'Required field'
-    if (isEmpty(password)) error["password"] = 'Required field'
+    if (isEmpty(identifier)) error["identifier"] = "Required field";
+    if (isEmpty(password)) error["password"] = "Required field";
 
-    let user = await checkIdentifier(identifier)
+    let user = await checkIdentifier(identifier);
 
     if (!user) {
-      error['identifier'] = 'Account does not exist'
+      error["identifier"] = "Account does not exist";
     }
 
     if (Object.keys(error).length == 0) {
       if (user.attempt >= 100) {
-
         let generatedCode = await generateCode();
         user.verificationCode = generatedCode;
         await user.save();
@@ -574,10 +490,9 @@ authController.post('/login', async (req, res) => {
             return res.status(500).json({
               success: false,
               message: "Account banned. Please contact the CDRRMO",
-            })
+            });
           } else {
             // Check if the user has exceeded the maximum number of attempts
-
 
             // Reset the attempt number if the password is correct
             user.attempt = 0;
@@ -590,20 +505,18 @@ authController.post('/login', async (req, res) => {
                 for: "login",
                 id: user._doc._id,
                 userType: user._doc.userType,
-                status: user._doc.status
+                status: user._doc.status,
               },
-              token: generateToken(user._id)
+              token: generateToken(user._id),
             });
           }
         } else {
-          error['password'] = 'Incorrect';
+          error["password"] = "Incorrect";
 
           console.log(user.attempt);
 
           user.attempt++;
           await user.save();
-
-
         }
       }
     }
@@ -617,55 +530,42 @@ authController.post('/login', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Internal Server Error" + error,
-    })
+    });
   }
-})
+});
 
-
-authController.post('/forgot-password', async (req, res) => {
-  // Variable declaration
+authController.post("/forgot-password", async (req, res) => {
   let accountExists;
   try {
     const error = {};
     const identifier = req.body.identifier;
 
-    // Checking if the 'identifier' field is empty
     if (isEmpty(identifier)) {
-      error["identifier"] = 'Required field';
+      error["identifier"] = "Required field";
     } else {
-      // Checking if an account with the given identifier exists
       accountExists = await checkIdentifier(identifier);
       if (!accountExists) {
-        error['identifier'] = 'Account does not exist';
+        error["identifier"] = "Account does not exist";
       }
-
-
     }
 
-    // If there are no errors so far
     if (Object.keys(error).length == 0) {
-      // Generating a verification code
       let generatedCode = await generateCode();
       console.log(accountExists.id);
-      // Updating the user's verification code and code expiration using 'User.updateById'
+
       const user = await User.findByIdAndUpdate(accountExists.id, {
         verificationCode: generatedCode,
         codeExpiration: codeExpiration,
       });
 
-
       if (user) {
         /*     sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
-        // Sending a verification code to the user (code not shown)
-        // Responding with success message and user information
-
         if (user.isBanned) {
           return res.status(500).json({
             success: false,
             message: "Account banned. Please contact the CDRRMO",
-          })
+          });
         } else {
-
           console.log("Current COde: " + generatedCode);
 
           return res.status(200).json({
@@ -675,13 +575,13 @@ authController.post('/forgot-password', async (req, res) => {
               for: "forgot-password",
               id: user._doc._id,
               userType: user._doc.userType,
-              status: user._doc.status
+              status: user._doc.status,
             },
-            token: generateToken(user._id)
+            token: generateToken(user._id),
           });
         }
       } else {
-        error['error'] = 'Database Error';
+        error["error"] = "Database Error";
         error["success"] = false;
       }
     }
@@ -692,7 +592,6 @@ authController.post('/forgot-password', async (req, res) => {
       error["message"] = "Input error";
       return res.status(400).json(error);
     }
-
   } catch (error) {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({
@@ -701,56 +600,61 @@ authController.post('/forgot-password', async (req, res) => {
     });
   }
 });
-authController.put('/new-password' , tokenMiddleware, async (req, res) => {
+authController.put("/new-password", tokenMiddleware, async (req, res) => {
   // Variable declaration
 
   try {
     const error = {};
-    const password = req.body.password
+    const { password, confirmPassword } = req.body;
 
-    // if (isEmpty(password)) {
-    //   error["password"] = 'Required field'
-    // } else {
-    //   if (verifyPassword(password)) {
-    //     error['password'] = 'password requirement did not match'
-    //   }
-    // }
+    /* if (isEmpty(password)) {
+      error["password"] = "Required field";
+    } else {
+      if (verifyPassword(password)) {
+        error["password"] = "password requirement did not match";
+      }
+    } */
 
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
+    if (isEmpty(confirmPassword)) {
+      error["confirmPassword"] = "Required field";
+    } else {
+      if (!isEmpty(password)) {
+        if (password !== confirmPassword) {
+          error["confirmPassword"] = "password did not match";
+        }
+      }
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     if (Object.keys(error).length == 0) {
-
       console.log(req.user);
       const user = await User.findByIdAndUpdate(req.user.id, {
         verificationCode: 0,
-        password: hashedPassword
+        password: hashedPassword,
       });
 
       if (user) {
-        if(req.body.for) {
-        return res.status(200).json({
-          success: true,
-          message: "Change Successfully. Login Now",
-         
-        });
+        if (req.body.for) {
+          return res.status(200).json({
+            success: true,
+            message: "Change Successfully. Login Now",
+          });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: "Password change",
+          });
+        }
       } else {
-         return res.status(200).json({
-          success: true,
-          message: "Password change",
-   
-        });
-      
+        error["message"] = "Database Error";
       }
-      } else {
-        error['message'] = 'Database Error'
-      }
-
     }
 
     if (Object.keys(error).length != 0) {
       console.log("error");
-      res.status(400).json(error)
+      res.status(400).json(error);
     }
   } catch (error) {
     // If an exception occurs, respond with an internal server error
@@ -760,22 +664,21 @@ authController.put('/new-password' , tokenMiddleware, async (req, res) => {
     });
   }
 });
-authController.put('/reset-password/:id', tokenMiddleware, async (req, res) => {
+authController.put("/reset-password/:id", tokenMiddleware, async (req, res) => {
   // Variable declaration
 
   try {
     const error = {};
-    const password = req.body.password
+    const password = req.body.password;
     console.log(password);
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     if (Object.keys(error).length == 0) {
-
       console.log(req.user.id);
       const user = await User.findByIdAndUpdate(req.user.id, {
         attempt: 0,
-        password: hashedPassword
+        password: hashedPassword,
       });
 
       if (user) {
@@ -789,9 +692,7 @@ authController.put('/reset-password/:id', tokenMiddleware, async (req, res) => {
           message: "DB Error",
         });
       }
-
     }
-
   } catch (error) {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({
@@ -801,13 +702,9 @@ authController.put('/reset-password/:id', tokenMiddleware, async (req, res) => {
   }
 });
 
-authController.put('/resend-code', tokenMiddleware, async (req, res) => {
-
-
+authController.put("/resend-code", tokenMiddleware, async (req, res) => {
   try {
-
-
-    const codeExpiration = new Date(currentDate.getTime() + 30 * 60000)
+    const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
     let generatedCode = await generateCode();
 
     const user = await User.findByIdAndUpdate(req.user.id, {
@@ -815,9 +712,7 @@ authController.put('/resend-code', tokenMiddleware, async (req, res) => {
       codeExpiration: codeExpiration,
     });
 
-
     if (user) {
-
       console.log("Current COde: " + generatedCode);
 
       return res.status(200).json({
@@ -827,21 +722,16 @@ authController.put('/resend-code', tokenMiddleware, async (req, res) => {
           for: "forgot-password",
           id: user._doc._id,
           userType: user._doc.userType,
-          status: user._doc.status
+          status: user._doc.status,
         },
-        token: generateToken(user._id)
+        token: generateToken(user._id),
       });
-
-
     } else {
       return res.status(500).json({
         success: false,
         message: "DB Error",
       });
     }
-
-
-
   } catch (error) {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({
@@ -850,56 +740,59 @@ authController.put('/resend-code', tokenMiddleware, async (req, res) => {
     });
   }
 });
-authController.put('/verify-identity', tokenMiddleware,upload.single('image'), async (req, res) => {
-
-
-  try {
-
-
-
-    const user = await User.findByIdAndUpdate(req.user.id, {
-      $push: {
-        verificationPicture: req.body.identificationCardPicture
-      },
-      $set: {
-        verificationRequestDate: Date.now(),
-        userType: "admiral"
+authController.put(
+  "/verify-identity",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $push: {
+            verificationPicture: req.body.identificationCardPicture,
+          },
+          $set: {
+            verificationRequestDate: Date.now(),
+            userType: "admiral",
+          },
+        },
+        { new: true }
+      );
+      console.log(req.body.identificationCardPicture);
+      console.log(req.user.id);
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          message: "Verification Request send",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "DB Error",
+        });
       }
-    }, { new: true });
-console.log(req.body.identificationCardPicture);
-console.log(req.user.id);
-    if (user) {
-      return res.status(200).json({
-        success: true,
-        message: "Verification Request send",
-      });
-
-    } else {
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
-        message: "DB Error",
+        message: "Internal Server Error" + error,
       });
     }
-
-
-
-  } catch (error) {
-    // If an exception occurs, respond with an internal server error
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    });
   }
-});
+);
 
-
-authController.put('/verification-request/:id', async (req, res) => {
+authController.put("/verification-request/:id", async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, {
-    /*   $unset: {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        /*   $unset: {
         verificationRequestDate: Date.now(),
       }, */
-    }, { new: true });
+      },
+      { new: true }
+    );
 
     /* if (req.body.action === "reject") {
       user.verificationPicture = [];
@@ -910,34 +803,20 @@ authController.put('/verification-request/:id', async (req, res) => {
       await user.save();
     } */
 
-
     if (user) {
       if (req.body.action === "reject") {
         /* sendSMS(`Verification Request Rejected`, user.contactNumber); */
-        /* await Notification.create({
-          userId: req.params.id,
-          notifications: [
-            {
-              title: "Verification Request",
-              message: "Verification Request Rejected",
-              dateSent: Date.now(),
-              category: "error",
-              isRead: false
-            }
-          ]
-        }); */
 
-
-        await createNotification(req.params.id,"title","message","category")
+        await createNotification(req.params.id, "title", "message", "category");
         return res.status(200).json({
           success: true,
           message: "Verification Request Rejected",
         });
       } else {
-        await createNotification(req.params.id,"title","message","category")
-       /*  sendSMS(`Verification Request Approved`, user.contactNumber); */
-      
-       return res.status(200).json({
+        await createNotification(req.params.id, "title", "message", "category");
+        /*  sendSMS(`Verification Request Approved`, user.contactNumber); */
+
+        return res.status(200).json({
           success: true,
           message: "Verification Request Approved",
         });
@@ -949,7 +828,6 @@ authController.put('/verification-request/:id', async (req, res) => {
       });
     }
   } catch (error) {
-    // If an exception occurs, respond with an internal server error
     return res.status(500).json({
       success: false,
       message: "Internal Server Error " + error,
@@ -957,114 +835,14 @@ authController.put('/verification-request/:id', async (req, res) => {
   }
 });
 
-
-
-authController.put('/update/:id', upload.single('image'), async (req, res) => {
-  try {
-    const error = {};
-    let {
-
-      firstname,
-      middlename,
-      lastname,
-
-      email,
-      region,
-      province,
-      municipality,
-      barangay,
-      street,
-      birthdate,
-      gender,
-      profilePicture,
-      attempt,
-      verificationCode,
-      userType,
-      status,
-      image,
-      hasChanged
-
-    } = req.body
-    /* validation */
-    /*    const userExists = await User.findOne({
-         contactNumber
-       }) */
-    /* req.user */
-
-
-
-    /*   if (isEmpty(username)) {
-        error["username"] = 'Required field'
-      } else {
-        if (userExists) {
-          error['usename'] = 'User already existsss'
-        } else {
-          if(isUsername(username) ){
-            error['usename'] = 'username must only be a number or character'
-          }
-        }
-      } */
-
-
-    /* 
-       if (isEmpty(firstname)) error["firstname"] = 'Required field'
-       if (isEmpty(lastname)) error["lastname"] = 'Required field'
-       if (isEmpty(birthdate)) error["birthdate"] = 'Required field'
-       if (isEmpty(gender)) error["gender"] = 'Required field'
-     
-     
-     
-       if (isEmpty(email)) {
-         error["email"] = 'Required field'
-       } else {
-         if (isEmail(email)) {
-           error['email'] = 'not email'
-         }
-       }
-     
-     
-      if (isResident === "true") {
-       region = "Region III"
-       province = "Bulacan"
-       municipality = "Malolos"
-     
-     } else {
-       if (isEmpty(region)) error["region"] = 'Required field'
-       if (isEmpty(province)) error["province"] = 'Required field'
-       if (isEmpty(municipality)) error["municipality"] = 'Required field'
-     }
-     if (isEmpty(barangay)) error["barangay"] = 'Required field'
-     if (isEmpty(street)) error["street"] = 'Required field'
-      
-     if (isEmpty(password)) {
-       error["password"] = 'Required field'
-     } else {
-       if (verifyPassword(password)) {
-         error['password'] = 'password requirement did not match'
-       }
-     }
-      */
-
-    /* if(image) {
-
-    } */
-    if (hasChanged == "true") {
-      if (!req.file) error["image"] = 'Required field';
-
-      if (isImage(req.file)) {
-        error["image"] = 'Only PNG, JPEG, and JPG files are allowed';
-      }
-
-      if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-        error["image"] = 'File size should be less than 10MB';
-      }
-
-    }
-
-
-    if (Object.keys(error).length == 0) {
-
-      const updateFields = {
+authController.put(
+  "/update/:id",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const error = {};
+      let {
         firstname,
         middlename,
         lastname,
@@ -1083,106 +861,177 @@ authController.put('/update/:id', upload.single('image'), async (req, res) => {
         userType,
         status,
 
-        hasChanged
-      };
-      let imagePath = '';
+        hasChanged,
+      } = req.body;
 
-      if (hasChanged && req.file) {
-        updateFields.profilePicture = req.file.filename;
-
-        const deletedSafetyTip = await User.findById(req.params.id);
-        if (deletedSafetyTip) {
-          imagePath = `public/images/${deletedSafetyTip.profilePicture}`;
+      if (isEmpty(email)) {
+        error["email"] = "Required field";
+      } else {
+        if (isEmail(email)) {
+          error["email"] = "not email";
+        } else {
+          if (await isEmailExists(email)) {
+            if (await isEmailOwner(req.user.id, email)) {
+              /*  error["email"] = "input new email"; */
+            } else {
+              error["email"] = "email already exists";
+            }
+          }
         }
       }
 
-      const safetyTip = await User.findByIdAndUpdate(req.params.id, updateFields, {
-        new: true
-      });
+      if (isEmpty(firstname)) error["firstname"] = "Required field";
+      if (isEmpty(lastname)) error["lastname"] = "Required field";
+      if (isEmpty(birthdate)) error["birthdate"] = "Required field";
+      if (isEmpty(gender)) error["gender"] = "Required field";
 
-      if (safetyTip) {
+      /*    if (isResident === "true") {
+        region = "Region III";
+        province = "Bulacan";
+        municipality = "Malolos";
+      } else { */
+      if (isEmpty(region)) error["region"] = "Required field";
+      if (isEmpty(province)) error["province"] = "Required field";
+      if (isEmpty(municipality)) error["municipality"] = "Required field";
+      /* } */
+      if (isEmpty(barangay)) error["barangay"] = "Required field";
+      if (isEmpty(street)) error["street"] = "Required field";
+
+      if (hasChanged === "true") {
+        if (!req.file) {
+          error["image"] = "Required field";
+        } else {
+          if (isImage(req.file)) {
+            error["image"] = "Only PNG, JPEG, and JPG files are allowed";
+          } else {
+            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+              error["image"] = "File size should be less than 10MB";
+            }
+          }
+        }
+      }
+
+      if (Object.keys(error).length == 0) {
+        const updateFields = {
+          firstname,
+          middlename,
+          lastname,
+
+          email,
+          region,
+          province,
+          municipality,
+          barangay,
+          street,
+          birthdate,
+          gender,
+          profilePicture,
+          attempt,
+          verificationCode,
+          userType,
+          status,
+
+          hasChanged,
+        };
+        let imagePath = "";
+
         if (hasChanged && req.file) {
-          if (!imagePath.includes("user_no_image")) {
-            console.log(imagePath);
-            fs.unlink(imagePath, (err) => {
-              if (err) {
-                return res.status(500).json({
-                  success: false,
-                  message: 'Error deleting the image',
-                });
-              }
-            });
+          updateFields.profilePicture = req.file.filename;
+
+          const deletedSafetyTip = await User.findById(req.params.id);
+          if (deletedSafetyTip) {
+            imagePath = `public/images/User/${deletedSafetyTip.profilePicture}`;
           }
         }
 
-        return res.status(200).json({
-          success: true,
-          message: "SafetyTip updated successfully",
-          safetyTip
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "DB Error",
-        });
+        const safetyTip = await User.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+          {
+            new: true,
+          }
+        );
+
+        if (safetyTip) {
+          if (hasChanged && req.file) {
+            if (!imagePath.includes("user_no_image")) {
+              console.log(imagePath);
+              fs.unlink(imagePath, (err) => {
+                if (err) {
+                  return res.status(500).json({
+                    success: false,
+                    message: "Error deleting the image",
+                  });
+                }
+              });
+            }
+          }
+
+          return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            safetyTip,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "DB Error",
+          });
+        }
       }
 
+      if (Object.keys(error).length != 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error,
+      });
     }
-
-    if (Object.keys(error).length != 0) {
-
-      error["success"] = false;
-      error["message"] = "input error";
-
-      return res.status(400).json(error)
-
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    })
   }
-})
+);
 
 /* get specific  */
-authController.get('/:id', async (req, res) => {
+authController.get("/:id", async (req, res) => {
   try {
-    const safetyTip = await User.findById(req.params.id)
+    const safetyTip = await User.findById(req.params.id);
 
-    safetyTip.views += 1
+    safetyTip.views += 1;
 
-    await safetyTip.save()
-    return res.status(200).json(safetyTip)
+    await safetyTip.save();
+    return res.status(200).json(safetyTip);
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "not found"
+      message: "not found",
     });
   }
-})
-
+});
 
 /* functions ---------------------------------------- */
 
 const generateCode = async () => {
   let codeTaken, code;
   do {
-    code = Math.floor(100000 + Math.random() * 900000)
+    code = Math.floor(100000 + Math.random() * 900000);
     codeTaken = await User.findOne({
-      verificationCode: code
+      verificationCode: code,
     });
-
-  } while (codeTaken)
-  return code
-}
+  } while (codeTaken);
+  return code;
+};
 
 const verifyPassword = (password, field) => {
-  const passwordRequirements = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&,*.])(?=.*\d).{8,16}$/;
+  const passwordRequirements =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&,*.])(?=.*\d).{8,16}$/;
   if (!passwordRequirements.test(password)) {
-    return true
+    return true;
   }
-}
+};
 
 /*   
   const isEmpty = (value) => {
@@ -1193,21 +1042,20 @@ const verifyPassword = (password, field) => {
 
 const isNumber = (value) => {
   if (isNaN(Number(value))) {
-    return true
+    return true;
   }
-}
+};
 const isContactNumber = (value) => {
   if (!/^09\d{9}$/.test(value)) {
-    return true
+    return true;
   }
-}
+};
 
 const isEmail = (value) => {
-
-  if (!value.includes('@')) {
-    return true
+  if (!value.includes("@")) {
+    return true;
   }
-}
+};
 
 /*   const isUsername =  (value) => {
     const regex = /^[a-zA-Z0-9]+$/; 
@@ -1218,47 +1066,67 @@ const isEmail = (value) => {
    */
 
 const checkIdentifier = async (identifier) => {
-  let identierType
-  if (identifier.includes('@')) {
-    identierType = 'email';
+  let identierType;
+  if (identifier.includes("@")) {
+    identierType = "email";
   } else if (/^09\d{9}$/.test(identifier)) {
-    identierType = 'contactNumber';
+    identierType = "contactNumber";
   }
   /* else {
        identierType = 'username';
      } */
   const accountExists = await User.findOne({
-    [identierType]: identifier
+    [identierType]: identifier,
   });
   return accountExists;
-}
+};
 
 const isContactNumberExists = async (contactNumber) => {
   const user = await User.findOne({
-    contactNumber
-  })
+    contactNumber,
+  });
 
-  return user
-
-
-}
+  return user;
+};
 
 const isContactNumberOwner = async (id, contactNumber) => {
   const user = await User.findOne({
-    _id: id
-  })
+    _id: id,
+  });
 
   if (user.contactNumber === contactNumber) {
-    return true
+    return true;
   }
-}
+};
+
+const isEmailExists = async (email) => {
+  const user = await User.findOne({
+    email,
+  });
+
+  return user;
+};
+
+const isEmailOwner = async (id, email) => {
+  const user = await User.findOne({
+    _id: id,
+  });
+
+  if (user.email === email) {
+    return true;
+  }
+};
 
 const generateToken = (id) => {
-  return jwt.sign({
-    id
-  }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  })
-}
+  return jwt.sign(
+    {
+      id,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+};
 
-module.exports = authController
+module.exports = authController;

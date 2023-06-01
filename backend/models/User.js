@@ -1,116 +1,108 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 mongoose.pluralize(null);
 
 const userSchema = mongoose.Schema(
   {
-    
     firstname: {
       type: String,
-      //required: [true, 'Please add a firstname'],
+      required: true,
     },
     middlename: {
       type: String,
-      //required: [true, 'Please add a middlename'],
+      required: true,
     },
     lastname: {
       type: String,
-      //required: [true, 'Please add a lastname'],
+      required: true,
     },
     contactNumber: {
       type: String,
-      //required: [true, 'Please add a contactNumber'],
+      /* required: true, */
     },
     email: {
       type: String,
-      //required: [true, 'Please add a email'],
+      /*  required: true, */
     },
     region: {
       type: String,
-      //required: [true, 'Please add a region'],
+      required: true,
     },
     province: {
       type: String,
-      //required: [true, 'Please add a province'],
+      required: true,
     },
     municipality: {
       type: String,
-      //required: [true, 'Please add a municipality'],
+      required: true,
     },
     barangay: {
       type: String,
-      //required: [true, 'Please add a barangay'],
+      required: true,
     },
     street: {
       type: String,
-      //required: [true, 'Please add a street'],
+      required: true,
     },
-    gender :{
+    gender: {
       type: String,
+      required: true,
     },
-    birthdate:{
-      type:Date
+    birthdate: {
+      type: Date,
+      required: true,
     },
     password: {
       type: String,
-      //required: [true, 'Please add a password'],
+      required: true,
     },
     profilePicture: {
       type: String,
-      ////required: [true, 'Please add a name'],
     },
     attempt: {
       type: Number,
-      //required: [true, 'Please add a attempt'],
+      default: 0,
     },
     verificationCode: {
       type: Number,
-      //required: [true, 'Please add a verificationCode'],
     },
     codeExpiration: {
       type: Date,
-      //required: [true, 'Please add a codeExpiration'],
     },
-  
+
     userType: {
       type: String,
-      //required: [true, 'Please add a userType'],
+      required: true,
     },
     isOnline: {
       type: Boolean,
-      //required: [true, 'Please add a name'],
-  
+      default: false,
     },
 
     isBanned: {
       type: Boolean,
-      default:false
-      //required: [true, 'Please add a password'],
-
+      default: false,
     },
     isArchived: {
       type: Boolean,
-      default:false
-      //required: [true, 'Please add a password'],
-
+      default: false,
     },
     status: {
       type: String,
-      //required: [true, 'Please add a password'],
-
+      default: false,
     },
 
     verificationPicture: {
       type: [String],
       default: [],
     },
-    
+
     verificationRequestDate: {
       type: Date,
     },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
-)
+);
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model("User", userSchema);

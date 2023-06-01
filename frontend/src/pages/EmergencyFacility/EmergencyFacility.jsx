@@ -347,8 +347,6 @@ function EmergencyFacility() {
         <input type="text" placeholder="Destination" ref={destiantionRef} />
       </Autocomplete> */}
       <div style={{ height: "50%", width: "100%" }}>
-        {/* Google Map Box */}
-
         <GoogleMap
           center={defaultCenter}
           zoom={15}
