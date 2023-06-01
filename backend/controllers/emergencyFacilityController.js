@@ -1,7 +1,8 @@
 const emergencyFacilityController = require("express").Router()
 const EmergencyFacility = require("../models/EmergencyFacility")
 const verifyToken = require('../middlewares/verifyToken')
-const upload = require('../middlewares/uploadMiddleware')
+const uploadMiddleware = require('../middlewares/uploadMiddleware')
+const upload = uploadMiddleware();
 const {isEmpty,isImage,isLessThanSize} = require('./functionController')
 
 

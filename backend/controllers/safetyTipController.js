@@ -2,7 +2,10 @@ const safetyTipController = require("express").Router()
 const SafetyTip = require("../models/SafetyTip")
 const verifyToken = require('../middlewares/verifyToken')
 const { isEmpty, isImage, isLessThanSize } = require('./functionController')
-const upload = require('../middlewares/uploadMiddleware')
+
+
+const uploadMiddleware = require('../middlewares/uploadMiddleware')
+const upload = uploadMiddleware('public/images/Safety Tip'); 
 
 const fs = require('fs');
 

@@ -87,7 +87,7 @@ const SafetyTipInput = ({ type }) => {
       const { success, message } = data;
       if (success) {
         toast.success(message);
-        navigate(`/manage/safety-tips/${type === 'add' ? data.safetyTip._id : id}`);
+       /*  navigate(`/manage/safety-tips/${type === 'add' ? data.safetyTip._id : id}`); */
       } else {
         if (message !== 'input error') {
           toast.error(message);

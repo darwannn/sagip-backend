@@ -20,7 +20,8 @@ const currentDate = new Date()
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000)
 const dateTimeToday = new Date().toLocaleString();
 
-const upload = require('../middlewares/uploadMiddleware')
+const uploadMiddleware = require('../middlewares/uploadMiddleware')
+const upload = uploadMiddleware();
 
 const fs = require('fs');
 const { log } = require('console')
