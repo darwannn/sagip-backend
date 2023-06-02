@@ -15,11 +15,13 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState("");
+
+  const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
     try {
       const options = {
         "Content-Type": "application/json",
@@ -49,6 +51,8 @@ const Login = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

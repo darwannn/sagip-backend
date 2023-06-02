@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -15,9 +15,25 @@ import Navbar from "../../components/Navbar";
 
 const EditPassword = () => {
   const { token } = useSelector((state) => state.auth);
-
+  const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const itemString = localStorage.getItem("verification");
+  const item = JSON.parse(itemString);
+  useEffect(() => {
+    if (!itemString) {
+      toast.error("please enter your password");
+      navigate("/profile/password-verification");
+    } else {
+      if (new Date().getTime() > item.expiry) {
+        localStorage.removeItem("verification");
+        toast.error("please enter your password");
+        navigate("/profile/password/password-verification");
+      }
+    }
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -35,7 +51,7 @@ const EditPassword = () => {
       const { success, message } = data;
       if (success) {
         toast.success(message);
-
+        localStorage.removeItem("verification");
         return;
       } else {
         if (message != "input error") {

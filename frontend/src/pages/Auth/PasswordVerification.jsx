@@ -15,6 +15,7 @@ import Navbar from "../../components/Navbar";
 
 const PasswordVerification = () => {
   const { token } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
 
@@ -42,7 +43,14 @@ const PasswordVerification = () => {
 
       if (success) {
         toast.success(message);
-
+        localStorage.setItem(
+          "verification",
+          JSON.stringify({
+            isOwner: true,
+            expiry: new Date().getTime() + 5 * 60 * 1000,
+          })
+        );
+        navigate("/profile/password/edit");
         return;
       } else {
         if (message !== "input error") {
