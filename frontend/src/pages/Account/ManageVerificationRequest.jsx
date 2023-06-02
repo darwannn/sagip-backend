@@ -242,7 +242,7 @@ const VerificationRequest = () => {
             verificationRequestDetails.verificationPicture.map(
               (picture, index) => (
                 <img
-                  src={`https://sagip.onrender.com/images/User/${picture}`}
+                  src={`http://localhost:5000/images/User/${picture}`}
                   key={index}
                   style={{ width: "300px" }}
                 />

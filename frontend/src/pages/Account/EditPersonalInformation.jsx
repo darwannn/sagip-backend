@@ -71,9 +71,7 @@ const AccountInput = ({ type }) => {
         setUserType(data.userType);
         setAttempt(data.attempt);
         setImage(data.profilePicture);
-        setImageUrl(
-          `https://sagip.onrender.com/images/User/${data.profilePicture}`
-        );
+        setImageUrl(`http://localhost:5000/images/User/${data.profilePicture}`);
       } catch (error) {
         console.error(error);
       }
