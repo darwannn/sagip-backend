@@ -9,12 +9,17 @@ import "react-toastify/dist/ReactToastify.css";
 const ContactVerification = ({ type }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth);
+  const { token, newContactNumber } = useSelector((state) => state.auth);
   const [code, setCode] = useState("");
 
   const handleSubmit = async (e, action) => {
+    console.log("====================================");
+    console.log(newContactNumber);
+    console.log("====================================");
     e.preventDefault();
-
+    console.log("====================================");
+    console.log(type);
+    console.log("====================================");
     try {
       const options = {
         "Content-Type": "application/json",
@@ -24,7 +29,7 @@ const ContactVerification = ({ type }) => {
       let method,
         url = "";
 
-      if (action === "send") {
+      if (action === "send" || type === "contact") {
         url = "/auth/contact-verification";
         method = "POST";
       } else if (action === "resend") {
@@ -41,15 +46,38 @@ const ContactVerification = ({ type }) => {
         if (message.includes("resent")) {
           toast.success(message);
         } else {
-          toast.success(message);
-          dispatch(contactVerification(data));
-
           if (type === "register") {
             navigate("/");
+            dispatch(contactVerification(data));
+            toast.success(message);
           } else if (type === "forgot-password") {
             navigate("/new-password");
+            dispatch(contactVerification(data));
+            toast.success(message);
           } else if (type === "login") {
             navigate("/login");
+            dispatch(contactVerification(data));
+            toast.success(message);
+          } else if (type === "contact") {
+            const data = await request(
+              `/auth/update/contact-number`,
+              "PUT",
+              options,
+              { contactNumber: newContactNumber }
+            );
+            const { success, message } = data;
+            console.log(data);
+
+            if (success) {
+              toast.success(message);
+
+              return;
+            } else {
+              if (message != "input error") {
+                toast.success(message);
+              } else {
+              }
+            }
           }
         }
       } else {

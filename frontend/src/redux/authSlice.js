@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   user: null,
   token: null,
-  contactVericiationUser: null,
+  newContactNumber: null,
 };
 
 export const authSlice = createSlice({
@@ -44,6 +44,10 @@ export const authSlice = createSlice({
       state.token = null;
       localStorage.clear();
     },
+
+    newContactNumber(state, action) {
+      state.newContactNumber = action.payload;
+    },
   },
 });
 
@@ -54,6 +58,7 @@ export const {
   contactVerification,
   forgotPassword,
   newPassword,
+  newContactNumber,
 } = authSlice.actions;
 
 export default authSlice.reducer;

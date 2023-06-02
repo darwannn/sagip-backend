@@ -360,7 +360,7 @@ authController.post(
             console.log("====================================");
             console.log("login");
             console.log("====================================");
-            if (type == "register")
+            if (type === "register")
               return res.status(200).json({
                 success: true,
                 message: "Verified successfully. You can now use your account!",
@@ -373,7 +373,7 @@ authController.post(
                 token: generateToken(user._id),
               });
 
-            if (type == "forgot-password")
+            if (type === "forgot-password")
               return res.status(200).json({
                 success: true,
                 message: "Enter your new-password",
@@ -385,7 +385,7 @@ authController.post(
                 },
                 token: generateToken(user._id),
               });
-            if (type == "login")
+            if (type === "login")
               return res.status(200).json({
                 success: true,
                 message: "Verified successfully ",
@@ -396,6 +396,11 @@ authController.post(
                   status: user._doc.status,
                 },
                 token: generateToken(user._id),
+              });
+            if (type === "contact")
+              return res.status(200).json({
+                success: true,
+                message: "Verified successfully",
               });
           } else {
             error["code"] = "Incorrect code";
@@ -722,13 +727,13 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Verification code has been resent.",
-        user: {
+        /* user: {
           for: "forgot-password",
           id: user._doc._id,
           userType: user._doc.userType,
           status: user._doc.status,
         },
-        token: generateToken(user._id),
+        token: generateToken(user._id), */
       });
     } else {
       return res.status(500).json({

@@ -198,6 +198,10 @@ const App = () => {
           element={<EditContactNumber />}
         />
         <Route
+          path="/profile/contact-number/contact-verification"
+          element={<ContactVerification type="contact" />}
+        />
+        <Route
           path="/profile/password-verification"
           element={<PasswordVerification />}
         />

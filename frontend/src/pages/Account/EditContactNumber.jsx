@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { newContactNumber } from "../../redux/authSlice";
 
 import { request } from "../../utils/axios";
 
@@ -15,7 +16,7 @@ import Navbar from "../../components/Navbar";
 
 const EditContactNumber = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
 
   const [contactNumber, setContactNumber] = useState("");
@@ -44,28 +45,24 @@ const EditContactNumber = () => {
     e.preventDefault();
 
     try {
+      dispatch(newContactNumber(contactNumber));
+
       const options = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       };
-      const data = await request(
-        `/auth/update/contact-number`,
-        "PUT",
-        options,
-        { contactNumber }
-      );
+      const data = await request(`/auth/resend-code`, "PUT", options, {
+        contactNumber,
+      });
       const { success, message } = data;
       console.log(data);
 
       if (success) {
-        toast.success(message);
-
+        /* toast.success(message); */
+        navigate("/profile/contact-number/contact-verification");
         return;
       } else {
-        if (message != "input error") {
-          toast.success(message);
-        } else {
-        }
+        toast.error(message);
       }
     } catch (error) {
       console.error(error);
