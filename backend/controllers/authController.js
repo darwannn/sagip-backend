@@ -802,7 +802,8 @@ authController.get(
       if (
         (safetyTip.verificationRequestDate === undefined &&
           safetyTip.verificationPicture.length <= 0) ||
-        safetyTip.status === "verified"
+        safetyTip.status === "verified" ||
+        safetyTip.userType !== "resident"
       ) {
         return res.status(500).json({
           success: false,
@@ -833,6 +834,10 @@ authController.put("/verification-request/:id", async (req, res) => {
     );
 
     if (req.body.action === "reject") {
+      user.verificationPicture.map((picture) => {
+        const imagePath = `public/images/User/${picture}`;
+        fs.unlink(imagePath, (err) => {});
+      });
       user.verificationPicture = [];
 
       await user.save();
@@ -846,6 +851,7 @@ authController.put("/verification-request/:id", async (req, res) => {
         /* sendSMS(`Verification Request Rejected`, user.contactNumber); */
 
         await createNotification(req.params.id, "title", "message", "category");
+
         return res.status(200).json({
           success: true,
           message: "Verification Request Rejected",

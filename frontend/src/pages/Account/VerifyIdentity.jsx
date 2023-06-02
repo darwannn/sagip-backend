@@ -1,26 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useSelector } from "react-redux";
 
 import { request } from "../../utils/axios";
-import { statusCategory } from "../../utils/categories";
 
 import { toast } from "react-toastify";
-import moment from "moment";
-import DataTable from "react-data-table-component";
 
-import {
-  AiFillEdit,
-  AiFillLike,
-  AiFillDelete,
-  AiOutlineArrowRight,
-  AiOutlineLike,
-} from "react-icons/ai";
-import { FiArrowRight } from "react-icons/fi";
-
-import Navbar from "../../components/Navbar";
 function VerifyIdentity() {
   const navigate = useNavigate();
 

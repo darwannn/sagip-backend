@@ -5,38 +5,29 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import { request } from "../../utils/axios";
-import { safetyTipsCategory } from "../../utils/categories";
 
 import { toast } from "react-toastify";
 import moment from "moment";
-import DataTable from "react-data-table-component";
-
-import {
-  AiFillEdit,
-  AiFillLike,
-  AiFillDelete,
-  AiOutlineArrowRight,
-  AiOutlineLike,
-} from "react-icons/ai";
-import { FiArrowRight } from "react-icons/fi";
 
 import Navbar from "../../components/Navbar";
 
-const SafetyTips = () => {
+const VerificationRequest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [safetyTips, setSafetyTips] = useState([]);
-  const [filteredSafetyTips, setFilteredSafetyTips] = useState([]);
+  const [verificationRequest, setVerificationRequest] = useState([]);
+  const [filteredVerificationRequest, setFilteredVerificationRequest] =
+    useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
 
   const { user, token } = useSelector((state) => state.auth);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalShown, setisModalShown] = useState(false);
-  const [verificationRequest, setVerificationRequest] = useState("");
+  const [verificationRequestDetails, setVerificationRequestDetails] =
+    useState("");
 
   useEffect(() => {
-    const fetchSafetyTips = async () => {
+    const fetchVerificationRequest = async () => {
       try {
         const data = await request("/auth/", "GET");
         const filteredRecords = data.filter(
@@ -48,36 +39,27 @@ const SafetyTips = () => {
         console.log("====================================");
         console.log(filteredRecords);
         console.log("====================================");
-        setSafetyTips(filteredRecords);
+        setVerificationRequest(filteredRecords);
       } catch (error) {
         console.error(error);
       }
     };
-    fetchSafetyTips();
+    fetchVerificationRequest();
   }, []);
 
   useEffect(() => {
     if (activeCategory === "all") {
-      setFilteredSafetyTips(
-        safetyTips.filter((safetyTip) =>
-          safetyTip.firstname.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredSafetyTips(
-        safetyTips.filter(
-          (safetyTip) =>
-            safetyTip.category.toLowerCase() === activeCategory.toLowerCase() &&
-            safetyTip.firstname
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
+      console.log("Filtering all requests");
+      setFilteredVerificationRequest(
+        verificationRequest.filter((request) =>
+          request.firstname.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
-  }, [activeCategory, searchQuery, safetyTips]);
+  }, [activeCategory, searchQuery, verificationRequest]);
 
   useEffect(() => {
-    const fetchVerificationRequest = async () => {
+    const fetchVerificationRequestDetails = async () => {
       try {
         const options = { Authorization: `Bearer ${token}` };
         const data = await request(
@@ -88,7 +70,7 @@ const SafetyTips = () => {
 
         if (data.message != "not found") {
           console.log(data);
-          setVerificationRequest(data);
+          setVerificationRequestDetails(data);
         } else {
           navigate(`/manage/account/verification-request`);
         }
@@ -98,7 +80,7 @@ const SafetyTips = () => {
     };
 
     if (id) {
-      fetchVerificationRequest();
+      fetchVerificationRequestDetails();
       setisModalShown(true);
     } else {
       setisModalShown(false);
@@ -167,18 +149,18 @@ const SafetyTips = () => {
       <Navbar />
 
       <div>
-        <div>Total Request: {safetyTips.length}</div>
+        <div>Total Request: {verificationRequest.length}</div>
         <input
           type="text"
-          placeholder="Search safetyTips"
+          placeholder="Search verificationRequest"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
       <div>
-        {filteredSafetyTips.length > 0 ? (
+        {filteredVerificationRequest.length > 0 ? (
           <div>
-            {filteredSafetyTips.map((safetyTip) => (
+            {filteredVerificationRequest.map((safetyTip) => (
               <div key={safetyTip._id}>
                 <div>
                   <div></div>
@@ -186,8 +168,8 @@ const SafetyTips = () => {
                     to={`/manage/account/verification-request/${safetyTip._id}`}
                   >
                     <h4>{`${safetyTip.firstname} ${
-                      verificationRequest &&
-                      verificationRequest.middlename
+                      verificationRequestDetails &&
+                      verificationRequestDetails.middlename
                         .split(" ")
                         .map((name) => name.charAt(0))
                         .join("")
@@ -215,50 +197,57 @@ const SafetyTips = () => {
           <div>
             {" "}
             Name:
-            {`${verificationRequest.firstname} ${
-              verificationRequest &&
-              verificationRequest.middlename
+            {`${verificationRequestDetails.firstname} ${
+              verificationRequestDetails &&
+              verificationRequestDetails.middlename
                 .split(" ")
                 .map((name) => name.charAt(0))
                 .join("")
-            } ${verificationRequest.lastname}`}
+            } ${verificationRequestDetails.lastname}`}
           </div>
           <br></br>
           <div>
             {" "}
             Address:
-            {`${verificationRequest.street}, ${verificationRequest.barangay}, ${verificationRequest.municipality}`}
+            {`${verificationRequestDetails.street}, ${verificationRequestDetails.barangay}, ${verificationRequestDetails.municipality}`}
           </div>{" "}
           <br></br>
-          <div> Contact Number: #{verificationRequest.contactNumber}</div>{" "}
+          <div>
+            {" "}
+            Contact Number: #{verificationRequestDetails.contactNumber}
+          </div>{" "}
           <br></br>
           <div>
             {" "}
             Date of Birth{" "}
-            {moment(verificationRequest.birthdate).format("MMMM DD, YYYY")}
+            {moment(verificationRequestDetails.birthdate).format(
+              "MMMM DD, YYYY"
+            )}
           </div>{" "}
           <br></br>
           <h4>
             Requested Created{" "}
-            {moment(verificationRequest.verificationRequestDate).format(
+            {moment(verificationRequestDetails.verificationRequestDate).format(
               "MMMM DD, YYYY HH:mm A"
             )}
           </h4>{" "}
           <br></br>
           <h4>
             Date Created
-            {moment(verificationRequest.createdAt).format(
+            {moment(verificationRequestDetails.createdAt).format(
               "MMMM DD, YYYY HH:mm A"
             )}
           </h4>
-          {verificationRequest.verificationPicture &&
-            verificationRequest.verificationPicture.map((picture, index) => (
-              <img
-                src={`http://localhost:5000/images/User/${picture}`}
-                key={index}
-                style={{ width: "300px" }}
-              />
-            ))}
+          {verificationRequestDetails.verificationPicture &&
+            verificationRequestDetails.verificationPicture.map(
+              (picture, index) => (
+                <img
+                  src={`http://localhost:5000/images/User/${picture}`}
+                  key={index}
+                  style={{ width: "300px" }}
+                />
+              )
+            )}
           <button onClick={handleReject}>Reject Verification</button>
           <br></br>
           <button onClick={handleVerify}>Verify</button>
@@ -268,4 +257,4 @@ const SafetyTips = () => {
   );
 };
 
-export default SafetyTips;
+export default VerificationRequest;
