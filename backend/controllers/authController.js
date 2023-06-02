@@ -357,7 +357,9 @@ authController.post(
             user.attempt = 0;
             user.verificationCode = 0;
             await user.save();
-
+            console.log("====================================");
+            console.log("login");
+            console.log("====================================");
             if (type == "register")
               return res.status(200).json({
                 success: true,
@@ -745,28 +747,34 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
 authController.put(
   "/verify-identity",
   tokenMiddleware,
-  upload.single("image"),
+  upload.single("selfieImage"),
   async (req, res) => {
     try {
+      if (!req.file) {
+        return res.status(200).json({
+          success: true,
+          image: "Required field",
+          message: "input error",
+        });
+      }
+
       const user = await User.findByIdAndUpdate(
         req.user.id,
         {
           $push: {
-            verificationPicture: req.body.identificationCardPicture,
+            verificationPicture: req.file.filename,
           },
           $set: {
             verificationRequestDate: Date.now(),
-            userType: "admiral",
           },
         },
         { new: true }
       );
-      console.log(req.body.identificationCardPicture);
-      console.log(req.user.id);
+
       if (user) {
         return res.status(200).json({
           success: true,
-          message: "Verification Request send",
+          message: "Verification Request sent",
         });
       } else {
         return res.status(500).json({
@@ -784,26 +792,54 @@ authController.put(
   }
 );
 
+authController.get(
+  "/verify-identity/:id",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const safetyTip = await User.findById(req.params.id);
+      if (
+        (safetyTip.verificationRequestDate === undefined &&
+          safetyTip.verificationPicture.length <= 0) ||
+        safetyTip.status === "verified"
+      ) {
+        return res.status(500).json({
+          success: false,
+          message: "not found",
+        });
+      }
+      return res.status(200).json(safetyTip);
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error,
+      });
+    }
+  }
+);
+
 authController.put("/verification-request/:id", async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       {
-        /*   $unset: {
-        verificationRequestDate: Date.now(),
-      }, */
+        $unset: {
+          verificationRequestDate: Date.now(),
+        },
       },
       { new: true }
     );
 
-    /* if (req.body.action === "reject") {
+    if (req.body.action === "reject") {
       user.verificationPicture = [];
-    
+
       await user.save();
     } else {
       user.status = "verified";
       await user.save();
-    } */
+    }
 
     if (user) {
       if (req.body.action === "reject") {
@@ -1003,9 +1039,9 @@ authController.get("/:id", async (req, res) => {
   try {
     const safetyTip = await User.findById(req.params.id);
 
-    safetyTip.views += 1;
+    /*  safetyTip.views += 1;
 
-    await safetyTip.save();
+    await safetyTip.save(); */
     return res.status(200).json(safetyTip);
   } catch (error) {
     return res.status(500).json({
