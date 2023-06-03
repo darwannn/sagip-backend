@@ -1,27 +1,21 @@
 import React, { useEffect, useState } from "react";
-
 import { Link, useNavigate, useParams } from "react-router-dom";
-
 import { useSelector } from "react-redux";
-
 import { request } from "../../utils/axios";
 import { statusCategory } from "../../utils/categories";
-
 import { toast } from "react-toastify";
 import moment from "moment";
 import DataTable from "react-data-table-component";
-
 import { AiFillEdit, AiFillDelete } from "react-icons/ai";
-
 import Navbar from "../../components/Navbar";
 
 const Account = ({ user }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const { token } = useSelector((state) => state.auth);
 
   const [residentAccounts, setResidentAccounts] = useState([]);
+  const [filteredResidentAccounts, setFilteredResidentAccounts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(statusCategory[0]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -40,35 +34,44 @@ const Account = ({ user }) => {
     fetchAccounts();
   }, []);
 
-  const filteredAccounts = residentAccounts.filter((account) => {
-    const categoryMatch =
-      activeCategory === statusCategory[0] ||
-      account.status.toLowerCase() === activeCategory.toLowerCase();
+  useEffect(() => {
+    setFilteredResidentAccounts(handleFilterAccounts());
+  }, [activeCategory, searchQuery, residentAccounts]);
 
-    const searchMatch =
-      account.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      account.contactNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      account.municipality.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      `${account.firstname} ${account.middlename} ${account.lastname}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+  const handleFilterAccounts = () => {
+    return residentAccounts.filter((account) => {
+      const categoryMatch =
+        activeCategory === statusCategory[0] ||
+        account.status.toLowerCase() === activeCategory.toLowerCase();
 
-    // Additional condition to filter by userType
-    const userTypeMatch =
-      (user === "staff" &&
-        ["responder", "dispatcher", "admin", "super-admin"].includes(
-          account.userType
-        )) ||
-      (user === "resident" && account.userType === "resident");
+      const searchMatch =
+        account.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        account.contactNumber
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        account.municipality
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        `${account.firstname} ${account.middlename} ${account.lastname}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
-    return categoryMatch && searchMatch && userTypeMatch;
-  });
+      const userTypeMatch =
+        (user === "staff" &&
+          ["responder", "dispatcher", "admin", "super-admin"].includes(
+            account.userType
+          )) ||
+        (user === "resident" && account.userType === "resident");
+
+      return categoryMatch && searchMatch && userTypeMatch;
+    });
+  };
 
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
 
-  const residentAccountsThisMonth = residentAccounts.filter((account) => {
+  const registeredThisMonth = residentAccounts.filter((account) => {
     const accountDate = new Date(account.createdAt);
     const accountMonth = accountDate.getMonth() + 1;
     const accountYear = accountDate.getFullYear();
@@ -90,10 +93,10 @@ const Account = ({ user }) => {
       setResidentAccounts(updatedAccounts);
       const { message } = data;
       toast.success(message);
-      {
-        user == "resident"
-          ? navigate("/manage/account/resident")
-          : navigate("/manage/account/staff");
+      if (user === "resident") {
+        navigate("/manage/account/resident");
+      } else {
+        navigate("/manage/account/staff");
       }
     } catch (error) {
       console.error(error);
@@ -120,7 +123,7 @@ const Account = ({ user }) => {
       sortable: true,
     },
     {
-      name: "Satus",
+      name: "Status",
       selector: (row) =>
         row.status.charAt(0).toUpperCase() + row.status.slice(1),
       sortable: true,
@@ -137,7 +140,7 @@ const Account = ({ user }) => {
           <div>
             <Link
               to={
-                user == "resident"
+                user === "resident"
                   ? `/manage/account/resident/update/${row._id}`
                   : `/manage/account/staff/update/${row._id}`
               }
@@ -159,7 +162,7 @@ const Account = ({ user }) => {
       <Navbar />
       <br />
       <br />
-      {user == "resident" ? (
+      {user === "resident" ? (
         <Link to="/manage/account/verification-request">
           Verification Request
         </Link>
@@ -167,9 +170,11 @@ const Account = ({ user }) => {
         <Link to="/manage/account/staff/add">Create</Link>
       )}
 
-      {user == "resident" ? (
+      {user === "resident" ? (
         <>
-          <div>
+          <div
+            onClick={() => setFilteredResidentAccounts(handleFilterAccounts())}
+          >
             Total:{" "}
             {
               residentAccounts.filter(
@@ -177,7 +182,9 @@ const Account = ({ user }) => {
               ).length
             }
           </div>
-          <div>Registered this month: {residentAccountsThisMonth.length}</div>
+          <div onClick={() => setFilteredResidentAccounts(registeredThisMonth)}>
+            Registered this month: {registeredThisMonth.length}
+          </div>
         </>
       ) : (
         <div>
@@ -218,7 +225,7 @@ const Account = ({ user }) => {
       <div>
         <DataTable
           columns={columns}
-          data={filteredAccounts}
+          data={filteredResidentAccounts}
           pagination
           paginationPerPage={10}
           paginationRowsPerPageOptions={[10, 20, 30]}

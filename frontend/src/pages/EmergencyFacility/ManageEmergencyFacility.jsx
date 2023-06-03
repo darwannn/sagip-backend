@@ -301,17 +301,23 @@ const ManageEmergencyFacility = () => {
       <div>
         <div>
           {emergencyFacilityCategory.slice(1).map((category) => (
-            <div key={category}>
-              <h3>{category}</h3>
-              <p>
-                {
-                  emergencyFacility.filter(
-                    (emergencyFacility) =>
-                      emergencyFacility.category.toLowerCase() ===
-                      category.toLowerCase()
-                  ).length
-                }
-              </p>
+            <div
+              onClick={() => {
+                setActiveCategory(category);
+              }}
+            >
+              <div key={category}>
+                <h3>{category}</h3>
+                <p>
+                  {
+                    emergencyFacility.filter(
+                      (emergencyFacility) =>
+                        emergencyFacility.category.toLowerCase() ===
+                        category.toLowerCase()
+                    ).length
+                  }
+                </p>
+              </div>
             </div>
           ))}
         </div>
@@ -482,7 +488,7 @@ const ManageEmergencyFacility = () => {
                   <div>{longitude}</div>
                 </div>
                 <div>
-                  {type == "update" && (
+                  {type === "update" && (
                     <div>
                       <label>Full </label>
                       <input
@@ -525,7 +531,7 @@ const ManageEmergencyFacility = () => {
                 </div>
                 <div>
                   <button type="submit">
-                    {type == "add" ? "Add" : "Edit"}
+                    {type === "add" ? "Add" : "Edit"}
                   </button>
                 </div>
               </form>

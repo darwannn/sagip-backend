@@ -8,8 +8,8 @@ const municipality = "Malolos";
 apiController.get("/signal", async (req, res) => {
   try {
     const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
-    const response = await fetch(url);
-    const data = await response.json();
+    const response = await axios.get(url);
+    const data = response.data;
     const bulletins = data.bulletins;
 
     let maxCount = 0;
@@ -33,14 +33,14 @@ apiController.get("/signal", async (req, res) => {
 
     do {
       const parseUrl = `https://pagasa.chlod.net/api/v1/bulletin/parse/${filename}`;
-      const parseResponse = await fetch(parseUrl, { method: "HEAD" });
+      const parseResponse = await axios.head(parseUrl);
 
       if (parseResponse.status !== 200) {
         console.log("Error: Unable to retrieve data from URL.");
 
         const downloadUrl = `https://pagasa.chlod.net/api/v1/bulletin/download/${filename}`;
-        const downloadResponse = await fetch(downloadUrl);
-        const datas = await downloadResponse.json();
+        const downloadResponse = await axios.get(downloadUrl);
+        const datas = downloadResponse.data;
 
         counter++;
 
@@ -50,8 +50,8 @@ apiController.get("/signal", async (req, res) => {
       } else {
         looping = false;
 
-        const parseResponse = await fetch(parseUrl);
-        const parseData = await parseResponse.json();
+        const parseResponse = await axios.get(parseUrl);
+        const parseData = parseResponse.data;
 
         const dateString = "2023-06-12T12:00:00.000Z";
         const targetDate = DateTime.fromISO(dateString);
@@ -76,7 +76,8 @@ apiController.get("/signal", async (req, res) => {
                   ) {
                     return res.status(201).json({
                       signal: `${signal}`,
-                      track: `https://pubfiles.pagasa.dost.gov.ph/tamss/nwp/wrf/ccover/PH_ccover_d01_024h.gif`,
+                      track:
+                        "https://pubfiles.pagasa.dost.gov.ph/tamss/nwp/wrf/ccover/PH_ccover_d01_024h.gif",
                     });
                   } else if (location.name === municipality) {
                     hasSignal = true;
@@ -98,10 +99,11 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
-  fetch(
-    `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
-  )
-    .then((response) => response.json())
+  axios
+    .get(
+      `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
+    )
+    .then((response) => response.data)
     .then((data) => {
       const weatherDescription = data.weather[0].description;
       res.json({ weather: weatherDescription });
@@ -110,7 +112,6 @@ apiController.get("/weather", async (req, res) => {
       res.status(500).json({ message: "An error occurred" });
     });
 });
-
 apiController.post("/send-alert", async (req, res) => {
   const error = {};
   const { alertMessage, location } = req.body;

@@ -36,9 +36,9 @@ const VerificationRequest = () => {
             record.status === "semi-verified" &&
             record.verificationRequestDate
         );
-        console.log("====================================");
+
         console.log(filteredRecords);
-        console.log("====================================");
+
         setVerificationRequest(filteredRecords);
       } catch (error) {
         console.error(error);
@@ -68,7 +68,7 @@ const VerificationRequest = () => {
           options
         );
 
-        if (data.message != "not found") {
+        if (data.message !== "not found") {
           console.log(data);
           setVerificationRequestDetails(data);
         } else {

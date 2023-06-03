@@ -1,4 +1,5 @@
-/* const BASE_URL = "https://sagip.onrender.com"; */
+import axios from "axios";
+
 const BASE_URL = "http://localhost:5000";
 
 export const request = async (
@@ -8,49 +9,50 @@ export const request = async (
   body = {},
   isNotStringified = false
 ) => {
-  let res;
-  let data;
-  switch (method) {
-    case "GET":
-      res = await fetch(BASE_URL + url, { headers });
-      data = await res.json();
-      return data;
+  try {
+    let response;
 
-    case "POST":
-      // if we send form data, it is not content-type:application/json,
-      // hence the bonus param
-      if (isNotStringified) {
-        res = await fetch(BASE_URL + url, { headers, method, body });
-        data = await res.json();
-      } else {
-        res = await fetch(BASE_URL + url, {
-          headers,
-          method,
-          body: JSON.stringify({ ...body }),
-        });
-        data = await res.json();
-      }
-      return data;
+    switch (method) {
+      case "GET":
+        response = await axios.get(BASE_URL + url, { headers });
+        break;
 
-    case "PUT":
-      if (isNotStringified) {
-        res = await fetch(BASE_URL + url, { headers, method, body });
-        data = await res.json();
-      } else {
-        res = await fetch(BASE_URL + url, {
-          headers,
-          method,
-          body: JSON.stringify({ ...body }),
-        });
-        data = await res.json();
-      }
-      return data;
+      case "POST":
+        if (isNotStringified) {
+          response = await axios.post(BASE_URL + url, body, { headers });
+        } else {
+          response = await axios.post(BASE_URL + url, { ...body }, { headers });
+        }
+        break;
 
-    case "DELETE":
-      res = await fetch(BASE_URL + url, { headers, method });
-      data = await res.json();
+      case "PUT":
+        if (isNotStringified) {
+          response = await axios.put(BASE_URL + url, body, { headers });
+        } else {
+          response = await axios.put(BASE_URL + url, { ...body }, { headers });
+        }
+        break;
+
+      case "DELETE":
+        response = await axios.delete(BASE_URL + url, { headers });
+        break;
+
+      default:
+        return;
+    }
+
+    const { data, status } = response;
+    return data;
+  } catch (error) {
+    if (error.response) {
+      const { status, data } = error.response;
       return data;
-    default:
-      return;
+    } else if (error.request) {
+      const errorMessage = "No response received from the server";
+      return { message: errorMessage, success: false };
+    } else {
+      const errorMessage = error.message;
+      return { message: errorMessage, success: false };
+    }
   }
 };
