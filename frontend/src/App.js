@@ -46,6 +46,16 @@ import EditPersonalInformation from "./pages/Account/EditPersonalInformation";
 import EditContactNumber from "./pages/Account/EditContactNumber";
 import PasswordVerification from "./pages/Auth/PasswordVerification";
 
+import ManageTeam from "./pages/Team/ManageTeam";
+import TeamInput from "./pages/Team/TeamInput";
+
+import Hazard from "./pages/HazardReport/Hazard";
+import HazardReport from "./pages/HazardReport/HazardReport";
+/* import HazardReportDetails from "./pages/HazardReport/HazardReportDetails"; */
+import ManageHazardReport from "./pages/HazardReport/ManageHazardReport";
+
+import Map from "./pages/Map";
+
 const App = () => {
   const { user, token } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -79,20 +89,16 @@ const App = () => {
       <ToastContainer />
       <Routes>
         <Route path="/" element={<Home />} />
-
         <Route path="/login" element={<Login />} />
         <Route
           path="/login/contact-verification"
           element={<ContactVerification type="login" />}
         />
-
         <Route path="/register" element={<Register />} />
-
         <Route
           path="/register/contact-verification"
           element={<ContactVerification type="register" />}
         />
-
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
           path="/forgot-password/contact-verification"
@@ -105,13 +111,9 @@ const App = () => {
           }
         />
         <Route path="/new-password" element={<NewPassword />} />
-
         <Route path="/manage/send-alert" element={<SendAlert />} />
-
         <Route path="/safety-tips" element={<SafetyTips />} />
-
         <Route path="/manage/safety-tips" element={<ManageSafetyTips />} />
-
         <Route
           path="/manage/safety-tips/add"
           element={
@@ -132,8 +134,8 @@ const App = () => {
           path="/manage/safety-tips/saved"
           element={user ? <SavedSafetyTips /> : <Navigate to="/login" />}
         />
-
-        <Route path="/emergency-facility" element={<EmergencyFacility />} />
+        <Route path="/map" element={<Map />} />
+        {/*  <Route path="/emergency-facility" element={<EmergencyFacility />} /> */}
         <Route
           path="/manage/emergency-facility"
           element={<ManageEmergencyFacility />}
@@ -146,7 +148,6 @@ const App = () => {
           path="/manage/emergency-facility/add"
           element={<ManageEmergencyFacility />}
         />
-
         <Route
           path="/manage/account/resident"
           element={<ManageAccount user="resident" />}
@@ -167,7 +168,6 @@ const App = () => {
           path="/manage/account/resident/identity-verification"
           element={<ManageAccount user="resident" />}
         />
-
         {/*  <Route
           path="/manage/account/resident/add"
           element={
@@ -178,7 +178,6 @@ const App = () => {
           path="/manage/account/staff/add"
           element={<AccountInput user="staff" type="add" />}
         />
-
         <Route
           path="/manage/account/resident/update/:id"
           element={<AccountInput user="resident" type="update" />}
@@ -205,7 +204,27 @@ const App = () => {
           path="/profile/password-verification"
           element={<PasswordVerification />}
         />
+        <Route path="/manage/team" element={<ManageTeam />} />
+        <Route
+          path="/manage/team/:id"
+          element={<ManageTeam type="details" />}
+        />
+        <Route
+          path="/manage/team/responder"
+          element={<ManageTeam type="responder" />}
+        />
+        <Route
+          path="/manage/team/update/:id"
+          element={<TeamInput />}
+          type="update"
+        />
 
+        <Route path="/hazard" element={<Hazard />} />
+        <Route path="/hazard/report" element={<HazardReport />} />
+        {/*    <Route path="/hazard/map" element={<HazardReportDetails />} />
+        <Route path="/hazard/map/:id" element={<HazardReportDetails />} /> */}
+        {/*   <Route path="/manage/hazard" element={<ManageHazardReport />} /> */}
+        <Route path="/manage/team/add" element={<TeamInput />} type="add" />
         {/* if no route path found*/}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}
       </Routes>

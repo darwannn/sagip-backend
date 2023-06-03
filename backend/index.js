@@ -9,6 +9,8 @@ const {
 } = require("./controllers/apiController");
 const safetyTipController = require("./controllers/safetyTipController");
 const emergencyFacilityController = require("./controllers/emergencyFacilityController");
+const teamController = require("./controllers/teamController");
+const hazardReportController = require("./controllers/hazardReportController");
 const multer = require("multer");
 const app = express();
 
@@ -29,6 +31,8 @@ app.use("/auth", authController);
 app.use("/safety-tips", safetyTipController);
 app.use("/emergency-facility", emergencyFacilityController);
 app.use("/api", apiController);
+app.use("/team", teamController);
+app.use("/hazard-report", hazardReportController);
 
 app.use(bodyParser.json());
 // multer

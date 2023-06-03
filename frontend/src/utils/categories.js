@@ -45,3 +45,9 @@ export const userTypeCategory = [
   "admin",
   "super-admin",
 ];
+
+export const hazardCategory = [
+  "Object on the street",
+  "Damaged road",
+  "Others",
+];

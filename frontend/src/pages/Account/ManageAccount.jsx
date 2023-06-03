@@ -24,9 +24,9 @@ const Account = ({ user }) => {
     const fetchAccounts = async () => {
       try {
         const data = await request("/auth/", "GET");
-        console.log("====================================");
+
         console.log(data);
-        console.log("====================================");
+
         setAccounts(data);
       } catch (error) {
         console.error(error);
@@ -79,12 +79,10 @@ const Account = ({ user }) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
-
   const registeredThisMonth = accounts.filter((account) => {
     const accountDate = new Date(account.createdAt);
     const accountMonth = accountDate.getMonth() + 1;
     const accountYear = accountDate.getFullYear();
-
     return (
       accountMonth === currentMonth &&
       accountYear === currentYear &&
