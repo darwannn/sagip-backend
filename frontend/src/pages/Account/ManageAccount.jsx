@@ -14,8 +14,9 @@ const Account = ({ user }) => {
   const navigate = useNavigate();
   const { token } = useSelector((state) => state.auth);
 
-  const [residentAccounts, setResidentAccounts] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [filteredResidentAccounts, setFilteredResidentAccounts] = useState([]);
+  const [filteredStaffAccounts, setFilteredStaffAccounts] = useState([]);
   const [activeCategory, setActiveCategory] = useState(statusCategory[0]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -26,7 +27,7 @@ const Account = ({ user }) => {
         console.log("====================================");
         console.log(data);
         console.log("====================================");
-        setResidentAccounts(data);
+        setAccounts(data);
       } catch (error) {
         console.error(error);
       }
@@ -35,11 +36,12 @@ const Account = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    setFilteredResidentAccounts(handleFilterAccounts());
-  }, [activeCategory, searchQuery, residentAccounts]);
+    setFilteredResidentAccounts(handleFilterAccounts(accounts, "resident"));
+    setFilteredStaffAccounts(handleFilterAccounts(accounts, "staff"));
+  }, [activeCategory, searchQuery, accounts]);
 
-  const handleFilterAccounts = () => {
-    return residentAccounts.filter((account) => {
+  const handleFilterAccounts = (accounts, userType) => {
+    const filteredAccounts = accounts.filter((account) => {
       const categoryMatch =
         activeCategory === statusCategory[0] ||
         account.status.toLowerCase() === activeCategory.toLowerCase();
@@ -56,22 +58,29 @@ const Account = ({ user }) => {
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
-      const userTypeMatch =
-        (user === "staff" &&
+      if (userType === "staff") {
+        return (
+          categoryMatch &&
+          searchMatch &&
           ["responder", "dispatcher", "admin", "super-admin"].includes(
             account.userType
-          )) ||
-        (user === "resident" && account.userType === "resident");
-
-      return categoryMatch && searchMatch && userTypeMatch;
+          )
+        );
+      } else if (userType === "resident") {
+        return categoryMatch && searchMatch && account.userType === "resident";
+      } else {
+        return false;
+      }
     });
+
+    return filteredAccounts;
   };
 
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
 
-  const registeredThisMonth = residentAccounts.filter((account) => {
+  const registeredThisMonth = accounts.filter((account) => {
     const accountDate = new Date(account.createdAt);
     const accountMonth = accountDate.getMonth() + 1;
     const accountYear = accountDate.getFullYear();
@@ -87,10 +96,8 @@ const Account = ({ user }) => {
     try {
       const options = { Authorization: `Bearer ${token}` };
       const data = await request(`/auth/delete/${id}`, "DELETE", options);
-      const updatedAccounts = residentAccounts.filter(
-        (account) => account._id !== id
-      );
-      setResidentAccounts(updatedAccounts);
+      const updatedAccounts = accounts.filter((account) => account._id !== id);
+      setAccounts(updatedAccounts);
       const { message } = data;
       toast.success(message);
       if (user === "resident") {
@@ -173,13 +180,16 @@ const Account = ({ user }) => {
       {user === "resident" ? (
         <>
           <div
-            onClick={() => setFilteredResidentAccounts(handleFilterAccounts())}
+            onClick={() =>
+              setFilteredResidentAccounts(
+                handleFilterAccounts(accounts, "resident")
+              )
+            }
           >
             Total:{" "}
             {
-              residentAccounts.filter(
-                (account) => account.userType === "resident"
-              ).length
+              accounts.filter((account) => account.userType === "resident")
+                .length
             }
           </div>
           <div onClick={() => setFilteredResidentAccounts(registeredThisMonth)}>
@@ -189,11 +199,7 @@ const Account = ({ user }) => {
       ) : (
         <div>
           Published:{" "}
-          {
-            residentAccounts.filter(
-              (account) => account.userType !== "resident"
-            ).length
-          }
+          {accounts.filter((account) => account.userType !== "resident").length}
         </div>
       )}
 
@@ -225,7 +231,11 @@ const Account = ({ user }) => {
       <div>
         <DataTable
           columns={columns}
-          data={filteredResidentAccounts}
+          data={
+            user === "resident"
+              ? filteredResidentAccounts
+              : filteredStaffAccounts
+          }
           pagination
           paginationPerPage={10}
           paginationRowsPerPageOptions={[10, 20, 30]}
