@@ -136,17 +136,25 @@ function EmergencyFacility() {
           } else {
             console.log("Street name not found");
           }
-        } else {
+        } /*  else {
           console.log("No results found");
-        }
-      } else {
+        } */
+      } /* else {
         console.log("Geocoding failed. Status:", status);
-      }
+      } */
     });
 
+    if (infoType === "facility") {
+      setName(emergencyFacility.name);
+
+      setImage(
+        `http://localhost:5000/images/Emergency Facility/${emergencyFacility.image}`
+      );
+    }
+    setIsFull(emergencyFacility.isFull);
     if (infoType === "hazard") {
       setProof(
-        `http://localhost:5000/images/Hazard Report/${emergencyFacility.prrof}`
+        `http://localhost:5000/images/Hazard Report/${emergencyFacility.proof}`
       );
       setDescription(emergencyFacility.description);
       setReportedOn(emergencyFacility.createdAt);
@@ -250,6 +258,7 @@ function EmergencyFacility() {
               name: {name}
               <br />
               {isFull && "Full"}
+              {console.log(image)}
               <img src={image} alt="" height={"100px"} />
               <button
                 onClick={() => {
@@ -389,7 +398,8 @@ function EmergencyFacility() {
             <div>{`${category} on ${barangay}`}</div>
             <div>{moment(reportedOn).format("MMMM DD, YYYY HH:mm A")}</div>
             <div>{reportedBy}</div>
-            <div>{proof}</div>
+
+            <img src={proof} alt="" height={"100px"} />
           </>
         ))}
       {/* should be hidden - opacity:0 */}
