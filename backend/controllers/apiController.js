@@ -99,6 +99,15 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
+  /*  const to = "/topics/newsletter";
+
+  const notification = {
+    title: "May bagyo",
+    body: "Magtago ka na sa puno",
+    sound: "default",
+  }; */
+  /* sendNotification(to, notification); */
+
   axios
     .get(
       `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
@@ -255,6 +264,26 @@ const getAllContactNumbersInBarangays = async (municipality, location) => {
   } catch (error) {
     return "Internal Server Error: " + error;
   }
+};
+
+const sendNotification = (to, notif) => {
+  const api_key = process.env.NOTIFICATION_API;
+
+  const fields = { to, notification: notif };
+
+  const headers = {
+    Authorization: "key=" + api_key,
+    "Content-Type": "application/json",
+  };
+
+  axios
+    .post("https://fcm.googleapis.com/fcm/send", fields, { headers })
+    .then((response) => {
+      console.log("Notification Sent");
+    })
+    .catch((error) => {
+      console.error("Error:", error.message);
+    });
 };
 
 module.exports = {
