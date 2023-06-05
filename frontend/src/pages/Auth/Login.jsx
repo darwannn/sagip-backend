@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { login } from "../../redux/authSlice";
+
+import { setServerResponse } from "../../redux/serverResponseSlice";
 import { useDispatch } from "react-redux";
 
 import { request } from "../../utils/axios";
@@ -37,7 +39,8 @@ const Login = () => {
       const { success, message } = data;
       if (success) {
         dispatch(login(data));
-        toast.success(message);
+        dispatch(setServerResponse(message));
+        /*   toast.success(message); */
         navigate("/");
       } else {
         if (message !== "input error") {

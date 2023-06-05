@@ -2,12 +2,23 @@ import { request } from "../utils/axios";
 
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+
+import { getServerResponse } from "../redux/serverResponseSlice";
+import { useSelector, useDispatch } from "react-redux";
 function Home() {
+  const dispatch = useDispatch();
+
   const [signal, setSignal] = useState(null);
   const [weather, setWeather] = useState(null);
-
+  const { serverResponse } = useSelector((state) => state.serverResponse);
   useEffect(() => {
     const fetchData = async () => {
+      //get server response
+      if (serverResponse !== "") {
+        toast.success(serverResponse);
+        dispatch(getServerResponse());
+      }
       try {
         const signalResponse = await request("/api/signal", "GET");
         setSignal(signalResponse.signal);
