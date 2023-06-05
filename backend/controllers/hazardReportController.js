@@ -18,7 +18,15 @@ hazardReportController.post(
       console.log("====================================");
       console.log(req.file);
       console.log("====================================");
-      const { description, category, latitude, longitude, status } = req.body;
+      const {
+        description,
+        category,
+        latitude,
+        longitude,
+        status,
+        street,
+        municipality,
+      } = req.body;
 
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
@@ -43,6 +51,8 @@ hazardReportController.post(
           category,
           latitude,
           longitude,
+          street,
+          municipality,
           status,
           proof: req.file.filename,
           userId: req.user.id,

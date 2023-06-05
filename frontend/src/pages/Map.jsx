@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import moment from "moment";
 import { request } from "../utils/axios";
 import { emergencyFacilityCategory } from "../utils/categories";
-
+import hospitalIcon from "../assets/hospital_icon.png";
 import { toast } from "react-toastify";
 import {
   useJsApiLoader,
@@ -29,6 +29,14 @@ const restrictions = {
   country: "ph",
 };
 const libraries = ["places"];
+
+/* const hospitalIcon = {
+  url: "../assets/hospital_icon.png",
+  size: new window.google.maps.Size(32, 32),
+  origin: new window.google.maps.Point(0, 0),
+  anchor: new window.google.maps.Point(16, 16),
+}; */
+
 function EmergencyFacility() {
   const mapAPI = process.env.REACT_APP_MAP_API;
   const { isLoaded } = useJsApiLoader({
@@ -45,7 +53,7 @@ function EmergencyFacility() {
   const [reportedBy, setReportedBy] = useState("");
   const [isFull, setIsFull] = useState("");
   const [isModalShown, setisModalShown] = useState(false);
-  const [barangay, setBarangay] = useState(false);
+  const [address, setAddress] = useState(false);
 
   const [proof, setProof] = useState("");
   const [description, setDescription] = useState("");
@@ -112,37 +120,15 @@ function EmergencyFacility() {
     const { latLng } = event;
     const latitude = latLng.lat();
     const longitude = latLng.lng();
-
+    console.log("====================================");
+    console.log(emergencyFacility);
+    console.log("====================================");
     setLatitude(latitude);
     setLongitude(longitude);
     setMarkerLatLng({ latitude, longitude });
 
     const geocoder = new window.google.maps.Geocoder();
     const latlng = { lat: latitude, lng: longitude };
-
-    geocoder.geocode({ location: latlng }, (results, status) => {
-      if (status === "OK") {
-        if (results[0]) {
-          const address = results[0].formatted_address;
-          const addressComponents = results[0].address_components;
-          const street = addressComponents.find((component) =>
-            component.types.includes("route")
-          );
-
-          if (street) {
-            const streetName = street.long_name;
-            console.log("Street Name:", streetName);
-            setBarangay(streetName);
-          } else {
-            console.log("Street name not found");
-          }
-        } /*  else {
-          console.log("No results found");
-        } */
-      } /* else {
-        console.log("Geocoding failed. Status:", status);
-      } */
-    });
 
     if (infoType === "facility") {
       setName(emergencyFacility.name);
@@ -153,6 +139,11 @@ function EmergencyFacility() {
     }
     setIsFull(emergencyFacility.isFull);
     if (infoType === "hazard") {
+      setAddress(
+        emergencyFacility.municipality
+          ? `${emergencyFacility.street} ${emergencyFacility.municipality}`
+          : ""
+      );
       setProof(
         `http://localhost:5000/images/Hazard Report/${emergencyFacility.proof}`
       );
@@ -395,7 +386,7 @@ function EmergencyFacility() {
           </div>
         ) : (
           <>
-            <div>{`${category} on ${barangay}`}</div>
+            <div>{`${category} on ${address}`}</div>
             <div>{moment(reportedOn).format("MMMM DD, YYYY HH:mm A")}</div>
             <div>{reportedBy}</div>
 
@@ -445,6 +436,12 @@ function EmergencyFacility() {
           <div>
             {emergencyFacility.map((emergencyFacility, index) => (
               <Marker
+                icon={{
+                  // path: google.maps.SymbolPath.CIRCLE,
+                  url: require("../assets/hospital_icon.png"),
+                  fillColor: "#EB00FF",
+                  scaledSize: new window.google.maps.Size(15, 25),
+                }}
                 position={{
                   lat: emergencyFacility.latitude,
                   lng: emergencyFacility.longitude,

@@ -420,15 +420,8 @@ const ManageEmergencyFacility = () => {
                       "MMMM DD, YYYY HH:mm A"
                     )}
                   </span>
-                  {reverseGeoCoding(
-                    emergencyFacility.latitude,
-                    emergencyFacility.longitude,
-                    (street, municipality) => {
-                      setStreet(street);
-                      setMunicipality(municipality);
-                      console.log(street);
-                    }
-                  )}
+                  {emergencyFacility.street}
+                  {emergencyFacility.municipality}
 
                   <span>
                     {street}

@@ -8,10 +8,6 @@ const HazardReportSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    /*  title: {
-      type: String,
-      required: true,
-    }, */
 
     description: {
       type: String,
@@ -31,6 +27,14 @@ const HazardReportSchema = new mongoose.Schema(
     },
     longitude: {
       type: Number,
+      required: true,
+    },
+    street: {
+      type: String,
+      required: true,
+    },
+    municipality: {
+      type: String,
       required: true,
     },
     status: {

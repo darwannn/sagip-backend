@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 
 import { request } from "../../utils/axios";
 import { hazardCategory } from "../../utils/categories";
+import { reverseGeoCoding } from "../../utils/functions";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -119,43 +120,55 @@ const HazardReport = ({ type = "add" }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      formData.append("latitude", latitude);
-      formData.append("longitude", longitude);
-      formData.append("category", category);
-      formData.append("hasChanged", hasChanged);
-      formData.append("proof", image);
+      const locationName = await new Promise((resolve, reject) => {
+        reverseGeoCoding(latitude, longitude).then(resolve).catch(reject);
+      });
 
-      const options = {
-        Authorization: `Bearer ${token}`,
-      };
+      const { street, municipality } = locationName;
+      if (municipality === "Malolos") {
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("latitude", latitude);
+        formData.append("longitude", longitude);
+        formData.append("category", category);
+        formData.append("hasChanged", hasChanged);
+        formData.append("proof", image);
+        formData.append("street", street);
+        formData.append("municipality", municipality);
 
-      let url, method;
-      if (type === "add") {
-        url = "/hazard-report/add";
-        method = "POST";
-      } else if (type === "update") {
-        url = `/hazard-report/update/${id}`;
-        method = "PUT";
-      }
+        const options = {
+          Authorization: `Bearer ${token}`,
+        };
 
-      const data = await request(url, method, options, formData, true);
-      console.log(data);
+        console.log(street);
+        console.log(municipality);
 
-      const { success, message } = data;
-      if (success) {
-        toast.success(message);
-        /*  navigate(
-          `/hazard/${type === "add" ? data.safetyTip._id : id}`
-        ); */
-      } else {
-        if (message !== "input error") {
-          toast.error(message);
-        } else {
-          toast.error(message);
+        let url, method;
+        if (type === "add") {
+          url = "/hazard-report/add";
+          method = "POST";
+        } else if (type === "update") {
+          url = `/hazard-report/update/${id}`;
+          method = "PUT";
         }
+
+        const data = await request(url, method, options, formData, true);
+        console.log(data);
+
+        const { success, message } = data;
+        if (success) {
+          toast.success(message);
+        } else {
+          if (message !== "input error") {
+            toast.error(message);
+          } else {
+            toast.error(message);
+          }
+        }
+      } else {
+        toast.error("Unfortunately the selected area is outside Malolos");
+        /* navigate('/') */
       }
     } catch (error) {
       console.error(error);
