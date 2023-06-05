@@ -300,8 +300,9 @@ const ManageEmergencyFacility = () => {
 
       <div>
         <div>
-          {emergencyFacilityCategory.slice(1).map((category) => (
+          {emergencyFacilityCategory.slice(1).map((category, index) => (
             <div
+              key={index}
               onClick={() => {
                 setActiveCategory(category);
               }}

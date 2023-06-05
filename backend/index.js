@@ -49,9 +49,9 @@ const upload = multer({
   storage: storage,
 });
 
-app.post("/upload", upload.single("image"), async (req, res) => {
+/* app.post("/upload", upload.single("image"), async (req, res) => {
   return res.status(200).json({ msg: "Successfully uploaded" });
-});
+}); */
 
 // connect server
 app.listen(process.env.PORT, () =>

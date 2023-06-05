@@ -15,8 +15,10 @@ hazardReportController.post(
   async (req, res) => {
     const error = {};
     try {
-      const { description, category, proofType, latitude, longitude, status } =
-        req.body;
+      console.log("====================================");
+      console.log(req.file);
+      console.log("====================================");
+      const { description, category, latitude, longitude, status } = req.body;
 
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
@@ -110,73 +112,35 @@ hazardReportController.put(
   async (req, res) => {
     const error = {};
     try {
-      const {
-        description,
-        category,
-        hasChanged,
-        proofType,
-        latitude,
-        longitude,
-        status,
-      } = req.body;
-
-      if (isEmpty(category)) error["category"] = "Required field";
-      if (isEmpty(description)) error["description"] = "Required field";
-      if (isEmpty(latitude)) error["category"] = "Choose a location";
-      if (isEmpty(longitude)) error["description"] = "Choose a location";
-
-      /*  if (hasChanged === "true") {
-        if (!req.file) {
-          error["image"] = "Required field";
-        } else {
-          if (isImage(req.file)) {
-            error["image"] = "Only PNG, JPEG, and JPG files are allowed";
-          } else {
-            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-              error["image"] = "File size should be less than 10MB";
-            }
-          }
-        }
-      } */
-
+      const { action } = req.body;
+      let = status = "";
+      if (action === "verify") {
+        status = "verified";
+      } else if (action === "resolve") {
+        status = "resolved";
+      }
+      console.log(req.params.id);
       if (Object.keys(error).length === 0) {
-        const updateFields = { title, content, category, userId: req.user.id };
-        let imagePath = "";
-
-        if (hasChanged && req.file) {
-          updateFields.image = req.file.filename;
-
-          const deletedHazardReport = await HazardReport.findById(
-            req.params.id
-          );
-          if (deletedHazardReport) {
-            imagePath = `public/images/Hazard Report/${deletedHazardReport.image}`;
-          }
-        }
-
         const hazardReport = await HazardReport.findByIdAndUpdate(
           req.params.id,
-          updateFields,
+          { status: status },
           { new: true }
         );
-
         if (hazardReport) {
-          if (hasChanged && req.file) {
-            fs.unlink(imagePath, (err) => {
-              if (err) {
-                return res.status(500).json({
-                  success: false,
-                  message: "Error deleting the image",
-                });
-              }
+          console.log(status);
+          if (action === "verify") {
+            return res.status(200).json({
+              success: true,
+              message: "HazardReport verified ",
+              hazardReport,
+            });
+          } else if (action === "resolve") {
+            return res.status(200).json({
+              success: true,
+              message: "HazardReport resolved ",
+              hazardReport,
             });
           }
-
-          return res.status(200).json({
-            success: true,
-            message: "HazardReport updated successfully",
-            hazardReport,
-          });
         } else {
           return res.status(500).json({
             success: false,

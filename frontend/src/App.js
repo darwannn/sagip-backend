@@ -223,7 +223,11 @@ const App = () => {
         <Route path="/hazard/report" element={<HazardReport />} />
         {/*    <Route path="/hazard/map" element={<HazardReportDetails />} />
         <Route path="/hazard/map/:id" element={<HazardReportDetails />} /> */}
-        {/*   <Route path="/manage/hazard" element={<ManageHazardReport />} /> */}
+        <Route path="/manage/hazard-report" element={<ManageHazardReport />} />
+        <Route
+          path="/manage/hazard-report/:id"
+          element={<ManageHazardReport />}
+        />
         <Route path="/manage/team/add" element={<TeamInput />} type="add" />
         {/* if no route path found*/}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}

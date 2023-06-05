@@ -51,3 +51,5 @@ export const hazardCategory = [
   "Damaged road",
   "Others",
 ];
+export const hazardReportCategory = ["all", "review", "ongoing", "resolved"];
+export const emergencyRequestCategory = ["all", "new", "ongoing", "resolved"];
