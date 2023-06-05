@@ -6,8 +6,6 @@ import { useSelector } from "react-redux";
 
 import { request } from "../../utils/axios";
 
-import { format } from "timeago.js";
-
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 
 import Navbar from "../../components/Navbar";
@@ -104,7 +102,7 @@ const SafetyTipDetails = () => {
           <div>
             <span></span>
             <span>
-              <span>Created At:</span> {format(safetyTipDetails.createdAt)}
+              <span>Created At:</span> {safetyTipDetails.createdAt}
             </span>
           </div>
         </div>

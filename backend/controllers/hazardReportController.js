@@ -44,7 +44,7 @@ hazardReportController.post(
           latitude,
           longitude,
           status,
-          proof,
+          proof: req.file.filename,
           userId: req.user.id,
         });
         if (hazardReport) {

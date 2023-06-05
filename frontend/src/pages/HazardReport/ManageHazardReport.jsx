@@ -196,20 +196,44 @@ const ManageEmergencyFacility = () => {
       };
       let url, method;
       if (type === "verify") {
-        formData = { action: type };
         url = `/hazard-report/update/${id}`;
         method = "PUT";
       } else if (type === "resolve") {
-        formData = { action: type };
-
         url = `/hazard-report/update/${id}`;
         method = "PUT";
-      } else if (type === "resolve") {
-        /*       url = `/hazard-report/delete/${id}`;
-        method = "DELETE"; */
       }
 
-      const data = await request(url, method, options, formData);
+      const data = await request(url, method, options, { action: type });
+
+      console.log(data);
+
+      const { success, message } = data;
+      if (success) {
+        toast.success(message);
+        navigate(`/manage/hazard-report`);
+        setisModalShown(false);
+        setShouldFetchData(true);
+        setMarkerLatLng(null);
+        /* setType(null); */
+      } else {
+        toast.error(message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleDismiss = async () => {
+    try {
+      const options = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      const data = await request(
+        `/hazard-report/delete/${id}`,
+        "DELETE",
+        options
+      );
 
       console.log(data);
 
@@ -464,7 +488,7 @@ const ManageEmergencyFacility = () => {
                 )}
                 <button
                   onClick={() => {
-                    handleSubmit("dismiss");
+                    handleDismiss();
                   }}
                 >
                   Dismiss

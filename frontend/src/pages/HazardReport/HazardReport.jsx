@@ -126,7 +126,7 @@ const HazardReport = ({ type = "add" }) => {
       formData.append("longitude", longitude);
       formData.append("category", category);
       formData.append("hasChanged", hasChanged);
-      formData.append("image", image);
+      formData.append("proof", image);
 
       const options = {
         Authorization: `Bearer ${token}`,
