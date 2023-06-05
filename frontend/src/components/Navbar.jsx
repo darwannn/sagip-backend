@@ -1,40 +1,106 @@
-import React from 'react'
-// import classes from './navbar.module.css'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../redux/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { request } from "../utils/axios";
+import moment from "moment";
 
-import { logout } from '../redux/authSlice'
-import { useDispatch } from 'react-redux'
-
-/* import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
- */
 const Navbar = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-const handleLogout = () => {
-  dispatch(logout())
-navigate('/login')
-}
+  const [notification, setNotification] = useState("");
+  const [isModalShown, setisModalShown] = useState(false); // Update initial state
+
+  const { token } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const fetchSafetyTipDetails = async () => {
+      try {
+        const options = { Authorization: `Bearer ${token}` };
+        const data = await request(`/notification/`, "GET", options);
+        setNotification(data.notifications);
+        console.log(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSafetyTipDetails();
+  }, [isModalShown]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  const readnotification = async (e) => {
+    e.preventDefault();
+    isModalShown ? setisModalShown(false) : setisModalShown(true);
+    try {
+      const options = {
+        Authorization: `Bearer ${token}`,
+      };
+      const data = await request("/notification/read", "PUT", options);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleDelete = async (notificationId) => {
+    try {
+      const options = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      console.log(notificationId);
+      const data = await request("/notification/delete", "PUT", options, {
+        notificationId,
+      });
+      console.log(data);
+    } catch (error) {
+      console.error(error);
+    }
+    setNotification((prevState) =>
+      prevState.filter((notification) => notification._id !== notificationId)
+    );
+  };
 
   return (
-    < >
+    <>
+      <div>
+        <Link to="/">Home</Link>
+      </div>
+      <ul></ul>
+      <div>
+        <span onClick={handleLogout}>Logout</span>
+        <br />
+        <span onClick={readnotification}>
+          notification
+          {notification && notification.length > 0
+            ? notification.filter(
+                (notification) => notification.isRead === false
+              ).length
+            : 0}
+        </span>
+        {notification &&
+          isModalShown &&
+          notification.map((notification, index) => {
+            return (
+              <div
+                key={index}
+                style={{ color: notification.isRead ? "black" : "red" }}
+              >
+                <div>{notification.title}</div>
+                <div>{notification.message}</div>
+                <div onClick={() => handleDelete(notification._id)}>delete</div>
 
-        <div >
-          <Link to='/'>Home</Link>
-        </div>
-        <ul >
+                {moment(notification.dateSent).format("MMMM DD, YYYY HH:mm A")}
+              </div>
+            );
+          })}
+      </div>
+    </>
+  );
+};
 
-        </ul>
-        <div >
-          
-              <span onClick={handleLogout}>Logout</span>
-           
-          
-        </div>
-      </>
-  
-  )
-}
-
-export default Navbar
+export default Navbar;

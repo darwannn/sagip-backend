@@ -106,7 +106,7 @@ apiController.get("/weather", async (req, res) => {
     body: "Magtago ka na sa puno",
     sound: "default",
   }; */
-  /* sendNotification(to, notification); */
+  /* sendNotificationAll(to, notification); */
 
   axios
     .get(
@@ -266,7 +266,7 @@ const getAllContactNumbersInBarangays = async (municipality, location) => {
   }
 };
 
-const sendNotification = (to, notif) => {
+const sendNotificationAll = (to, notif) => {
   const api_key = process.env.NOTIFICATION_API;
 
   const fields = { to, notification: notif };

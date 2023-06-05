@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 
 import { getServerResponse } from "../redux/serverResponseSlice";
 import { useSelector, useDispatch } from "react-redux";
+
+import Navbar from "../components/Navbar";
 function Home() {
   const dispatch = useDispatch();
 
@@ -33,6 +35,7 @@ function Home() {
 
   return (
     <>
+      <Navbar />
       <div>
         Malolos Signal NUmber <br></br>
         {signal && <div>{signal}</div>}

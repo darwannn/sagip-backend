@@ -3,14 +3,12 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { isEmpty, isImage, isLessThanSize } = require("./functionController");
-
 const {
+  isEmpty,
+  isImage,
+  isLessThanSize,
   createNotification,
-  addNotification,
-  updateNotification,
-  deleteNotification,
-} = require("./notificationController");
+} = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
