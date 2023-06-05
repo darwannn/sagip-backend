@@ -162,7 +162,7 @@ const ManageEmergencyFacility = () => {
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setImageUrl(
-              `http://localhost:5000/images/Emergency Facility/${data.image}`
+              `https://sagip.onrender.com/images/Emergency Facility/${data.image}`
             );
           } else {
             navigate(`/manage/emergency-facility`);

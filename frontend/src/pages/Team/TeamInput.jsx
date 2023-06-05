@@ -63,7 +63,9 @@ const SafetyTipInput = ({ type }) => {
           setTitle(data.title);
           setContent(data.content);
           setCategory(data.category);
-          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
+          setImageUrl(
+            `https://sagip.onrender.com/images/Safety Tip/${data.image}`
+          );
           console.log(data.category);
           console.log(category);
         } catch (error) {

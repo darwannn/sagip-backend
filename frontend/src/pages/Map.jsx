@@ -134,7 +134,7 @@ function EmergencyFacility() {
       setName(emergencyFacility.name);
 
       setImage(
-        `http://localhost:5000/images/Emergency Facility/${emergencyFacility.image}`
+        `https://sagip.onrender.com/images/Emergency Facility/${emergencyFacility.image}`
       );
     }
     setIsFull(emergencyFacility.isFull);
@@ -145,7 +145,7 @@ function EmergencyFacility() {
           : ""
       );
       setProof(
-        `http://localhost:5000/images/Hazard Report/${emergencyFacility.proof}`
+        `https://sagip.onrender.com/images/Hazard Report/${emergencyFacility.proof}`
       );
       setDescription(emergencyFacility.description);
       setReportedOn(emergencyFacility.createdAt);

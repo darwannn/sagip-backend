@@ -56,7 +56,7 @@ const SafetyTips = () => {
               <div key={safetyTip._id}>
                 {/*   <Link to={`/manage/safety-tips/${safetyTip._id}`}>
                   <img
-                    src={`http://localhost:5000/images/Safety Tip/${safetyTip.image}`}
+                    src={`https://sagip.onrender.com/images/Safety Tip/${safetyTip.image}`}
                     alt=""
                     style={{ width: "300px" }}
                   />
