@@ -387,7 +387,8 @@ accountController.put(
         verificationCode,
         userType,
         status,
-
+        isBanned,
+        isArchived,
         hasChanged,
       } = req.body;
 
@@ -443,7 +444,8 @@ accountController.put(
           firstname,
           middlename,
           lastname,
-
+          isBanned,
+          isArchived,
           email,
           region,
           province,

@@ -126,6 +126,8 @@ const AccountInput = ({ user, type }) => {
         birthdate,
         contactNumber,
         status,
+        isBanned,
+        isArchived,
         verificationCode: 0,
       };
     }
