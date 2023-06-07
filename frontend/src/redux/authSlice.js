@@ -62,5 +62,3 @@ export const {
 } = authSlice.actions;
 
 export default authSlice.reducer;
-
-// variables and function that change the variables, and they are both available in the all components

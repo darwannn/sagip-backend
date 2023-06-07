@@ -26,7 +26,7 @@ const SafetyTips = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
 
   const [safetyTips, setSafetyTips] = useState([]);
   const [activeCategory, setActiveCategory] = useState(safetyTipsCategory[0]);
@@ -35,6 +35,13 @@ const SafetyTips = () => {
   useEffect(() => {
     const fetchSafetyTips = async () => {
       try {
+        /*    let option;
+        user
+          ? (option = {
+              Authorization: `Bearer ${token}`,
+            })
+          : (option = {}); */
+
         const data = await request("/safety-tips/", "GET");
         setSafetyTips(data);
       } catch (error) {
@@ -57,12 +64,9 @@ const SafetyTips = () => {
 
   const handleDeleteBlog = async (id) => {
     try {
-      const options = { Authorization: `Bearer ${token}` };
-      const data = await request(
-        `/safety-tips/delete/${id}`,
-        "DELETE",
-        options
-      );
+      const data = await request(`/safety-tips/delete/${id}`, "DELETE", {
+        Authorization: `Bearer ${token}`,
+      });
 
       const { message, success } = data;
       if (success) {

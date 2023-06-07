@@ -98,17 +98,14 @@ const HazardReport = ({ type = "add" }) => {
     if (type === "update") {
       const fetchSafetyTipDetails = async () => {
         try {
-          const options = {
+          const data = await request(`/hazard-report/${id}`, "GET", {
             Authorization: `Bearer ${token}`,
-          };
-          const data = await request(`/hazard-report/${id}`, "GET", options);
+          });
 
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setImageUrl(
-            `https://sagip.onrender.com/images/Safety Tip/${data.image}`
-          );
+          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {

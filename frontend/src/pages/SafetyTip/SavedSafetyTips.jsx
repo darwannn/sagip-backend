@@ -33,8 +33,9 @@ const SavedSafetyTips = () => {
 
   const handleSavedSafetyTips = async (safetyTipId) => {
     try {
-      const options = { Authorization: `Bearer ${token}` };
-      await request(`/safety-tips/saves/${safetyTipId}`, "PUT", options);
+      await request(`/safety-tips/saves/${safetyTipId}`, "PUT", {
+        Authorization: `Bearer ${token}`,
+      });
       setSavedSafetyTips((prevBlogs) =>
         prevBlogs.filter((safetyTip) => safetyTip._id !== safetyTipId)
       );
@@ -52,7 +53,7 @@ const SavedSafetyTips = () => {
             <div key={safetyTip._id}>
               <Link to={`/manage/safety-tips/${safetyTip._id}`}>
                 <img
-                  src={`https://sagip.onrender.com/images/Safety Tip/${safetyTip.image}`}
+                  src={`http://localhost:5000/images/Safety Tip/${safetyTip.image}`}
                   alt="Blog"
                   style={{ width: "300px" }}
                 />

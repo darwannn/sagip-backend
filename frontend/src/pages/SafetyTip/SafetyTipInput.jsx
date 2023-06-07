@@ -46,9 +46,7 @@ const SafetyTipInput = ({ type }) => {
           setTitle(data.title);
           setContent(data.content);
           setCategory(data.category);
-          setImageUrl(
-            `https://sagip.onrender.com/images/Safety Tip/${data.image}`
-          );
+          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -69,10 +67,6 @@ const SafetyTipInput = ({ type }) => {
       formData.append("hasChanged", hasChanged);
       formData.append("image", image);
 
-      const options = {
-        Authorization: `Bearer ${token}`,
-      };
-
       let url, method;
       if (type === "add") {
         url = "/safety-tips/add";
@@ -82,7 +76,14 @@ const SafetyTipInput = ({ type }) => {
         method = "PUT";
       }
 
-      const data = await request(url, method, options, formData, true);
+      const data = await request(
+        url,
+        method,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        formData
+      );
       console.log(data);
 
       const { success, message } = data;

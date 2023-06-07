@@ -39,25 +39,29 @@ const Register = () => {
     } */
 
     try {
-      const options = { "Content-Type": "application/json" };
-      const data = await request("/auth/register", "POST", options, {
-        email,
-        password,
-        confirmPassword,
-        region,
-        province,
-        municipality,
-        barangay,
-        street,
-        firstname,
-        middlename,
-        lastname,
-        gender,
-        userType: "resident",
-        status: "unverified",
-        birthdate,
-        contactNumber,
-      });
+      const data = await request(
+        "/auth/register",
+        "POST",
+        {},
+        {
+          email,
+          password,
+          confirmPassword,
+          region,
+          province,
+          municipality,
+          barangay,
+          street,
+          firstname,
+          middlename,
+          lastname,
+          gender,
+          userType: "resident",
+          status: "unverified",
+          birthdate,
+          contactNumber,
+        }
+      );
 
       console.log(data);
 

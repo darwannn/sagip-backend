@@ -21,10 +21,9 @@ const SafetyTipDetails = () => {
   useEffect(() => {
     const fetchSafetyTipDetails = async () => {
       try {
-        const options = { Authorization: `Bearer ${token}` };
-        const data = await request(`/safety-tips/${id}`, "GET", options);
+        const data = await request(`/safety-tips/${id}`, "GET");
 
-        if (data.message !== "not found") {
+        if (data.message.toLowerCase() !== "not found") {
           console.log(data);
           setSafetyTipDetails(data);
           setIsSaved(data.saves.includes(user.id));
@@ -56,7 +55,7 @@ const SafetyTipDetails = () => {
         <Link to="/manage/safety-tips">Go Back</Link>
         <div>
           <img
-            src={`https://sagip.onrender.com/images/Safety Tip/${safetyTipDetails.image}`}
+            src={`http://localhost:5000/images/Safety Tip/${safetyTipDetails.image}`}
             style={{ width: "300px" }}
           />
           <div>

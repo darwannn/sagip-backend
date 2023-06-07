@@ -1,14 +1,8 @@
 import axios from "axios";
 
-const BASE_URL = "https://sagip.onrender.com";
+const BASE_URL = "http://localhost:5000";
 
-export const request = async (
-  url,
-  method,
-  headers = {},
-  body = {},
-  isNotStringified = false
-) => {
+export const request = async (url, method, headers = {}, body = {}) => {
   try {
     let response;
 
@@ -18,19 +12,11 @@ export const request = async (
         break;
 
       case "POST":
-        if (isNotStringified) {
-          response = await axios.post(BASE_URL + url, body, { headers });
-        } else {
-          response = await axios.post(BASE_URL + url, { ...body }, { headers });
-        }
+        response = await axios.post(BASE_URL + url, body, { headers });
         break;
 
       case "PUT":
-        if (isNotStringified) {
-          response = await axios.put(BASE_URL + url, body, { headers });
-        } else {
-          response = await axios.put(BASE_URL + url, { ...body }, { headers });
-        }
+        response = await axios.put(BASE_URL + url, body, { headers });
         break;
 
       case "DELETE":

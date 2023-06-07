@@ -1,79 +1,70 @@
 import { useEffect, useState } from "react";
-
 import { Link } from "react-router-dom";
-
 import { useSelector } from "react-redux";
-
 import { request } from "../../utils/axios";
 import { safetyTipsCategory } from "../../utils/categories";
-
-import { AiFillLike, AiOutlineLike } from "react-icons/ai";
-
 import Navbar from "../../components/Navbar";
 
 const SafetyTips = () => {
   const { user, token } = useSelector((state) => state.auth);
 
-  const [safetyTips, setSafetyTips] = useState([]);
-  const [filteredSafetyTips, setFilteredSafetyTips] = useState([]);
+  const [filteredHazardReport, setFilteredHazardReport] = useState([]);
   const [activeCategory, setActiveCategory] = useState(safetyTipsCategory[0]);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchSafetyTips = async () => {
+    const fetchHazardReport = async () => {
       try {
-        const data = await request("/hazard-report/", "GET");
-        setSafetyTips(data);
-        setFilteredSafetyTips(data);
+        const data = await request("/hazard-report/", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
+
+        setFilteredHazardReport(
+          data.filter((report) => report.status !== "resolved")
+        );
       } catch (error) {
         console.error(error);
       }
     };
-    fetchSafetyTips();
+    fetchHazardReport();
   }, []);
 
   useEffect(() => {
     if (activeCategory === safetyTipsCategory[0]) {
-      setFilteredSafetyTips(
-        safetyTips.filter((safetyTip) =>
-          safetyTip.category.toLowerCase().includes(searchQuery.toLowerCase())
+      setFilteredHazardReport(
+        filteredHazardReport.filter((report) =>
+          report.category.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
-  }, [activeCategory, searchQuery, safetyTips]);
+  }, [activeCategory, searchQuery]);
 
   return (
     <>
       <Navbar />
-      <br></br>
-      <br></br>
+      <br />
+      <br />
       <Link to="/hazard/report">Submit a Report</Link>
 
       <div>
-        {filteredSafetyTips.length > 0 ? (
+        {filteredHazardReport.length > 0 ? (
           <div>
-            {filteredSafetyTips.map((safetyTip) => (
-              <div key={safetyTip._id}>
-                {/*   <Link to={`/manage/safety-tips/${safetyTip._id}`}>
-                  <img
-                    src={`https://sagip.onrender.com/images/Safety Tip/${safetyTip.image}`}
-                    alt=""
-                    style={{ width: "300px" }}
-                  />
-                </Link> */}
+            {filteredHazardReport.map((report) => (
+              <div key={report._id}>
                 <div>
                   <div>
-                    <span>{safetyTip.category}</span>
+                    <span>
+                      {report.category} on {report.street} {report.municipality}
+                    </span>
                   </div>
-                  <h4>{safetyTip.title}</h4>
-
-                  <Link to={`/hazard/map/${safetyTip._id}`}>View on Map</Link>
+                  <h4>{report.title}</h4>
+                  <Link to={`/hazard/map/${report._id}`}>View on Map</Link>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <h3>No safetyTips</h3>
+          <h3>No hazard reports</h3>
         )}
       </div>
     </>

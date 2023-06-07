@@ -103,6 +103,9 @@ const ManageEmergencyFacility = () => {
     const fetchEmergencyFacility = async () => {
       try {
         const data = await request("/emergency-facility/", "GET");
+        console.log("====================================");
+        console.log(data);
+        console.log("====================================");
         setEmergencyFacility(data);
         setFilteredEmergencyFacility(data);
       } catch (error) {
@@ -143,18 +146,11 @@ const ManageEmergencyFacility = () => {
     if (id) {
       const fetchEmergencyFacilityDetails = async () => {
         try {
-          const options = {
-            Authorization: `Bearer ${token}`,
-          };
-          const data = await request(
-            `/emergency-facility/${id}`,
-            "GET",
-            options
-          );
+          const data = await request(`/emergency-facility/${id}`, "GET");
 
           console.log(data);
 
-          if (data.message !== "not found") {
+          if (data.message.toLowerCase() !== "not found") {
             setName(data.name);
             setLatitude(data.latitude);
             setLongitude(data.longitude);
@@ -162,7 +158,7 @@ const ManageEmergencyFacility = () => {
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setImageUrl(
-              `https://sagip.onrender.com/images/Emergency Facility/${data.image}`
+              `http://localhost:5000/images/Emergency Facility/${data.image}`
             );
           } else {
             navigate(`/manage/emergency-facility`);
@@ -195,10 +191,6 @@ const ManageEmergencyFacility = () => {
       formData.append("hasChanged", hasChanged);
       formData.append("image", image);
 
-      const options = {
-        Authorization: `Bearer ${token}`,
-      };
-
       let url, method;
       if (type === "add") {
         url = "/emergency-facility/add";
@@ -210,7 +202,14 @@ const ManageEmergencyFacility = () => {
         method = "PUT";
       }
 
-      const data = await request(url, method, options, formData, true);
+      const data = await request(
+        url,
+        method,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        formData
+      );
 
       console.log(data);
 

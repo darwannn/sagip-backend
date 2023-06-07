@@ -55,7 +55,9 @@ safetyTipController.post(
 /* get all */
 safetyTipController.get("/", async (req, res) => {
   try {
-    const team = await Team.find({});
+    const team = await Team.findMany({
+      userType: "resident",
+    });
     return res.status(200).json(team);
   } catch (error) {
     return res.status(500).json({

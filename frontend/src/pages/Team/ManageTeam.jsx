@@ -182,34 +182,6 @@ const ManageTeam = ({ type }) => {
     }
   };
 
-  const handleSubmitName = async (e) => {
-    e.preventDefault();
-
-    try {
-      const options = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-      const data = await request("/team/add", "POST", options, {
-        name,
-      });
-      console.log(data);
-      const { success, message } = data;
-      if (success) {
-        toast.success(message);
-
-        return;
-      } else {
-        if (message !== "input error") {
-          toast.error(message);
-        } else {
-          toast.error(message);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
   const columns = [
     {
       name: "Name",
@@ -264,7 +236,7 @@ const ManageTeam = ({ type }) => {
   return (
     <>
       <Navbar />
-
+      <Link to="/manage/team/add">Create Team</Link>
       <div>
         {filteredVerificationRequest.length > 0 ? (
           <div>
@@ -279,14 +251,6 @@ const ManageTeam = ({ type }) => {
         ) : (
           <h3>No Team</h3>
         )}
-        <form onSubmit={handleSubmitName}>
-          <input
-            type="text"
-            placeholder="team name"
-            onChange={(e) => setName(e.target.value)}
-          />
-          <button type="submit">Submit Name</button>
-        </form>
       </div>
       <br></br>
       <br></br>
@@ -294,7 +258,7 @@ const ManageTeam = ({ type }) => {
         (type === "details" ? (
           <>
             <Link to="/manage/team/">Go Back</Link>
-            <Link to={`/manage/team/update/${id}`}>Go Back</Link>
+
             <div>
               <AiFillDelete onClick={handleDelete} />
             </div>

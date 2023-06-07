@@ -17,8 +17,9 @@ const Navbar = () => {
   useEffect(() => {
     const fetchSafetyTipDetails = async () => {
       try {
-        const options = { Authorization: `Bearer ${token}` };
-        const data = await request(`/notification/`, "GET", options);
+        const data = await request(`/notification/`, "GET", {
+          Authorization: `Bearer ${token}`,
+        });
         setNotification(data.notifications);
         console.log(data);
       } catch (error) {
@@ -38,24 +39,26 @@ const Navbar = () => {
     e.preventDefault();
     isModalShown ? setisModalShown(false) : setisModalShown(true);
     try {
-      const options = {
+      const data = await request("/notification/read", "PUT", {
         Authorization: `Bearer ${token}`,
-      };
-      const data = await request("/notification/read", "PUT", options);
+      });
     } catch (error) {
       console.error(error);
     }
   };
   const handleDelete = async (notificationId) => {
     try {
-      const options = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
       console.log(notificationId);
-      const data = await request("/notification/delete", "PUT", options, {
-        notificationId,
-      });
+      const data = await request(
+        "/notification/delete",
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          notificationId,
+        }
+      );
       console.log(data);
     } catch (error) {
       console.error(error);

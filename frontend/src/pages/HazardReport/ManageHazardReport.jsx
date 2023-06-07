@@ -166,7 +166,7 @@ const ManageEmergencyFacility = () => {
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setProof(
-              `https://sagip.onrender.com/images/Emergency Facility/${data.proof}`
+              `http://localhost:5000/images/Emergency Facility/${data.proof}`
             );
           } else {
             navigate(`/manage/hazard-report`);
@@ -190,10 +190,6 @@ const ManageEmergencyFacility = () => {
   const handleSubmit = async (type) => {
     let formData = {};
     try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
       let url, method;
       if (type === "verify") {
         url = `/hazard-report/update/${id}`;
@@ -203,7 +199,14 @@ const ManageEmergencyFacility = () => {
         method = "PUT";
       }
 
-      const data = await request(url, method, options, { action: type });
+      const data = await request(
+        url,
+        method,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        { action: type }
+      );
 
       console.log(data);
 

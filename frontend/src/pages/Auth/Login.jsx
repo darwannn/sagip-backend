@@ -15,6 +15,8 @@ import "react-toastify/dist/ReactToastify.css";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [idetifierErrorMessage, setIdetifierErrorMessage] = useState("");
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
 
   const [identifier, setIdentifier] = useState("");
 
@@ -25,14 +27,15 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const options = {
-        "Content-Type": "application/json",
-      };
-
-      const data = await request("/auth/login", "POST", options, {
-        identifier,
-        password,
-      });
+      const data = await request(
+        "/auth/login",
+        "POST",
+        {},
+        {
+          identifier,
+          password,
+        }
+      );
 
       console.log("Token:", data.token);
       console.log(data);
@@ -43,13 +46,15 @@ const Login = () => {
         /*   toast.success(message); */
         navigate("/");
       } else {
-        if (message !== "input error") {
-          toast.error(message);
+        if (message.toLowerCase() !== "input error") {
           if (message.includes("attempts")) {
             navigate("/login/contact-verification");
           }
         } else {
           toast.error(message);
+          //dito ilalagay yung mga error message sa specific input field
+          setIdetifierErrorMessage(data.identifier);
+          setPasswordErrorMessage(data.password);
         }
       }
     } catch (error) {
@@ -68,13 +73,21 @@ const Login = () => {
           placeholder="Email or Number"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
+          style={{
+            border: idetifierErrorMessage ? "1px solid red" : "1px solid black",
+          }}
         />
+        <span>{idetifierErrorMessage}</span>
         <input
           type="password"
           placeholder="Password..."
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={{
+            border: passwordErrorMessage ? "1px solid red" : "1px solid black",
+          }}
         />
+        <span>{passwordErrorMessage}</span>
         <button type="submit">Login</button>
         <br></br>
         <p>
