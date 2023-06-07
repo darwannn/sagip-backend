@@ -29,7 +29,7 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
-        const data = await request("/auth/", "GET");
+        const data = await request("/account/", "GET");
         const filteredRecords = data.filter(
           (record) =>
             record.verificationPicture.length !== 0 &&
@@ -61,12 +61,9 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequestDetails = async () => {
       try {
-        const options = { Authorization: `Bearer ${token}` };
-        const data = await request(
-          `/auth/verify-identity/${id}`,
-          "GET",
-          options
-        );
+        const data = await request(`/auth/verify-identity/${id}`, "GET", {
+          Authorization: `Bearer ${token}`,
+        });
 
         if (data.message !== "not found") {
           console.log(data);
@@ -91,14 +88,12 @@ const VerificationRequest = () => {
     e.preventDefault();
 
     try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
       const data = await request(
         `/auth/verification-request/${id}`,
         "PUT",
-        options,
+        {
+          Authorization: `Bearer ${token}`,
+        },
         { action: "reject" }
       );
       const { success, message } = data;
@@ -119,14 +114,12 @@ const VerificationRequest = () => {
     e.preventDefault();
 
     try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
       const data = await request(
         `/auth/verification-request/${id}`,
         "PUT",
-        options,
+        {
+          Authorization: `Bearer ${token}`,
+        },
         { action: "approve" }
       );
       const { success, message } = data;

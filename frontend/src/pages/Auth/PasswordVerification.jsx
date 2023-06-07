@@ -23,15 +23,16 @@ const PasswordVerification = () => {
     e.preventDefault();
 
     try {
-      const options = {
-        "Content-Type": "application/json",
+      /*   const options = {
         Authorization: `Bearer ${token}`,
-      };
+      }; */
 
       const data = await request(
         "/auth/password-verification",
         "POST",
-        options,
+        {
+          Authorization: `Bearer ${token}`,
+        },
         {
           password,
         }

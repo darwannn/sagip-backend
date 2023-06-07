@@ -21,10 +21,10 @@ const ContactVerification = ({ type }) => {
     console.log(type);
     console.log("====================================");
     try {
-      const options = {
+      /*    const options = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
-      };
+      }; */
 
       let method,
         url = "";
@@ -37,7 +37,12 @@ const ContactVerification = ({ type }) => {
         method = "PUT";
       }
 
-      const data = await request(url, method, options, { code, type });
+      const data = await request(
+        url,
+        method,
+        { Authorization: `Bearer ${token}` },
+        { code, type }
+      );
       console.log(data);
 
       const { success, message } = data;
@@ -60,9 +65,9 @@ const ContactVerification = ({ type }) => {
             toast.success(message);
           } else if (type === "contact") {
             const data = await request(
-              `/auth/update/contact-number`,
+              `/account/update/contact-number`,
               "PUT",
-              options,
+              { Authorization: `Bearer ${token}` },
               { contactNumber: newContactNumber }
             );
             const { success, message } = data;

@@ -7,7 +7,21 @@ const {
   isEmpty,
   isImage,
   isLessThanSize,
+  createEmptyNotification,
   createNotification,
+  readNotification,
+  updateNotification,
+  isEmailExists,
+  isEmailOwner,
+  isContactNumberOwner,
+  isContactNumberExists,
+  checkIdentifier,
+  isEmail,
+  isContactNumber,
+  isNumber,
+  verifyPassword,
+  generateCode,
+  generateToken,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -23,20 +37,6 @@ const upload = uploadMiddleware("public/images/User");
 
 const fs = require("fs");
 const { log } = require("console");
-
-/* get all */
-authController.get("/", async (req, res) => {
-  try {
-    const user = await User.find({});
-
-    return res.status(200).json(user);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    });
-  }
-});
 
 authController.post("/register", async (req, res) => {
   try {
@@ -59,13 +59,11 @@ authController.post("/register", async (req, res) => {
       profilePicture,
       attempt,
       verificationCode,
-      userType,
-      status,
     } = req.body;
 
-    if (status === "verified") {
+    /*  if (status === "verified") {
       if (isEmpty(userType)) error["userType"] = "Required field";
-    }
+    } */
 
     if (isEmpty(email)) {
       error["email"] = "Required field";
@@ -134,9 +132,7 @@ authController.post("/register", async (req, res) => {
       if (verificationCode !== 0) {
         verificationCode = await generateCode();
       }
-      if (status === "verified") {
-        verificationCode = 0;
-      }
+
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -166,8 +162,8 @@ authController.post("/register", async (req, res) => {
         verificationCode,
         codeExpiration,
 
-        userType,
-        status,
+        userType: "resident",
+        status: "unverified",
       });
 
       const notification = await Notification.create({
@@ -218,111 +214,6 @@ authController.post("/register", async (req, res) => {
     });
   }
 });
-
-authController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-
-    if (user) {
-      if (user.profilePicture == "user_no_image.png") {
-        const imagePath = `public/images/User/${user.profilePicture}`;
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            return res.status(500).json({
-              success: false,
-              message: "Error deleting the image ",
-            });
-          } else {
-            return res.status(200).json({
-              success: true,
-              message: "Account deleted successfully",
-            });
-          }
-        });
-      } else {
-        return res.status(200).json({
-          success: true,
-          message: "Account  deleted successfully",
-        });
-      }
-    } else {
-      return res.status(500).json({
-        success: false,
-        message: "DB Erroree",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    });
-  }
-});
-
-authController.put(
-  "/update/contact-number",
-  tokenMiddleware,
-  async (req, res) => {
-    try {
-      const error = {};
-      let { contactNumber } = req.body;
-
-      const contactNumberExists = await User.findOne({
-        contactNumber,
-      });
-
-      if (isEmpty(contactNumber)) {
-        error["contact"] = "Required field";
-      } else {
-        if (isContactNumber(contactNumber)) {
-          error["contact"] = "must be a number";
-        } else {
-          if (await isContactNumberExists(contactNumber)) {
-            if (await isContactNumberOwner(req.user.id, contactNumber)) {
-              error["contact"] = "input new contact numebr";
-            } else {
-              error["contact"] = "Contact Number already exists";
-            }
-          }
-        }
-      }
-
-      if (Object.keys(error).length == 0) {
-        const updateFields = {
-          contactNumber,
-        };
-
-        const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
-          new: true,
-        });
-
-        if (user) {
-          return res.status(200).json({
-            success: true,
-            message: "Contact Number updated successfully",
-          });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "DB Error",
-          });
-        }
-      }
-
-      if (Object.keys(error).length != 0) {
-        error["success"] = false;
-        error["message"] = "input error";
-
-        return res.status(400).json(error);
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error" + error,
-      });
-    }
-  }
-);
 
 authController.post(
   "/contact-verification",
@@ -663,44 +554,8 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
 
     if (Object.keys(error).length != 0) {
       console.log("error");
+      error["message"] = "Input error";
       res.status(400).json(error);
-    }
-  } catch (error) {
-    // If an exception occurs, respond with an internal server error
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error" + error,
-    });
-  }
-});
-authController.put("/reset-password/:id", tokenMiddleware, async (req, res) => {
-  // Variable declaration
-
-  try {
-    const error = {};
-    const password = req.body.password;
-    console.log(password);
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    if (Object.keys(error).length == 0) {
-      console.log(req.user.id);
-      const user = await User.findByIdAndUpdate(req.user.id, {
-        attempt: 0,
-        password: hashedPassword,
-      });
-
-      if (user) {
-        return res.status(200).json({
-          success: true,
-          message: "Password reset successfully",
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "DB Error",
-        });
-      }
     }
   } catch (error) {
     // If an exception occurs, respond with an internal server error
@@ -749,6 +604,7 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
     });
   }
 });
+
 authController.put(
   "/verify-identity",
   tokenMiddleware,
@@ -831,23 +687,23 @@ authController.put("/verification-request/:id", async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       {
-        $unset: {
+        /* $unset: {
           verificationRequestDate: Date.now(),
-        },
+        }, */
       },
       { new: true }
     );
 
     if (req.body.action === "reject") {
-      user.verificationPicture.map((picture) => {
+      /* user.verificationPicture.map((picture) => {
         const imagePath = `public/images/User/${picture}`;
         fs.unlink(imagePath, (err) => {});
       });
-      user.verificationPicture = [];
+      user.verificationPicture = []; */
 
       await user.save();
     } else {
-      user.status = "verified";
+      /*  user.status = "verified"; */
       await user.save();
     }
 
@@ -884,299 +740,6 @@ authController.put("/verification-request/:id", async (req, res) => {
   }
 });
 
-authController.put(
-  "/update/:id",
-
-  upload.single("image"),
-  async (req, res) => {
-    try {
-      const error = {};
-      let {
-        id,
-        firstname,
-        middlename,
-        lastname,
-
-        email,
-        region,
-        province,
-        municipality,
-        barangay,
-        street,
-        birthdate,
-        gender,
-        profilePicture,
-        attempt,
-        verificationCode,
-        userType,
-        status,
-
-        hasChanged,
-      } = req.body;
-
-      if (isEmpty(email)) {
-        error["email"] = "Required field";
-      } else {
-        if (isEmail(email)) {
-          error["email"] = "not email";
-        } else {
-          if (await isEmailExists(email)) {
-            if (await isEmailOwner(id, email)) {
-              /*   error["email"] = "input new email"; */
-            } else {
-              error["email"] = "email already exists";
-            }
-          }
-        }
-      }
-
-      if (isEmpty(firstname)) error["firstname"] = "Required field";
-      if (isEmpty(lastname)) error["lastname"] = "Required field";
-      if (isEmpty(birthdate)) error["birthdate"] = "Required field";
-      if (isEmpty(gender)) error["gender"] = "Required field";
-
-      /*    if (isResident === "true") {
-        region = "Region III";
-        province = "Bulacan";
-        municipality = "Malolos";
-      } else { */
-      if (isEmpty(region)) error["region"] = "Required field";
-      if (isEmpty(province)) error["province"] = "Required field";
-      if (isEmpty(municipality)) error["municipality"] = "Required field";
-      /* } */
-      if (isEmpty(barangay)) error["barangay"] = "Required field";
-      if (isEmpty(street)) error["street"] = "Required field";
-
-      if (hasChanged === "true") {
-        if (!req.file) {
-          error["image"] = "Required field";
-        } else {
-          if (isImage(req.file)) {
-            error["image"] = "Only PNG, JPEG, and JPG files are allowed";
-          } else {
-            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-              error["image"] = "File size should be less than 10MB";
-            }
-          }
-        }
-      }
-
-      if (Object.keys(error).length == 0) {
-        const updateFields = {
-          firstname,
-          middlename,
-          lastname,
-
-          email,
-          region,
-          province,
-          municipality,
-          barangay,
-          street,
-          birthdate,
-          gender,
-          profilePicture,
-          attempt,
-          verificationCode,
-          userType,
-          status,
-
-          hasChanged,
-        };
-        let imagePath = "";
-
-        if (hasChanged && req.file) {
-          updateFields.profilePicture = req.file.filename;
-
-          const deletedAccount = await User.findById(req.params.id);
-          if (deletedAccount) {
-            imagePath = `public/images/User/${deletedAccount.profilePicture}`;
-          }
-        }
-
-        const safetyTip = await User.findByIdAndUpdate(
-          req.params.id,
-          updateFields,
-          {
-            new: true,
-          }
-        );
-
-        if (safetyTip) {
-          if (hasChanged && req.file) {
-            if (!imagePath.includes("user_no_image")) {
-              console.log(imagePath);
-              fs.unlink(imagePath, (err) => {
-                if (err) {
-                  return res.status(500).json({
-                    success: false,
-                    message: "Error deleting the image",
-                  });
-                }
-              });
-            }
-          }
-
-          return res.status(200).json({
-            success: true,
-            message: "Profile updated successfully",
-            safetyTip,
-          });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "DB Error",
-          });
-        }
-      }
-
-      if (Object.keys(error).length != 0) {
-        error["success"] = false;
-        error["message"] = "input error";
-
-        return res.status(400).json(error);
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error" + error,
-      });
-    }
-  }
-);
-
-/* get specific  */
-authController.get("/:id", async (req, res) => {
-  try {
-    const safetyTip = await User.findById(req.params.id);
-
-    /*  safetyTip.views += 1;
-
-    await safetyTip.save(); */
-    return res.status(200).json(safetyTip);
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "not found",
-    });
-  }
-});
-
 /* functions ---------------------------------------- */
-
-const generateCode = async () => {
-  let codeTaken, code;
-  do {
-    code = Math.floor(100000 + Math.random() * 900000);
-    codeTaken = await User.findOne({
-      verificationCode: code,
-    });
-  } while (codeTaken);
-  return code;
-};
-
-const verifyPassword = (password, field) => {
-  const passwordRequirements =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&,*.])(?=.*\d).{8,16}$/;
-  if (!passwordRequirements.test(password)) {
-    return true;
-  }
-};
-
-/*   
-  const isEmpty = (value) => {
-    if (value == "") {
-      return true
-    }
-  } */
-
-const isNumber = (value) => {
-  if (isNaN(Number(value))) {
-    return true;
-  }
-};
-const isContactNumber = (value) => {
-  if (!/^09\d{9}$/.test(value)) {
-    return true;
-  }
-};
-
-const isEmail = (value) => {
-  if (!value.includes("@")) {
-    return true;
-  }
-};
-
-/*   const isUsername =  (value) => {
-    const regex = /^[a-zA-Z0-9]+$/; 
-    if (!regex.test(value)) {
-      return true
-    } 
-  }
-   */
-
-const checkIdentifier = async (identifier) => {
-  let identierType;
-  if (identifier.includes("@")) {
-    identierType = "email";
-  } else if (/^09\d{9}$/.test(identifier)) {
-    identierType = "contactNumber";
-  }
-  /* else {
-       identierType = 'username';
-     } */
-  const accountExists = await User.findOne({
-    [identierType]: identifier,
-  });
-  return accountExists;
-};
-
-const isContactNumberExists = async (contactNumber) => {
-  const user = await User.findOne({
-    contactNumber,
-  });
-
-  return user;
-};
-
-const isContactNumberOwner = async (id, contactNumber) => {
-  const user = await User.findOne({
-    _id: id,
-  });
-
-  if (user.contactNumber === contactNumber) {
-    return true;
-  }
-};
-
-const isEmailExists = async (email) => {
-  const user = await User.findOne({
-    email,
-  });
-
-  return user;
-};
-
-const isEmailOwner = async (id, email) => {
-  const user = await User.findOne({
-    _id: id,
-  });
-
-  if (user.email === email) {
-    return true;
-  }
-};
-
-const generateToken = (id) => {
-  return jwt.sign(
-    {
-      id,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: "7d",
-    }
-  );
-};
 
 module.exports = authController;

@@ -136,10 +136,6 @@ const HazardReport = ({ type = "add" }) => {
         formData.append("street", street);
         formData.append("municipality", municipality);
 
-        const options = {
-          Authorization: `Bearer ${token}`,
-        };
-
         console.log(street);
         console.log(municipality);
 
@@ -152,7 +148,14 @@ const HazardReport = ({ type = "add" }) => {
           method = "PUT";
         }
 
-        const data = await request(url, method, options, formData, true);
+        const data = await request(
+          url,
+          method,
+          {
+            Authorization: `Bearer ${token}`,
+          },
+          formData
+        );
         console.log(data);
 
         const { success, message } = data;

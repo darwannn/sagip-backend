@@ -56,8 +56,8 @@ const Register = () => {
           middlename,
           lastname,
           gender,
-          userType: "resident",
-          status: "unverified",
+          /*        userType: "resident",
+          status: "unverified", */
           birthdate,
           contactNumber,
         }

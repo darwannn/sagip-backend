@@ -3,11 +3,17 @@ const Notification = require("../models/Notification");
 
 const fs = require("fs");
 const { log } = require("console");
+
+const User = require("../models/User");
+
+const currentDate = new Date();
+
 const isEmpty = (value) => {
   if (value == "") {
     return true;
   }
 };
+
 const isImage = (file) => {
   const allowedExtensions = [".png", ".jpeg", ".jpg"];
   const extname = path.extname(file.originalname).toLowerCase();
@@ -66,6 +72,108 @@ const readNotification = async (id) => {
   return notification;
 };
 
+/* ----------------
+ */
+
+const generateCode = async () => {
+  let codeTaken, code;
+  do {
+    code = Math.floor(100000 + Math.random() * 900000);
+    codeTaken = await User.findOne({
+      verificationCode: code,
+    });
+  } while (codeTaken);
+  return code;
+};
+
+const verifyPassword = (password, field) => {
+  const passwordRequirements =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&,*.])(?=.*\d).{8,16}$/;
+  if (!passwordRequirements.test(password)) {
+    return true;
+  }
+};
+
+const isNumber = (value) => {
+  if (isNaN(Number(value))) {
+    return true;
+  }
+};
+const isContactNumber = (value) => {
+  if (!/^09\d{9}$/.test(value)) {
+    return true;
+  }
+};
+
+const isEmail = (value) => {
+  if (!value.includes("@")) {
+    return true;
+  }
+};
+
+const checkIdentifier = async (identifier) => {
+  let identierType;
+  if (identifier.includes("@")) {
+    identierType = "email";
+  } else if (/^09\d{9}$/.test(identifier)) {
+    identierType = "contactNumber";
+  }
+  /* else {
+       identierType = 'username';
+     } */
+  const accountExists = await User.findOne({
+    [identierType]: identifier,
+  });
+  return accountExists;
+};
+
+const isContactNumberExists = async (contactNumber) => {
+  const user = await User.findOne({
+    contactNumber,
+  });
+
+  return user;
+};
+
+const isContactNumberOwner = async (id, contactNumber) => {
+  const user = await User.findOne({
+    _id: id,
+  });
+
+  if (user.contactNumber === contactNumber) {
+    return true;
+  }
+};
+
+const isEmailExists = async (email) => {
+  const user = await User.findOne({
+    email,
+  });
+
+  return user;
+};
+
+const isEmailOwner = async (id, email) => {
+  const user = await User.findOne({
+    _id: id,
+  });
+
+  if (user.email === email) {
+    return true;
+  }
+};
+
+const generateToken = (id) => {
+  return jwt.sign(
+    {
+      id,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+};
 module.exports = {
   isEmpty,
   isImage,
@@ -74,4 +182,15 @@ module.exports = {
   createNotification,
   readNotification,
   updateNotification,
+  isEmailExists,
+  isEmailOwner,
+  isContactNumberOwner,
+  isContactNumberExists,
+  checkIdentifier,
+  isEmail,
+  isContactNumber,
+  isNumber,
+  verifyPassword,
+  generateCode,
+  generateToken,
 };

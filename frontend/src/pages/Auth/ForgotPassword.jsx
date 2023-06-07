@@ -20,13 +20,14 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     try {
-      const options = {
-        "Content-Type": "application/json",
-      };
-
-      const data = await request("/auth/forgot-password", "POST", options, {
-        identifier,
-      });
+      const data = await request(
+        "/auth/forgot-password",
+        "POST",
+        {},
+        {
+          identifier,
+        }
+      );
 
       console.log("Token:", data.token);
       console.log(data);

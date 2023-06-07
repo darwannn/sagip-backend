@@ -38,15 +38,18 @@ const EditPassword = () => {
     e.preventDefault();
 
     try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
       console.log(password);
-      const data = await request("/auth/new-password", "PUT", options, {
-        password,
-        confirmPassword,
-      });
+      const data = await request(
+        "/auth/new-password",
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          password,
+          confirmPassword,
+        }
+      );
       console.log(data);
       const { success, message } = data;
       if (success) {

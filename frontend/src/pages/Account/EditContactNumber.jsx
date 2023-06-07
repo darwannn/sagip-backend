@@ -26,11 +26,9 @@ const EditContactNumber = () => {
 
     const fetchAccountDetails = async () => {
       try {
-        const options = {
-          "Content-Type": "application/json",
+        const data = await request(`/account/${user.id}`, "GET", {
           Authorization: `Bearer ${token}`,
-        };
-        const data = await request(`/auth/${user.id}`, "GET", options);
+        });
         console.log(data);
 
         setContactNumber(data.contactNumber);
@@ -47,13 +45,16 @@ const EditContactNumber = () => {
     try {
       dispatch(newContactNumber(contactNumber));
 
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      const data = await request(`/auth/resend-code`, "PUT", options, {
-        contactNumber,
-      });
+      const data = await request(
+        `/auth/resend-code`,
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          contactNumber,
+        }
+      );
       const { success, message } = data;
       console.log(data);
 

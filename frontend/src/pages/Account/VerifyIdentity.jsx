@@ -24,7 +24,6 @@ function VerifyIdentity() {
     const fetchAccountDetails = async () => {
       try {
         const options = {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         };
         const data = await request(`/auth/${user.id}`, "GET", options);
@@ -135,8 +134,7 @@ function VerifyIdentity() {
         `/auth/verify-identity`,
         "PUT",
         options,
-        formData,
-        true
+        formData
       );
       console.log(data);
       const { success, message } = data;

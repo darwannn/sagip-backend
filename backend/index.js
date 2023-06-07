@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv").config();
 const cors = require("cors");
 const authController = require("./controllers/authController");
+const accountController = require("./controllers/accountController");
 const {
   sendVerificationCode,
   apiController,
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authController);
+app.use("/account", accountController);
 app.use("/safety-tips", safetyTipController);
 app.use("/emergency-facility", emergencyFacilityController);
 app.use("/api", apiController);

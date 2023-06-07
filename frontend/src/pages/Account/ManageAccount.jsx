@@ -23,7 +23,9 @@ const Account = ({ user }) => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const data = await request("/auth/", "GET");
+        const data = await request("/account/", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
 
         console.log(data);
 
@@ -92,8 +94,9 @@ const Account = ({ user }) => {
 
   const handleDeleteBlog = async (id) => {
     try {
-      const options = { Authorization: `Bearer ${token}` };
-      const data = await request(`/auth/delete/${id}`, "DELETE", options);
+      const data = await request(`/account/delete/${id}`, "DELETE", {
+        Authorization: `Bearer ${token}`,
+      });
       const updatedAccounts = accounts.filter((account) => account._id !== id);
       setAccounts(updatedAccounts);
       const { message } = data;

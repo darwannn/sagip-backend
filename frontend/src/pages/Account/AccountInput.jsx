@@ -49,10 +49,9 @@ const AccountInput = ({ user, type }) => {
       const fetchAccountDetails = async () => {
         console.log(token);
         try {
-          const options = {
+          const data = await request(`/account/${id}`, "GET", {
             Authorization: `Bearer ${token}`,
-          };
-          const data = await request(`/auth/${id}`, "GET", options);
+          });
           console.log(data);
           setEmail(data.email);
           setPassword(data.password);
@@ -84,7 +83,7 @@ const AccountInput = ({ user, type }) => {
     e.preventDefault();
     let url, method, formData;
     if (type === "add") {
-      url = "/auth/register";
+      url = "/account/create";
       method = "POST";
       formData = {
         email,
@@ -102,14 +101,14 @@ const AccountInput = ({ user, type }) => {
 
         birthdate,
         contactNumber,
-        status: "verified",
+        /*     status: "verified", */
         userType,
-        verificationCode: 0,
+        /*     verificationCode: 0, */
         isBanned,
         isArchived,
       };
     } else if (type === "update") {
-      url = `/auth/update/${id}`;
+      url = `/account/update/${id}`;
       method = "PUT";
       formData = {
         id: id,
@@ -132,11 +131,14 @@ const AccountInput = ({ user, type }) => {
     }
 
     try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      const data = await request(url, method, options, formData);
+      const data = await request(
+        url,
+        method,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        formData
+      );
 
       console.log(data);
 
@@ -166,12 +168,8 @@ const AccountInput = ({ user, type }) => {
     e.preventDefault();
     console.log("reset");
     try {
-      const options = {
-        "Content-Type": "application/json",
+      const data = await request(`/account/reset-password/${id}`, "PUT", {
         Authorization: `Bearer ${token}`,
-      };
-      const data = await request(`/auth/reset-password/${id}`, "PUT", options, {
-        password: "sagip",
       });
 
       const { success, message } = data;

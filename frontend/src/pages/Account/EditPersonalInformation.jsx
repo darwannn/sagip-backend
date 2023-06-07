@@ -52,7 +52,7 @@ const AccountInput = ({ type }) => {
         const options = {
           Authorization: `Bearer ${token}`,
         };
-        const data = await request(`/auth/${user.id}`, "GET", options);
+        const data = await request(`/account/${user.id}`, "GET", options);
         console.log(data);
         setEmail(data.email);
         /*      setPassword(data.password); */
@@ -110,7 +110,7 @@ const AccountInput = ({ type }) => {
       const options = { Authorization: `Bearer ${token}` };
       /*  const data = await request(url, method, options, formData); */
       const data = await request(
-        `/auth/update/${user.id}`,
+        `/account/update/${user.id}`,
         "PUT",
         options,
         formData,
