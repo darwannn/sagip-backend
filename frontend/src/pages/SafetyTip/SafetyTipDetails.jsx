@@ -23,7 +23,7 @@ const SafetyTipDetails = () => {
       try {
         const data = await request(`/safety-tips/${id}`, "GET");
 
-        if (data.message.toLowerCase() !== "not found") {
+        if (data.message !== "not found") {
           console.log(data);
           setSafetyTipDetails(data);
           setIsSaved(data.saves.includes(user.id));

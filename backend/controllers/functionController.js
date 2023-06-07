@@ -3,7 +3,7 @@ const Notification = require("../models/Notification");
 
 const fs = require("fs");
 const { log } = require("console");
-
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const currentDate = new Date();
