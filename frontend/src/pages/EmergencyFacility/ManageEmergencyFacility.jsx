@@ -65,6 +65,8 @@ const ManageEmergencyFacility = () => {
   const [image, setImage] = useState(null);
   const [imageName, setImageName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+
   const [isFull, setIsFull] = useState(false);
 
   const [hasChanged, setHasChanged] = useState(false);
@@ -150,12 +152,13 @@ const ManageEmergencyFacility = () => {
 
           console.log(data);
 
-          if (data.message.toLowerCase() !== "not found") {
+          if (data.message !== "not found") {
             setName(data.name);
             setLatitude(data.latitude);
             setLongitude(data.longitude);
             setIsFull(data.isFull);
             setCategory(data.category);
+            setContactNumber(data.contactNumber);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setImageUrl(
               `http://localhost:5000/images/Emergency Facility/${data.image}`
@@ -189,6 +192,7 @@ const ManageEmergencyFacility = () => {
       formData.append("longitude", longitude);
       formData.append("category", category);
       formData.append("hasChanged", hasChanged);
+      formData.append("contactNumber", contactNumber);
       formData.append("image", image);
 
       let url, method;
@@ -477,6 +481,15 @@ const ManageEmergencyFacility = () => {
                     placeholder="name..."
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>: </label>
+                  <input
+                    type="text"
+                    placeholder="contactNumber..."
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(e.target.value)}
                   />
                 </div>
                 <div>

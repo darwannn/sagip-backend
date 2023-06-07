@@ -33,25 +33,25 @@ apiController.get("/signal", async (req, res) => {
 
     do {
       const parseUrl = `https://pagasa.chlod.net/api/v1/bulletin/parse/${filename}`;
-      const parseResponse = await axios.head(parseUrl);
+      let parseResponse;
 
-      if (parseResponse.status !== 200) {
+      try {
+        parseResponse = await axios.head(parseUrl);
+      } catch (error) {
         console.log("Error: Unable to retrieve data from URL.");
-
         const downloadUrl = `https://pagasa.chlod.net/api/v1/bulletin/download/${filename}`;
         const downloadResponse = await axios.get(downloadUrl);
         const datas = downloadResponse.data;
-
         counter++;
 
         if (counter > 1) {
           break;
         }
-      } else {
-        looping = false;
+      }
 
-        const parseResponse = await axios.get(parseUrl);
-        const parseData = parseResponse.data;
+      if (parseResponse && parseResponse.status === 200) {
+        looping = false;
+        const parseData = await axios.get(parseUrl).then((res) => res.data);
 
         const dateString = "2023-06-12T12:00:00.000Z";
         const targetDate = DateTime.fromISO(dateString);

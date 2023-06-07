@@ -57,7 +57,7 @@ safetyTipController.post(
 
       if (Object.keys(error).length !== 0) {
         error["success"] = false;
-        error["message"] = "Input error";
+        error["message"] = "input error";
         return res.status(400).json(error);
       }
     } catch (error) {
@@ -176,7 +176,7 @@ safetyTipController.put(
 
       if (Object.keys(error).length !== 0) {
         error["success"] = false;
-        error["message"] = "Input error";
+        error["message"] = "input error";
         return res.status(400).json(error);
       }
     } catch (error) {

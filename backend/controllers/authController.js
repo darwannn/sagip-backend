@@ -328,7 +328,7 @@ authController.post(
       if (isEmpty(password)) {
         return res.status(200).json({
           success: true,
-          message: "Input error",
+          message: "input error",
           password: "Required field",
         });
       } else {
@@ -345,7 +345,7 @@ authController.post(
         } else {
           return res.status(200).json({
             success: false,
-            message: "Input error",
+            message: "input error",
             password: "Incorrect Password",
           });
         }
@@ -423,7 +423,7 @@ authController.post("/login", async (req, res) => {
 
     if (Object.keys(error).length != 0) {
       error["success"] = false;
-      error["message"] = "Input error";
+      error["message"] = "input error";
       return res.status(500).json(error);
     }
   } catch (error) {
@@ -489,7 +489,7 @@ authController.post("/forgot-password", async (req, res) => {
     // If there are errors, respond with error messages
     if (Object.keys(error).length != 0) {
       error["success"] = false;
-      error["message"] = "Input error";
+      error["message"] = "input error";
       return res.status(400).json(error);
     }
   } catch (error) {
@@ -554,7 +554,7 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
 
     if (Object.keys(error).length != 0) {
       console.log("error");
-      error["message"] = "Input error";
+      error["message"] = "input error";
       res.status(400).json(error);
     }
   } catch (error) {

@@ -3,9 +3,28 @@ const EmergencyFacility = require("../models/EmergencyFacility");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/Emergency Facility");
-const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
 const fs = require("fs");
+const {
+  isEmpty,
+  isImage,
+  isLessThanSize,
+  createEmptyNotification,
+  createNotification,
+  readNotification,
+  updateNotification,
+  isEmailExists,
+  isEmailOwner,
+  isContactNumberOwner,
+  isContactNumberExists,
+  checkIdentifier,
+  isEmail,
+  isContactNumber,
+  isNumber,
+  verifyPassword,
+  generateCode,
+  generateToken,
+} = require("./functionController");
 
 emergencyFacilityController.post(
   "/add",
@@ -14,12 +33,21 @@ emergencyFacilityController.post(
   async (req, res) => {
     const error = {};
     try {
-      const { name, latitude, longitude, category } = req.body;
+      const { name, latitude, longitude, category, contactNumber } = req.body;
 
       if (isEmpty(name)) error["name"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["latitude"] = "Mark a location";
       if (isEmpty(category)) error["category"] = "Required field";
+
+      if (isEmpty(contactNumber)) {
+        error["contact"] = "Required field";
+      } else {
+        if (isContactNumber(contactNumber)) {
+          error["contact"] = "must be a number";
+        }
+      }
+
       if (!req.file) {
         error["image"] = "Required field";
       } else {
@@ -38,6 +66,7 @@ emergencyFacilityController.post(
           longitude,
           image: req.file.filename,
           category,
+          contactNumber,
         });
         if (emergencyFacility) {
           return res.status(200).json({
@@ -55,7 +84,7 @@ emergencyFacilityController.post(
 
       if (Object.keys(error).length !== 0) {
         error["success"] = false;
-        error["message"] = "Input error";
+        error["message"] = "input error";
         return res.status(400).json(error);
       }
     } catch (error) {
@@ -104,13 +133,28 @@ emergencyFacilityController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { name, latitude, longitude, category, hasChanged, isFull } =
-        req.body;
+      const {
+        name,
+        latitude,
+        longitude,
+        category,
+        hasChanged,
+        isFull,
+        contactNumber,
+      } = req.body;
 
       if (isEmpty(name)) error["name"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Required field";
       if (isEmpty(longitude)) error["latitude"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
+
+      if (isEmpty(contactNumber)) {
+        error["contact"] = "Required field";
+      } else {
+        if (isContactNumber(contactNumber)) {
+          error["contact"] = "must be a number";
+        }
+      }
 
       if (hasChanged === "true") {
         if (!req.file) {
@@ -174,7 +218,7 @@ emergencyFacilityController.put(
 
       if (Object.keys(error).length !== 0) {
         error["success"] = false;
-        error["message"] = "Input error";
+        error["message"] = "input error";
         return res.status(400).json(error);
       }
     } catch (error) {
