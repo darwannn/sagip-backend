@@ -220,42 +220,38 @@ function EmergencyFacility() {
   }
 
   const shareLocation = async () => {
-    let myLatitude;
-    let myLongitude;
-
     if (navigator.geolocation) {
       const options = {
         enableHighAccuracy: true,
       };
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation({ lat: latitude, lng: longitude });
           console.log(latitude);
-          myLatitude = latitude;
           console.log(longitude);
-          myLongitude = longitude;
-          //originRef.current.value = `${latitude},${longitude} `;
+
+          // Make the API request here
+          await request(
+            "/api/pusher",
+            "PUT",
+            {
+              Authorization: `Bearer ${token}`,
+            },
+            {
+              pusherTo: "648070cf9a74896d21b7d494",
+              purpose: "location",
+              content: {
+                latitude: latitude,
+                longitude: longitude,
+              },
+            }
+          );
         },
         (error) => {
           console.log("Error getting current location:", error);
         },
         options
-      );
-      await request(
-        "/api/pusher",
-        "PUT",
-        {
-          Authorization: `Bearer ${token}`,
-        },
-        {
-          pusherTo: "648070cf9a74896d21b7d494",
-          purpose: "location",
-          content: {
-            latitude: myLatitude,
-            longitude: myLongitude,
-          },
-        }
       );
     } else {
       console.log("Geolocation is not supported by this browser.");

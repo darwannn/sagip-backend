@@ -94,6 +94,8 @@ function EmergencyFacility() {
       /*  if (data.to === user.id) {
         alert("akin to");
       } */
+      console.log(data.content.latitude);
+      console.log("+" + data.content.longitude);
       if (data.purpose === "location") {
         setResponderLatitude(data.content.latitude);
         setResponderLongitude(data.content.longitude);
@@ -439,10 +441,10 @@ function EmergencyFacility() {
           zoom={15}
           mapContainerStyle={{ width: "100%", height: "100%" }}
           options={{
-            restriction: {
+            /* restriction: {
               latLngBounds: malolosBounds,
               strictBounds: true,
-            },
+            }, */
             zoomControl: true,
             streetViewControl: false,
             mapTypeControl: false,
@@ -486,18 +488,23 @@ function EmergencyFacility() {
 
             {/* responder lcoation */}
             {responderLongitude && (
-              <Marker
-                /* icon={{
-             
-                  url: require("../assets/hospital_icon.png"),
-                  fillColor: "#EB00FF",
-                  scaledSize: new window.google.maps.Size(15, 25),
-                }} */
-                position={{
-                  lat: responderLatitude,
-                  lng: responderLongitude,
-                }}
-              />
+              <>
+                <Marker
+                  /* icon={{
+           
+                url: require("../assets/hospital_icon.png"),
+                fillColor: "#EB00FF",
+                scaledSize: new window.google.maps.Size(15, 25),
+              }} */
+                  position={{
+                    lat: responderLatitude,
+                    lng: responderLongitude,
+                  }}
+                />
+                {console.log("nasaan kana?")}
+                {/*  120.6159
+                15.0186 */}
+              </>
             )}
           </div>
           <div>

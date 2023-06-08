@@ -49,6 +49,9 @@ import PasswordVerification from "./pages/Auth/PasswordVerification";
 import ManageTeam from "./pages/Team/ManageTeam";
 import TeamInput from "./pages/Team/TeamInput";
 
+import ManageWellnessSurvey from "./pages/WellnessSurvey/ManageWellnessSurvey";
+import WellnessSurveyInput from "./pages/WellnessSurvey/WellnessSurveyInput";
+
 import Hazard from "./pages/HazardReport/Hazard";
 import HazardReport from "./pages/HazardReport/HazardReport";
 /* import HazardReportDetails from "./pages/HazardReport/HazardReportDetails"; */
@@ -219,6 +222,19 @@ const App = () => {
           path="/manage/team/update/:id"
           element={<TeamInput />}
           type="update"
+        />
+
+        <Route
+          path="/manage/wellness-survey"
+          element={<ManageWellnessSurvey />}
+        />
+        <Route
+          path="/manage/wellness-survey/update/:id"
+          element={<WellnessSurveyInput type="update" />}
+        />
+        <Route
+          path="/manage/wellness-survey/add"
+          element={<WellnessSurveyInput type="add" />}
         />
 
         <Route path="/hazard" element={<Hazard />} />

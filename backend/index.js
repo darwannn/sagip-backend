@@ -13,7 +13,9 @@ const emergencyFacilityController = require("./controllers/emergencyFacilityCont
 const teamController = require("./controllers/teamController");
 const hazardReportController = require("./controllers/hazardReportController");
 const notificationController = require("./controllers/notificationController");
-const multer = require("multer");
+const wellnessSurveyController = require("./controllers/wellnessSurveyController");
+
+/* const multer = require("multer"); */
 const app = express();
 
 const bodyParser = require("body-parser");
@@ -37,10 +39,11 @@ app.use("/api", apiController);
 app.use("/team", teamController);
 app.use("/hazard-report", hazardReportController);
 app.use("/notification", notificationController);
+app.use("/wellness-survey", wellnessSurveyController);
 
 app.use(bodyParser.json());
 // multer
-const storage = multer.diskStorage({
+/* const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/images");
   },
@@ -51,7 +54,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-});
+}); */
 
 /* app.post("/upload", upload.single("image"), async (req, res) => {
   return res.status(200).json({ msg: "Successfully uploaded" });
