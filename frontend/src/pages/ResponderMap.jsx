@@ -8,7 +8,6 @@ import { request } from "../utils/axios";
 import { emergencyFacilityCategory } from "../utils/categories";
 import hospitalIcon from "../assets/hospital_icon.png";
 import { toast } from "react-toastify";
-import Pusher from "pusher-js";
 import {
   useJsApiLoader,
   GoogleMap,
@@ -74,35 +73,6 @@ function EmergencyFacility() {
   const [searchQuery, setSearchQuery] = useState("");
   const [shouldFetchData, setShouldFetchData] = useState(true);
   const [transit, setTransit] = useState("");
-  const [responderLatitude, setResponderLatitude] = useState("");
-  const [responderLongitude, setResponderLongitude] = useState("");
-
-  /* pusher */
-  useEffect(() => {
-    const pusher = new Pusher(process.env.REACT_APP_KEY, {
-      cluster: process.env.REACT_APP_CLUSTER,
-    });
-
-    const channel = pusher.subscribe("sagipChannel");
-    channel.bind("sagipEvent", (data) => {
-      console.log("Received event:", data);
-      if (data.to === user.id && data.purpose === "notification") {
-        alert(
-          "akin itong notifcation, my notification use effect should be reloaded, toast should appear"
-        );
-      }
-      /*  if (data.to === user.id) {
-        alert("akin to");
-      } */
-      if (data.purpose === "location") {
-        setResponderLatitude(data.content.latitude);
-        setResponderLongitude(data.content.longitude);
-      }
-    });
-    return () => {
-      pusher.unsubscribe("sagipChannel");
-    };
-  }, []);
 
   useEffect(() => {
     const fetchEmergencyFacility = async () => {
@@ -124,6 +94,7 @@ function EmergencyFacility() {
       fetchEmergencyFacility();
       setShouldFetchData(false);
     }
+    console.log("1");
   }, [shouldFetchData]);
 
   /* ------------------- */
@@ -247,6 +218,49 @@ function EmergencyFacility() {
       console.log("Geolocation is not supported by this browser.");
     }
   }
+
+  const shareLocation = async () => {
+    let myLatitude;
+    let myLongitude;
+
+    if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true,
+      };
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
+          console.log(latitude);
+          myLatitude = latitude;
+          console.log(longitude);
+          myLongitude = longitude;
+          //originRef.current.value = `${latitude},${longitude} `;
+        },
+        (error) => {
+          console.log("Error getting current location:", error);
+        },
+        options
+      );
+      await request(
+        "/api/pusher",
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          pusherTo: "648070cf9a74896d21b7d494",
+          purpose: "location",
+          content: {
+            latitude: myLatitude,
+            longitude: myLongitude,
+          },
+        }
+      );
+    } else {
+      console.log("Geolocation is not supported by this browser.");
+    }
+  };
 
   return (
     <div
@@ -483,22 +497,6 @@ function EmergencyFacility() {
                 key={index}
               />
             ))}
-
-            {/* responder lcoation */}
-            {responderLongitude && (
-              <Marker
-                /* icon={{
-             
-                  url: require("../assets/hospital_icon.png"),
-                  fillColor: "#EB00FF",
-                  scaledSize: new window.google.maps.Size(15, 25),
-                }} */
-                position={{
-                  lat: responderLatitude,
-                  lng: responderLongitude,
-                }}
-              />
-            )}
           </div>
           <div>
             {hazardReport.map((emergencyFacility, index) => (
@@ -520,6 +518,13 @@ function EmergencyFacility() {
             <DirectionsRenderer directions={directionsResponse} />
           )}
         </GoogleMap>
+        <button
+          onClick={() => {
+            setInterval(shareLocation, 2000);
+          }}
+        >
+          Share mt loc
+        </button>
       </div>
     </div>
   );

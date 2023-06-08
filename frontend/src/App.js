@@ -55,6 +55,7 @@ import HazardReport from "./pages/HazardReport/HazardReport";
 import ManageHazardReport from "./pages/HazardReport/ManageHazardReport";
 
 import Map from "./pages/Map";
+import ResponderMap from "./pages/ResponderMap";
 
 const App = () => {
   const { user, token } = useSelector((state) => state.auth);
@@ -135,6 +136,7 @@ const App = () => {
           element={user ? <SavedSafetyTips /> : <Navigate to="/login" />}
         />
         <Route path="/map" element={<Map />} />
+        <Route path="/responder/map" element={<ResponderMap />} />
         {/*  <Route path="/emergency-facility" element={<EmergencyFacility />} /> */}
         <Route
           path="/manage/emergency-facility"
