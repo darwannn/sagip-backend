@@ -2,8 +2,16 @@ const apiController = require("express").Router();
 const axios = require("axios");
 const { DateTime } = require("luxon");
 const User = require("../models/User");
-
+const Pusher = require("pusher");
 const municipality = "Malolos";
+const tokenMiddleware = require("../middlewares/tokenMiddleware");
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true,
+});
 
 apiController.get("/signal", async (req, res) => {
   try {
@@ -77,7 +85,7 @@ apiController.get("/signal", async (req, res) => {
                     return res.status(201).json({
                       signal: `${signal}`,
                       track:
-                        "https://pubfiles.pagasa.dost.gov.ph/tamss/nwp/wrf/ccover/PH_ccover_d01_024h.gif",
+                        "https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_chedeng.png",
                     });
                   } else if (location.name === municipality) {
                     hasSignal = true;
@@ -121,7 +129,22 @@ apiController.get("/weather", async (req, res) => {
       res.status(500).json({ message: "An error occurred" });
     });
 });
-apiController.post("/send-alert", async (req, res) => {
+
+apiController.put("/pusher", tokenMiddleware, async (req, res) => {
+  const { pusherTo, purpose, content } = req.body;
+  console.log("p" + purpose);
+  const data = {
+    from: req.user.id,
+    to: pusherTo,
+    purpose,
+    content,
+  };
+
+  pusher.trigger("sagipChannel", "sagipEvent", data);
+  res.send("Event triggered");
+});
+
+apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   const error = {};
   const { alertMessage, location } = req.body;
 
