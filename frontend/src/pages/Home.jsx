@@ -121,6 +121,7 @@ function Home() {
         <button onClick={triggerPusher}>Trigger Event</button>
       </div>
       <br></br>
+      <a href="tel:09999999999"> PHONE_NUM </a>
     </>
   );
 }
