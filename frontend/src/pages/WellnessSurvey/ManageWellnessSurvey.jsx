@@ -36,9 +36,8 @@ const SafetyTips = () => {
             })
           : (option = {}); */
 
-        const data = await request("/wellness-survey/", "GET", {
-          Authorization: `Bearer ${token}`,
-        });
+        const data = await request("/wellness-survey/", "GET");
+
         setSafetyTips(data);
       } catch (error) {
         console.error(error);

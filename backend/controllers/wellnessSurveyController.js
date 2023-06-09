@@ -1,5 +1,6 @@
 const wellnessSurveyController = require("express").Router();
 const WellnessSurvey = require("../models/WellnessSurvey");
+const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const isAlreadyResponded = require("../middlewares/isAlreadyResponded");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
@@ -55,8 +56,48 @@ wellnessSurveyController.post("/add", tokenMiddleware, async (req, res) => {
 wellnessSurveyController.get("/", async (req, res) => {
   try {
     const safetyTips = await WellnessSurvey.find({});
-
     return res.status(200).json(safetyTips);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error" + error,
+    });
+  }
+});
+wellnessSurveyController.get("/active", tokenMiddleware, async (req, res) => {
+  try {
+    const safetyTips = await WellnessSurvey.findOne({ isActive: true });
+
+    const user = await User.findOne({
+      _id: req.user.id,
+    });
+
+    if (user.userType === "resident") {
+      let surveyResponse = [...safetyTips.affected, ...safetyTips.unaffected];
+      let isResponded = false;
+
+      surveyResponse.map((response) => {
+        console.log(response);
+
+        console.log("id" + req.user.id);
+        if (response.toString() === req.user.id) {
+          isResponded = true;
+          return;
+        } else {
+          isResponded = false;
+        }
+      });
+      if (isResponded) {
+        return res.status(500).json({
+          success: false,
+          message: "already responded",
+        });
+      } else {
+        return res.status(200).json({ success: true, ...safetyTips._doc });
+      }
+    } else {
+      return res.status(200).json({ success: true, ...safetyTips._doc });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,

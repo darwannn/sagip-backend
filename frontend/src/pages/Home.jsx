@@ -14,7 +14,7 @@ function Home() {
   const [signal, setSignal] = useState(null);
   const [weather, setWeather] = useState(null);
   const [pusherMessage, setPusherMessage] = useState("");
-  const [wellnessSurveys, setWellnessSurveys] = useState([]);
+  const [wellnessSurveys, setWellnessSurveys] = useState();
   /*   const [userAnswers, setUserAnswers] = useState([]); */
   const [isAnswered, setIsAnswered] = useState(false);
 
@@ -41,10 +41,15 @@ function Home() {
   useEffect(() => {
     const fetchWellnessSurveys = async () => {
       try {
-        const data = await request("/wellness-survey/", "GET", {
+        const data = await request("/wellness-survey/active", "GET", {
           Authorization: `Bearer ${token}`,
         });
-        setWellnessSurveys(data.filter((survey) => survey.isActive === true));
+
+        console.log(data);
+        if (data.success) {
+          setWellnessSurveys(data);
+        } else {
+        }
       } catch (error) {
         console.error(error);
       }
@@ -145,26 +150,18 @@ function Home() {
       <br />
       <a href="tel:09999999999">PHONE_NUM</a>
       <>
-        {wellnessSurveys.length > 0 && (
+        {wellnessSurveys && (
           <>
-            {/*  {userAnswers.map((answer) => {
-              if (answer === user.id) {
-                setIsAnswered(true);
-              }
-            })} */}
-            {console.log(wellnessSurveys[0])}
             {true ? (
               <>
                 <button
-                  onClick={() =>
-                    answerSurvey(wellnessSurveys[0]._id, "affected")
-                  }
+                  onClick={() => answerSurvey(wellnessSurveys._id, "affected")}
                 >
                   affected
                 </button>
                 <button
                   onClick={() =>
-                    answerSurvey(wellnessSurveys[0]._id, "unaffected")
+                    answerSurvey(wellnessSurveys._id, "unaffected")
                   }
                 >
                   unaffected

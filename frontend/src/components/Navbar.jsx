@@ -21,7 +21,7 @@ const Navbar = () => {
           Authorization: `Bearer ${token}`,
         });
         setNotification(data.notifications);
-        console.log(data);
+        /*    console.log(data); */
       } catch (error) {
         console.error(error);
       }
