@@ -1,6 +1,7 @@
 const wellnessSurveyController = require("express").Router();
 const WellnessSurvey = require("../models/WellnessSurvey");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+const isAlreadyResponded = require("../middlewares/isAlreadyResponded");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
 /* const uploadMiddleware = require("../middlewares/uploadMiddleware");
@@ -54,6 +55,7 @@ wellnessSurveyController.post("/add", tokenMiddleware, async (req, res) => {
 wellnessSurveyController.get("/", async (req, res) => {
   try {
     const safetyTips = await WellnessSurvey.find({});
+
     return res.status(200).json(safetyTips);
   } catch (error) {
     return res.status(500).json({

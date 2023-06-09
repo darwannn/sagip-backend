@@ -16,7 +16,7 @@ function VerifyIdentity() {
 
   const [selfieImage, setSelfieImage] = useState(null);
   const { token, user } = useSelector((state) => state.auth);
-  const [contactNumber, setContactNumber] = useState("");
+  const [alreadyRequested, setAlreadyRequested] = useState(false);
 
   useEffect(() => {
     console.log(user);
@@ -26,9 +26,27 @@ function VerifyIdentity() {
         const options = {
           Authorization: `Bearer ${token}`,
         };
-        const data = await request(`/auth/${user.id}`, "GET", options);
+        const data = await request(
+          `/auth/verify-identity/request/${user.id}`,
+          "GET",
+          options
+        );
+
         console.log(data);
-        setContactNumber(data.verificationRequestDate);
+
+        if (data.success) {
+        } else {
+          if (data.message.includes("not found")) {
+            navigate("/");
+          }
+          if (data.message.includes("requested")) {
+            // pag may request na
+            setAlreadyRequested(true);
+          }
+
+          /*    setAlreadyRequested(data.verificationRequestDate); */
+        }
+
         if (data.status === "verified") {
           navigate("/");
         }
@@ -157,7 +175,7 @@ function VerifyIdentity() {
 
   return (
     <div>
-      {contactNumber ? (
+      {alreadyRequested ? (
         <>We are verifying your request...</>
       ) : (
         <>

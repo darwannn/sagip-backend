@@ -654,12 +654,50 @@ authController.put(
 );
 
 authController.get(
+  "/verify-identity/request/:id",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const safetyTip = await User.findById(req.params.id);
+      if (safetyTip.verificationRequestDate === undefined) {
+        if (
+          (safetyTip.verificationRequestDate === undefined &&
+            safetyTip.verificationPicture.length <= 0) ||
+          safetyTip.status === "verified" ||
+          safetyTip.userType !== "resident"
+        ) {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
+          });
+        } else {
+          return res.status(200).json({ success: true, ...safetyTip._doc });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "user already requested",
+        });
+      }
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error" + error,
+      });
+    }
+  }
+);
+
+authController.get(
   "/verify-identity/:id",
   tokenMiddleware,
   upload.single("image"),
   async (req, res) => {
     try {
       const safetyTip = await User.findById(req.params.id);
+      /*   if (safetyTip.verificationRequestDate === undefined) { */
       if (
         (safetyTip.verificationRequestDate === undefined &&
           safetyTip.verificationPicture.length <= 0) ||
@@ -670,8 +708,15 @@ authController.get(
           success: false,
           message: "not found",
         });
+      } else {
+        return res.status(200).json({ success: true, ...safetyTip._doc });
       }
-      return res.status(200).json(safetyTip);
+      /*  } else {
+        return res.status(500).json({
+          success: false,
+          message: "user already requested",
+        });
+      } */
     } catch (error) {
       // If an exception occurs, respond with an internal server error
       return res.status(500).json({
@@ -687,23 +732,23 @@ authController.put("/verification-request/:id", async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       {
-        /* $unset: {
+        $unset: {
           verificationRequestDate: Date.now(),
-        }, */
+        },
       },
       { new: true }
     );
 
     if (req.body.action === "reject") {
-      /* user.verificationPicture.map((picture) => {
+      user.verificationPicture.map((picture) => {
         const imagePath = `public/images/User/${picture}`;
         fs.unlink(imagePath, (err) => {});
       });
-      user.verificationPicture = []; */
+      user.verificationPicture = [];
 
       await user.save();
     } else {
-      /*  user.status = "verified"; */
+      user.status = "verified";
       await user.save();
     }
 

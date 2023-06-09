@@ -15,7 +15,7 @@ function Home() {
   const [weather, setWeather] = useState(null);
   const [pusherMessage, setPusherMessage] = useState("");
   const [wellnessSurveys, setWellnessSurveys] = useState([]);
-  const [userAnswers, setUserAnswers] = useState([]);
+  /*   const [userAnswers, setUserAnswers] = useState([]); */
   const [isAnswered, setIsAnswered] = useState(false);
 
   useEffect(() => {
@@ -41,7 +41,9 @@ function Home() {
   useEffect(() => {
     const fetchWellnessSurveys = async () => {
       try {
-        const data = await request("/wellness-survey/", "GET");
+        const data = await request("/wellness-survey/", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
         setWellnessSurveys(data.filter((survey) => survey.isActive === true));
       } catch (error) {
         console.error(error);
@@ -145,13 +147,13 @@ function Home() {
       <>
         {wellnessSurveys.length > 0 && (
           <>
-            {userAnswers.map((answer) => {
+            {/*  {userAnswers.map((answer) => {
               if (answer === user.id) {
                 setIsAnswered(true);
               }
-            })}
+            })} */}
             {console.log(wellnessSurveys[0])}
-            {isAnswered ? (
+            {true ? (
               <>
                 <button
                   onClick={() =>

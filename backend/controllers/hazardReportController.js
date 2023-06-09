@@ -1,6 +1,7 @@
 const hazardReportController = require("express").Router();
 const HazardReport = require("../models/HazardReport");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+const isInMalolos = require("../middlewares/isInMalolos");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
@@ -11,6 +12,7 @@ const fs = require("fs");
 hazardReportController.post(
   "/add",
   tokenMiddleware,
+  isInMalolos,
   upload.single("proof"),
   async (req, res) => {
     const error = {};
@@ -26,7 +28,7 @@ hazardReportController.post(
         status,
         street,
         municipality,
-      } = req.body;
+      } = municipality;
 
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";

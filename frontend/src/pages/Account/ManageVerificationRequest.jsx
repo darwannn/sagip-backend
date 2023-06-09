@@ -65,11 +65,14 @@ const VerificationRequest = () => {
           Authorization: `Bearer ${token}`,
         });
 
-        if (data.message !== "not found") {
-          console.log(data);
+        if (data.success) {
           setVerificationRequestDetails(data);
         } else {
-          navigate(`/manage/account/verification-request`);
+          if (data.message !== "not found") {
+            console.log(data);
+          } else {
+            navigate(`/manage/account/verification-request`);
+          }
         }
       } catch (error) {
         console.error(error);

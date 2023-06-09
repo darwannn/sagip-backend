@@ -124,54 +124,54 @@ const HazardReport = ({ type = "add" }) => {
       });
 
       const { street, municipality } = locationName;
-      if (municipality === "Malolos") {
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("description", description);
-        formData.append("latitude", latitude);
-        formData.append("longitude", longitude);
-        formData.append("category", category);
-        formData.append("hasChanged", hasChanged);
-        formData.append("proof", image);
-        formData.append("street", street);
-        formData.append("municipality", municipality);
+      /*    if (municipality === "Malolos") { */
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("latitude", latitude);
+      formData.append("longitude", longitude);
+      formData.append("category", category);
+      formData.append("hasChanged", hasChanged);
+      formData.append("proof", image);
+      formData.append("street", street);
+      formData.append("municipality", municipality);
 
-        console.log(street);
-        console.log(municipality);
+      console.log(street);
+      console.log(municipality);
 
-        let url, method;
-        if (type === "add") {
-          url = "/hazard-report/add";
-          method = "POST";
-        } else if (type === "update") {
-          url = `/hazard-report/update/${id}`;
-          method = "PUT";
-        }
-
-        const data = await request(
-          url,
-          method,
-          {
-            Authorization: `Bearer ${token}`,
-          },
-          formData
-        );
-        console.log(data);
-
-        const { success, message } = data;
-        if (success) {
-          toast.success(message);
-        } else {
-          if (message !== "input error") {
-            toast.error(message);
-          } else {
-            toast.error(message);
-          }
-        }
-      } else {
-        toast.error("Unfortunately the selected area is outside Malolos");
-        /* navigate('/') */
+      let url, method;
+      if (type === "add") {
+        url = "/hazard-report/add";
+        method = "POST";
+      } else if (type === "update") {
+        url = `/hazard-report/update/${id}`;
+        method = "PUT";
       }
+
+      const data = await request(
+        url,
+        method,
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        formData
+      );
+      console.log(data);
+
+      const { success, message } = data;
+      if (success) {
+        toast.success(message);
+      } else {
+        if (message !== "input error") {
+          toast.error(message);
+        } else {
+          toast.error(message);
+        }
+      }
+      /*  } else { */
+      /* toast.error("Unfortunately the selected area is outside Malolos"); */
+      /* navigate('/') */
+      /*   } */
     } catch (error) {
       console.error(error);
     }
