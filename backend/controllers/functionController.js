@@ -118,10 +118,10 @@ const checkIdentifier = async (identifier) => {
   } else if (/^09\d{9}$/.test(identifier)) {
     identierType = "contactNumber";
   } else {
-    return res.status(400).json({
+    /*   return res.status(400).json({
       success: true,
       message: "Invalid Email or Contact NUmber",
-    });
+    }); */
   }
   const accountExists = await User.findOne({
     [identierType]: identifier,
