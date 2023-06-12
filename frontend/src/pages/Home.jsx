@@ -15,12 +15,11 @@ function Home() {
   const [weather, setWeather] = useState(null);
   const [pusherMessage, setPusherMessage] = useState("");
   const [wellnessSurveys, setWellnessSurveys] = useState();
-  /*   const [userAnswers, setUserAnswers] = useState([]); */
   const [isAnswered, setIsAnswered] = useState(false);
+  const [intervalId, setIntervalId] = useState(null); // Added intervalId state
 
   useEffect(() => {
     const fetchData = async () => {
-      // Get server response
       if (serverResponse !== "") {
         toast.success(serverResponse);
         dispatch(getServerResponse());
@@ -77,7 +76,7 @@ function Home() {
     return () => {
       pusher.unsubscribe("sagipChannel");
     };
-  });
+  }, [user.id]);
 
   const triggerPusher = async () => {
     setPusherMessage("Pusher Test");
@@ -96,6 +95,17 @@ function Home() {
         },
       }
     );
+  };
+
+  const handleMouseDown = () => {
+    const interval = setInterval(function () {
+      window.AndroidInterface?.vibrateOnHold();
+    }, 100);
+    setIntervalId(interval);
+  };
+
+  const handleMouseUp = () => {
+    clearInterval(intervalId);
   };
 
   const answerSurvey = async (surveyId, answer) => {
@@ -147,8 +157,13 @@ function Home() {
         <h1>Pusher Test</h1>
         <button onClick={triggerPusher}>Trigger Event</button>
       </div>
+      <div>
+        <button onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
+          Vibrate on Hold
+        </button>
+      </div>
       <br />
-      <a href="tel:09999999999">PHONE_NUMM</a>
+      <a href="tel:09999999999">PHONE_NUMMn</a>
       <>
         {wellnessSurveys && (
           <>

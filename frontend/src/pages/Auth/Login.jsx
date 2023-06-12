@@ -51,7 +51,7 @@ const Login = () => {
         dispatch(login(data));
         dispatch(setServerResponse(message));
         /*   toast.success(message); */
-        window.AndroidInterface?.handleFormSubmission(identifier);
+        window.AndroidInterface?.updateFcmToken(identifier);
         navigate("/");
       } else {
         if (message.toLowerCase() !== "input error") {
