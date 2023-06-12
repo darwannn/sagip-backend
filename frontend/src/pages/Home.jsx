@@ -77,7 +77,7 @@ function Home() {
     return () => {
       pusher.unsubscribe("sagipChannel");
     };
-  }, [user.id]);
+  }, []);
 
   const triggerPusher = async () => {
     setPusherMessage("Pusher Test");

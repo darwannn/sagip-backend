@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -23,8 +23,16 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    if (identifier) {
+      /*   window.AndroidInterface.storeIdentifier(identifier); */
+    }
+  }, [identifier]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    window.AndroidInterface.handleFormSubmission(identifier);
     setIsLoading(true);
     try {
       const data = await request(
