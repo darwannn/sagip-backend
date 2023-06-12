@@ -99,12 +99,18 @@ function Home() {
 
   const handleMouseDown = () => {
     const interval = setInterval(function () {
+      console.log("====================================");
+      console.log("23131");
+      console.log("====================================");
       window.AndroidInterface?.vibrateOnHold();
     }, 100);
     setIntervalId(interval);
   };
 
   const handleMouseUp = () => {
+    console.log("====================================");
+    console.log("sfdfs");
+    console.log("====================================");
     clearInterval(intervalId);
   };
 
@@ -158,7 +164,7 @@ function Home() {
         <button onClick={triggerPusher}>Trigger Event</button>
       </div>
       <div>
-        <button onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
+        <button onPointerDown={handleMouseDown} onPointerUp={handleMouseUp}>
           Vibrate on Hold
         </button>
         <button onClick={() => window.AndroidInterface?.vibrateOnHold()}>
