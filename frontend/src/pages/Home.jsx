@@ -152,7 +152,7 @@ function Home() {
       <br />
       <br />
       <br />
-      <div>PUSHER API TEST</div>
+      <div>PUSHER API TESTT</div>
       <div>
         <h1>Pusher Test</h1>
         <button onClick={triggerPusher}>Trigger Event</button>
@@ -160,6 +160,9 @@ function Home() {
       <div>
         <button onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
           Vibrate on Hold
+        </button>
+        <button onClick={() => window.AndroidInterface?.vibrateOnHold()}>
+          Vibrate cLICK
         </button>
       </div>
       <br />

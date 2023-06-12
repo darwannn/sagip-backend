@@ -260,6 +260,7 @@ authController.post(
                   id: user._doc._id,
                   userType: user._doc.userType,
                   status: user._doc.status,
+                  email: user._doc.email,
                 },
                 token: generateToken(user._id),
               });
