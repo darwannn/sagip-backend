@@ -525,6 +525,59 @@ accountController.put(
 );
 
 /* get specific  */
+accountController.put("/fcm", async (req, res) => {
+  try {
+    const { identifier, fcmToken } = req.body;
+
+    let user = await checkIdentifier(identifier);
+
+    if (!user) {
+      error["identifier"] = "Account does not exist";
+    } else {
+      let query;
+      if (user === "contactNumber") {
+        query = {
+          contactNumber: identifier,
+        };
+      } else if (user === "email") {
+        query = {
+          email: identifier,
+        };
+      }
+      /*    if (user) { */
+      console.log("====================================");
+      console.log("query");
+      console.log(query);
+      console.log("====================================");
+      /*   console.log(identifier); */
+      const safetyTip = await User.findOne(query);
+
+      console.log(safetyTip);
+      if (safetyTip) {
+        safetyTip.fcmToken = fcmToken;
+        safetyTip.save();
+        return res.status(200).json({
+          success: true,
+          message: "updated",
+        });
+      } else {
+        return res.status(400).json({
+          success: true,
+          message: "DB Error",
+        });
+      }
+    }
+
+    /* } */
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
+  }
+});
+
+/* get specific  */
 accountController.get("/:id", async (req, res) => {
   try {
     const safetyTip = await User.findById(req.params.id);

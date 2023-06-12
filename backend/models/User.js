@@ -99,6 +99,10 @@ const userSchema = mongoose.Schema(
     verificationRequestDate: {
       type: Date,
     },
+    fcmToken: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

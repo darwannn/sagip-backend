@@ -32,7 +32,6 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    window.AndroidInterface.handleFormSubmission(identifier);
     setIsLoading(true);
     try {
       const data = await request(
@@ -52,6 +51,7 @@ const Login = () => {
         dispatch(login(data));
         dispatch(setServerResponse(message));
         /*   toast.success(message); */
+        window.AndroidInterface?.handleFormSubmission(identifier);
         navigate("/");
       } else {
         if (message.toLowerCase() !== "input error") {

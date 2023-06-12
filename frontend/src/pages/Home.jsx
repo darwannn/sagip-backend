@@ -77,7 +77,7 @@ function Home() {
     return () => {
       pusher.unsubscribe("sagipChannel");
     };
-  }, []);
+  });
 
   const triggerPusher = async () => {
     setPusherMessage("Pusher Test");
@@ -148,7 +148,7 @@ function Home() {
         <button onClick={triggerPusher}>Trigger Event</button>
       </div>
       <br />
-      <a href="tel:09999999999">PHONE_NUM</a>
+      <a href="tel:09999999999">PHONE_NUMM</a>
       <>
         {wellnessSurveys && (
           <>
