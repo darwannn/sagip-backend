@@ -99,10 +99,15 @@ function Home() {
 
   const handleMouseDown = () => {
     const interval = setInterval(function () {
-      console.log("====================================");
-      console.log("23131");
-      console.log("====================================");
-      window.AndroidInterface?.vibrateOnHold();
+      //window.AndroidInterface?.vibrateOnHold();
+
+      if (window.AndroidInterface) {
+        window.AndroidInterface.vibrateOnHold();
+      } else {
+        if (navigator.vibrate) {
+          navigator.vibrate(200);
+        }
+      }
     }, 100);
     setIntervalId(interval);
   };
