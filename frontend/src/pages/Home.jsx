@@ -100,7 +100,9 @@ function Home() {
   const handleMouseDown = () => {
     const interval = setInterval(function () {
       //window.AndroidInterface?.vibrateOnHold();
-
+      console.log("====================================");
+      console.log("S");
+      console.log("====================================");
       if (window.AndroidInterface) {
         window.AndroidInterface.vibrateOnHold();
       } else {
@@ -169,7 +171,7 @@ function Home() {
         <button onClick={triggerPusher}>Trigger Event</button>
       </div>
       <div>
-        <button onPointerDown={handleMouseDown} onPointerUp={handleMouseUp}>
+        <button onTouchStart={handleMouseDown} onTouchEnd={handleMouseUp}>
           Vibrate on Hold
         </button>
         <button onClick={() => window.AndroidInterface?.vibrateOnHold()}>
