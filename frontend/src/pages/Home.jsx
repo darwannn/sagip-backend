@@ -7,6 +7,8 @@ import { useSelector, useDispatch } from "react-redux";
 import Pusher from "pusher-js";
 import Navbar from "../components/Navbar";
 
+import warningSound from "../assets/warning.mp3";
+
 function Home() {
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
@@ -121,6 +123,20 @@ function Home() {
     clearInterval(intervalId);
   };
 
+  let audioRef;
+  const playSound = async () => {
+    audioRef = new Audio(warningSound);
+    audioRef.loop = true;
+    audioRef.play();
+  };
+
+  const stopSound = () => {
+    if (audioRef) {
+      audioRef.pause();
+      audioRef.currentTime = 0;
+    }
+  };
+
   const answerSurvey = async (surveyId, answer) => {
     try {
       const data = await request(
@@ -174,12 +190,20 @@ function Home() {
         <button onTouchStart={handleMouseDown} onTouchEnd={handleMouseUp}>
           Vibrate on Hold
         </button>
-        <button onClick={() => window.AndroidInterface?.vibrateOnHold()}>
+        <br />
+        {/*   <button onClick={() => window.AndroidInterface?.vibrateOnHold()}>
           Vibrate cLICK
-        </button>
+        </button> */}
+        <br />
+        <br />
+        <br />
+        <button onClick={playSound}>Play Sound</button>
+        <br />
+        <button onClick={stopSound}>Stop Sound</button>
       </div>
       <br />
       <a href="tel:09999999999">PHONE_NUMMn</a>
+      <input type="file" accept="image/*" capture="camera"></input>
       <>
         {wellnessSurveys && (
           <>
