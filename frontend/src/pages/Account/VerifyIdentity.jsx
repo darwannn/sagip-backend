@@ -39,7 +39,7 @@ function VerifyIdentity() {
           if (data.message.includes("not found")) {
             navigate("/");
           }
-          if (data.message.includes("requested")) {
+          if (data.message.includes("pending")) {
             // pag may request na
             setAlreadyRequested(true);
           }

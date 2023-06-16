@@ -105,9 +105,7 @@ const HazardReport = ({ type = "add" }) => {
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setImageUrl(
-            `https://sagip.onrender.com/images/Safety Tip/${data.image}`
-          );
+          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -362,9 +360,16 @@ const HazardReport = ({ type = "add" }) => {
             </div>
             <div>
               <label htmlFor="image">
-                Image: <span>Upload here</span>
+                Image: <span>Upload Photo</span>
               </label>
-              <input id="image" type="file" onChange={onChangeFile} />
+              {/*  <input type="file" accept="image/*" capture="camera"></input> */}
+              <input
+                id="image"
+                type="file"
+                accept="image/*"
+                capture="camera"
+                onChange={onChangeFile}
+              />
               {image && (
                 <p>
                   {imageName}{" "}

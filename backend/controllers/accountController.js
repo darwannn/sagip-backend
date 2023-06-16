@@ -2,15 +2,11 @@ const accountController = require("express").Router();
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+
 const {
   isEmpty,
   isImage,
   isLessThanSize,
-  createEmptyNotification,
-  createNotification,
-  readNotification,
-  updateNotification,
   isEmailExists,
   isEmailOwner,
   isContactNumberOwner,
@@ -18,36 +14,42 @@ const {
   checkIdentifier,
   isEmail,
   isContactNumber,
-  isNumber,
-  verifyPassword,
   generateCode,
-  generateToken,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-// const isBanned = require('../middlewares/authMiddleware')
-const { sendSMS, apiController } = require("./apiController");
 
 const currentDate = new Date();
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
-const dateTimeToday = new Date().toLocaleString();
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/User");
 
 const fs = require("fs");
-const { log } = require("console");
 
 /* get all */
 accountController.get("/", async (req, res) => {
   try {
     const user = await User.find({});
 
-    return res.status(200).json(user);
+    if (user) {
+      return res.status(200).json(user);
+      return res.status(200).json({
+        /* success: true,
+        message: "found", 
+        emergencyFacility,*/
+        ...user,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -82,10 +84,10 @@ accountController.post("/create", async (req, res) => {
       error["email"] = "Required field";
     } else {
       if (isEmail(email)) {
-        error["email"] = "not email";
+        error["email"] = "Invalid email address";
       } else {
         if (await isEmailExists(email)) {
-          error["email"] = "email already exists";
+          error["email"] = "Email address already taken";
         }
       }
     }
@@ -94,10 +96,10 @@ accountController.post("/create", async (req, res) => {
       error["contact"] = "Required field";
     } else {
       if (isContactNumber(contactNumber)) {
-        error["contact"] = "must be a number";
+        error["contact"] = "Invalid Contact Number";
       } else {
         if (await isContactNumberExists(contactNumber)) {
-          error["contact"] = "Contact Number already exists";
+          error["contact"] = "Contact number already taken";
         }
       }
     }
@@ -124,7 +126,7 @@ accountController.post("/create", async (req, res) => {
         error["password"] = "Required field";
       } else {
         if (verifyPassword(password)) {
-          error["password"] = "password requirement did not match";
+          error["password"] = "Password requirement not met";
         }
       } */
 
@@ -152,29 +154,23 @@ accountController.post("/create", async (req, res) => {
       const user = await User.create({
         email,
         password: hashedPassword,
-
         region,
         province,
         municipality,
         barangay,
         street,
-
         firstname,
         middlename,
         lastname,
         gender,
         birthdate,
-
         contactNumber,
-
         isOnline: false,
         isBanned: false,
-
         profilePicture,
         attempt,
         verificationCode: 0,
         codeExpiration,
-
         userType,
         status: "varified",
       });
@@ -183,20 +179,18 @@ accountController.post("/create", async (req, res) => {
         userId: user._doc._id,
         notifications: [],
       });
+
       if (user && notification) {
-        console.log("success");
-
         /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
-
         return res.status(200).json({
           success: true,
-          message: "Added",
+          message: "Created Successfully",
         });
       } else {
-        console.log("error");
-
-        error["error"] = "Database Error";
-        return res.status(400);
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
       }
     }
 
@@ -209,7 +203,7 @@ accountController.post("/create", async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -219,37 +213,37 @@ accountController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (user) {
-      if (user.profilePicture == "user_no_image.png") {
+      if (user.profilePicture !== "user_no_image.png") {
         const imagePath = `public/images/User/${user.profilePicture}`;
         fs.unlink(imagePath, (err) => {
-          if (err) {
+          /* if (err) {
             return res.status(500).json({
               success: false,
               message: "Error deleting the image ",
             });
-          } else {
-            return res.status(200).json({
-              success: true,
-              message: "Account deleted successfully",
-            });
-          }
+          } else { */
+          return res.status(200).json({
+            success: true,
+            message: "Deleted Successfully",
+          });
+          /* } */
         });
       } else {
         return res.status(200).json({
           success: true,
-          message: "Account  deleted successfully",
+          message: "Deleted Successfully",
         });
       }
     } else {
       return res.status(500).json({
         success: false,
-        message: "DB Erroree",
+        message: "Internal Server Error",
       });
     }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -262,21 +256,17 @@ accountController.put(
       const error = {};
       let { contactNumber } = req.body;
 
-      const contactNumberExists = await User.findOne({
-        contactNumber,
-      });
-
       if (isEmpty(contactNumber)) {
         error["contact"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "must be a number";
+          error["contact"] = "Invalid contact number";
         } else {
           if (await isContactNumberExists(contactNumber)) {
             if (await isContactNumberOwner(req.user.id, contactNumber)) {
-              error["contact"] = "input new contact numebr";
+              error["contact"] = "Input a new contact numebr";
             } else {
-              error["contact"] = "Contact Number already exists";
+              error["contact"] = "Contact number already taken";
             }
           }
         }
@@ -294,12 +284,12 @@ accountController.put(
         if (user) {
           return res.status(200).json({
             success: true,
-            message: "Contact Number updated successfully",
+            message: "Contact Number Updated Successfully",
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -313,7 +303,7 @@ accountController.put(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -327,6 +317,7 @@ accountController.put(
 
     try {
       const error = {};
+      //default password
       const password = "sagip";
       console.log(password);
       const salt = await bcrypt.genSalt(10);
@@ -342,20 +333,19 @@ accountController.put(
         if (user) {
           return res.status(200).json({
             success: true,
-            message: "Password reset successfully",
+            message: "Password has been reset successfully",
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -373,7 +363,6 @@ accountController.put(
         firstname,
         middlename,
         lastname,
-
         email,
         region,
         province,
@@ -396,13 +385,13 @@ accountController.put(
         error["email"] = "Required field";
       } else {
         if (isEmail(email)) {
-          error["email"] = "not email";
+          error["email"] = "Invalid email address";
         } else {
           if (await isEmailExists(email)) {
             if (await isEmailOwner(id, email)) {
-              /*   error["email"] = "input new email"; */
+              /*   error["email"] = "input a new email address"; */
             } else {
-              error["email"] = "email already exists";
+              error["email"] = "Email address already taken";
             }
           }
         }
@@ -459,7 +448,6 @@ accountController.put(
           verificationCode,
           userType,
           status,
-
           hasChanged,
         };
         let imagePath = "";
@@ -467,44 +455,40 @@ accountController.put(
         if (hasChanged && req.file) {
           updateFields.profilePicture = req.file.filename;
 
-          const deletedAccount = await User.findById(req.params.id);
-          if (deletedAccount) {
-            imagePath = `public/images/User/${deletedAccount.profilePicture}`;
+          const userImage = await User.findById(req.params.id);
+          if (userImage) {
+            imagePath = `public/images/User/${userImage.profilePicture}`;
           }
         }
 
-        const safetyTip = await User.findByIdAndUpdate(
-          req.params.id,
-          updateFields,
-          {
-            new: true,
-          }
-        );
+        const user = await User.findByIdAndUpdate(req.params.id, updateFields, {
+          new: true,
+        });
 
-        if (safetyTip) {
+        if (user) {
           if (hasChanged && req.file) {
             if (!imagePath.includes("user_no_image")) {
               console.log(imagePath);
               fs.unlink(imagePath, (err) => {
-                if (err) {
+                /*  if (err) {
                   return res.status(500).json({
                     success: false,
                     message: "Error deleting the image",
                   });
-                }
+                } */
               });
             }
           }
 
           return res.status(200).json({
             success: true,
-            message: "Profile updated successfully",
+            message: "Profile Updated Successfully",
             safetyTip,
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -518,7 +502,7 @@ accountController.put(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -529,63 +513,63 @@ accountController.put("/fcm", async (req, res) => {
   try {
     const { identifier, fcmToken } = req.body;
 
-    let user = await checkIdentifier(identifier);
+    let userIdentifier = await checkIdentifier(identifier);
 
-    if (!user) {
-      error["identifier"] = "Account does not exist";
+    if (!userIdentifier) {
+      error["identifier"] = "not found";
     } else {
       let query;
-      if (user === "contactNumber") {
+      if (userIdentifier === "contactNumber") {
         query = {
           contactNumber: identifier,
         };
-      } else if (user === "email") {
+      } else if (userIdentifier === "email") {
         query = {
           email: identifier,
         };
       }
-      /*    if (user) { */
-      console.log("====================================");
-      console.log("query");
-      console.log(query);
-      console.log("====================================");
-      /*   console.log(identifier); */
-      const safetyTip = await User.findOne(query);
 
-      console.log(safetyTip);
-      if (safetyTip) {
-        safetyTip.fcmToken = fcmToken;
-        safetyTip.save();
+      const user = await User.findOne(query);
+
+      console.log(user);
+      if (user) {
+        user.fcmToken = fcmToken;
+        user.save();
         return res.status(200).json({
           success: true,
-          message: "updated",
+          message: "Updated Successfully",
         });
       } else {
         return res.status(400).json({
           success: true,
-          message: "DB Error",
+          message: "Internal Server Error",
         });
       }
     }
-
-    /* } */
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "not found",
+      message: "Internal Server Error: " + error,
     });
   }
 });
 
-/* get specific  */
 accountController.get("/:id", async (req, res) => {
   try {
-    const safetyTip = await User.findById(req.params.id);
-
-    console.log("====================================");
-    console.log("wakj");
-    console.log("====================================");
-    return res.status(200).json(safetyTip);
+    const user = await User.findById(req.params.id);
+    if (user) {
+      /*      return res.status(200).json(user); */
+      return res.status(200).json({
+        success: true,
+        message: "found",
+        ...user._doc,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,

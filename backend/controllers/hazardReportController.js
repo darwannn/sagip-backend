@@ -17,9 +17,6 @@ hazardReportController.post(
   async (req, res) => {
     const error = {};
     try {
-      console.log("====================================");
-      console.log(req.file);
-      console.log("====================================");
       const {
         description,
         category,
@@ -32,8 +29,8 @@ hazardReportController.post(
 
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
-      if (isEmpty(latitude)) error["category"] = "Choose a location";
-      if (isEmpty(longitude)) error["description"] = "Choose a location";
+      if (isEmpty(latitude)) error["latitude"] = "Mark a location";
+      if (isEmpty(longitude)) error["longitude"] = "Mark a location";
 
       if (!req.file) {
         error["proof"] = "Required field";
@@ -62,13 +59,13 @@ hazardReportController.post(
         if (hazardReport) {
           return res.status(200).json({
             success: true,
-            message: "HazardReport created successfully",
+            message: "Added Successfully",
             hazardReport,
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -81,13 +78,12 @@ hazardReportController.post(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
 );
 
-/* get all */
 hazardReportController.get("/", async (req, res) => {
   try {
     const hazardReports = await HazardReport.find({}).populate(
@@ -95,20 +91,47 @@ hazardReportController.get("/", async (req, res) => {
       "-password"
     );
 
-    return res.status(200).json(hazardReports);
+    if (hazardReports) {
+      return res.status(200).json(hazardReports);
+      return res.status(200).json({
+        /* success: true,
+        message: "found", 
+        hazardReports,*/
+        ...hazardReports,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
 
-/* get specific  */
 hazardReportController.get("/:id", async (req, res) => {
   try {
-    const hazardReport = await HazardReport.findById(req.params.id);
-    return res.status(200).json(hazardReport);
+    const hazardReport = await HazardReport.findById(req.params.id).populate(
+      "userId",
+      "-password"
+    );
+    if (hazardReport) {
+      /*      return res.status(200).json(hazardReport); */
+      return res.status(200).json({
+        success: true,
+        message: "found",
+        ...hazardReport._doc,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -143,20 +166,20 @@ hazardReportController.put(
           if (action === "verify") {
             return res.status(200).json({
               success: true,
-              message: "HazardReport verified ",
+              message: "Hazard Report Verified",
               hazardReport,
             });
           } else if (action === "resolve") {
             return res.status(200).json({
               success: true,
-              message: "HazardReport resolved ",
+              message: "Hazard Report Resolved",
               hazardReport,
             });
           }
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -169,7 +192,7 @@ hazardReportController.put(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -180,36 +203,33 @@ hazardReportController.delete(
   tokenMiddleware,
   async (req, res) => {
     try {
-      const deletedHazardReport = await HazardReport.findByIdAndDelete(
-        req.params.id
-      );
+      const hazardReport = await HazardReport.findByIdAndDelete(req.params.id);
 
-      if (deletedHazardReport) {
-        /*  const imagePath = `public/images/Hazard Report/${deletedHazardReport.image}`;
+      if (hazardReport) {
+        const imagePath = `public/images/Hazard Report/${hazardReport.image}`;
         fs.unlink(imagePath, (err) => {
-          if (err) {
+          /* if (err) {
             return res.status(500).json({
               success: false,
               message: "Error deleting the image ",
             });
           } else { */
-        return res.status(200).json({
-          success: true,
-          message: "HazardReport  deleted successfully",
+          return res.status(200).json({
+            success: true,
+            message: "Deleted successfully",
+          });
+          /*  } */
         });
-        /*      }
-        });
- */
       } else {
         return res.status(500).json({
           success: false,
-          message: "DB Error",
+          message: "Internal Server Error",
         });
       }
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }

@@ -5,25 +5,12 @@ const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/Emergency Facility");
 
 const fs = require("fs");
+
 const {
   isEmpty,
   isImage,
   isLessThanSize,
-  createEmptyNotification,
-  createNotification,
-  readNotification,
-  updateNotification,
-  isEmailExists,
-  isEmailOwner,
-  isContactNumberOwner,
-  isContactNumberExists,
-  checkIdentifier,
-  isEmail,
   isContactNumber,
-  isNumber,
-  verifyPassword,
-  generateCode,
-  generateToken,
 } = require("./functionController");
 
 emergencyFacilityController.post(
@@ -44,7 +31,7 @@ emergencyFacilityController.post(
         error["contact"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "must be a number";
+          error["contact"] = "Invalid contact number";
         }
       }
 
@@ -71,13 +58,13 @@ emergencyFacilityController.post(
         if (emergencyFacility) {
           return res.status(200).json({
             success: true,
-            message: "Emergency Facility created successfully",
+            message: "Data added successfully",
             emergencyFacility,
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -90,7 +77,7 @@ emergencyFacilityController.post(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -99,14 +86,26 @@ emergencyFacilityController.post(
 /* get all */
 emergencyFacilityController.get("/", async (req, res) => {
   try {
-    const safetyTips = await EmergencyFacility.find({});
-    console.log("dasd");
-    console.log(safetyTips);
-    return res.status(200).json(safetyTips);
+    const emergencyFacility = await EmergencyFacility.find({});
+    console.log(emergencyFacility);
+    if (emergencyFacility) {
+      return res.status(200).json(emergencyFacility);
+      return res.status(200).json({
+        /* success: true,
+        message: "found", 
+        emergencyFacility,*/
+        ...emergencyFacility,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "not found",
     });
   }
 });
@@ -117,7 +116,20 @@ emergencyFacilityController.get("/:id", async (req, res) => {
     const emergencyFacility = await EmergencyFacility.findById(req.params.id);
 
     console.log(emergencyFacility);
-    return res.status(200).json(emergencyFacility);
+
+    if (emergencyFacility) {
+      /*      return res.status(200).json(emergencyFacility); */
+      return res.status(200).json({
+        success: true,
+        message: "found",
+        ...emergencyFacility._doc,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -152,7 +164,7 @@ emergencyFacilityController.put(
         error["contact"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "must be a number";
+          error["contact"] = "Invalid contact number";
         }
       }
 
@@ -177,11 +189,11 @@ emergencyFacilityController.put(
         if (hasChanged && req.file) {
           updateFields.image = req.file.filename;
 
-          const deletedSafetyTip = await EmergencyFacility.findById(
+          const emergencyFacilityImage = await EmergencyFacility.findById(
             req.params.id
           );
-          if (deletedSafetyTip) {
-            imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
+          if (emergencyFacilityImage) {
+            imagePath = `public/images/Emergency Facility/${emergencyFacilityImage.image}`;
           }
         }
 
@@ -194,24 +206,24 @@ emergencyFacilityController.put(
         if (emergencyFacility) {
           if (hasChanged && req.file) {
             fs.unlink(imagePath, (err) => {
-              if (err) {
+              /* if (err) {
                 return res.status(500).json({
                   success: false,
                   message: "Error deleting the image",
                 });
-              }
+              } */
             });
           }
 
           return res.status(200).json({
             success: true,
-            message: "EmergencyFacility updated successfully",
-            EmergencyFacility,
+            message: "Updated Successfully",
+            emergencyFacility,
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -224,7 +236,7 @@ emergencyFacilityController.put(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -235,76 +247,38 @@ emergencyFacilityController.delete(
   tokenMiddleware,
   async (req, res) => {
     try {
-      /*  const EmergencyFacility = await EmergencyFacility.findById(req.params.id);
-      if(EmergencyFacility.userId.toString() !== req.user.id.toString()){
-          throw new Error("You can delete only your own posts")
-      } */
-
-      const deletedSafetyTip = await EmergencyFacility.findByIdAndDelete(
+      const emergencyFacility = await EmergencyFacility.findByIdAndDelete(
         req.params.id
       );
 
-      if (deletedSafetyTip) {
-        const imagePath = `public/images/Emergency Facility/${deletedSafetyTip.image}`;
-        fs.unlink(imagePath, (err) => {
-          if (err) {
+      if (emergencyFacility) {
+        const imagePath = `public/images/Emergency Facility/${emergencyFacility.image}`;
+        fs.unlink(imagePath, (error) => {
+          /*  if (error) {
             return res.status(500).json({
               success: false,
-              message: "Error deleting the image ",
+              message: "Error deleting the image.",
             });
-          } else {
-            return res.status(200).json({
-              success: true,
-              message: "EmergencyFacility  deleted successfully",
-            });
-          }
+          } else { */
+          return res.status(200).json({
+            success: true,
+            message: "Deleted Successfully",
+          });
+          /* } */
         });
       } else {
         return res.status(500).json({
           success: false,
-          message: "DB Error",
+          message: "Internal Server Error",
         });
       }
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
 );
-
-/* 
-emergencyFacilityController.put('/saves/:id', tokenMiddleware, async (req, res) => {
-    try {
-        const EmergencyFacility = await EmergencyFacility.findById(req.params.id)
-        if(EmergencyFacility.saves.includes(req.user.id)){
-            EmergencyFacility.saves = EmergencyFacility.saves.filter((userId) => userId !== req.user.id)
-            await EmergencyFacility.save()
-
-            return res.status(200).json({msg: 'Successfully unliked the EmergencyFacility'})
-        } else {
-            EmergencyFacility.saves.push(req.user.id)
-            await EmergencyFacility.save()
-
-            return res.status(200).json({msg: "Successfully liked the EmergencyFacility"})
-        }
-
-    } catch (error) {
-        return res.status(500).json(error)
-    }
-})
-
-emergencyFacilityController.get('/saved/:userId', async (req, res) => {
-    try {
-      const likedSafetyTips = await EmergencyFacility.find({ saves: req.params.userId }).populate("userId", "-password");
-      return res.status(200).json(likedSafetyTips);
-    } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error" + error,
-          })
-    }
-  }); */
 
 module.exports = emergencyFacilityController;

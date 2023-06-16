@@ -2,24 +2,20 @@ const authController = require("express").Router();
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+
 const {
   isEmpty,
-  isImage,
-  isLessThanSize,
-  createEmptyNotification,
+
   createNotification,
-  readNotification,
-  updateNotification,
+
   isEmailExists,
-  isEmailOwner,
-  isContactNumberOwner,
+
   isContactNumberExists,
   checkIdentifier,
   isEmail,
   isContactNumber,
   isNumber,
-  verifyPassword,
+
   generateCode,
   generateToken,
 } = require("./functionController");
@@ -30,13 +26,11 @@ const { sendSMS, apiController } = require("./apiController");
 
 const currentDate = new Date();
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
-const dateTimeToday = new Date().toLocaleString();
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/User");
 
 const fs = require("fs");
-const { log } = require("console");
 
 authController.post("/register", async (req, res) => {
   try {
@@ -111,7 +105,7 @@ authController.post("/register", async (req, res) => {
       error["password"] = "Required field";
     } else {
       if (verifyPassword(password)) {
-        error["password"] = "password requirement did not match";
+        error["password"] = "Password requirement not met";
       }
     } */
 
@@ -120,7 +114,7 @@ authController.post("/register", async (req, res) => {
     } else {
       if (!isEmpty(password)) {
         if (password !== confirmPassword) {
-          error["confirmPassword"] = "password did not match";
+          error["confirmPassword"] = "Password did not match";
         }
       }
     } */
@@ -178,7 +172,7 @@ authController.post("/register", async (req, res) => {
         if (verificationCode !== 0) {
           return res.status(200).json({
             success: true,
-            message: "Please verify contact number",
+            message: "A verification has been sent to your contact number",
             user: {
               for: "register",
               id: user._doc._id,
@@ -190,14 +184,14 @@ authController.post("/register", async (req, res) => {
         } else {
           return res.status(200).json({
             success: true,
-            message: "Added",
+            message: "Created Successfully",
           });
         }
       } else {
-        console.log("error");
-
-        error["error"] = "Database Error";
-        return res.status(400);
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
       }
     }
 
@@ -210,7 +204,7 @@ authController.post("/register", async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -224,7 +218,6 @@ authController.post(
       const { code, type } = req.body;
       const userId = req.user.id;
 
-      /*     const userId = "646de7d73b43cfb85af16d77" */
       if (isEmpty(code)) {
         error["code"] = "Required field";
       } else if (isNumber(code)) {
@@ -233,12 +226,7 @@ authController.post(
 
       if (Object.keys(error).length == 0) {
         const user = await User.findById(userId);
-        if (!user) {
-          return res.status(500).json({
-            success: false,
-            message: "User Not Found" + error,
-          });
-        } else {
+        if (user) {
           if (code == user.verificationCode) {
             // Code matches, update user status to 'semi-verified'
 
@@ -268,7 +256,7 @@ authController.post(
             if (type === "forgot-password")
               return res.status(200).json({
                 success: true,
-                message: "Enter your new-password",
+                message: "Enter your new password",
                 user: {
                   for: "new-password",
                   id: user._doc._id,
@@ -280,7 +268,7 @@ authController.post(
             if (type === "login")
               return res.status(200).json({
                 success: true,
-                message: "Verified successfully ",
+                message: "Verified successfully. You can now use your account!",
                 user: {
                   for: "login",
                   id: user._doc._id,
@@ -292,13 +280,23 @@ authController.post(
             if (type === "contact")
               return res.status(200).json({
                 success: true,
-                message: "Verified successfully",
+                message: "Contact number has been updated successfully",
               });
           } else {
-            error["code"] = "Incorrect code";
+            error["code"] = "Incorrect verification code";
             user.attempt += 1;
             await user.save();
           }
+        } else {
+          /* return res.status(500).json({
+              success: false,
+              message: "User Not Found",
+            });
+       */
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
         }
       }
 
@@ -312,7 +310,7 @@ authController.post(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -340,7 +338,7 @@ authController.post(
         if (user && (await bcrypt.compare(password, user.password))) {
           return res.status(200).json({
             success: true,
-            message: "Password match",
+            message: "Password Matches",
             for: "edit-password",
           });
         } else {
@@ -354,7 +352,7 @@ authController.post(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -382,7 +380,7 @@ authController.post("/login", async (req, res) => {
 
         return res.status(500).json({
           success: false,
-          message: "Maximum login attempts exceeded.",
+          message: "Maximum login attempts exceeded",
           attempt: true,
         });
       } else {
@@ -390,7 +388,8 @@ authController.post("/login", async (req, res) => {
           if (user.isBanned) {
             return res.status(500).json({
               success: false,
-              message: "Account banned. Please contact the CDRRMO",
+              message:
+                "Account suspended. Please contact us if you think this isn't right",
             });
           } else {
             // Check if the user has exceeded the maximum number of attempts
@@ -412,10 +411,8 @@ authController.post("/login", async (req, res) => {
             });
           }
         } else {
-          error["password"] = "Incorrect";
-
+          error["password"] = "Incorrect password";
           console.log(user.attempt);
-
           user.attempt++;
           await user.save();
         }
@@ -430,7 +427,7 @@ authController.post("/login", async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -464,14 +461,14 @@ authController.post("/forgot-password", async (req, res) => {
         if (user.isBanned) {
           return res.status(500).json({
             success: false,
-            message: "Account banned. Please contact the CDRRMO",
+            message:
+              "Account suspended. Please contact us if you think this isn't right",
           });
         } else {
-          console.log("Current COde: " + generatedCode);
-
+          //console.log("Current COde: " + generatedCode);
           return res.status(200).json({
             success: true,
-            message: "Message has been sent to",
+            message: `Verification code has been sent to ${user._doc.contactNumber}`,
             user: {
               for: "forgot-password",
               id: user._doc._id,
@@ -487,23 +484,20 @@ authController.post("/forgot-password", async (req, res) => {
       }
     }
 
-    // If there are errors, respond with error messages
     if (Object.keys(error).length != 0) {
       error["success"] = false;
       error["message"] = "input error";
       return res.status(400).json(error);
     }
   } catch (error) {
-    // If an exception occurs, respond with an internal server error
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
-authController.put("/new-password", tokenMiddleware, async (req, res) => {
-  // Variable declaration
 
+authController.put("/new-password", tokenMiddleware, async (req, res) => {
   try {
     const error = {};
     const { password, confirmPassword } = req.body;
@@ -512,7 +506,7 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
       error["password"] = "Required field";
     } else {
       if (verifyPassword(password)) {
-        error["password"] = "password requirement did not match";
+        error["password"] = "Password requirement not met";
       }
     } */
 
@@ -521,7 +515,7 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
     } else {
       if (!isEmpty(password)) {
         if (password !== confirmPassword) {
-          error["confirmPassword"] = "password did not match";
+          error["confirmPassword"] = "Password did not match";
         }
       }
     }
@@ -540,16 +534,21 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
         if (req.body.for) {
           return res.status(200).json({
             success: true,
-            message: "Change Successfully. Login Now",
+            message:
+              "Password has been changed successfully. You can now login with your new password",
           });
         } else {
           return res.status(200).json({
             success: true,
-            message: "Password change",
+            message: "Password has been changed successfully",
           });
         }
       } else {
-        error["message"] = "Database Error";
+        /* error["message"] = "Database Error"; */
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
       }
     }
 
@@ -562,7 +561,7 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -578,11 +577,11 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
     });
 
     if (user) {
-      console.log("Current COde: " + generatedCode);
+      //console.log("Current COde: " + generatedCode);
 
       return res.status(200).json({
         success: true,
-        message: "Verification code has been resent.",
+        message: "Verification code has been resent",
         /* user: {
           for: "forgot-password",
           id: user._doc._id,
@@ -594,14 +593,14 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
     } else {
       return res.status(500).json({
         success: false,
-        message: "DB Error",
+        message: "Internal Server Error",
       });
     }
   } catch (error) {
     // If an exception occurs, respond with an internal server error
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -636,19 +635,18 @@ authController.put(
       if (user) {
         return res.status(200).json({
           success: true,
-          message: "Verification Request sent",
+          message: "Verification Request Submitted Successfully",
         });
       } else {
         return res.status(500).json({
           success: false,
-          message: "DB Error",
+          message: "Internal Server Error",
         });
       }
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -660,32 +658,32 @@ authController.get(
   upload.single("image"),
   async (req, res) => {
     try {
-      const safetyTip = await User.findById(req.params.id);
-      if (safetyTip.verificationRequestDate === undefined) {
+      const user = await User.findById(req.params.id);
+      if (user.verificationRequestDate === undefined) {
         if (
-          (safetyTip.verificationRequestDate === undefined &&
-            safetyTip.verificationPicture.length <= 0) ||
-          safetyTip.status === "verified" ||
-          safetyTip.userType !== "resident"
+          (user.verificationRequestDate === undefined &&
+            user.verificationPicture.length <= 0) ||
+          user.status === "verified" ||
+          user.userType !== "resident"
         ) {
           return res.status(500).json({
             success: false,
             message: "not found",
           });
         } else {
-          return res.status(200).json({ success: true, ...safetyTip._doc });
+          return res.status(200).json({ success: true, ...user._doc });
         }
       } else {
         return res.status(500).json({
           success: false,
-          message: "user already requested",
+          message: "pending request",
         });
       }
     } catch (error) {
       // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -697,32 +695,31 @@ authController.get(
   upload.single("image"),
   async (req, res) => {
     try {
-      const safetyTip = await User.findById(req.params.id);
-      /*   if (safetyTip.verificationRequestDate === undefined) { */
+      const user = await User.findById(req.params.id);
+      /*   if (user.verificationRequestDate === undefined) { */
       if (
-        (safetyTip.verificationRequestDate === undefined &&
-          safetyTip.verificationPicture.length <= 0) ||
-        safetyTip.status === "verified" ||
-        safetyTip.userType !== "resident"
+        (user.verificationRequestDate === undefined &&
+          user.verificationPicture.length <= 0) ||
+        user.status === "verified" ||
+        user.userType !== "resident"
       ) {
         return res.status(500).json({
           success: false,
           message: "not found",
         });
       } else {
-        return res.status(200).json({ success: true, ...safetyTip._doc });
+        return res.status(200).json({ success: true, ...user._doc });
       }
       /*  } else {
         return res.status(500).json({
           success: false,
-          message: "user already requested",
+          message: "pending request",
         });
       } */
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -781,7 +778,7 @@ authController.put("/verification-request/:id", async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error " + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });

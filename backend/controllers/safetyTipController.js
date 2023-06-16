@@ -39,18 +39,17 @@ safetyTipController.post(
           content,
           category,
           image: req.file.filename,
-          userId: req.user.id,
         });
         if (safetyTip) {
           return res.status(200).json({
             success: true,
-            message: "SafetyTip created successfully",
+            message: "Added successfully",
             safetyTip,
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -63,7 +62,7 @@ safetyTipController.post(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -72,13 +71,25 @@ safetyTipController.post(
 /* get all */
 safetyTipController.get("/", async (req, res) => {
   try {
-    const safetyTips = await SafetyTip.find({}).populate("userId", "-password");
-
-    return res.status(200).json(safetyTips);
+    const safetyTips = await SafetyTip.find({});
+    if (safetyTips) {
+      return res.status(200).json(safetyTips);
+      return res.status(200).json({
+        /* success: true,
+      message: "Record found", 
+      safetyTips,*/
+        ...safetyTips,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -86,15 +97,24 @@ safetyTipController.get("/", async (req, res) => {
 /* get specific  */
 safetyTipController.get("/:id", async (req, res) => {
   try {
-    const safetyTip = await SafetyTip.findById(req.params.id).populate(
-      "userId",
-      "-password"
-    );
+    const safetyTip = await SafetyTip.findById(req.params.id);
 
-    safetyTip.views += 1;
+    /* safetyTip.views += 1;
+    await safetyTip.save(); */
 
-    await safetyTip.save();
-    return res.status(200).json(safetyTip);
+    if (safetyTip) {
+      /*      return res.status(200).json(safetyTip); */
+      return res.status(200).json({
+        success: true,
+        message: "found",
+        ...safetyTip._doc,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -131,15 +151,15 @@ safetyTipController.put(
       }
 
       if (Object.keys(error).length === 0) {
-        const updateFields = { title, content, category, userId: req.user.id };
+        const updateFields = { title, content, category };
         let imagePath = "";
 
         if (hasChanged && req.file) {
           updateFields.image = req.file.filename;
 
-          const deletedSafetyTip = await SafetyTip.findById(req.params.id);
-          if (deletedSafetyTip) {
-            imagePath = `public/images/Safety Tip/${deletedSafetyTip.image}`;
+          const safetyTipImage = await SafetyTip.findById(req.params.id);
+          if (safetyTipImage) {
+            imagePath = `public/images/Safety Tip/${safetyTipImage.image}`;
           }
         }
 
@@ -152,24 +172,24 @@ safetyTipController.put(
         if (safetyTip) {
           if (hasChanged && req.file) {
             fs.unlink(imagePath, (err) => {
-              if (err) {
+              /* if (err) {
                 return res.status(500).json({
                   success: false,
                   message: "Error deleting the image",
                 });
-              }
+              } */
             });
           }
 
           return res.status(200).json({
             success: true,
-            message: "SafetyTip updated successfully",
+            message: "Updated Successfully",
             safetyTip,
           });
         } else {
           return res.status(500).json({
             success: false,
-            message: "DB Error",
+            message: "Internal Server Error",
           });
         }
       }
@@ -182,7 +202,7 @@ safetyTipController.put(
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error" + error,
+        message: "Internal Server Error: " + error,
       });
     }
   }
@@ -190,38 +210,33 @@ safetyTipController.put(
 
 safetyTipController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
   try {
-    /*  const safetyTip = await SafetyTip.findById(req.params.id);
-      if(safetyTip.userId.toString() !== req.user.id.toString()){
-          throw new Error("You can delete only your own posts")
-      } */
-
     const deletedSafetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
 
     if (deletedSafetyTip) {
       const imagePath = `public/images/Safety Tip/${deletedSafetyTip.image}`;
       fs.unlink(imagePath, (err) => {
-        if (err) {
+        /* if (err) {
           return res.status(500).json({
             success: false,
             message: "Error deleting the image ",
           });
-        } else {
-          return res.status(200).json({
-            success: true,
-            message: "SafetyTip  deleted successfully",
-          });
-        }
+        } else { */
+        return res.status(200).json({
+          success: true,
+          message: "Deleted successfully",
+        });
+        /* } */
       });
     } else {
       return res.status(500).json({
         success: false,
-        message: "DB Error",
+        message: "Internal Server Error",
       });
     }
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
     });
   }
 });
@@ -230,35 +245,52 @@ safetyTipController.put("/saves/:id", tokenMiddleware, async (req, res) => {
   try {
     const safetyTip = await SafetyTip.findById(req.params.id);
     if (safetyTip.saves.includes(req.user.id)) {
-      safetyTip.saves = safetyTip.saves.filter(
-        (userId) => userId !== req.user.id
-      );
+      safetyTip.saves = safetyTip.saves.filter((id) => id !== req.user.id);
       await safetyTip.save();
-
-      return res
-        .status(200)
-        .json({ msg: "Successfully unliked the safetyTip" });
+      return res.status(200).json({
+        success: true,
+        message: "Unsaved Successfully",
+      });
     } else {
       safetyTip.saves.push(req.user.id);
       await safetyTip.save();
 
-      return res.status(200).json({ msg: "Successfully liked the safetyTip" });
+      return res.status(200).json({
+        success: true,
+        message: "Saved Successfully",
+      });
     }
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-});
-
-safetyTipController.get("/saved/:userId", async (req, res) => {
-  try {
-    const likedSafetyTips = await SafetyTip.find({
-      saves: req.params.userId,
-    }).populate("userId", "-password");
-    return res.status(200).json(likedSafetyTips);
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error" + error,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
+
+safetyTipController.get("/saved/:id", async (req, res) => {
+  try {
+    const safetyTip = await SafetyTip.find({
+      saves: req.params.id,
+    });
+    if (safetyTip) {
+      return res.status(200).json(safetyTip);
+      return res.status(200).json({
+        /* success: true,
+      message: "Record found", 
+      safetyTips,*/
+        ...safetyTip,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
     });
   }
 });

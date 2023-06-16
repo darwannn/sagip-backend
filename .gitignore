@@ -16,7 +16,7 @@
 #.gitignore
 #.run.cmd
 
-
+/backend sagip-5756f-firebase-adminsdk-1r9yo-7cb34db90a.json
 /backend/.pnp
 /backend.pnp.js
 

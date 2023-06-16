@@ -55,12 +55,12 @@ const SafetyTipDetails = () => {
         <Link to="/manage/safety-tips">Go Back</Link>
         <div>
           <img
-            src={`https://sagip.onrender.com/images/Safety Tip/${safetyTipDetails.image}`}
+            src={`http://localhost:5000/images/Safety Tip/${safetyTipDetails.image}`}
             style={{ width: "300px" }}
           />
           <div>
             <h3>{safetyTipDetails.title}</h3>
-            {safetyTipDetails.userId?._id === user.id ? (
+            {user.userType === "admin" || user.userType === "super-admin" ? (
               <div>
                 {" "}
                 {isSaved ? (
@@ -94,9 +94,9 @@ const SafetyTipDetails = () => {
                 dangerouslySetInnerHTML={{ __html: safetyTipDetails.content }}
               />
             </p>
-            <div>
+            {/*  <div>
               <span>{safetyTipDetails.views} views</span>
-            </div>
+            </div> */}
           </div>
           <div>
             <span></span>

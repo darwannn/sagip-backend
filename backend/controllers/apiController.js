@@ -5,12 +5,20 @@ const User = require("../models/User");
 const Pusher = require("pusher");
 const municipality = "Malolos";
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+
+const admin = require("firebase-admin");
+const serviceAccount = require("../sagip-5756f-firebase-adminsdk-1r9yo-7cb34db90a.json");
+
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
   key: process.env.PUSHER_KEY,
   secret: process.env.PUSHER_SECRET,
   cluster: process.env.PUSHER_CLUSTER,
   useTLS: true,
+});
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
 
 apiController.get("/signal", async (req, res) => {
@@ -30,10 +38,10 @@ apiController.get("/signal", async (req, res) => {
       }
     });
 
-    const name = bulletins[maxIndex].name;
+    /*   const name = bulletins[maxIndex].name;
     const count = bulletins[maxIndex].count;
     const final = bulletins[maxIndex].final;
-    const file = bulletins[maxIndex].file;
+    const file = bulletins[maxIndex].file; */
     const link = bulletins[maxIndex].link;
     const filename = link.substring(link.lastIndexOf("/") + 1);
     let counter = 0;
@@ -107,15 +115,9 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
-  /*  const to = "/topics/newsletter";
-
-  const notification = {
-    title: "May bagyo",
-    body: "Magtago ka na sa puno",
-    sound: "default",
-  }; */
-  /* sendNotificationAll(to, notification); */
-
+  sendNotificationAll("title", "body", [
+    "ezYNxqpMR8i8734PUR8vwU:APA91bE4arhbEa4ul5PDK4QXK9qhQwQ7JmLZu7F3SVxj1uNxXoKOq7EsrrGsXvIIihj5bW1ypn9Km7g4-jHV4pRkI19osumo5lOFIKD4SSmXw2IcCd5YaW2iApSBnjhCYYz6Qo-LRcKQ",
+  ]);
   axios
     .get(
       `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
@@ -132,7 +134,7 @@ apiController.get("/weather", async (req, res) => {
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
   const { pusherTo, purpose, content } = req.body;
-  console.log("p" + purpose);
+  //console.log("p" + purpose);
   const data = {
     from: req.user.id,
     to: pusherTo,
@@ -146,20 +148,29 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
 
 apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   const error = {};
-  const { alertMessage, location } = req.body;
+  const { alertTitle, alertMessage, location } = req.body;
 
+  if (isEmpty(alertTitle)) error["alertTitle"] = "Required field";
   if (isEmpty(alertMessage)) error["alertMessage"] = "Required field";
   if (isEmpty(location)) error["location"] = "Required field";
 
   if (Object.keys(error).length == 0) {
     let contactNumbers = [];
+    let fcmTokens = [];
 
-    if (location == "All") {
+    if (location == "all") {
       contactNumbers = await getAllContactNumbersInMunicipality("Malolos");
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error" + contactNumbers,
+          message: "Internal Server Error: " + contactNumbers,
+        });
+      }
+      fcmTokens = await getAllFcmTokensInMunicipality("Malolos");
+      if (!Array.isArray(fcmTokens)) {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error: " + contactNumbers,
         });
       }
     } else {
@@ -170,12 +181,23 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error" + contactNumbers,
+          message: "Internal Server Error: " + contactNumbers,
+        });
+      }
+      fcmTokens = await getAllFcmTokensInBarangays("Malolos", location);
+      if (!Array.isArray(fcmTokens)) {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error: " + contactNumbers,
         });
       }
     }
 
     console.log(contactNumbers);
+    console.log(fcmTokens);
+
+    sendNotificationAll(alertTitle, alertMessage, fcmTokens);
+
     try {
       /*  const smsResponse = await sendSMS("alertMessage", "09395372592"); */
       const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
@@ -213,9 +235,7 @@ const sendSMS = async (message, contactNumber) => {
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   };
-  console.log("====================================");
-  console.log(smsData);
-  console.log("====================================");
+
   return axios
     .post("https://smsgateway24.com/getdata/addsms", null, {
       params: smsData,
@@ -266,15 +286,10 @@ const getAllContactNumbersInMunicipality = async (municipality) => {
     const contactNumbers = users.map((user) => user.contactNumber);
     return contactNumbers;
   } catch (error) {
-    /*  return res.status(500).json({
-      success:false,
-      message:"Internal Server Error" + error,
-    }) */
-    return "Internal Server Error" + error;
+    return "Internal Server Error: " + error;
   }
 };
 
-// Function to get all contact numbers of users with the specified barangays
 const getAllContactNumbersInBarangays = async (municipality, location) => {
   try {
     const barangays = location.split(","); // Split the location string into an array of barangays
@@ -289,23 +304,60 @@ const getAllContactNumbersInBarangays = async (municipality, location) => {
   }
 };
 
-const sendNotificationAll = (to, notif) => {
-  const api_key = process.env.NOTIFICATION_API;
+const getAllFcmTokensInMunicipality = async (municipality) => {
+  try {
+    const users = await User.find({ municipality: municipality });
+    const fcmTokens = users.map((user) => user.fcmToken);
+    return fcmTokens;
+  } catch (error) {
+    return "Internal Server Error: " + error;
+  }
+};
 
-  const fields = { to, notification: notif };
+const getAllFcmTokensInBarangays = async (municipality, location) => {
+  try {
+    const barangays = location.split(","); // Split the location string into an array of barangays
+    const users = await User.find({
+      barangay: { $in: barangays },
+      municipality,
+    });
+    const fcmTokens = users.map((user) => user.fcmToken);
+    return fcmTokens;
+  } catch (error) {
+    return "Internal Server Error: " + error;
+  }
+};
 
-  const headers = {
-    Authorization: "key=" + api_key,
-    "Content-Type": "application/json",
+const sendNotificationAll = (title, body, tokens) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    tokens: tokens,
   };
 
-  axios
-    .post("https://fcm.googleapis.com/fcm/send", fields, { headers })
+  admin
+    .messaging()
+    .sendMulticast(message)
     .then((response) => {
-      console.log("Notification Sent");
+      if (response.failureCount > 0) {
+        const failedTokens = [];
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            failedTokens.push(tokens[idx]);
+          }
+        });
+        console.log("List of tokens that caused failures: " + failedTokens);
+      } /* else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      } */
     })
     .catch((error) => {
-      console.error("Error:", error.message);
+      return "Internal Server Error: " + error;
     });
 };
 

@@ -105,9 +105,10 @@ const ManageEmergencyFacility = () => {
     const fetchEmergencyFacility = async () => {
       try {
         const data = await request("/emergency-facility/", "GET");
-        console.log("====================================");
+        console.log("===================data=================");
         console.log(data);
         console.log("====================================");
+
         setEmergencyFacility(data);
         setFilteredEmergencyFacility(data);
       } catch (error) {
@@ -150,6 +151,7 @@ const ManageEmergencyFacility = () => {
         try {
           const data = await request(`/emergency-facility/${id}`, "GET");
 
+          console.log("data");
           console.log(data);
 
           if (data.message !== "not found") {
@@ -161,7 +163,7 @@ const ManageEmergencyFacility = () => {
             setContactNumber(data.contactNumber);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setImageUrl(
-              `https://sagip.onrender.com/images/Emergency Facility/${data.image}`
+              `http://localhost:5000/images/Emergency Facility/${data.image}`
             );
           } else {
             navigate(`/manage/emergency-facility`);
