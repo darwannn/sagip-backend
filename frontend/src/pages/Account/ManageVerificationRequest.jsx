@@ -29,6 +29,7 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
+        //https://sagip.onrender.com/
         const data = await request("/auth/verification-request", "GET", {
           Authorization: `Bearer ${token}`,
         });

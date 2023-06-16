@@ -7,7 +7,7 @@ const municipality = "Malolos";
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 const admin = require("firebase-admin");
-const serviceAccount = require("../sagip-5756f-firebase-adminsdk-1r9yo-7cb34db90a.json");
+//const serviceAccount = require("../sagip-5756f-firebase-adminsdk-1r9yo-7cb34db90a.json");
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -18,7 +18,7 @@ const pusher = new Pusher({
 });
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  // credential: admin.credential.cert(serviceAccount),
 });
 
 apiController.get("/signal", async (req, res) => {
