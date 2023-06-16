@@ -41,6 +41,14 @@ const VerificationRequest = () => {
             record.verificationRequestDate
         ); */
 
+        /*   const data = await request("/account/", "GET");
+        const filteredRecords = data.filter(
+          (record) =>
+            record.verificationPicture.length !== 0 &&
+            record.status === "semi-verified" &&
+            record.verificationRequestDate
+        );
+ */
         console.log(data);
 
         setVerificationRequest(data);

@@ -7,7 +7,6 @@ const municipality = "Malolos";
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 const admin = require("firebase-admin");
-//const serviceAccount = require("../sagip-5756f-firebase-adminsdk-1r9yo-7cb34db90a.json");
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -18,9 +17,12 @@ const pusher = new Pusher({
 });
 
 admin.initializeApp({
-  // credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  }),
 });
-
 apiController.get("/signal", async (req, res) => {
   try {
     const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
@@ -116,7 +118,7 @@ apiController.get("/signal", async (req, res) => {
 
 apiController.get("/weather", async (req, res) => {
   sendNotificationAll("title", "body", [
-    "ezYNxqpMR8i8734PUR8vwU:APA91bE4arhbEa4ul5PDK4QXK9qhQwQ7JmLZu7F3SVxj1uNxXoKOq7EsrrGsXvIIihj5bW1ypn9Km7g4-jHV4pRkI19osumo5lOFIKD4SSmXw2IcCd5YaW2iApSBnjhCYYz6Qo-LRcKQ",
+    "erNQJkZgSHCCCp0BcTT3uM:APA91bG6sgaP-k7OmYa4EdKyWviBOyPF4t2aCXYbgImS_ob49p44wDzQ1TwV55OIaghA3rtasEXN2pMX4oi-Ed6rELISulMEKW3kNoK6VfXSMrS9ZlPUwWaYCbffWsLLL3KmZnrQHUVU",
   ]);
   axios
     .get(
