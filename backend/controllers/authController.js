@@ -653,6 +653,44 @@ authController.put(
 );
 
 authController.get(
+  "/verification-request",
+  tokenMiddleware,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      let user = await User.find({});
+
+      user = user.filter(
+        (record) =>
+          record.verificationPicture.length !== 0 &&
+          record.status === "semi-verified" &&
+          record.verificationRequestDate
+      );
+
+      if (user) {
+        return res.status(200).json(user);
+        return res.status(200).json({
+          /* success: true,
+        message: "found", 
+        emergencyFacility,*/
+          ...user,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+authController.get(
   "/verify-identity/request/:id",
   tokenMiddleware,
   upload.single("image"),

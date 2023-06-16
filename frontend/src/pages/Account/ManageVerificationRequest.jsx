@@ -29,17 +29,20 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
-        const data = await request("/account/", "GET");
-        const filteredRecords = data.filter(
+        const data = await request("/auth/verification-request", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
+
+        /*  const filteredRecords = data.filter(
           (record) =>
             record.verificationPicture.length !== 0 &&
             record.status === "semi-verified" &&
             record.verificationRequestDate
-        );
+        ); */
 
-        console.log(filteredRecords);
+        console.log(data);
 
-        setVerificationRequest(filteredRecords);
+        setVerificationRequest(data);
       } catch (error) {
         console.error(error);
       }
