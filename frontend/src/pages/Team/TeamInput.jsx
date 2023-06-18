@@ -24,32 +24,28 @@ const SafetyTipInput = ({ type }) => {
 
   const { token } = useSelector((state) => state.auth);
 
-  const [responders, setResponders] = useState([]);
+  const [responder, setResponder] = useState([]);
 
-  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
 
   const [image, setImage] = useState(null);
   const [imageName, setImageName] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [headId, setHeadId] = useState("");
-  const [membersId, setMembersId] = useState([]);
-
-  const [teamMembersId, setTeamMembersId] = useState([]);
 
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const data = await request("/teams/", "GET");
+        const data = await request("/auth/", "GET");
         console.log(data);
-        /* setResponders(
-          data.filter((account) => teamMembersId.userType === "responder")
+        /*  setResponder(
+          data.filter((account) => account.userType === "responder")
         ); */
-        setResponders(data);
-        console.log(responders);
+        setResponder(data);
+        console.log(responder);
       } catch (error) {
         console.error(error);
       }
@@ -64,7 +60,7 @@ const SafetyTipInput = ({ type }) => {
           };
           const data = await request(`/safety-tips/${id}`, "GET", options);
 
-          setName(data.name);
+          setTitle(data.title);
           setContent(data.content);
           setCategory(data.category);
           setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
@@ -76,13 +72,13 @@ const SafetyTipInput = ({ type }) => {
       };
       fetchSafetyTipDetails();
     }
-  }, [type, setName, setContent, setCategory, token]);
+  }, [type, setTitle, setContent, setCategory, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
-      formData.append("name", name);
+      formData.append("title", title);
       formData.append("content", content);
       formData.append("category", category);
       formData.append("hasChanged", hasChanged);
@@ -145,25 +141,59 @@ const SafetyTipInput = ({ type }) => {
       <Navbar />
       <div>
         <div>
-          <Link to="/manage/team">Go Back</Link>
+          <Link to="/manage/safety-tips">Go Back</Link>
           <h2>{type === "add" ? "Add" : "Update"} Safety Tip</h2>
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div>
-              <label>name: </label>
+              <label>Title: </label>
               <input
                 type="text"
                 placeholder="Title..."
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-
-            {responders.map((responder, index) => {
-              <>
-                <input key={index} type="checkbox" name="responder" />
-                {responder.firstname}
-              </>;
-            })}
+            <div>
+              <label>Description: </label>
+              <ReactQuill
+                value={content}
+                onChange={setContent}
+                readOnly={false}
+                theme="snow"
+              />
+            </div>
+            <div>
+              <label>Content: </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="" hidden>
+                  Select a category
+                </option>
+                {safetyTipsCategory.slice(1).map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="image">
+                Image: <span>Upload here</span>
+              </label>
+              <input id="image" type="file" onChange={onChangeFile} />
+              {image && (
+                <p>
+                  {imageName}{" "}
+                  <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
+                </p>
+              )}
+              {imageUrl && <img src={imageUrl} alt="Selected" />}
+            </div>
+            <div>
+              <button type="submit">Submit</button>
+            </div>
           </form>
         </div>
       </div>

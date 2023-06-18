@@ -103,6 +103,16 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "",
     },
+
+    teamId: {
+      type: mongoose.Types.ObjectId,
+      ref: "Team",
+    },
+
+    isAssigned: {
+      type: String,
+      default: false,
+    },
   },
   {
     timestamps: true,

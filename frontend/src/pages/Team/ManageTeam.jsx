@@ -30,24 +30,37 @@ const ManageTeam = ({ type }) => {
 
   const [name, setName] = useState("");
 
+  const [head, setHead] = useState("");
+  const [teamId, setTeamId] = useState("");
+  const [member, setMember] = useState([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalShown, setisModalShown] = useState(false);
   const [verificationRequestDetails, setVerificationRequestDetails] =
     useState("");
   const [shouldFetchData, setShouldFetchData] = useState(true);
 
-  const [responder, setResponder] = useState([]);
+  const [responders, setResponders] = useState([]);
+  const [unassignedResponders, setUnassignedResponders] = useState([]);
+  const [assignedResponders, setAssignedResponders] = useState([]);
 
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const data = await request("/auth/", "GET");
-        console.log(data);
-        /*  setResponder(
-          data.filter((account) => account.userType === "responder")
-        ); */
-        setResponder(data);
-        console.log(responder);
+        const unassigneddata = await request(
+          "/team/responder/unassigned",
+          "GET"
+        );
+
+        const responderdata = await request("/team/responder", "GET");
+
+        const assigneddata = await request("/team/responder/assigned", "GET");
+        console.log("====================================");
+        console.log(assigneddata);
+        console.log("====================================");
+        setAssignedResponders(assigneddata);
+        setUnassignedResponders(unassigneddata);
+        setResponders(responderdata);
       } catch (error) {
         console.error(error);
       }
@@ -59,6 +72,9 @@ const ManageTeam = ({ type }) => {
         const data = await request("/team/", "GET");
 
         setVerificationRequest(data);
+        console.log("===========tean=========================");
+        console.log(data);
+        console.log("====================================");
       } catch (error) {
         console.error(error);
       }
@@ -87,8 +103,13 @@ const ManageTeam = ({ type }) => {
         const data = await request(`/team/${id}`, "GET", options);
 
         if (data.message !== "not found") {
-          console.log(data);
+          console.log("------aaaaaaaaaaaaaaaaaaaaaaaaaaaaadata");
+          console.log(data.members);
           setVerificationRequestDetails(data);
+          setMember(data.members);
+          setHead(data.head._id);
+          setName(data.name);
+          setTeamId(data._id);
         } else {
           navigate(`/manage/team`);
         }
@@ -182,6 +203,64 @@ const ManageTeam = ({ type }) => {
     }
   };
 
+  const handleSubmitName = async (e) => {
+    e.preventDefault();
+
+    try {
+      const options = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      const data = await request("/team/add", "POST", options, {
+        name,
+      });
+      console.log(data);
+      const { success, message } = data;
+      if (success) {
+        toast.success(message);
+
+        return;
+      } else {
+        if (message !== "input error") {
+          toast.error(message);
+        } else {
+          toast.error(message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleSaveTeam = async (e) => {
+    e.preventDefault();
+
+    try {
+      const options = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      const data = await request(`/team/update/${id}`, "PUT", options, {
+        head,
+        members: member,
+      });
+
+      console.log(data);
+      const { success, message } = data;
+      if (success) {
+        toast.success(message);
+
+        return;
+      } else {
+        if (message !== "input error") {
+          toast.error(message);
+        } else {
+          toast.error(message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const columns = [
     {
       name: "Name",
@@ -192,38 +271,22 @@ const ManageTeam = ({ type }) => {
           .join("")} ${row.lastname}`,
     },
     {
-      name: "Number",
-      selector: (row) => row.contactNumber,
-      sortable: true,
-    },
-    {
       name: "Email",
       selector: (row) => row.email,
       sortable: true,
     },
     {
-      name: "Status",
-      selector: (row) =>
-        row.status.charAt(0).toUpperCase() + row.status.slice(1),
+      name: "Team",
+      selector: (row) => (row.teamId ? row.teamId.name : "Unassigned"),
       sortable: true,
     },
-    {
-      name: "Address",
-      selector: (row) => `${row.street}, ${row.barangay}, ${row.municipality}`,
-      sortable: true,
-    },
-    {
+
+    /*  {
       name: "Actions",
       cell: (row) => (
         <>
           <div>
-            <Link
-              to={
-                user === "resident"
-                  ? `/manage/account/resident/update/${row._id}`
-                  : `/manage/account/staff/update/${row._id}`
-              }
-            >
+            <Link to={`/manage/account/staff/update/${row._id}`}>
               <AiFillEdit />
             </Link>
 
@@ -231,12 +294,12 @@ const ManageTeam = ({ type }) => {
           </div>
         </>
       ),
-    },
+    }, */
   ];
   return (
     <>
       <Navbar />
-      <Link to="/manage/team/add">Create Team</Link>
+      <Link to={"/manage/team/responder"}>Manage Responder</Link>
       <div>
         {filteredVerificationRequest.length > 0 ? (
           <div>
@@ -251,27 +314,117 @@ const ManageTeam = ({ type }) => {
         ) : (
           <h3>No Team</h3>
         )}
+        <form onSubmit={handleSubmitName}>
+          <input
+            type="text"
+            placeholder="team name"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button type="submit">Submit Name</button>
+        </form>
       </div>
       <br></br>
       <br></br>
       {isModalShown &&
         (type === "details" ? (
           <>
-            <Link to="/manage/team/">Go Back</Link>
-
+            <Link to={`/manage/team/update/${id}`}>Go Back</Link>
             <div>
               <AiFillDelete onClick={handleDelete} />
             </div>
             <div>Response{verificationRequestDetails.response}</div>
             <div>{verificationRequestDetails.name}</div>
-            <div>{verificationRequestDetails.head ? "" : "Unassigned"}</div>
+
+            {/*  */}
+
             <div>
-              {verificationRequestDetails.members <= 0 ? "" : "Unassigned"}
+              {/*  {verificationRequestDetails.head ? (
+                verificationRequestDetails.head.firstname
+              ) : ( */}
+              <>
+                <select value={head} onChange={(e) => setHead(e.target.value)}>
+                  {verificationRequestDetails.head ? (
+                    <>
+                      {/*          {setHead(verificationRequestDetails.head.firstname)} */}
+                      <option value={verificationRequestDetails.head._id}>
+                        {verificationRequestDetails.head.firstname}
+                      </option>
+                    </>
+                  ) : (
+                    <option value="" hidden>
+                      Select a head
+                    </option>
+                  )}
+                  {unassignedResponders.map((responder, index) => (
+                    <option key={index} value={responder._id}>
+                      {`${responder.firstname} ${responder.lastname}`}
+                    </option>
+                  ))}
+                </select>
+              </>
+              {/*    )} */}
+            </div>
+            <div>
+              <span>Select members</span>
+
+              {verificationRequestDetails.members &&
+                verificationRequestDetails.members.map((responder) => (
+                  <label key={responder._id}>
+                    <input
+                      type="checkbox"
+                      value={responder._id}
+                      checked="true"
+                      onChange={(e) => {
+                        const selectedMember = e.target.value;
+                        const isChecked = e.target.checked;
+
+                        if (isChecked) {
+                          setMember((prevMembers) => [
+                            ...prevMembers,
+                            selectedMember,
+                          ]);
+                        } else {
+                          setMember((prevMembers) =>
+                            prevMembers.filter((m) => m !== selectedMember)
+                          );
+                        }
+                      }}
+                    />
+                    {`${responder.firstname} ${responder.lastname}`}
+                  </label>
+                ))}
+
+              {unassignedResponders
+                .filter((responder) => responder._id !== head)
+                .map((responder) => (
+                  <label key={responder._id}>
+                    <input
+                      type="checkbox"
+                      value={responder._id}
+                      onChange={(e) => {
+                        const selectedMember = e.target.value;
+                        const isChecked = e.target.checked;
+
+                        if (isChecked) {
+                          setMember((prevMembers) => [
+                            ...prevMembers,
+                            selectedMember,
+                          ]);
+                        } else {
+                          setMember((prevMembers) =>
+                            prevMembers.filter((m) => m !== selectedMember)
+                          );
+                        }
+                      }}
+                    />
+                    {`${responder.firstname} ${responder.lastname}`}
+                  </label>
+                ))}
             </div>
 
-            <button onClick={handleReject}>Reject Verification</button>
+            {/*  */}
+            <button onClick={handleSaveTeam}>Save</button>
             <br></br>
-            <button onClick={handleVerify}>Verify</button>
             <div>responder list</div>
           </>
         ) : (
@@ -287,7 +440,7 @@ const ManageTeam = ({ type }) => {
             <div></div>
             <DataTable
               columns={columns}
-              data={responder}
+              data={responders}
               pagination
               paginationPerPage={10}
               paginationRowsPerPageOptions={[10, 20, 30]}

@@ -53,6 +53,7 @@ import ManageWellnessSurvey from "./pages/WellnessSurvey/ManageWellnessSurvey";
 import WellnessSurveyInput from "./pages/WellnessSurvey/WellnessSurveyInput";
 
 import Hazard from "./pages/HazardReport/Hazard";
+import HazardReportReport from "./pages/HazardReport/HazardReportReport";
 import HazardReport from "./pages/HazardReport/HazardReport";
 /* import HazardReportDetails from "./pages/HazardReport/HazardReportDetails"; */
 import ManageHazardReport from "./pages/HazardReport/ManageHazardReport";
@@ -77,6 +78,8 @@ const App = () => {
     if (token) {
       const decodedToken = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
+
+      console.log(decodedToken);
 
       if (decodedToken.exp < currentTime) {
         console.log("expired");
@@ -242,6 +245,10 @@ const App = () => {
         {/*    <Route path="/hazard/map" element={<HazardReportDetails />} />
         <Route path="/hazard/map/:id" element={<HazardReportDetails />} /> */}
         <Route path="/manage/hazard-report" element={<ManageHazardReport />} />
+        <Route
+          path="/manage/hazard-report/report"
+          element={<HazardReportReport />}
+        />
         <Route
           path="/manage/hazard-report/:id"
           element={<ManageHazardReport />}
