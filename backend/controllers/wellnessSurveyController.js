@@ -101,12 +101,12 @@ wellnessSurveyController.get("/active", tokenMiddleware, async (req, res) => {
       } else {
         return res
           .status(200)
-          .json({ success: true, message: "success", ...safetyTips._doc });
+          .json({ success: true, message: "success", ...wellnessSurvey._doc });
       }
     } else {
       return res
         .status(200)
-        .json({ success: true, message: "success", ...safetyTips._doc });
+        .json({ success: true, message: "success", ...wellnessSurvey._doc });
     }
   } catch (error) {
     return res.status(500).json({

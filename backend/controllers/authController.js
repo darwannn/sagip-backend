@@ -383,15 +383,16 @@ authController.post("/login", async (req, res) => {
   try {
     const error = {};
     const { identifier, password } = req.body;
-
-    if (isEmpty(identifier)) error["identifier"] = "Required field";
-    if (isEmpty(password)) error["password"] = "Required field";
-
-    let user = await checkIdentifier(identifier);
-
-    if (!user) {
-      error["identifier"] = "Account does not exist";
+    let user;
+    if (isEmpty(identifier)) {
+      error["identifier"] = "Required field";
+    } else {
+      user = await checkIdentifier(identifier);
+      if (!user) {
+        error["identifier"] = "Account does not exist";
+      }
     }
+    if (isEmpty(password)) error["password"] = "Required field";
 
     if (Object.keys(error).length == 0) {
       if (user.attempt >= 100) {
@@ -708,11 +709,14 @@ authController.get(
   upload.single("image"),
   async (req, res) => {
     try {
+      /*       console.log("====================================");
+      console.log(req.params.id);
+      console.log("===================================="); */
       const user = await User.findById(req.params.id);
       if (user.verificationRequestDate === undefined) {
         if (
-          (user.verificationRequestDate === undefined &&
-            user.verificationPicture.length <= 0) ||
+          /* (user.verificationRequestDate === undefined &&
+            user.verificationPicture.length <= 0) || */
           user.status === "verified" ||
           user.userType !== "resident"
         ) {

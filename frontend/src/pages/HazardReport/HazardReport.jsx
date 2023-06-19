@@ -88,9 +88,9 @@ const HazardReport = ({ type = "add" }) => {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
-  const [image, setImage] = useState(null);
-  const [imageName, setImageName] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [proof, setProof] = useState(null);
+  const [proofName, setProofName] = useState("");
+  const [proofUrl, setProofUrl] = useState("");
 
   const [hasChanged, setHasChanged] = useState(false);
 
@@ -105,7 +105,7 @@ const HazardReport = ({ type = "add" }) => {
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
+          setProofUrl(`http://localhost:5000/images/Safety Tip/${data.proof}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -132,7 +132,7 @@ const HazardReport = ({ type = "add" }) => {
       formData.append("longitude", longitude);
       formData.append("category", category);
       formData.append("hasChanged", hasChanged);
-      formData.append("proof", image);
+      formData.append("proof", proof);
       formData.append("street", street);
       formData.append("municipality", municipality);
 
@@ -178,21 +178,21 @@ const HazardReport = ({ type = "add" }) => {
   };
 
   const onChangeFile = (e) => {
-    setImage(e.target.files[0]);
-    setImageName(e.target.files[0].name);
+    setProof(e.target.files[0]);
+    setProofName(e.target.files[0].name);
     setHasChanged(true);
     const reader = new FileReader();
     reader.onload = () => {
-      setImageUrl(reader.result);
+      setProofUrl(reader.result);
     };
     reader.readAsDataURL(e.target.files[0]);
   };
 
   const handleCloseImage = () => {
-    setImage(null);
+    setProof(null);
     hasChanged(false);
-    setImageName("");
-    setImageUrl("");
+    setProofName("");
+    setProofUrl("");
   };
 
   if (!isLoaded) {
@@ -370,13 +370,8 @@ const HazardReport = ({ type = "add" }) => {
                 capture="camera"
                 onChange={onChangeFile}
               />
-              {image && (
-                <p>
-                  {imageName}{" "}
-                  <AiOutlineCloseCircle onClick={() => handleCloseImage()} />
-                </p>
-              )}
-              {imageUrl && <img src={imageUrl} alt="Selected" />}
+
+              {proofUrl && <img src={proofUrl} alt="Selected" />}
             </div>
             <div>
               <button type="submit">Submit</button>
