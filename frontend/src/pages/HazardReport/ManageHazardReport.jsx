@@ -166,7 +166,7 @@ const ManageEmergencyFacility = () => {
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setProof(
-              `http://localhost:5000/images/Emergency Facility/${data.proof}`
+              `https://sagip.onrender.com/images/Emergency Facility/${data.proof}`
             );
           } else {
             navigate(`/manage/hazard-report`);
