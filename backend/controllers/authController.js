@@ -18,14 +18,15 @@ const {
 
   generateCode,
   generateToken,
+  updateVerificationCode,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
 const { sendSMS, apiController } = require("./apiController");
 
-const currentDate = new Date();
-const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
+/* const currentDate = new Date(); */
+const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/User");
@@ -227,70 +228,90 @@ authController.post(
       if (Object.keys(error).length == 0) {
         const user = await User.findById(userId);
         if (user) {
-          if (code == user.verificationCode) {
-            // Code matches, update user status to 'semi-verified'
-
-            if (user.status == "unverified") {
-              user.status = "semi-verified";
+          const currentTimestamp = Date.now();
+          if (currentTimestamp > user.codeExpiration) {
+            const user = await updateVerificationCode(req.user.id);
+            if (user) {
+              return res.status(200).json({
+                success: false,
+                message:
+                  "Verification code has expired. A new verification code has been sent",
+              });
+            } else {
+              return res.status(200).json({
+                success: false,
+                message: "Verification code has expired.",
+              });
             }
-            user.attempt = 0;
-            user.verificationCode = 0;
-            await user.save();
-            console.log("====================================");
-            console.log("login");
-            console.log("====================================");
-            if (type === "register")
-              return res.status(200).json({
-                success: true,
-                message: "Verified successfully. You can now use your account!",
-                user: {
-                  for: "login",
-                  id: user._doc._id,
-                  userType: user._doc.userType,
-                  status: user._doc.status,
-                  email: user._doc.email,
-                },
-                token: generateToken(user._id),
-              });
-
-            if (type === "forgot-password")
-              return res.status(200).json({
-                success: true,
-                message: "Enter your new password",
-                user: {
-                  for: "new-password",
-                  id: user._doc._id,
-                  userType: user._doc.userType,
-                  status: user._doc.status,
-                },
-                token: generateToken(user._id),
-              });
-            if (type === "login")
-              return res.status(200).json({
-                success: true,
-                message: "Verified successfully. You can now use your account!",
-                user: {
-                  for: "login",
-                  id: user._doc._id,
-                  userType: user._doc.userType,
-                  status: user._doc.status,
-                },
-                token: generateToken(user._id),
-              });
-            if (type === "contact")
-              return res.status(200).json({
-                success: true,
-                message: "Contact number has been updated successfully",
-              });
           } else {
-            error["code"] = "Incorrect verification code";
-            user.attempt += 1;
-            await user.save();
+            console.log("====================================");
+            console.log(code);
+            console.log(user.verificationCode);
+            console.log("====================================");
+            if (parseInt(code) === user.verificationCode) {
+              if (user.codeExpiration)
+                if (user.status == "unverified") {
+                  user.status = "semi-verified";
+                }
+              user.attempt = 0;
+              user.verificationCode = 0;
+              await user.save();
+
+              if (type === "register")
+                return res.status(200).json({
+                  success: true,
+                  message:
+                    "Verified successfully. You can now use your account!",
+                  user: {
+                    for: "login",
+                    id: user._doc._id,
+                    userType: user._doc.userType,
+                    status: user._doc.status,
+                    email: user._doc.email,
+                  },
+                  token: generateToken(user._id),
+                });
+
+              if (type === "forgot-password")
+                return res.status(200).json({
+                  success: true,
+                  message: "Enter your new password",
+                  user: {
+                    for: "new-password",
+                    id: user._doc._id,
+                    userType: user._doc.userType,
+                    status: user._doc.status,
+                  },
+                  token: generateToken(user._id),
+                });
+              if (type === "login")
+                return res.status(200).json({
+                  success: true,
+                  message:
+                    "Verified successfully. You can now use your account!",
+                  user: {
+                    for: "login",
+                    id: user._doc._id,
+                    userType: user._doc.userType,
+                    status: user._doc.status,
+                  },
+                  token: generateToken(user._id),
+                });
+              if (type === "contact")
+                return res.status(200).json({
+                  success: true,
+                  message: "Contact number has been updated successfully",
+                });
+            } else {
+              error["code"] = "Incorrect verification code";
+              user.attempt += 1;
+              await user.save();
+            }
           }
         } else {
           /* return res.status(500).json({
               success: false,
-              message: "User Not Found",
+              message: "not found",
             });
        */
           return res.status(500).json({
@@ -566,15 +587,13 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
   }
 });
 
+//general resend
 authController.put("/resend-code", tokenMiddleware, async (req, res) => {
   try {
-    const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
-    let generatedCode = await generateCode();
-
-    const user = await User.findByIdAndUpdate(req.user.id, {
-      verificationCode: generatedCode,
-      codeExpiration: codeExpiration,
-    });
+    console.log("====================================");
+    console.log("resend");
+    console.log("====================================");
+    const user = await updateVerificationCode(req.user.id);
 
     if (user) {
       //console.log("Current COde: " + generatedCode);
@@ -582,13 +601,6 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "Verification code has been resent",
-        /* user: {
-          for: "forgot-password",
-          id: user._doc._id,
-          userType: user._doc.userType,
-          status: user._doc.status,
-        },
-        token: generateToken(user._id), */
       });
     } else {
       return res.status(500).json({

@@ -12,80 +12,84 @@ const ContactVerification = ({ type }) => {
   const { token, newContactNumber } = useSelector((state) => state.auth);
   const [code, setCode] = useState("");
 
-  const handleSubmit = async (e, action) => {
-    console.log("====================================");
-    console.log(newContactNumber);
-    console.log("====================================");
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("====================================");
-    console.log(type);
-    console.log("====================================");
+
     try {
-      /*    const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      }; */
-
-      let method,
-        url = "";
-
-      if (action === "send" || type === "contact") {
-        url = "/auth/contact-verification";
-        method = "POST";
-      } else if (action === "resend") {
-        url = "/auth/resend-code";
-        method = "PUT";
-      }
-
       const data = await request(
-        url,
-        method,
+        "/auth/contact-verification",
+        "POST",
         { Authorization: `Bearer ${token}` },
         { code, type }
+      );
+
+      const { success, message } = data;
+      console.log("====================================");
+      console.log(data);
+      console.log("====================================");
+      if (success) {
+        if (type === "register") {
+          navigate("/");
+          dispatch(contactVerification(data));
+          window.AndroidInterface?.updateFcmToken(data.user.email);
+          toast.success(message);
+        } else if (type === "forgot-password") {
+          navigate("/new-password");
+          dispatch(contactVerification(data));
+          toast.success(message);
+        } else if (type === "login") {
+          navigate("/login");
+          dispatch(contactVerification(data));
+          toast.success(message);
+        } else if (type === "contact") {
+          console.log("====================================");
+          console.log("new contact?");
+          console.log("====================================");
+          const data = await request(
+            `/account/update/contact-number`,
+            "PUT",
+            { Authorization: `Bearer ${token}` },
+            { contactNumber: newContactNumber }
+          );
+          const { success, message } = data;
+          console.log(data);
+
+          if (success) {
+            toast.success(message);
+
+            return;
+          } else {
+            if (message != "input error") {
+              toast.success(message);
+            } else {
+            }
+          }
+        }
+      } else {
+        if (message !== "input error") {
+          toast.error(message);
+        } else {
+          toast.error(message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleResend = async () => {
+    try {
+      const data = await request(
+        "/auth/resend-code",
+        "PUT",
+        { Authorization: `Bearer ${token}` } /* ,
+        { code, type } */
       );
       console.log(data);
 
       const { success, message } = data;
       console.log(data);
       if (success) {
-        if (message.includes("resent")) {
-          toast.success(message);
-        } else {
-          if (type === "register") {
-            navigate("/");
-            dispatch(contactVerification(data));
-            window.AndroidInterface?.updateFcmToken(data.user.email);
-            toast.success(message);
-          } else if (type === "forgot-password") {
-            navigate("/new-password");
-            dispatch(contactVerification(data));
-            toast.success(message);
-          } else if (type === "login") {
-            navigate("/login");
-            dispatch(contactVerification(data));
-            toast.success(message);
-          } else if (type === "contact") {
-            const data = await request(
-              `/account/update/contact-number`,
-              "PUT",
-              { Authorization: `Bearer ${token}` },
-              { contactNumber: newContactNumber }
-            );
-            const { success, message } = data;
-            console.log(data);
-
-            if (success) {
-              toast.success(message);
-
-              return;
-            } else {
-              if (message != "input error") {
-                toast.success(message);
-              } else {
-              }
-            }
-          }
-        }
+        toast.success(message);
       } else {
         if (message !== "input error") {
           toast.error(message);
@@ -101,7 +105,7 @@ const ContactVerification = ({ type }) => {
   return (
     <>
       <h2>Contact Verification</h2>
-      <form onSubmit={(e) => handleSubmit(e, "send")}>
+      <form onSubmit={handleSubmit}>
         <input
           type="number"
           placeholder=""
@@ -109,7 +113,7 @@ const ContactVerification = ({ type }) => {
         />
         <button type="submit">Contact Verification</button>
       </form>
-      <button onClick={(e) => handleSubmit(e, "resend")}>Resend Code</button>
+      <button onClick={handleResend}>Resend Code</button>
     </>
   );
 };

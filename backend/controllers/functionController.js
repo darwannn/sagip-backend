@@ -3,6 +3,9 @@ const Notification = require("../models/Notification");
 
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+/* const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); */ // 1 day expiration
+const codeExpiration = new Date(new Date().getTime() + 30 * 60000); //will expire after 30 minutes
+/* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
 
 const isEmpty = (value) => {
   if (value == "") {
@@ -152,6 +155,7 @@ const createEmptyNotification = async (id) => {
 
   return notification;
 };
+
 const updateNotification = async () => {
   const notification = await Notification.create({
     userId: user._doc._id,
@@ -166,6 +170,15 @@ const readNotification = async (id) => {
     { $set: { "notifications.$[].isRead": true } }
   );
   return notification;
+};
+const updateVerificationCode = async (id) => {
+  let generatedCode = await generateCode();
+
+  const user = await User.findByIdAndUpdate(id, {
+    verificationCode: generatedCode,
+    codeExpiration: codeExpiration,
+  });
+  return user;
 };
 
 module.exports = {
@@ -187,4 +200,5 @@ module.exports = {
   verifyPassword,
   generateCode,
   generateToken,
+  updateVerificationCode,
 };

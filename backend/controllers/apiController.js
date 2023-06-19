@@ -150,17 +150,20 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
 
 apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   const error = {};
-  const { alertTitle, alertMessage, location } = req.body;
+  let { alertTitle, alertMessage, location } = req.body;
 
   if (isEmpty(alertTitle)) error["alertTitle"] = "Required field";
   if (isEmpty(alertMessage)) error["alertMessage"] = "Required field";
-  if (isEmpty(location)) error["location"] = "Required field";
+  if (location.length === 0) error["location"] = "Required field";
 
+  console.log("====================================");
+  console.log(location);
+  console.log("====================================");
   if (Object.keys(error).length == 0) {
     let contactNumbers = [];
     let fcmTokens = [];
 
-    if (location == "all") {
+    if (location.includes("All")) {
       contactNumbers = await getAllContactNumbersInMunicipality("Malolos");
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
@@ -168,6 +171,7 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
           message: "Internal Server Error: " + contactNumbers,
         });
       }
+      console.log(contactNumbers);
       fcmTokens = await getAllFcmTokensInMunicipality("Malolos");
       if (!Array.isArray(fcmTokens)) {
         return res.status(500).json({
@@ -180,6 +184,9 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
         "Malolos",
         location
       );
+
+      console.log(contactNumbers);
+
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
@@ -195,13 +202,12 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       }
     }
 
-    console.log(contactNumbers);
+    /*    console.log(contactNumbers);
     console.log(fcmTokens);
 
-    sendNotificationAll(alertTitle, alertMessage, fcmTokens);
+    sendNotificationAll(alertTitle, alertMessage, fcmTokens); */
 
     try {
-      /*  const smsResponse = await sendSMS("alertMessage", "09395372592"); */
       const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
       console.log(smsResponse);
 
@@ -294,9 +300,8 @@ const getAllContactNumbersInMunicipality = async (municipality) => {
 
 const getAllContactNumbersInBarangays = async (municipality, location) => {
   try {
-    const barangays = location.split(","); // Split the location string into an array of barangays
     const users = await User.find({
-      barangay: { $in: barangays },
+      barangay: { $in: location },
       municipality,
     });
     const contactNumbers = users.map((user) => user.contactNumber);
@@ -318,9 +323,8 @@ const getAllFcmTokensInMunicipality = async (municipality) => {
 
 const getAllFcmTokensInBarangays = async (municipality, location) => {
   try {
-    const barangays = location.split(","); // Split the location string into an array of barangays
     const users = await User.find({
-      barangay: { $in: barangays },
+      barangay: { $in: location },
       municipality,
     });
     const fcmTokens = users.map((user) => user.fcmToken);

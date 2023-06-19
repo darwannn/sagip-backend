@@ -47,7 +47,13 @@ const ManageTeam = ({ type }) => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const unassigneddata = await request(
+        const data = await request("/team/responder", "GET");
+        console.log("res");
+        console.log(data);
+        setAssignedResponders(data.assignedResponders);
+        setUnassignedResponders(data.unassignedResponders);
+        setResponders(data.responders);
+        /*  const unassigneddata = await request(
           "/team/responder/unassigned",
           "GET"
         );
@@ -60,7 +66,7 @@ const ManageTeam = ({ type }) => {
         console.log("====================================");
         setAssignedResponders(assigneddata);
         setUnassignedResponders(unassigneddata);
-        setResponders(responderdata);
+        setResponders(responderdata); */
       } catch (error) {
         console.error(error);
       }
@@ -103,13 +109,19 @@ const ManageTeam = ({ type }) => {
         const data = await request(`/team/${id}`, "GET", options);
 
         if (data.message !== "not found") {
-          console.log("------aaaaaaaaaaaaaaaaaaaaaaaaaaaaadata");
-          console.log(data.members);
           setVerificationRequestDetails(data);
           setMember(data.members);
-          setHead(data.head._id);
+          setHead(data.head);
           setName(data.name);
-          setTeamId(data._id);
+
+          // Create a new array with the current head and members
+          const updatedUnassignedResponders = [...data.members, data.head];
+
+          // Add the new array to the existing unassignedResponders array
+          setUnassignedResponders((prevUnassignedResponders) => [
+            ...prevUnassignedResponders,
+            ...updatedUnassignedResponders,
+          ]);
         } else {
           navigate(`/manage/team`);
         }
@@ -130,27 +142,23 @@ const ManageTeam = ({ type }) => {
     }
   }, [id, token, isModalShown]);
 
-  const handleReject = async (e) => {
+  const handleUpdateIndividual = async (e, userId, prevTeamId) => {
     e.preventDefault();
-
+    let newTeamId = e.target.value;
     try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
       const data = await request(
-        `/auth/verification-request/${id}`,
+        `/team/update/assignment/`,
         "PUT",
-        options,
-        { action: "reject" }
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        { newTeamId, userId, prevTeamId }
       );
       const { success, message } = data;
       console.log(data);
 
       if (success) {
         toast.success(message);
-
-        return;
       } else {
         toast.success(message);
       }
@@ -158,34 +166,7 @@ const ManageTeam = ({ type }) => {
       console.error(error);
     }
   };
-  const handleVerify = async (e) => {
-    e.preventDefault();
 
-    try {
-      const options = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-      const data = await request(
-        `/auth/verification-request/${id}`,
-        "PUT",
-        options,
-        { action: "approve" }
-      );
-      const { success, message } = data;
-      console.log(data);
-
-      if (success) {
-        toast.success(message);
-
-        return;
-      } else {
-        toast.success(message);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
   const handleDelete = async () => {
     try {
       const options = { Authorization: `Bearer ${token}` };
@@ -201,6 +182,19 @@ const ManageTeam = ({ type }) => {
     } catch (error) {
       console.error(error);
     }
+  };
+  const handleHeadChange = (e) => {
+    const selectedHead = e.target.value;
+
+    setHead(selectedHead);
+
+    // Include the current head in the member list
+    /*   if (
+      verificationRequestDetails.head &&
+      !member.includes(verificationRequestDetails.head._id)
+    ) {
+      setMember([...member, verificationRequestDetails.head._id]);
+    } */
   };
 
   const handleSubmitName = async (e) => {
@@ -277,7 +271,48 @@ const ManageTeam = ({ type }) => {
     },
     {
       name: "Team",
-      selector: (row) => (row.teamId ? row.teamId.name : "Unassigned"),
+      selector: (row) =>
+        row.teamName ? (
+          //value = newteam
+          //row.id == userId
+          //prev team name
+          <select
+            onChange={(e) => handleUpdateIndividual(e, row._id, row.teamId)}
+          >
+            <option value="unassigned">Unassigned</option>
+            {verificationRequest &&
+              verificationRequest.map(
+                (team, index) =>
+                  team && (
+                    <option
+                      key={index}
+                      value={team._id}
+                      selected={row.teamName === team.name}
+                    >
+                      {team.name}
+                    </option>
+                  )
+              )}
+          </select>
+        ) : (
+          <>
+            <select onChange={(e) => handleUpdateIndividual(e, row._id, "")}>
+              <option value="" hidden>
+                Select a team
+              </option>
+
+              {verificationRequest &&
+                verificationRequest.map(
+                  (team, index) =>
+                    team && (
+                      <option key={index} value={team._id}>
+                        {`${team.name}`}
+                      </option>
+                    )
+                )}
+            </select>
+          </>
+        ),
       sortable: true,
     },
 
@@ -338,89 +373,70 @@ const ManageTeam = ({ type }) => {
             {/*  */}
 
             <div>
-              {/*  {verificationRequestDetails.head ? (
-                verificationRequestDetails.head.firstname
-              ) : ( */}
-              <>
-                <select value={head} onChange={(e) => setHead(e.target.value)}>
-                  {verificationRequestDetails.head ? (
-                    <>
-                      {/*          {setHead(verificationRequestDetails.head.firstname)} */}
-                      <option value={verificationRequestDetails.head._id}>
-                        {verificationRequestDetails.head.firstname}
-                      </option>
-                    </>
-                  ) : (
-                    <option value="" hidden>
-                      Select a head
+              <span>Select head</span>
+              <select value={head} onChange={handleHeadChange}>
+                {verificationRequestDetails.head ? (
+                  <>
+                    {}
+                    <option value={verificationRequestDetails.head._id}>
+                      {verificationRequestDetails.head.firstname}
                     </option>
+                  </>
+                ) : (
+                  <option value="" hidden>
+                    Select a head
+                  </option>
+                )}
+
+                {unassignedResponders &&
+                  unassignedResponders.map(
+                    (responder, index) =>
+                      responder && (
+                        <option key={index} value={responder._id}>
+                          {`${responder.firstname} ${responder.lastname}`}
+                        </option>
+                      )
                   )}
-                  {unassignedResponders.map((responder, index) => (
-                    <option key={index} value={responder._id}>
-                      {`${responder.firstname} ${responder.lastname}`}
-                    </option>
-                  ))}
-                </select>
-              </>
-              {/*    )} */}
+              </select>
             </div>
-            <div>
+            {/*  <div>
               <span>Select members</span>
 
-              {verificationRequestDetails.members &&
-                verificationRequestDetails.members.map((responder) => (
-                  <label key={responder._id}>
-                    <input
-                      type="checkbox"
-                      value={responder._id}
-                      checked="true"
-                      onChange={(e) => {
-                        const selectedMember = e.target.value;
-                        const isChecked = e.target.checked;
-
-                        if (isChecked) {
-                          setMember((prevMembers) => [
-                            ...prevMembers,
-                            selectedMember,
-                          ]);
-                        } else {
-                          setMember((prevMembers) =>
-                            prevMembers.filter((m) => m !== selectedMember)
-                          );
-                        }
-                      }}
-                    />
-                    {`${responder.firstname} ${responder.lastname}`}
-                  </label>
-                ))}
-
+              {console.log("as")}
+              {console.log(unassignedResponders)}
               {unassignedResponders
                 .filter((responder) => responder._id !== head)
-                .map((responder) => (
-                  <label key={responder._id}>
-                    <input
-                      type="checkbox"
-                      value={responder._id}
-                      onChange={(e) => {
-                        const selectedMember = e.target.value;
-                        const isChecked = e.target.checked;
+                .map(
+                  (responder) =>
+                    responder && (
+                      <label key={responder._id}>
+                        <input
+                          type="checkbox"
+                          value={responder._id}
+                          checked={member.some((m) =>
+                            m._id.includes(responder._id)
+                          )}
+                          onChange={(e) => {
+                            const selectedMember = e.target.value;
+                            const isChecked = e.target.checked;
 
-                        if (isChecked) {
-                          setMember((prevMembers) => [
-                            ...prevMembers,
-                            selectedMember,
-                          ]);
-                        } else {
-                          setMember((prevMembers) =>
-                            prevMembers.filter((m) => m !== selectedMember)
-                          );
-                        }
-                      }}
-                    />
-                    {`${responder.firstname} ${responder.lastname}`}
-                  </label>
-                ))}
-            </div>
+                            if (isChecked) {
+                              setMember((prevMembers) => [
+                                ...prevMembers,
+                                selectedMember,
+                              ]);
+                            } else {
+                              setMember((prevMembers) =>
+                                prevMembers.filter((m) => m !== selectedMember)
+                              );
+                            }
+                          }}
+                        />
+                        {`${responder.firstname} ${responder._id}`}
+                      </label>
+                    )
+                )}
+            </div> */}
 
             {/*  */}
             <button onClick={handleSaveTeam}>Save</button>

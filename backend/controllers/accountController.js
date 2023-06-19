@@ -15,6 +15,7 @@ const {
   isEmail,
   isContactNumber,
   generateCode,
+  updateVerificationCode,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -253,6 +254,41 @@ accountController.put(
   tokenMiddleware,
   async (req, res) => {
     try {
+      let { contactNumber } = req.body;
+
+      const updateFields = {
+        contactNumber,
+      };
+
+      const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
+        new: true,
+      });
+
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          message: "Contact Number Updated Successfully",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+/* 
+accountController.put(
+  "/update/contact-number",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
       const error = {};
       let { contactNumber } = req.body;
 
@@ -285,6 +321,63 @@ accountController.put(
           return res.status(200).json({
             success: true,
             message: "Contact Number Updated Successfully",
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length != 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+); */
+
+accountController.put(
+  "/update/contact-number/contact-verification",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const error = {};
+      let { contactNumber } = req.body;
+
+      if (isEmpty(contactNumber)) {
+        error["contact"] = "Required field";
+      } else {
+        if (isContactNumber(contactNumber)) {
+          error["contact"] = "Invalid contact number";
+        } else {
+          if (await isContactNumberExists(contactNumber)) {
+            if (await isContactNumberOwner(req.user.id, contactNumber)) {
+              error["contact"] = "Input a new contact numebr";
+            } else {
+              error["contact"] = "Contact number already taken";
+            }
+          }
+        }
+      }
+
+      if (Object.keys(error).length == 0) {
+        const user = await updateVerificationCode(req.user.id);
+
+        if (user) {
+          //console.log("Current COde: " + generatedCode);
+
+          return res.status(200).json({
+            success: true,
+            message: "Verification code has been resent",
           });
         } else {
           return res.status(500).json({
@@ -483,7 +576,7 @@ accountController.put(
           return res.status(200).json({
             success: true,
             message: "Profile Updated Successfully",
-            safetyTip,
+            user,
           });
         } else {
           return res.status(500).json({
