@@ -371,6 +371,9 @@ const HazardReport = ({ type = "add" }) => {
               </select>
             </div>
             <div>
+              <div>
+                <button type="submit">Submit</button>
+              </div>
               <label htmlFor="image">
                 Image: <span>Upload Photo</span>
               </label>
@@ -395,10 +398,13 @@ const HazardReport = ({ type = "add" }) => {
               />
               {/* {videoUrl && <video src={videoUrl} controls />} */}
               {proofUrl && <img src={proofUrl} />}
+              {proofUrl && (
+                <div>
+                  {proofUrl}
+                  {/*    {proofUrl.includes("data:image")} */}
+                </div>
+              )}
               {proofUrl && <video src={proofUrl} controls />}
-            </div>
-            <div>
-              <button type="submit">Submit</button>
             </div>
           </form>
         </div>

@@ -3,7 +3,7 @@
 const isInMalolos = async (req, res, next) => {
   try {
     const { municipality } = req.body;
-    console.log("====================================");
+    console.log("=============sdsd=======================");
     console.log(municipality);
     console.log("====================================");
     if (municipality !== "Malolos") {

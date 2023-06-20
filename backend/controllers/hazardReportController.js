@@ -2,7 +2,13 @@ const hazardReportController = require("express").Router();
 const HazardReport = require("../models/HazardReport");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const isInMalolos = require("../middlewares/isInMalolos");
-const { isEmpty, isImage, isLessThanSize } = require("./functionController");
+const {
+  isEmpty,
+  isImage,
+  isValidExtensions,
+  isVideo,
+  isLessThanSize,
+} = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
 const upload = uploadMiddleware("public/images/Hazard Report");
@@ -12,8 +18,9 @@ const fs = require("fs");
 hazardReportController.post(
   "/add",
   tokenMiddleware,
-  isInMalolos,
+
   upload.single("proof"),
+  isInMalolos,
   async (req, res) => {
     const error = {};
     try {
@@ -25,7 +32,7 @@ hazardReportController.post(
         status,
         street,
         municipality,
-      } = municipality;
+      } = req.body;
 
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
@@ -35,11 +42,18 @@ hazardReportController.post(
       if (!req.file) {
         error["proof"] = "Required field";
       } else {
-        if (isImage(req.file)) {
+        if (isValidExtensions(req.file, [".png", ".jpeg", ".jpg", ".mp4"])) {
           error["proof"] = "Only PNG, JPEG, and JPG files are allowed";
         } else {
-          if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-            error["proof"] = "File size should be less than 10MB";
+          if (!isValidExtensions(req.file, [".png", ".jpeg", ".jpg"])) {
+            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+              error["proof"] = "File size should be less than 10MB";
+            }
+          }
+          if (!isValidExtensions(req.file, [".mp4"])) {
+            if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
+              error["proof"] = "File size should be less than 50MB";
+            }
           }
         }
       }

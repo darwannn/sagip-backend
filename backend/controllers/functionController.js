@@ -22,6 +22,24 @@ const isImage = (file) => {
     return true;
   }
 };
+const isValidExtensions = (file, extensions) => {
+  /*   const allowedExtensions = [".mp4"]; */
+  const extname = path.extname(file.originalname).toLowerCase();
+  console.log("ssss");
+  console.log("s" + extname);
+  if (!extensions.includes(extname)) {
+    return true;
+  }
+};
+const isVideo = (file) => {
+  const allowedExtensions = [".mp4"];
+  const extname = path.extname(file.originalname).toLowerCase();
+  console.log("ssss");
+  console.log("s" + extname);
+  if (!allowedExtensions.includes(extname)) {
+    return true;
+  }
+};
 const isLessThanSize = (file, maxSize) => {
   if (file.size > maxSize) {
     return true;
@@ -201,4 +219,6 @@ module.exports = {
   generateCode,
   generateToken,
   updateVerificationCode,
+  isVideo,
+  isValidExtensions,
 };
