@@ -166,6 +166,10 @@ function Home() {
     <>
       <Navbar />
       <div>
+        {user && user._id}
+        {/*   {user&& user.firstname} */}
+      </div>
+      <div>
         Malolos Signal Number:
         <br />
         {signal && <div>{signal}</div>}
