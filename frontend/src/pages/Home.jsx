@@ -166,7 +166,7 @@ function Home() {
     <>
       <Navbar />
       <div>
-        {user && user._id}
+        User: {user && user.id}
         {/*   {user&& user.firstname} */}
       </div>
       <div>
