@@ -393,8 +393,9 @@ const HazardReport = ({ type = "add" }) => {
                 capture="user"
                 onChange={onChangeVideo}
               />
-              {videoUrl && <video src={videoUrl} controls />}
+              {/* {videoUrl && <video src={videoUrl} controls />} */}
               {proofUrl && <img src={proofUrl} />}
+              {proofUrl && <video src={proofUrl} controls />}
             </div>
             <div>
               <button type="submit">Submit</button>
