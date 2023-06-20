@@ -28,6 +28,7 @@ mongoose.connect(process.env.MONGO_URL, () =>
 app.use(express.static("public"));
 
 app.use(cors());
+app.use("/images", cors(), express.static("public/images"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -42,25 +43,7 @@ app.use("/notification", notificationController);
 app.use("/wellness-survey", wellnessSurveyController);
 
 app.use(bodyParser.json());
-// multer
-/* const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, req.body.filename);
-  },
-});
 
-const upload = multer({
-  storage: storage,
-}); */
-
-/* app.post("/upload", upload.single("image"), async (req, res) => {
-  return res.status(200).json({ msg: "Successfully uploaded" });
-}); */
-
-// connect server
 app.listen(process.env.PORT, () =>
   console.log("Server has been started successfully")
 );

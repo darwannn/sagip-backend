@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "autoprefixer": "^10.4.14",
     "axios": "^1.4.0",
+    "fslightbox-react": "^1.7.6",
     "google-maps-react": "^2.0.6",
     "jwt-decode": "^3.1.2",
     "moment": "^2.29.4",

@@ -189,6 +189,16 @@ const HazardReport = ({ type = "add" }) => {
     };
     reader.readAsDataURL(e.target.files[0]);
   };
+  const onChangeVideo = (e) => {
+    setProof(e.target.files[0]);
+    setProofName(e.target.files[0].name);
+    setHasChanged(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProofUrl(reader.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
 
   const handleCloseImage = () => {
     setProof(null);
@@ -373,7 +383,18 @@ const HazardReport = ({ type = "add" }) => {
                 onChange={onChangeFile}
               />
 
-              {proofUrl && <img src={proofUrl} alt="Selected" />}
+              <label htmlFor="video">
+                Video: <span>Upload Video</span>
+              </label>
+              <input
+                id="video"
+                type="file"
+                accept="video/*"
+                capture="user"
+                onChange={onChangeVideo}
+              />
+              {videoUrl && <video src={videoUrl} controls />}
+              {proofUrl && <img src={proofUrl} />}
             </div>
             <div>
               <button type="submit">Submit</button>

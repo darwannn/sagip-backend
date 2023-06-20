@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import moment from "moment";
 
 import Navbar from "../../components/Navbar";
-
+import FsLightbox from "fslightbox-react";
 const VerificationRequest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const VerificationRequest = () => {
   const [isModalShown, setisModalShown] = useState(false);
   const [verificationRequestDetails, setVerificationRequestDetails] =
     useState("");
-
+  const [toggler, setToggler] = useState(false);
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
@@ -155,7 +155,15 @@ const VerificationRequest = () => {
   return (
     <>
       <Navbar />
-
+      {/* <button onClick={() => setToggler(!toggler)}>Toggle Lightbox</button> */}
+      {/* <FsLightbox
+        toggler={toggler}
+        sources={[
+          "https://i.imgur.com/fsyrScY.jpg",
+          "https://www.youtube.com/watch?v=3nQNiWdeH2Q",
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        ]}
+      /> */}
       <div>
         <div>Total Request: {verificationRequest.length}</div>
         <input
@@ -249,11 +257,21 @@ const VerificationRequest = () => {
           {verificationRequestDetails.verificationPicture &&
             verificationRequestDetails.verificationPicture.map(
               (picture, index) => (
-                <img
-                  src={`https://sagip.onrender.com/images/User/${picture}`}
-                  key={index}
-                  style={{ width: "300px" }}
-                />
+                <>
+                  <img
+                    src={`https://sagip.onrender.com/images/User/${picture}`}
+                    key={index}
+                    style={{ width: "300px" }}
+                    onClick={() => setToggler(!toggler)}
+                  />
+                  <FsLightbox
+                    toggler={toggler}
+                    sources={[
+                      `https://sagip.onrender.com/images/User/${picture}`,
+                    ]}
+                    type="image"
+                  />
+                </>
               )
             )}
           <button onClick={handleReject}>Reject Verification</button>
