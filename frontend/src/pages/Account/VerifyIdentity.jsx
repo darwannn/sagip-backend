@@ -51,7 +51,10 @@ function VerifyIdentity() {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append("selfieImage", selfieImage, "selfie.png");
+
+    if (selfieImage) {
+      formData.append("selfieImage", selfieImage, "selfie.png");
+    }
 
     try {
       const options = { Authorization: `Bearer ${token}` };
@@ -61,14 +64,16 @@ function VerifyIdentity() {
         options,
         formData
       );
+
       console.log(data);
       const { success, message } = data;
+
       if (success) {
         toast.success(message);
         return;
       } else {
         if (message !== "input error") {
-          toast.success(message);
+          toast.error(message);
           // navigate(0);
         } else {
           toast.error(message);

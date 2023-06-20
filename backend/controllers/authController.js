@@ -15,7 +15,8 @@ const {
   isEmail,
   isContactNumber,
   isNumber,
-
+  isLessThanSize,
+  isImage,
   generateCode,
   generateToken,
   updateVerificationCode,
@@ -625,11 +626,27 @@ authController.put(
   async (req, res) => {
     try {
       if (!req.file) {
-        return res.status(200).json({
-          success: true,
+        return res.status(500).json({
+          success: false,
           image: "Required field",
           message: "input error",
         });
+      } else {
+        if (isImage(req.file)) {
+          return res.status(500).json({
+            success: false,
+            image: "Only PNG, JPEG, and JPG files are allowed",
+            message: "input error",
+          });
+        } else {
+          if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+            return res.status(500).json({
+              success: false,
+              image: "File size should be less than 10MB",
+              message: "input error",
+            });
+          }
+        }
       }
 
       const user = await User.findByIdAndUpdate(
