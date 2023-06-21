@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@david.kucsai/react-pdf-table": "^0.4.1",
     "@react-google-maps/api": "^2.18.1",
     "@react-pdf/renderer": "^3.1.12",
     "@reduxjs/toolkit": "^1.9.3",
@@ -20,6 +21,7 @@
     "react-data-table-component": "^7.5.3",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",
+    "react-lightgallery": "^0.9.0",
     "react-quill": "^2.0.0",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.8.1",

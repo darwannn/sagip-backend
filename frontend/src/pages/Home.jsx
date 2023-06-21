@@ -207,7 +207,18 @@ function Home() {
       </div>
       <br />
       <a href="tel:09999999999">PHONE_NUMMn</a>
-      <input type="file" accept="image/*" capture="camera"></input>
+      <input
+        type="file"
+        accept="image/*"
+        capture="camera"
+        onClick={() => window.AndroidInterface?.setFileChooser("camera")}
+      ></input>
+      <input
+        type="file"
+        accept="image/*"
+        capture="camcorder"
+        onClick={() => window.AndroidInterface?.setFileChooser("camcorder")}
+      ></input>
       <>
         {wellnessSurveys && (
           <>

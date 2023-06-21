@@ -1,84 +1,84 @@
-import { useState, useEffect } from "react";
-import { Page, Text, View, Document } from "@react-pdf/renderer";
-import { request } from "../../utils/axios";
+import React from "react";
+import {
+  PDFViewer,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+} from "@react-pdf/renderer";
 
-const PDFDocument = () => {
-  const [data, setData] = useState([]);
+const styles = StyleSheet.create({
+  page: {
+    padding: 20,
+  },
+  header: {
+    marginBottom: 20,
+  },
+  table: {
+    display: "table",
+    width: "auto",
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#000",
+    borderBottomStyle: "solid",
+    alignItems: "center",
+    height: 30,
+  },
+  tableCell: {
+    width: "25%",
+    borderRightWidth: 1,
+    borderRightColor: "#000",
+    borderRightStyle: "solid",
+    padding: 5,
+  },
+});
 
-  useEffect(() => {
-    const fetchEmergencyFacility = async () => {
-      try {
-        const data = await request("/hazard-report/", "GET");
-
-        setData(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchEmergencyFacility();
-  }, []); // Add an empty dependency array to useEffect to fetch data only once
+const InvoiceTemplate = () => {
+  const tableData = [
+    {
+      firstName: "John",
+      lastName: "Smith",
+      dob: new Date(2000, 1, 1),
+      country: "Australia",
+      phoneNumber: "xxx-0000-0000",
+    },
+  ];
 
   return (
-    <Document>
-      <Page size="A4">
-        <View style={{ flexDirection: "row", backgroundColor: "#E4E4E4" }}>
-          <View
-            style={{
-              margin: 10,
-              padding: 10,
-              flexGrow: 1,
-              border: "1px solid black",
-            }}
-          >
-            {/* Table header */}
-            <View
-              style={{
-                flexDirection: "row",
-                borderBottom: "1px solid black",
-                alignItems: "center",
-                padding: 4,
-              }}
-            >
-              <Text style={{ width: "5%", textAlign: "center" }}>#</Text>
-              <Text style={{ width: "15%" }}>Name</Text>
-              <Text style={{ width: "15%" }}>Contact Number</Text>
-              <Text style={{ width: "15%" }}>Address</Text>
-              <Text style={{ width: "15%" }}>Category</Text>
-              <Text style={{ width: "15%" }}>Longitude</Text>
-              <Text style={{ width: "15%" }}>Latitude</Text>
-              <Text style={{ width: "15%" }}>Location</Text>
-              <Text style={{ width: "15%" }}>Description</Text>
-            </View>
+    <PDFViewer>
+      <Document>
+        <Page style={styles.page}>
+          <View style={styles.header}>
+            <Text>Company Name</Text>
+            <Text>Company Address</Text>
+            <Text>Invoice Report</Text>
+          </View>
 
-            {/* Table rows */}
-            {data.map((row, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  borderBottom: "1px solid black",
-                  alignItems: "center",
-                  padding: 4,
-                }}
-              >
-                <Text style={{ width: "5%", textAlign: "center" }}>
-                  {index + 1}
-                </Text>
-                <Text style={{ width: "15%" }}>{row.name}</Text>
-                <Text style={{ width: "15%" }}>{row.contactNumber}</Text>
-                <Text style={{ width: "15%" }}>{row.address}</Text>
-                <Text style={{ width: "15%" }}>{row.category}</Text>
-                <Text style={{ width: "15%" }}>{row.longitude}</Text>
-                <Text style={{ width: "15%" }}>{row.latitude}</Text>
-                <Text style={{ width: "15%" }}>{row.location}</Text>
-                <Text style={{ width: "15%" }}>{row.description}</Text>
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCell}>First Name</Text>
+              <Text style={styles.tableCell}>Last Name</Text>
+              <Text style={styles.tableCell}>DOB</Text>
+              <Text style={styles.tableCell}>Country</Text>
+              <Text style={styles.tableCell}>Phone Number</Text>
+            </View>
+            {tableData.map((row, index) => (
+              <View style={styles.tableRow} key={index}>
+                <Text style={styles.tableCell}>{row.firstName}</Text>
+                <Text style={styles.tableCell}>{row.lastName}</Text>
+                <Text style={styles.tableCell}>{row.dob.toLocaleString()}</Text>
+                <Text style={styles.tableCell}>{row.country}</Text>
+                <Text style={styles.tableCell}>{row.phoneNumber}</Text>
               </View>
             ))}
           </View>
-        </View>
-      </Page>
-    </Document>
+        </Page>
+      </Document>
+    </PDFViewer>
   );
 };
 
-export default PDFDocument;
+export default InvoiceTemplate;

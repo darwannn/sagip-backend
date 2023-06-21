@@ -11,6 +11,24 @@ import moment from "moment";
 
 import Navbar from "../../components/Navbar";
 import FsLightbox from "fslightbox-react";
+
+import "lightgallery/css/lightgallery.css";
+import "lightgallery/css/lg-zoom.css";
+import "lightgallery/css/lg-thumbnail.css";
+import "lightgallery/css/lg-autoplay.css";
+import "lightgallery/css/lg-share.css";
+import "lightgallery/css/lg-rotate.css";
+
+// import plugins if you need
+import lgThumbnail from "lightgallery/plugins/thumbnail";
+import lgZoom from "lightgallery/plugins/zoom";
+import lgAutoplay from "lightgallery/plugins/autoplay";
+import lgVideo from "lightgallery/plugins/video";
+import lgShare from "lightgallery/plugins/share";
+import lgRotate from "lightgallery/plugins/rotate";
+
+import LightGallery from "lightgallery/react/Lightgallery.es5";
+
 const VerificationRequest = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,7 +47,7 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
-        //https://sagip.onrender.com/
+        //http://localhost:5000/
         const data = await request("/auth/verification-request", "GET", {
           Authorization: `Bearer ${token}`,
         });
@@ -155,6 +173,17 @@ const VerificationRequest = () => {
   return (
     <>
       <Navbar />
+      {/*  <LightGallery
+        speed={200}
+        plugins={[lgThumbnail, lgZoom, lgShare, lgRotate, lgVideo, lgAutoplay]}
+      >
+        <a href="https://procodestore.com/wp-content/uploads/2021/03/164508084_271381191136191_654097929788476286_n.jpg">
+          <img
+            alt="img1"
+            src="https://procodestore.com/wp-content/uploads/2021/03/164508084_271381191136191_654097929788476286_n.jpg"
+          />
+        </a>
+      </LightGallery> */}
       {/* <button onClick={() => setToggler(!toggler)}>Toggle Lightbox</button> */}
       {/* <FsLightbox
         toggler={toggler}
@@ -259,16 +288,14 @@ const VerificationRequest = () => {
               (picture, index) => (
                 <>
                   <img
-                    src={`https://sagip.onrender.com/images/User/${picture}`}
+                    src={`http://localhost:5000/images/User/${picture}`}
                     key={index}
                     style={{ width: "300px" }}
                     onClick={() => setToggler(!toggler)}
                   />
                   <FsLightbox
                     toggler={toggler}
-                    sources={[
-                      `https://sagip.onrender.com/images/User/${picture}`,
-                    ]}
+                    sources={[`http://localhost:5000/images/User/${picture}`]}
                     type="image"
                   />
                 </>

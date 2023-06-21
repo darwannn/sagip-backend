@@ -117,9 +117,13 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
-  sendNotificationAll("title", "body", [
+  sendNotificationToken("title", "body", [
     "erNQJkZgSHCCCp0BcTT3uM:APA91bG6sgaP-k7OmYa4EdKyWviBOyPF4t2aCXYbgImS_ob49p44wDzQ1TwV55OIaghA3rtasEXN2pMX4oi-Ed6rELISulMEKW3kNoK6VfXSMrS9ZlPUwWaYCbffWsLLL3KmZnrQHUVU",
   ]);
+  sendNotificationTopic("Topic", "body", "sagip");
+  console.log("====================================");
+  console.log("localhost");
+  console.log("====================================");
   axios
     .get(
       `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
@@ -205,7 +209,7 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
     /*    console.log(contactNumbers);
     console.log(fcmTokens);
 
-    sendNotificationAll(alertTitle, alertMessage, fcmTokens); */
+    sendNotificationToken(alertTitle, alertMessage, fcmTokens); */
 
     try {
       const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
@@ -334,7 +338,26 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   }
 };
 
-const sendNotificationAll = (title, body, tokens) => {
+const sendNotificationTopic = (title, body, topic) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    topic: topic,
+  };
+
+  admin
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log("Notification sent successfully:", response);
+    })
+    .catch((error) => {
+      console.log("Failed to send notification:", error);
+    });
+};
+const sendNotificationToken = (title, body, tokens) => {
   const message = {
     notification: {
       title: title,

@@ -105,9 +105,7 @@ const HazardReport = ({ type = "add" }) => {
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setProofUrl(
-            `https://sagip.onrender.com/images/Safety Tip/${data.proof}`
-          );
+          setProofUrl(`http://localhost:5000/images/Safety Tip/${data.proof}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -179,7 +177,7 @@ const HazardReport = ({ type = "add" }) => {
     }
   };
 
-  const onChangeFile = (e) => {
+  const onChangeImage = (e) => {
     setProof(e.target.files[0]);
     setProofName(e.target.files[0].name);
     setHasChanged(true);
@@ -383,7 +381,7 @@ const HazardReport = ({ type = "add" }) => {
                 type="file"
                 accept="image/*"
                 capture="camera"
-                onChange={onChangeFile}
+                onChange={onChangeImage}
               />
 
               <label htmlFor="video">
