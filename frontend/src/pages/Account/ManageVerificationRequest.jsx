@@ -12,7 +12,7 @@ import moment from "moment";
 import Navbar from "../../components/Navbar";
 import FsLightbox from "fslightbox-react";
 
-import "lightgallery/css/lightgallery.css";
+/* import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
 import "lightgallery/css/lg-autoplay.css";
@@ -27,7 +27,7 @@ import lgVideo from "lightgallery/plugins/video";
 import lgShare from "lightgallery/plugins/share";
 import lgRotate from "lightgallery/plugins/rotate";
 
-import LightGallery from "lightgallery/react/Lightgallery.es5";
+import LightGallery from "lightgallery/react/Lightgallery.es5"; */
 
 const VerificationRequest = () => {
   const { id } = useParams();
