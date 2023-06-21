@@ -202,6 +202,11 @@ function Home() {
         <br />
         <br />
         <button onClick={playSound}>Play Sound</button>
+        <button
+          onClick={() => window.AndroidInterface?.setFileChooser("camcorder")}
+        >
+          Test
+        </button>
         <br />
         <button onClick={stopSound}>Stop Sound</button>
       </div>
