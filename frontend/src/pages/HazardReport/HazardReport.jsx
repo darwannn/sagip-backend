@@ -393,18 +393,25 @@ const HazardReport = ({ type = "add" }) => {
                 id="video"
                 type="file"
                 accept="video/*"
-                capture="user"
+                capture="camcorder"
                 onChange={onChangeVideo}
               />
               {/* {videoUrl && <video src={videoUrl} controls />} */}
-              {proofUrl && <img src={proofUrl} />}
+              {/*  {proofUrl && <img src={proofUrl} />}
               {proofUrl && (
                 <div>
+                  {proofUrl.includes("data:image")}
                   {proofUrl}
-                  {/*    {proofUrl.includes("data:image")} */}
                 </div>
               )}
-              {proofUrl && <video src={proofUrl} controls />}
+              {proofUrl && <video src={proofUrl} controls />} */}
+
+              {proofUrl && proofUrl.includes("data:image") && (
+                <img src={proofUrl} />
+              )}
+              {proofUrl && proofUrl.includes("data:video") && (
+                <video src={proofUrl} controls />
+              )}
             </div>
           </form>
         </div>

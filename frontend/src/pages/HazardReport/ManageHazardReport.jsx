@@ -166,7 +166,7 @@ const ManageEmergencyFacility = () => {
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setProof(
-              `https://sagip.onrender.com/images/Emergency Facility/${data.proof}`
+              `https://sagip.onrender.com/images/Hazard Report/${data.proof}`
             );
           } else {
             navigate(`/manage/hazard-report`);
@@ -276,6 +276,22 @@ const ManageEmergencyFacility = () => {
     console.log({ lat: latitude, lng: longitude });
   }
 
+  function checkFileType(proof) {
+    // Get the file extension
+    var extension = proof.split(".").pop().toLowerCase();
+
+    // Check if it's an image file
+    if (extension === "jpg" || extension === "jpeg" || extension === "png") {
+      return "image";
+    }
+    // Check if it's a video file
+    else if (extension === "mp4") {
+      return "video";
+    }
+
+    // Return a default message if the file type is unsupported
+    return "Unsupported file type.";
+  }
   return (
     <>
       <Navbar />
@@ -461,7 +477,13 @@ const ManageEmergencyFacility = () => {
               <div>{latitude}</div>
               <div>{location}</div>
               <div>{description}</div>
-              <img src={proof}></img>
+
+              {proof && checkFileType(proof) === "image" && (
+                <img src={proof}></img>
+              )}
+              {proof && checkFileType(proof) === "video" && (
+                <video src={proof} controls />
+              )}
             </div>
             {hazardStatus !== "resolved" && (
               <div>
