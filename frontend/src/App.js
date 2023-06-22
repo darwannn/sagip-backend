@@ -36,6 +36,7 @@ import ManageEmergencyFacility from "./pages/EmergencyFacility/ManageEmergencyFa
 
 import SendAlert from "./pages/SendAlert";
 import Test from "./pages/Test";
+import Test2 from "./pages/Test2";
 
 import ManageVerificationRequest from "./pages/Account/ManageVerificationRequest";
 
@@ -251,6 +252,7 @@ const App = () => {
           element={<HazardReportReport />}
         />
         <Route path="/test" element={<Test />} />
+        <Route path="/test2" element={<Test2 />} />
         <Route
           path="/manage/hazard-report/:id"
           element={<ManageHazardReport />}

@@ -202,9 +202,8 @@ function Home() {
         <br />
         <br />
         <button onClick={playSound}>Play Sound</button>
-        <button
-          onClick={() => window.AndroidInterface?.setFileChooser("camcorder")}
-        >
+        <button onClick={() => window.AndroidInterface?.("camcorder")}>
+          {/* window.AndroidInterface?.vibrateOnHold(); */}
           Test
         </button>
         <br />

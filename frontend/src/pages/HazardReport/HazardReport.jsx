@@ -81,7 +81,7 @@ const HazardReport = ({ type = "add" }) => {
 
   /** @type React.MutableRefObject<HTMLInputElement> */
   const originRef = useRef();
-
+  const [recordingDuration, setRecordingDuration] = useState(0);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -188,14 +188,28 @@ const HazardReport = ({ type = "add" }) => {
     reader.readAsDataURL(e.target.files[0]);
   };
   const onChangeVideo = (e) => {
-    setProof(e.target.files[0]);
-    setProofName(e.target.files[0].name);
+    const videoFile = e.target.files[0];
+    setProof(videoFile);
+    setProofName(videoFile.name);
     setHasChanged(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProofUrl(reader.result);
-    };
-    reader.readAsDataURL(e.target.files[0]);
+
+    const videoElement = document.createElement("video");
+    videoElement.src = URL.createObjectURL(videoFile);
+
+    videoElement.addEventListener("loadedmetadata", () => {
+      const duration = Math.floor(videoElement.duration);
+      const maxDuration = 5; // Maximum duration in seconds
+
+      if (duration <= maxDuration) {
+        setRecordingDuration(duration);
+        setProofUrl(videoElement.src);
+      } else {
+        // Perform actions when the recording exceeds the desired duration
+        // For example, display an error message or reset the video capture
+      }
+    });
+
+    videoElement.load();
   };
 
   const handleCloseImage = () => {
@@ -383,6 +397,7 @@ const HazardReport = ({ type = "add" }) => {
                 capture="camera"
                 onChange={onChangeImage}
               />
+              <div>Recording Duration: {recordingDuration} seconds</div>
 
               <label htmlFor="video">
                 Video: <span>Upload Video</span>
