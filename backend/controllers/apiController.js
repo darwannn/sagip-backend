@@ -118,7 +118,7 @@ apiController.get("/signal", async (req, res) => {
 
 apiController.get("/weather", async (req, res) => {
   sendNotificationToken("title", "body", [
-    "erNQJkZgSHCCCp0BcTT3uM:APA91bG6sgaP-k7OmYa4EdKyWviBOyPF4t2aCXYbgImS_ob49p44wDzQ1TwV55OIaghA3rtasEXN2pMX4oi-Ed6rELISulMEKW3kNoK6VfXSMrS9ZlPUwWaYCbffWsLLL3KmZnrQHUVU",
+    "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
   sendNotificationTopic("Topic", "body", "sagip");
   console.log("====================================");

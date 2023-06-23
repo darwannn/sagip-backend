@@ -105,7 +105,9 @@ const HazardReport = ({ type = "add" }) => {
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setProofUrl(`http://localhost:5000/images/Safety Tip/${data.proof}`);
+          setProofUrl(
+            `https://sagip.onrender.com/images/Safety Tip/${data.proof}`
+          );
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -382,6 +384,9 @@ const HazardReport = ({ type = "add" }) => {
                 accept="image/*"
                 capture="camera"
                 onChange={onChangeImage}
+                onClick={() =>
+                  window.AndroidInterface?.setMediaChooser("camera")
+                }
               />
 
               <label htmlFor="video">
@@ -393,6 +398,9 @@ const HazardReport = ({ type = "add" }) => {
                 accept="video/*"
                 capture="camcorder"
                 onChange={onChangeVideo}
+                onClick={() =>
+                  window.AndroidInterface?.setMediaChooser("camcorder")
+                }
               />
               {/* {videoUrl && <video src={videoUrl} controls />} */}
               {/*  {proofUrl && <img src={proofUrl} />}

@@ -47,7 +47,7 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
-        //http://localhost:5000/
+        //https://sagip.onrender.com/
         const data = await request("/auth/verification-request", "GET", {
           Authorization: `Bearer ${token}`,
         });
@@ -288,14 +288,16 @@ const VerificationRequest = () => {
               (picture, index) => (
                 <>
                   <img
-                    src={`http://localhost:5000/images/User/${picture}`}
+                    src={`https://sagip.onrender.com/images/User/${picture}`}
                     key={index}
                     style={{ width: "300px" }}
                     onClick={() => setToggler(!toggler)}
                   />
                   <FsLightbox
                     toggler={toggler}
-                    sources={[`http://localhost:5000/images/User/${picture}`]}
+                    sources={[
+                      `https://sagip.onrender.com/images/User/${picture}`,
+                    ]}
                     type="image"
                   />
                 </>

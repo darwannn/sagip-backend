@@ -215,13 +215,18 @@ function Home() {
         type="file"
         accept="image/*"
         capture="camera"
-        onClick={() => window.AndroidInterface?.setFileChooser("camera")}
+        onClick={() => window.AndroidInterface?.setMediaChooser("camera")}
       ></input>
       <input
         type="file"
         accept="image/*"
         capture="camcorder"
-        onClick={() => window.AndroidInterface?.setFileChooser("camcorder")}
+        onClick={() => window.AndroidInterface?.setMediaChooser("camcorder")}
+      ></input>
+      <input
+        type="file"
+        accept="image/*"
+        onClick={() => window.AndroidInterface?.setMediaChooser("file")}
       ></input>
       <>
         {wellnessSurveys && (
