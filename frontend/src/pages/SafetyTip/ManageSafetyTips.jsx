@@ -42,7 +42,10 @@ const SafetyTips = () => {
             })
           : (option = {}); */
 
-        const data = await request("/safety-tips/", "GET");
+        const data = await request("/safety-tips/", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
+        console.log(data);
         setSafetyTips(data);
       } catch (error) {
         console.error(error);

@@ -1,6 +1,12 @@
 const safetyTipController = require("express").Router();
 const SafetyTip = require("../models/SafetyTip");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+
+const isAdmin = require("../middlewares/isAdmin");
+const isSuperAdmin = require("../middlewares/isSuperAdmin");
+const isResponder = require("../middlewares/isResponder");
+const isDispatcher = require("../middlewares/isDispatcher");
+
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
@@ -69,7 +75,7 @@ safetyTipController.post(
 );
 
 /* get all */
-safetyTipController.get("/", async (req, res) => {
+safetyTipController.get("/", tokenMiddleware, async (req, res) => {
   try {
     const safetyTips = await SafetyTip.find({});
     if (safetyTips) {
