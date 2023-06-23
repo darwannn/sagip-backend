@@ -5,7 +5,7 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("public/images/Team");
+const upload = uploadMiddleware("assets/images/Team");
 
 teamController.post(
   "/add",

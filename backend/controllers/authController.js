@@ -30,7 +30,7 @@ const { sendSMS, apiController } = require("./apiController");
 const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("public/images/User");
+const upload = uploadMiddleware("assets/images/User");
 
 const fs = require("fs");
 
@@ -810,7 +810,7 @@ authController.put("/verification-request/:id", async (req, res) => {
 
     if (req.body.action === "reject") {
       user.verificationPicture.map((picture) => {
-        const imagePath = `public/images/User/${picture}`;
+        const imagePath = `assets/images/User/${picture}`;
         fs.unlink(imagePath, (err) => {});
       });
       user.verificationPicture = [];

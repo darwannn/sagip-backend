@@ -24,7 +24,7 @@ const currentDate = new Date();
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("public/images/User");
+const upload = uploadMiddleware("assets/images/User");
 
 const fs = require("fs");
 
@@ -215,7 +215,7 @@ accountController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
 
     if (user) {
       if (user.profilePicture !== "user_no_image.png") {
-        const imagePath = `public/images/User/${user.profilePicture}`;
+        const imagePath = `assets/images/User/${user.profilePicture}`;
         fs.unlink(imagePath, (err) => {
           /* if (err) {
             return res.status(500).json({
@@ -550,7 +550,7 @@ accountController.put(
 
           const userImage = await User.findById(req.params.id);
           if (userImage) {
-            imagePath = `public/images/User/${userImage.profilePicture}`;
+            imagePath = `assets/images/User/${userImage.profilePicture}`;
           }
         }
 

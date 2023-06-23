@@ -11,7 +11,7 @@ const {
 } = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("public/images/Hazard Report");
+const upload = uploadMiddleware("assets/images/Hazard Report");
 
 const fs = require("fs");
 
@@ -220,7 +220,7 @@ hazardReportController.delete(
       const hazardReport = await HazardReport.findByIdAndDelete(req.params.id);
 
       if (hazardReport) {
-        const imagePath = `public/images/Hazard Report/${hazardReport.image}`;
+        const imagePath = `assets/images/Hazard Report/${hazardReport.image}`;
         fs.unlink(imagePath, (err) => {
           /* if (err) {
             return res.status(500).json({

@@ -25,10 +25,10 @@ mongoose.connect(process.env.MONGO_URL, () =>
   console.log("MongoDB has been started successfully")
 );
 
-app.use(express.static("public"));
+app.use(express.static("assets"));
 
 app.use(cors());
-app.use("/images", cors(), express.static("public/images"));
+app.use("/images", cors(), express.static("assets/images"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

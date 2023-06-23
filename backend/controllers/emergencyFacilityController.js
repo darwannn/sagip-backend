@@ -2,7 +2,7 @@ const emergencyFacilityController = require("express").Router();
 const EmergencyFacility = require("../models/EmergencyFacility");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("public/images/Emergency Facility");
+const upload = uploadMiddleware("assets/images/Emergency Facility");
 
 const fs = require("fs");
 
@@ -193,7 +193,7 @@ emergencyFacilityController.put(
             req.params.id
           );
           if (emergencyFacilityImage) {
-            imagePath = `public/images/Emergency Facility/${emergencyFacilityImage.image}`;
+            imagePath = `assets/images/Emergency Facility/${emergencyFacilityImage.image}`;
           }
         }
 
@@ -252,7 +252,7 @@ emergencyFacilityController.delete(
       );
 
       if (emergencyFacility) {
-        const imagePath = `public/images/Emergency Facility/${emergencyFacility.image}`;
+        const imagePath = `assets/images/Emergency Facility/${emergencyFacility.image}`;
         fs.unlink(imagePath, (error) => {
           /*  if (error) {
             return res.status(500).json({

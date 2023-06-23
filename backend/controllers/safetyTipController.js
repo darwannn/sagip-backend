@@ -10,7 +10,7 @@ const isDispatcher = require("../middlewares/isDispatcher");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("public/images/Safety Tip");
+const upload = uploadMiddleware("assets/images/Safety Tip");
 
 const fs = require("fs");
 
@@ -75,7 +75,7 @@ safetyTipController.post(
 );
 
 /* get all */
-safetyTipController.get("/", tokenMiddleware, async (req, res) => {
+safetyTipController.get("/", async (req, res) => {
   try {
     const safetyTips = await SafetyTip.find({});
     if (safetyTips) {
@@ -165,7 +165,7 @@ safetyTipController.put(
 
           const safetyTipImage = await SafetyTip.findById(req.params.id);
           if (safetyTipImage) {
-            imagePath = `public/images/Safety Tip/${safetyTipImage.image}`;
+            imagePath = `assets/images/Safety Tip/${safetyTipImage.image}`;
           }
         }
 
@@ -219,7 +219,7 @@ safetyTipController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
     const deletedSafetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
 
     if (deletedSafetyTip) {
-      const imagePath = `public/images/Safety Tip/${deletedSafetyTip.image}`;
+      const imagePath = `assets/images/Safety Tip/${deletedSafetyTip.image}`;
       fs.unlink(imagePath, (err) => {
         /* if (err) {
           return res.status(500).json({
