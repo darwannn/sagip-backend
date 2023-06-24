@@ -166,7 +166,7 @@ const ManageEmergencyFacility = () => {
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setProof(
-              `http://localhost:5000/images/Hazard Report/${data.proof}`
+              `https://sagip-production.up.railway.app/images/Hazard Report/${data.proof}`
             );
           } else {
             navigate(`/manage/hazard-report`);
