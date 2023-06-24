@@ -105,9 +105,7 @@ const HazardReport = ({ type = "add" }) => {
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setProofUrl(
-            `https://sagip.onrender.com/images/Safety Tip/${data.proof}`
-          );
+          setProofUrl(`http://localhost:5000/images/Safety Tip/${data.proof}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {

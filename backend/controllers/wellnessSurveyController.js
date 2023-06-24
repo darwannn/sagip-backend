@@ -220,6 +220,9 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
 
       return res.status(200).json({
         success: true,
+        title: wellnessSurvey.title,
+        category: wellnessSurvey.category,
+        date: wellnessSurvey.createdAt,
         responseCount:
           wellnessSurvey.affected.length + wellnessSurvey.unaffected.length,
         affectedCount: wellnessSurvey.affected.length,

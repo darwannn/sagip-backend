@@ -106,7 +106,7 @@ function EmergencyFacility() {
 
     setCategory(emergencyFacility.category);
     setImage(
-      `https://sagip.onrender.com/images/Emergency Facility/${emergencyFacility.image}`
+      `http://localhost:5000/images/Emergency Facility/${emergencyFacility.image}`
     );
 
     setIsFull(emergencyFacility.isFull);

@@ -53,9 +53,9 @@ import TeamInput from "./pages/Team/TeamInput";
 
 import ManageWellnessSurvey from "./pages/WellnessSurvey/ManageWellnessSurvey";
 import WellnessSurveyInput from "./pages/WellnessSurvey/WellnessSurveyInput";
+import WellnessSurveyReport from "./pages/WellnessSurvey/WellnessSurveyReport";
 
 import Hazard from "./pages/HazardReport/Hazard";
-import HazardReportReport from "./pages/HazardReport/HazardReportReport";
 import HazardReport from "./pages/HazardReport/HazardReport";
 /* import HazardReportDetails from "./pages/HazardReport/HazardReportDetails"; */
 import ManageHazardReport from "./pages/HazardReport/ManageHazardReport";
@@ -248,8 +248,8 @@ const App = () => {
         <Route path="/hazard/map/:id" element={<HazardReportDetails />} /> */}
         <Route path="/manage/hazard-report" element={<ManageHazardReport />} />
         <Route
-          path="/manage/hazard-report/report"
-          element={<HazardReportReport />}
+          path="/manage/wellness-survey/report/:id"
+          element={<WellnessSurveyReport />}
         />
         <Route path="/test" element={<Test />} />
         <Route path="/test2" element={<Test2 />} />
