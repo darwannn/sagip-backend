@@ -71,7 +71,9 @@ const AccountInput = ({ type }) => {
         setUserType(data.userType);
         setAttempt(data.attempt);
         setImage(data.profilePicture);
-        setImageUrl(`http://localhost:5000/images/User/${data.profilePicture}`);
+        setImageUrl(
+          `https://sagip.cyclic.app/images/User/${data.profilePicture}`
+        );
       } catch (error) {
         console.error(error);
       }
