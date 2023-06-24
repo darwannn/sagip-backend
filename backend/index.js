@@ -25,17 +25,10 @@ mongoose.connect(process.env.MONGO_URL, () =>
   console.log("MongoDB has been started successfully")
 );
 
-const corsOpts = {
-  origin: "*",
-  credentials: true,
-  methods: ["GET", "POST", "HEAD", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type"],
-  exposedHeaders: ["Content-Type"],
-};
-app.use(cors(corsOpts));
 app.use(express.static("assets"));
-//app.use(cors());
-app.use("/images", express.static("assets/images"));
+
+app.use(cors());
+app.use("/images", cors(), express.static("assets/images"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
