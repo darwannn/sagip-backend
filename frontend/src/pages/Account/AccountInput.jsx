@@ -330,7 +330,7 @@ const AccountInput = ({ user, type }) => {
             {type === "update" && (
               <>
                 <div>
-                  <label>Archived</label>
+                  <label>Archivedd</label>
                   <input
                     type="checkbox"
                     onChange={(e) => setIsArchived(e.target.checked)}
