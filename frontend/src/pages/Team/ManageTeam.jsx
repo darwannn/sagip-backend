@@ -47,7 +47,9 @@ const ManageTeam = ({ type }) => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const data = await request("/team/responder", "GET");
+        const data = await request("/team/responder", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
         console.log("res");
         console.log(data);
         setAssignedResponders(data.assignedResponders);
@@ -75,7 +77,9 @@ const ManageTeam = ({ type }) => {
 
     const fetchVerificationRequest = async () => {
       try {
-        const data = await request("/team/", "GET");
+        const data = await request("/team/", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
 
         setVerificationRequest(data);
         console.log("===========tean=========================");
@@ -107,7 +111,9 @@ const ManageTeam = ({ type }) => {
       try {
         const options = { Authorization: `Bearer ${token}` };
         const data = await request(`/team/${id}`, "GET", options);
-
+        console.log("====================================");
+        console.log(data);
+        console.log("====================================");
         if (data.message !== "not found") {
           setVerificationRequestDetails(data);
           setMember(data.members);
@@ -118,10 +124,10 @@ const ManageTeam = ({ type }) => {
           const updatedUnassignedResponders = [...data.members, data.head];
 
           // Add the new array to the existing unassignedResponders array
-          setUnassignedResponders((prevUnassignedResponders) => [
+          /* setUnassignedResponders((prevUnassignedResponders) => [
             ...prevUnassignedResponders,
             ...updatedUnassignedResponders,
-          ]);
+          ]); */
         } else {
           navigate(`/manage/team`);
         }
@@ -201,13 +207,16 @@ const ManageTeam = ({ type }) => {
     e.preventDefault();
 
     try {
-      const options = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-      const data = await request("/team/add", "POST", options, {
-        name,
-      });
+      const data = await request(
+        "/team/add",
+        "POST",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          name,
+        }
+      );
       console.log(data);
       const { success, message } = data;
       if (success) {
@@ -229,14 +238,17 @@ const ManageTeam = ({ type }) => {
     e.preventDefault();
 
     try {
-      const options = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-      const data = await request(`/team/update/${id}`, "PUT", options, {
-        head,
-        members: member,
-      });
+      const data = await request(
+        `/team/update/${id}`,
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        },
+        {
+          head,
+          members: member,
+        }
+      );
 
       console.log(data);
       const { success, message } = data;

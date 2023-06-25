@@ -8,7 +8,12 @@ const codeExpiration = new Date(new Date().getTime() + 30 * 60000); //will expir
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
 
 const isEmpty = (value) => {
-  if (value == "") {
+  if (
+    value === "" ||
+    value === null ||
+    value === undefined ||
+    value.trim() === ""
+  ) {
     return true;
   }
 };

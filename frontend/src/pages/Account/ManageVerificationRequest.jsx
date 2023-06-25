@@ -47,7 +47,7 @@ const VerificationRequest = () => {
   useEffect(() => {
     const fetchVerificationRequest = async () => {
       try {
-        //https://sagip-production.up.railway.app/
+        //http://localhost:5000/
         const data = await request("/auth/verification-request", "GET", {
           Authorization: `Bearer ${token}`,
         });
@@ -288,16 +288,14 @@ const VerificationRequest = () => {
               (picture, index) => (
                 <>
                   <img
-                    src={`https://sagip-production.up.railway.app/images/User/${picture}`}
+                    src={`http://localhost:5000/images/User/${picture}`}
                     key={index}
                     style={{ width: "300px" }}
                     onClick={() => setToggler(!toggler)}
                   />
                   <FsLightbox
                     toggler={toggler}
-                    sources={[
-                      `https://sagip-production.up.railway.app/images/User/${picture}`,
-                    ]}
+                    sources={[`http://localhost:5000/images/User/${picture}`]}
                     type="image"
                   />
                 </>

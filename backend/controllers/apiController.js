@@ -16,13 +16,13 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-// admin.initializeApp({
-//   credential: admin.credential.cert({
-//     projectId: process.env.FIREBASE_PROJECT_ID,
-//     privateKey: process.env.FIREBASE_PRIVATE_KEY,
-//     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-//   }),
-// });
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+  }),
+});
 
 apiController.get("/signal", async (req, res) => {
   try {
@@ -348,7 +348,7 @@ const sendNotificationTopic = (title, body, topic) => {
     topic: topic,
   };
 
-  /*  admin
+  admin
     .messaging()
     .send(message)
     .then((response) => {
@@ -356,7 +356,7 @@ const sendNotificationTopic = (title, body, topic) => {
     })
     .catch((error) => {
       console.log("Failed to send notification:", error);
-    }); */
+    });
 };
 const sendNotificationToken = (title, body, tokens) => {
   const message = {
@@ -367,7 +367,7 @@ const sendNotificationToken = (title, body, tokens) => {
     tokens: tokens,
   };
 
-  /* admin
+  admin
     .messaging()
     .sendMulticast(message)
     .then((response) => {
@@ -379,17 +379,17 @@ const sendNotificationToken = (title, body, tokens) => {
           }
         });
         console.log("List of tokens that caused failures: " + failedTokens);
-      } */
-  /* else {
+      }
+      /* else {
         return res.status(500).json({
           success: false,
           message: "Internal Server Error",
         });
       } */
-  /*  })
+    })
     .catch((error) => {
       return "Internal Server Error: " + error;
-    }); */
+    });
 };
 
 module.exports = {

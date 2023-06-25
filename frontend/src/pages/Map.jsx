@@ -166,7 +166,7 @@ function EmergencyFacility() {
       setName(emergencyFacility.name);
 
       setImage(
-        `https://sagip-production.up.railway.app/images/Emergency Facility/${emergencyFacility.image}`
+        `http://localhost:5000/images/Emergency Facility/${emergencyFacility.image}`
       );
     }
     setIsFull(emergencyFacility.isFull);
@@ -177,7 +177,7 @@ function EmergencyFacility() {
           : ""
       );
       setProof(
-        `https://sagip-production.up.railway.app/images/Hazard Report/${emergencyFacility.proof}`
+        `http://localhost:5000/images/Hazard Report/${emergencyFacility.proof}`
       );
       setDescription(emergencyFacility.description);
       setReportedOn(emergencyFacility.createdAt);

@@ -24,7 +24,8 @@ safetyTipController.post(
       const { title, content, category } = req.body;
 
       if (isEmpty(title)) error["title"] = "Required field";
-      if (isEmpty(content)) error["content"] = "Required field";
+      if (isEmpty(content.replace(/<[^>]*>/g, "")))
+        error["content"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
 
       if (!req.file) {
@@ -139,9 +140,12 @@ safetyTipController.put(
       const { title, content, category, hasChanged } = req.body;
 
       if (isEmpty(title)) error["title"] = "Required field";
-      if (isEmpty(content)) error["content"] = "Required field";
+      if (isEmpty(content.replace(/<[^>]*>/g, "")))
+        error["content"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
-
+      console.log("====================================");
+      console.log();
+      console.log("====================================");
       if (hasChanged === "true") {
         if (!req.file) {
           error["image"] = "Required field";

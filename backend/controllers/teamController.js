@@ -82,13 +82,11 @@ teamController.get("/", async (req, res) => {
 
 teamController.get("/responder", async (req, res) => {
   try {
-    let responders = await User.find({
+    /*   let responders = await User.find({
       userType: "resident",
-    }).populate("teamId");
+    }).populate("teamId"); */
 
-    const teams = await Team.find({})
-      .populate("head", "firstname -password")
-      .populate("members", "firstname -password");
+    const teams = await Team.find({}).populate("head").populate("members");
 
     if (teams.length > 0) {
       let assignedResponders = [];
@@ -156,59 +154,6 @@ teamController.get("/responder", async (req, res) => {
   }
 });
 
-/* teamController.get("/responder/assigned", async (req, res) => {
-  try {
-    let team = await User.find({
-      userType: "resident",
-    }).populate("teamId");
-    team = team.filter((record) => record.teamId);
-
-    if (team) {
-      return res.status(200).json(team);
-      return res.status(200).json({
-        
-        ...team,
-      });
-    } else {
-      return res.status(200).json({
-        success: false,
-        message: "not found",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
-  }
-});
-teamController.get("/responder/unassigned", async (req, res) => {
-  try {
-    let team = await User.find({
-      userType: "resident",
-    }).populate("teamId");
-    team = team.filter((record) => record.teamId === undefined);
-
-    if (team) {
-      return res.status(200).json(team);
-      return res.status(200).json({
-      
-        ...team,
-      });
-    } else {
-      return res.status(200).json({
-        success: false,
-        message: "not found",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
-  }
-}); */
-
 teamController.get("/:id", async (req, res) => {
   try {
     const team = await Team.findById(req.params.id);
@@ -217,7 +162,7 @@ teamController.get("/:id", async (req, res) => {
       /*      return res.status(200).json(team); */
       return res.status(200).json({
         success: true,
-        message: "found",
+        /*   message: "found", */
         ...team._doc,
       });
     } else {
