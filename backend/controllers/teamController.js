@@ -4,13 +4,10 @@ const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
-const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("assets/images/Team");
-
 teamController.post(
   "/add",
   tokenMiddleware,
-  upload.single("image"),
+
   async (req, res) => {
     const error = {};
     try {
@@ -202,46 +199,85 @@ teamController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
   }
 });
 
-teamController.put(
-  "/update/assignment/",
-  tokenMiddleware,
-  upload.single("image"),
-  async (req, res) => {
-    /* const error = {}; */
-    try {
-      const { newTeamId, userId, prevTeamId } = req.body;
+teamController.put("/update/assignment/", tokenMiddleware, async (req, res) => {
+  /* const error = {}; */
+  try {
+    const { newTeamId, userId, prevTeamId } = req.body;
 
-      /* if (Object.keys(error).length === 0) { */
-      let team;
-      //may team gagawing unassigned
-      if (newTeamId === "unassigned") {
-        console.log("====================================");
-        console.log("unassigned");
-        console.log("====================================");
-        team = await Team.findByIdAndUpdate(
-          prevTeamId,
-          { $pull: { members: userId } },
-          { new: true }
-        );
-      } else if (prevTeamId === "") {
-        // walang prev team
-        team = await Team.findByIdAndUpdate(
-          newTeamId,
-          { $push: { members: userId } },
-          { new: true }
-        );
-      } else {
-        const removeTeam = await Team.findByIdAndUpdate(
-          prevTeamId,
-          { $pull: { members: userId } },
-          { new: true }
-        );
-        team = await Team.findByIdAndUpdate(
-          newTeamId,
-          { $push: { members: userId } },
-          { new: true }
-        );
-      }
+    /* if (Object.keys(error).length === 0) { */
+    let team;
+    //may team gagawing unassigned
+    if (newTeamId === "unassigned") {
+      console.log("====================================");
+      console.log("unassigned");
+      console.log("====================================");
+      team = await Team.findByIdAndUpdate(
+        prevTeamId,
+        { $pull: { members: userId } },
+        { new: true }
+      );
+    } else if (prevTeamId === "") {
+      // walang prev team
+      team = await Team.findByIdAndUpdate(
+        newTeamId,
+        { $push: { members: userId } },
+        { new: true }
+      );
+    } else {
+      const removeTeam = await Team.findByIdAndUpdate(
+        prevTeamId,
+        { $pull: { members: userId } },
+        { new: true }
+      );
+      team = await Team.findByIdAndUpdate(
+        newTeamId,
+        { $push: { members: userId } },
+        { new: true }
+      );
+    }
+
+    if (team) {
+      return res.status(200).json({
+        success: true,
+        message: "Updated Successfully",
+        team,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+    /*  } */
+
+    /*  if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      } */
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
+teamController.put("/update/:id", tokenMiddleware, async (req, res) => {
+  const error = {};
+  try {
+    const { head, members } = req.body;
+    /*  console.log(head); */
+    console.log(members);
+
+    if (isEmpty(head)) error["head"] = "Required field";
+    if (members.length === 0) error["members"] = "Required field";
+
+    if (Object.keys(error).length === 0) {
+      const updateFields = { head, members };
+
+      const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
+        new: true,
+      });
 
       if (team) {
         return res.status(200).json({
@@ -255,68 +291,19 @@ teamController.put(
           message: "Internal Server Error",
         });
       }
-      /*  } */
-
-      /*  if (Object.keys(error).length !== 0) {
-        error["success"] = false;
-        error["message"] = "input error";
-        return res.status(400).json(error);
-      } */
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
     }
-  }
-);
-teamController.put(
-  "/update/:id",
-  tokenMiddleware,
-  upload.single("image"),
-  async (req, res) => {
-    const error = {};
-    try {
-      const { head, members } = req.body;
-      /*  console.log(head); */
-      console.log(members);
 
-      if (isEmpty(head)) error["head"] = "Required field";
-      if (members.length === 0) error["members"] = "Required field";
-
-      if (Object.keys(error).length === 0) {
-        const updateFields = { head, members };
-
-        const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
-          new: true,
-        });
-
-        if (team) {
-          return res.status(200).json({
-            success: true,
-            message: "Updated Successfully",
-            team,
-          });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
-        }
-      }
-
-      if (Object.keys(error).length !== 0) {
-        error["success"] = false;
-        error["message"] = "input error";
-        return res.status(400).json(error);
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
+    if (Object.keys(error).length !== 0) {
+      error["success"] = false;
+      error["message"] = "input error";
+      return res.status(400).json(error);
     }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
   }
-);
+});
 
 module.exports = teamController;

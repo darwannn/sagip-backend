@@ -2,7 +2,7 @@ const emergencyFacilityController = require("express").Router();
 const EmergencyFacility = require("../models/EmergencyFacility");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("assets/images/Emergency Facility");
+/* const upload = uploadMiddleware("assets/images/Emergency Facility"); */
 
 const fs = require("fs");
 
@@ -16,7 +16,7 @@ const {
 emergencyFacilityController.post(
   "/add",
   tokenMiddleware,
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     const error = {};
     try {
@@ -141,7 +141,7 @@ emergencyFacilityController.get("/:id", async (req, res) => {
 emergencyFacilityController.put(
   "/update/:id",
   tokenMiddleware,
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     const error = {};
     try {

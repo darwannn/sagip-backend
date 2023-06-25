@@ -55,7 +55,7 @@ const SafetyTipDetails = () => {
         <Link to="/manage/safety-tips">Go Back</Link>
         <div>
           <img
-            src={`http://localhost:5000/images/Safety Tip/${safetyTipDetails.image}`}
+            src={`https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/safety-tips/${safetyTipDetails.image}`}
             style={{ width: "300px" }}
           />
           <div>

@@ -30,7 +30,7 @@ const { sendSMS, apiController } = require("./apiController");
 const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("assets/images/User");
+/* const upload = uploadMiddleware("assets/images/User"); */
 
 const fs = require("fs");
 
@@ -622,7 +622,7 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
 authController.put(
   "/verify-identity",
   tokenMiddleware,
-  upload.single("selfieImage"),
+  /*   upload.single("selfieImage"), */
   async (req, res) => {
     try {
       if (!req.file) {
@@ -685,7 +685,7 @@ authController.put(
 authController.get(
   "/verification-request",
   tokenMiddleware,
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     try {
       let user = await User.find({});
@@ -723,7 +723,7 @@ authController.get(
 authController.get(
   "/verify-identity/request/:id",
   tokenMiddleware,
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     try {
       /*       console.log("====================================");
@@ -763,7 +763,7 @@ authController.get(
 authController.get(
   "/verify-identity/:id",
   tokenMiddleware,
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     try {
       const user = await User.findById(req.params.id);

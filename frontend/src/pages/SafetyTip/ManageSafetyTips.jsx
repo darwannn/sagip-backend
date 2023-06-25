@@ -73,8 +73,8 @@ const SafetyTips = () => {
 
       const { message, success } = data;
       if (success) {
-        const updatedSafetyTips = safetyTips.filter((tip) => tip._id !== id);
-        setSafetyTips(updatedSafetyTips);
+        /*  const updatedSafetyTips = safetyTips.filter((tip) => tip._id !== id);
+        setSafetyTips(updatedSafetyTips); */
         toast.success(message);
         navigate(`/manage/safety-tips`);
       } else {

@@ -9,8 +9,10 @@ const isDispatcher = require("../middlewares/isDispatcher");
 
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 
-const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("assets/images/Safety Tip");
+const upload = require("../middlewares/uploadMiddleware");
+//const upload = uploadMiddleware("assets/images/Safety Tip");
+const folderPath = "sagip/media/safety-tips";
+const { cloudinary } = require("../utils/config");
 
 const fs = require("fs");
 
@@ -22,7 +24,10 @@ safetyTipController.post(
     const error = {};
     try {
       const { title, content, category } = req.body;
-
+      console.log("====================================");
+      console.log(title);
+      console.log(category);
+      console.log("====================================");
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";
@@ -41,24 +46,39 @@ safetyTipController.post(
       }
 
       if (Object.keys(error).length === 0) {
-        const safetyTip = await SafetyTip.create({
-          title,
-          content,
-          category,
-          image: req.file.filename,
-        });
-        if (safetyTip) {
-          return res.status(200).json({
-            success: true,
-            message: "Added successfully",
-            safetyTip,
+        const result = await cloudinary.uploader
+          .upload(req.file.path, {
+            folder: folderPath,
+            public_id: req.file.filename,
+          })
+          .then(async (result) => {
+            console.log("Image uploaded successfully:", result.secure_url);
+
+            const safetyTip = await SafetyTip.create({
+              title,
+              content,
+              category,
+              image: `${result.original_filename}.${result.format}`,
+            });
+            if (safetyTip) {
+              return res.status(200).json({
+                success: true,
+                message: "Added successfully",
+                safetyTip,
+              });
+            } else {
+              return res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+              });
+            }
+          })
+          .catch((error) => {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error: " + error,
+            });
           });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
-        }
       }
 
       if (Object.keys(error).length !== 0) {
@@ -162,15 +182,14 @@ safetyTipController.put(
 
       if (Object.keys(error).length === 0) {
         const updateFields = { title, content, category };
-        let imagePath = "";
+        /*  let imagePath = ""; */
 
         if (hasChanged && req.file) {
-          updateFields.image = req.file.filename;
-
-          const safetyTipImage = await SafetyTip.findById(req.params.id);
+          /*       updateFields.image = req.file.filename; */
+          /* const safetyTipImage = await SafetyTip.findById(req.params.id);
           if (safetyTipImage) {
             imagePath = `assets/images/Safety Tip/${safetyTipImage.image}`;
-          }
+          } */
         }
 
         const safetyTip = await SafetyTip.findByIdAndUpdate(
@@ -181,16 +200,39 @@ safetyTipController.put(
 
         if (safetyTip) {
           if (hasChanged && req.file) {
-            fs.unlink(imagePath, (err) => {
-              /* if (err) {
+            /*  cloudinary.uploader.destroy(
+              `${folderPath}/${safetyTip.image.replace(/\.[^/.]+$/, "")}`,
+              { type: "upload", resource_type: "image" },
+              (error, result) => {
+                console.log("====================================");
+                console.log(result);
+                console.log("====================================");
+              }
+            ); */
+            console.log("====================================");
+            console.log(safetyTip.image.replace(/\.[^/.]+$/, ""));
+            console.log("====================================");
+            const result = await cloudinary.uploader
+              .upload(req.file.path, {
+                folder: folderPath,
+                public_id: safetyTip.image.replace(/\.[^/.]+$/, ""),
+              })
+              .then(async (result) => {
+                console.log("====================================");
+                console.log(result);
+                console.log("====================================");
+                safetyTip.image = `${result.public_id.split("/").pop()}.${
+                  result.format
+                }`;
+                safetyTip.save();
+              })
+              .catch((error) => {
                 return res.status(500).json({
                   success: false,
-                  message: "Error deleting the image",
+                  message: "Internal Server Error: " + error,
                 });
-              } */
-            });
+              });
           }
-
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -220,23 +262,28 @@ safetyTipController.put(
 
 safetyTipController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
   try {
-    const deletedSafetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
+    const safetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
 
-    if (deletedSafetyTip) {
-      const imagePath = `assets/images/Safety Tip/${deletedSafetyTip.image}`;
-      fs.unlink(imagePath, (err) => {
-        /* if (err) {
-          return res.status(500).json({
+    if (true) {
+      cloudinary.uploader.destroy(
+        `${folderPath}/${safetyTip.image.replace(/\.[^/.]+$/, "")}`,
+        { type: "upload", resource_type: "image" },
+        (error, result) => {
+          /* if (error) {
+           return res.status(500).json({
             success: false,
             message: "Error deleting the image ",
           });
-        } else { */
-        return res.status(200).json({
-          success: true,
-          message: "Deleted successfully",
-        });
-        /* } */
-      });
+        } */
+          console.log("====================================");
+          console.log(result);
+          console.log("====================================");
+          return res.status(200).json({
+            success: true,
+            message: "Deleted successfully",
+          });
+        }
+      );
     } else {
       return res.status(500).json({
         success: false,

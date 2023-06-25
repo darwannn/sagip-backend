@@ -24,7 +24,7 @@ const currentDate = new Date();
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("assets/images/User");
+/* const upload = uploadMiddleware("assets/images/User"); */
 
 const fs = require("fs");
 
@@ -447,7 +447,7 @@ accountController.put(
 accountController.put(
   "/update/:id",
 
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     try {
       const error = {};

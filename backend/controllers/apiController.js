@@ -6,7 +6,7 @@ const Pusher = require("pusher");
 const municipality = "Malolos";
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
-const admin = require("firebase-admin");
+const { firebase } = require("../utils/config");
 
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
@@ -16,14 +16,14 @@ const pusher = new Pusher({
   useTLS: true,
 });
 
-admin.initializeApp({
-  credential: admin.credential.cert({
+/* firebase.initializeApp({
+  credential: firebase.credential.cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
     privateKey: process.env.FIREBASE_PRIVATE_KEY,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   }),
 });
-
+ */
 apiController.get("/signal", async (req, res) => {
   try {
     const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
@@ -348,7 +348,7 @@ const sendNotificationTopic = (title, body, topic) => {
     topic: topic,
   };
 
-  admin
+  firebase
     .messaging()
     .send(message)
     .then((response) => {
@@ -367,7 +367,7 @@ const sendNotificationToken = (title, body, tokens) => {
     tokens: tokens,
   };
 
-  admin
+  firebase
     .messaging()
     .sendMulticast(message)
     .then((response) => {

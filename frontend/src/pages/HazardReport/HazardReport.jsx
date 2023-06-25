@@ -105,7 +105,9 @@ const HazardReport = ({ type = "add" }) => {
           setTitle(data.title);
           setDescription(data.description);
           setCategory(data.category);
-          setProofUrl(`http://localhost:5000/images/Safety Tip/${data.proof}`);
+          setProofUrl(
+            `https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/safety-tips/${data.proof}`
+          );
           console.log(data.category);
           console.log(category);
         } catch (error) {

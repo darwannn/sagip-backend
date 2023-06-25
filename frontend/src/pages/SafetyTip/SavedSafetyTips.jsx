@@ -53,7 +53,7 @@ const SavedSafetyTips = () => {
             <div key={safetyTip._id}>
               <Link to={`/manage/safety-tips/${safetyTip._id}`}>
                 <img
-                  src={`http://localhost:5000/images/Safety Tip/${safetyTip.image}`}
+                  src={`https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/safety-tips/${safetyTip.image}`}
                   alt="Blog"
                   style={{ width: "300px" }}
                 />

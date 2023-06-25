@@ -11,7 +11,7 @@ const {
 } = require("./functionController");
 
 const uploadMiddleware = require("../middlewares/uploadMiddleware");
-const upload = uploadMiddleware("assets/images/Hazard Report");
+/* const upload = uploadMiddleware("assets/images/Hazard Report"); */
 
 const fs = require("fs");
 
@@ -19,7 +19,7 @@ hazardReportController.post(
   "/add",
   tokenMiddleware,
 
-  upload.single("proof"),
+  /*   upload.single("proof"), */
   isInMalolos,
   async (req, res) => {
     const error = {};
@@ -157,7 +157,7 @@ hazardReportController.get("/:id", async (req, res) => {
 hazardReportController.put(
   "/update/:id",
   tokenMiddleware,
-  upload.single("image"),
+  /*   upload.single("image"), */
   async (req, res) => {
     const error = {};
     try {
