@@ -64,7 +64,7 @@ const SafetyTipInput = ({ type }) => {
           setContent(data.content);
           setCategory(data.category);
           setImageUrl(
-            `https://sagip.cyclic.app/images/Safety Tip/${data.image}`
+            `https://sagip-production.up.railway.app/images/Safety Tip/${data.image}`
           );
           console.log(data.category);
           console.log(category);

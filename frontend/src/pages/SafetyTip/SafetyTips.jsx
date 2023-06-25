@@ -108,7 +108,7 @@ const SafetyTips = () => {
               <div key={safetyTip._id}>
                 <Link to={`/manage/safety-tips/${safetyTip._id}`}>
                   <img
-                    src={`https://sagip.cyclic.app/images/Safety Tip/${safetyTip.image}`}
+                    src={`https://sagip-production.up.railway.app/images/Safety Tip/${safetyTip.image}`}
                     alt=""
                     style={{ width: "300px" }}
                   />

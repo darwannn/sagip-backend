@@ -163,7 +163,7 @@ const ManageEmergencyFacility = () => {
             setContactNumber(data.contactNumber);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setImageUrl(
-              `https://sagip.cyclic.app/images/Emergency Facility/${data.image}`
+              `https://sagip-production.up.railway.app/images/Emergency Facility/${data.image}`
             );
           } else {
             navigate(`/manage/emergency-facility`);

@@ -106,7 +106,7 @@ const HazardReport = ({ type = "add" }) => {
           setDescription(data.description);
           setCategory(data.category);
           setProofUrl(
-            `https://sagip.cyclic.app/images/Safety Tip/${data.proof}`
+            `https://sagip-production.up.railway.app/images/Safety Tip/${data.proof}`
           );
           console.log(data.category);
           console.log(category);

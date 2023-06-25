@@ -72,7 +72,7 @@ const AccountInput = ({ type }) => {
         setAttempt(data.attempt);
         setImage(data.profilePicture);
         setImageUrl(
-          `https://sagip.cyclic.app/images/User/${data.profilePicture}`
+          `https://sagip-production.up.railway.app/images/User/${data.profilePicture}`
         );
       } catch (error) {
         console.error(error);

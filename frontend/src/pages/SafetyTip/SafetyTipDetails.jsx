@@ -55,7 +55,7 @@ const SafetyTipDetails = () => {
         <Link to="/manage/safety-tips">Go Back</Link>
         <div>
           <img
-            src={`https://sagip.cyclic.app/images/Safety Tip/${safetyTipDetails.image}`}
+            src={`https://sagip-production.up.railway.app/images/Safety Tip/${safetyTipDetails.image}`}
             style={{ width: "300px" }}
           />
           <div>

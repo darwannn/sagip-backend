@@ -106,7 +106,7 @@ function EmergencyFacility() {
 
     setCategory(emergencyFacility.category);
     setImage(
-      `https://sagip.cyclic.app/images/Emergency Facility/${emergencyFacility.image}`
+      `https://sagip-production.up.railway.app/images/Emergency Facility/${emergencyFacility.image}`
     );
 
     setIsFull(emergencyFacility.isFull);

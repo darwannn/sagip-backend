@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://sagip.cyclic.app";
+const BASE_URL = "https://sagip-production.up.railway.app";
 
 export const request = async (url, method, headers = {}, body = {}) => {
   try {
