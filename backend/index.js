@@ -24,7 +24,7 @@ mongoose.set("strictQuery", false);
 mongoose.connect(process.env.MONGO_URL, () =>
   console.log("MongoDB has been started successfully")
 );
-
+//
 app.use(express.static("assets"));
 
 app.use(cors());
