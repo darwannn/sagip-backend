@@ -25,14 +25,4 @@ const TeamSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Populate the 'head' and 'members' fields with the corresponding User objects
-TeamSchema.pre("findOne", autoPopulate);
-TeamSchema.pre("find", autoPopulate);
-
-function autoPopulate(next) {
-  this.populate("head");
-  this.populate("members");
-  next();
-}
-
 module.exports = mongoose.model("Team", TeamSchema);

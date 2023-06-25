@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://sagip-production.up.railway.app";
+const BASE_URL = "http://localhost:5000";
 
 export const request = async (url, method, headers = {}, body = {}) => {
   try {

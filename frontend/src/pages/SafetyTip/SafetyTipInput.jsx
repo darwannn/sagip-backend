@@ -46,9 +46,7 @@ const SafetyTipInput = ({ type }) => {
           setTitle(data.title);
           setContent(data.content);
           setCategory(data.category);
-          setImageUrl(
-            `https://sagip-production.up.railway.app/images/Safety Tip/${data.image}`
-          );
+          setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
           console.log(data.category);
           console.log(category);
         } catch (error) {
@@ -91,9 +89,9 @@ const SafetyTipInput = ({ type }) => {
       const { success, message } = data;
       if (success) {
         toast.success(message);
-        navigate(
+        /*  navigate(
           `/manage/safety-tips/${type === "add" ? data.safetyTip._id : id}`
-        );
+        ); */
       } else {
         if (message !== "input error") {
           toast.error(message);

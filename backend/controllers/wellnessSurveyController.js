@@ -7,27 +7,45 @@ const { isEmpty } = require("./functionController");
 wellnessSurveyController.post("/add", tokenMiddleware, async (req, res) => {
   const error = {};
   try {
-    const { title, category } = req.body;
+    const { title, category, isActive } = req.body;
 
     if (isEmpty(title)) error["title"] = "Required field";
     if (isEmpty(category)) error["category"] = "Required field";
 
-    if (Object.keys(error).length === 0) {
-      const wellnessSurvey = await WellnessSurvey.create({
-        title,
-        category,
-      });
+    const activeWellnessSurvey = await WellnessSurvey.find({
+      isActive: true,
+    });
 
-      if (wellnessSurvey) {
-        return res.status(200).json({
-          success: true,
-          message: "Added successfully",
-          wellnessSurvey,
+    if (Object.keys(error).length === 0) {
+      if (!(activeWellnessSurvey.length !== 0 && isActive)) {
+        /* error["category"] = "There is already an active survey"; */
+
+        const activeWellnessSurvey = await WellnessSurvey.find({
+          isActive: true,
         });
+
+        const wellnessSurvey = await WellnessSurvey.create({
+          title,
+          category,
+          isActive,
+        });
+
+        if (wellnessSurvey) {
+          return res.status(200).json({
+            success: true,
+            message: "Added successfully",
+            wellnessSurvey,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error",
+          message: "There is already an active survey",
         });
       }
     }
@@ -296,7 +314,7 @@ wellnessSurveyController.get("/:id", async (req, res) => {
       /*      return res.status(200).json(wellnessSurvey); */
       return res.status(200).json({
         success: true,
-        message: "found",
+        /*    message: "found", */
         ...wellnessSurvey._doc,
       });
     } else {
@@ -324,12 +342,28 @@ wellnessSurveyController.put(
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
 
+      const activeWellnessSurvey = await WellnessSurvey.find({
+        isActive: true,
+      });
+
+      /*    console.log("====================================");
+      console.log(activeWellnessSurvey.length === 0);
+      console.log("====================================");
+      if (activeWellnessSurvey.length !== 0) {
+        if (activeWellnessSurvey._id !== req.params.id && isActive) {
+          error["category"] = "There is already an active survey";
+        }
+      } */
+
       if (Object.keys(error).length === 0) {
         //already an active
-        const activeWellnessSurvey = await WellnessSurvey.find({
-          isActive: true,
-        });
-        if (!(activeWellnessSurvey._id !== req.params.id && isActive)) {
+        if (
+          !(
+            activeWellnessSurvey.length !== 0 &&
+            activeWellnessSurvey._id !== req.params.id &&
+            isActive
+          )
+        ) {
           const updateFields = { title, isActive, category };
 
           const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
