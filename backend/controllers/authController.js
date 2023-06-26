@@ -632,7 +632,7 @@ authController.put(
           message: "input error",
         });
       } else {
-        if (isImage(req.file)) {
+        if (isImage(req.file.originalname)) {
           return res.status(500).json({
             success: false,
             image: "Only PNG, JPEG, and JPG files are allowed",

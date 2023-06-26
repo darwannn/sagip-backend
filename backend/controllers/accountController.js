@@ -511,7 +511,7 @@ accountController.put(
         if (!req.file) {
           error["image"] = "Required field";
         } else {
-          if (isImage(req.file)) {
+          if (isImage(req.file.originalname)) {
             error["image"] = "Only PNG, JPEG, and JPG files are allowed";
           } else {
             if (isLessThanSize(req.file, 10 * 1024 * 1024)) {

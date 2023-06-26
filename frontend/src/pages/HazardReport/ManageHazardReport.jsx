@@ -165,9 +165,15 @@ const ManageEmergencyFacility = () => {
             setHazardStatus(data.status);
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
-            setProof(
-              `http://localhost:5000/images/Hazard Report/${data.proof}`
-            );
+            if (data.proof.includes(".mp4")) {
+              setProof(
+                `https://res.cloudinary.com/dantwvqrv/video/upload/v1687769867/sagip/media/hazard-report/${data.proof}`
+              );
+            } else {
+              setProof(
+                `https://res.cloudinary.com/dantwvqrv/image/upload/v1687769867/sagip/media/hazard-report/${data.proof}`
+              );
+            }
           } else {
             navigate(`/manage/hazard-report`);
           }

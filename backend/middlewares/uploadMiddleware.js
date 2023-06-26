@@ -2,7 +2,7 @@ const multer = require("multer");
 const path = require("path");
 
 // Multer config
-module.exports = multer({
+const uploadMiddleware = multer({
   storage: multer.diskStorage({
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
@@ -14,3 +14,5 @@ module.exports = multer({
     cb(null, true);
   }, */
 });
+
+module.exports = uploadMiddleware;

@@ -6,7 +6,7 @@ const User = require("../models/User");
 /* const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); */ // 1 day expiration
 const codeExpiration = new Date(new Date().getTime() + 30 * 60000); //will expire after 30 minutes
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
-
+const { cloudinary } = require("../utils/config");
 const isEmpty = (value) => {
   if (
     value === "" ||
@@ -20,7 +20,7 @@ const isEmpty = (value) => {
 
 const isImage = (file) => {
   const allowedExtensions = [".png", ".jpeg", ".jpg"];
-  const extname = path.extname(file.originalname).toLowerCase();
+  const extname = path.extname(file).toLowerCase();
   console.log("ssss");
   console.log("s" + extname);
   if (!allowedExtensions.includes(extname)) {
@@ -204,6 +204,43 @@ const updateVerificationCode = async (id) => {
   return user;
 };
 
+const cloudinaryUploader = async (
+  action,
+  filePath,
+  resource_type,
+  folderPath,
+  public_id
+) => {
+  let cloudinaryResult;
+
+  try {
+    if (action === "upload") {
+      await cloudinary.uploader
+        .upload(filePath, {
+          resource_type: resource_type,
+          folder: folderPath,
+          public_id: public_id.replace(/\.[^/.]+$/, ""),
+        })
+        .then(async (result) => {
+          cloudinaryResult = result;
+        });
+    } else if (action === "destroy") {
+      await cloudinary.uploader
+        .destroy(`${folderPath}/${public_id.replace(/\.[^/.]+$/, "")}`, {
+          type: "upload",
+          resource_type: resource_type,
+        })
+        .then(async (result) => {
+          cloudinaryResult = result;
+        });
+    }
+  } catch (error) {
+    cloudinaryResult = "error";
+  }
+
+  return cloudinaryResult;
+};
+
 module.exports = {
   isEmpty,
   isImage,
@@ -226,4 +263,5 @@ module.exports = {
   updateVerificationCode,
   isVideo,
   isValidExtensions,
+  cloudinaryUploader,
 };

@@ -8,9 +8,12 @@ const {
   isValidExtensions,
   isVideo,
   isLessThanSize,
+  cloudinaryUploader,
 } = require("./functionController");
 
-const uploadMiddleware = require("../middlewares/uploadMiddleware");
+const upload = require("../middlewares/uploadMiddleware");
+const folderPath = "sagip/media/hazard-report";
+const { cloudinary } = require("../utils/config");
 /* const upload = uploadMiddleware("assets/images/Hazard Report"); */
 
 const fs = require("fs");
@@ -19,9 +22,10 @@ hazardReportController.post(
   "/add",
   tokenMiddleware,
 
-  /*   upload.single("proof"), */
+  upload.single("proof"),
   isInMalolos,
   async (req, res) => {
+    let resource_type = "image";
     const error = {};
     try {
       const {
@@ -38,7 +42,9 @@ hazardReportController.post(
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["longitude"] = "Mark a location";
-
+      console.log("=====req.file===============================");
+      console.log(req.file);
+      console.log("====================================");
       if (!req.file) {
         error["proof"] = "Required field";
       } else {
@@ -51,6 +57,7 @@ hazardReportController.post(
             }
           }
           if (!isValidExtensions(req.file, [".mp4"])) {
+            resource_type = "video";
             if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
               error["proof"] = "File size should be less than 50MB";
             }
@@ -59,23 +66,39 @@ hazardReportController.post(
       }
 
       if (Object.keys(error).length === 0) {
-        const hazardReport = await HazardReport.create({
-          description,
-          category,
-          latitude,
-          longitude,
-          street,
-          municipality,
-          status,
-          proof: req.file.filename,
-          userId: req.user.id,
-        });
-        if (hazardReport) {
-          return res.status(200).json({
-            success: true,
-            message: "Added Successfully",
-            hazardReport,
+        const cloud = await cloudinaryUploader(
+          "upload",
+          req.file.path,
+          resource_type,
+          folderPath,
+          req.file.filename
+        );
+
+        if (cloud !== "error") {
+          console.log("File uploaded successfully:", cloud.secure_url);
+          const hazardReport = await HazardReport.create({
+            description,
+            category,
+            latitude,
+            longitude,
+            street,
+            municipality,
+            status,
+            proof: `${cloud.original_filename}.${cloud.format}`,
+            userId: req.user.id,
           });
+          if (hazardReport) {
+            return res.status(200).json({
+              success: true,
+              message: "Added Successfully",
+              hazardReport,
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
         } else {
           return res.status(500).json({
             success: false,
@@ -217,23 +240,36 @@ hazardReportController.delete(
   tokenMiddleware,
   async (req, res) => {
     try {
-      const hazardReport = await HazardReport.findByIdAndDelete(req.params.id);
+      let resource_type = "image";
 
-      if (hazardReport) {
-        const imagePath = `assets/images/Hazard Report/${hazardReport.image}`;
-        fs.unlink(imagePath, (err) => {
-          /* if (err) {
-            return res.status(500).json({
-              success: false,
-              message: "Error deleting the image ",
-            });
-          } else { */
+      const hazardReportImage = await HazardReport.findById(req.params.id);
+      const cloud = await cloudinaryUploader(
+        "destroy",
+        "",
+        resource_type,
+        folderPath,
+        hazardReportImage.image
+      );
+      if (cloud !== "error") {
+        const hazardReport = await HazardReport.findByIdAndDelete(
+          req.params.id
+        );
+
+        if (hazardReport) {
+          if (hazardReport.image.includes(".mp4")) {
+            resource_type = "video";
+          }
+
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",
           });
-          /*  } */
-        });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,
