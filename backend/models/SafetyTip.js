@@ -24,6 +24,10 @@ const SafetyTipSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    status: {
+      type: String,
+      required: true,
+    },
     /* views: {
       type: Number,
       default: 0,

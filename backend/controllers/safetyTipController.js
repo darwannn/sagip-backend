@@ -23,16 +23,18 @@ safetyTipController.post(
   async (req, res) => {
     const error = {};
     try {
-      const { title, content, category } = req.body;
-      console.log("====================================");
+      const { title, content, category, status } = req.body;
+      console.log("======status==============================");
+      console.log(status);
       console.log(title);
       console.log(category);
       console.log("====================================");
+
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
-
+      if (isEmpty(status)) error["status"] = "Required field";
       if (!req.file) {
         error["image"] = "Required field";
       } else {
@@ -58,6 +60,7 @@ safetyTipController.post(
               title,
               content,
               category,
+              status,
               image: `${result.original_filename}.${result.format}`,
             });
             if (safetyTip) {
@@ -120,7 +123,58 @@ safetyTipController.get("/", async (req, res) => {
     });
   }
 });
+safetyTipController.get("/published", async (req, res) => {
+  try {
+    const safetyTips = await SafetyTip.find({ status: "published" });
+    if (safetyTips) {
+      return res.status(200).json(safetyTips);
+      return res.status(200).json({
+        /* success: true,
+      message: "Record found", 
+      safetyTips,*/
+        ...safetyTips,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
 
+/* get specific  */
+safetyTipController.get("/published/:id", async (req, res) => {
+  try {
+    const safetyTip = await SafetyTip.findOne({
+      _id: req.params.id,
+      status: "published",
+    });
+    if (safetyTip) {
+      /*      return res.status(200).json(safetyTip); */
+      return res.status(200).json({
+        success: true,
+        message: "found",
+        ...safetyTip._doc,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
+  }
+});
 /* get specific  */
 safetyTipController.get("/:id", async (req, res) => {
   try {
@@ -157,12 +211,13 @@ safetyTipController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { title, content, category, hasChanged } = req.body;
+      const { title, content, category, status, hasChanged } = req.body;
 
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
+      if (isEmpty(status)) error["status"] = "Required field";
       console.log("====================================");
       console.log();
       console.log("====================================");
@@ -181,9 +236,11 @@ safetyTipController.put(
       }
 
       if (Object.keys(error).length === 0) {
-        const updateFields = { title, content, category };
+        const updateFields = { title, content, category, status };
         /*  let imagePath = ""; */
-
+        console.log("====================================");
+        console.log(status);
+        console.log("====================================");
         if (hasChanged && req.file) {
           /*       updateFields.image = req.file.filename; */
           /* const safetyTipImage = await SafetyTip.findById(req.params.id);
