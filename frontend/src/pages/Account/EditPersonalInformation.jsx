@@ -71,7 +71,9 @@ const AccountInput = ({ type }) => {
         setUserType(data.userType);
         setAttempt(data.attempt);
         setImage(data.profilePicture);
-        setImageUrl(`http://localhost:5000/images/User/${data.profilePicture}`);
+        setImageUrl(
+          `https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/user/${data.profilePicture}`
+        );
       } catch (error) {
         console.error(error);
       }

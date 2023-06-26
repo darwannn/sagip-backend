@@ -163,7 +163,7 @@ const ManageEmergencyFacility = () => {
             setContactNumber(data.contactNumber);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
             setImageUrl(
-              `http://localhost:5000/images/Emergency Facility/${data.image}`
+              `https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/emergency-facility/${data.image}`
             );
           } else {
             navigate(`/manage/emergency-facility`);

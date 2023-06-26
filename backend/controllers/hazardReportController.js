@@ -11,18 +11,19 @@ const {
   cloudinaryUploader,
 } = require("./functionController");
 
-const upload = require("../middlewares/uploadMiddleware");
+const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/hazard-report";
 const { cloudinary } = require("../utils/config");
-/* const upload = uploadMiddleware("assets/images/Hazard Report"); */
+/* const upload = multerMiddleware("assets/images/Hazard Report"); */
 
 const fs = require("fs");
+const { log } = require("console");
 
 hazardReportController.post(
   "/add",
   tokenMiddleware,
 
-  upload.single("proof"),
+  multerMiddleware.single("proof"),
   isInMalolos,
   async (req, res) => {
     let resource_type = "image";
@@ -48,15 +49,18 @@ hazardReportController.post(
       if (!req.file) {
         error["proof"] = "Required field";
       } else {
-        if (isValidExtensions(req.file, [".png", ".jpeg", ".jpg", ".mp4"])) {
-          error["proof"] = "Only PNG, JPEG, and JPG files are allowed";
+        if (
+          !isVideo(req.file.originalname) &&
+          !isImage(req.file.originalname)
+        ) {
+          error["proof"] = "Only PNG, JPEG, JPG, and MP4 files are allowed";
         } else {
-          if (!isValidExtensions(req.file, [".png", ".jpeg", ".jpg"])) {
+          if (!isImage(req.file.originalname)) {
             if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
               error["proof"] = "File size should be less than 10MB";
             }
           }
-          if (!isValidExtensions(req.file, [".mp4"])) {
+          if (!isVideo(req.file.originalname)) {
             resource_type = "video";
             if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
               error["proof"] = "File size should be less than 50MB";
@@ -180,7 +184,7 @@ hazardReportController.get("/:id", async (req, res) => {
 hazardReportController.put(
   "/update/:id",
   tokenMiddleware,
-  /*   upload.single("image"), */
+  /*   multerMiddleware.single("image"), */
   async (req, res) => {
     const error = {};
     try {
@@ -243,12 +247,20 @@ hazardReportController.delete(
       let resource_type = "image";
 
       const hazardReportImage = await HazardReport.findById(req.params.id);
+
+      if (!isVideo(hazardReportImage.proof)) {
+        resource_type = "video";
+      }
+      console.log("====================================");
+      console.log(resource_type);
+      console.log("====================================");
+
       const cloud = await cloudinaryUploader(
         "destroy",
         "",
         resource_type,
         folderPath,
-        hazardReportImage.image
+        hazardReportImage.proof
       );
       if (cloud !== "error") {
         const hazardReport = await HazardReport.findByIdAndDelete(
@@ -256,10 +268,6 @@ hazardReportController.delete(
         );
 
         if (hazardReport) {
-          if (hazardReport.image.includes(".mp4")) {
-            resource_type = "video";
-          }
-
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",

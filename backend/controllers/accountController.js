@@ -16,6 +16,7 @@ const {
   isContactNumber,
   generateCode,
   updateVerificationCode,
+  cloudinaryUploader,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -23,8 +24,10 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const currentDate = new Date();
 const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
 
-const uploadMiddleware = require("../middlewares/uploadMiddleware");
-/* const upload = uploadMiddleware("assets/images/User"); */
+const multerMiddleware = require("../middlewares/multerMiddleware");
+
+const folderPath = "sagip/media/user";
+const { cloudinary } = require("../utils/config");
 
 const fs = require("fs");
 
@@ -447,7 +450,7 @@ accountController.put(
 accountController.put(
   "/update/:id",
 
-  /*   upload.single("image"), */
+  multerMiddleware.single("image"),
   async (req, res) => {
     try {
       const error = {};
@@ -543,14 +546,37 @@ accountController.put(
           status,
           hasChanged,
         };
-        let imagePath = "";
+        /*  let imagePath = ""; */
 
         if (hasChanged && req.file) {
+          const userImage = await User.findById(req.params.id);
+          if (!userImage.profilePicture.includes("user_no_image")) {
+            await cloudinaryUploader(
+              "destroy",
+              "",
+              "image",
+              folderPath,
+              userImage.profilePicture
+            );
+          }
           updateFields.profilePicture = req.file.filename;
 
-          const userImage = await User.findById(req.params.id);
-          if (userImage) {
-            imagePath = `assets/images/User/${userImage.profilePicture}`;
+          const cloud = await cloudinaryUploader(
+            "upload",
+            req.file.path,
+            "image",
+            folderPath,
+            req.file.filename
+          );
+          if (cloud !== "error") {
+            /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
+                cloud.format
+              }`; */
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
           }
         }
 
@@ -559,20 +585,6 @@ accountController.put(
         });
 
         if (user) {
-          if (hasChanged && req.file) {
-            if (!imagePath.includes("user_no_image")) {
-              console.log(imagePath);
-              fs.unlink(imagePath, (err) => {
-                /*  if (err) {
-                  return res.status(500).json({
-                    success: false,
-                    message: "Error deleting the image",
-                  });
-                } */
-              });
-            }
-          }
-
           return res.status(200).json({
             success: true,
             message: "Profile Updated Successfully",

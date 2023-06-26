@@ -38,7 +38,7 @@ const isValidExtensions = (file, extensions) => {
 };
 const isVideo = (file) => {
   const allowedExtensions = [".mp4"];
-  const extname = path.extname(file.originalname).toLowerCase();
+  const extname = path.extname(file).toLowerCase();
   console.log("ssss");
   console.log("s" + extname);
   if (!allowedExtensions.includes(extname)) {
@@ -235,6 +235,9 @@ const cloudinaryUploader = async (
         });
     }
   } catch (error) {
+    console.log("====================================");
+    console.log(error);
+    console.log("====================================");
     cloudinaryResult = "error";
   }
 

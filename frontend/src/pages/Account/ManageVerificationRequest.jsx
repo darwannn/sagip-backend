@@ -288,14 +288,16 @@ const VerificationRequest = () => {
               (picture, index) => (
                 <>
                   <img
-                    src={`http://localhost:5000/images/User/${picture}`}
+                    src={`https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/user/${picture}`}
                     key={index}
                     style={{ width: "300px" }}
                     onClick={() => setToggler(!toggler)}
                   />
                   <FsLightbox
                     toggler={toggler}
-                    sources={[`http://localhost:5000/images/User/${picture}`]}
+                    sources={[
+                      `https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/user/${picture}`,
+                    ]}
                     type="image"
                   />
                 </>

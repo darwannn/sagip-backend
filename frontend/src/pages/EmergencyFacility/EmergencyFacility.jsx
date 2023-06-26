@@ -106,7 +106,7 @@ function EmergencyFacility() {
 
     setCategory(emergencyFacility.category);
     setImage(
-      `http://localhost:5000/images/Emergency Facility/${emergencyFacility.image}`
+      `https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/emergency-facility/${emergencyFacility.image}`
     );
 
     setIsFull(emergencyFacility.isFull);

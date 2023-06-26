@@ -20,6 +20,7 @@ const {
   generateCode,
   generateToken,
   updateVerificationCode,
+  cloudinaryUploader,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -29,8 +30,11 @@ const { sendSMS, apiController } = require("./apiController");
 /* const currentDate = new Date(); */
 const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
 
-const uploadMiddleware = require("../middlewares/uploadMiddleware");
-/* const upload = uploadMiddleware("assets/images/User"); */
+const multerMiddleware = require("../middlewares/multerMiddleware");
+/* const upload = multerMiddleware("assets/images/User"); */
+
+const folderPath = "sagip/media/user";
+const { cloudinary } = require("../utils/config");
 
 const fs = require("fs");
 
@@ -622,7 +626,7 @@ authController.put("/resend-code", tokenMiddleware, async (req, res) => {
 authController.put(
   "/verify-identity",
   tokenMiddleware,
-  /*   upload.single("selfieImage"), */
+  multerMiddleware.single("selfieImage"),
   async (req, res) => {
     try {
       if (!req.file) {
@@ -648,25 +652,39 @@ authController.put(
           }
         }
       }
-
-      const user = await User.findByIdAndUpdate(
-        req.user.id,
-        {
-          $push: {
-            verificationPicture: req.file.filename,
-          },
-          $set: {
-            verificationRequestDate: Date.now(),
-          },
-        },
-        { new: true }
+      const cloud = await cloudinaryUploader(
+        "upload",
+        req.file.path,
+        "image",
+        folderPath,
+        req.file.filename
       );
 
-      if (user) {
-        return res.status(200).json({
-          success: true,
-          message: "Verification Request Submitted Successfully",
-        });
+      if (cloud !== "error") {
+        const user = await User.findByIdAndUpdate(
+          req.user.id,
+          {
+            $push: {
+              verificationPicture: `${cloud.original_filename}.${cloud.format}`,
+            },
+            $set: {
+              verificationRequestDate: Date.now(),
+            },
+          },
+          { new: true }
+        );
+
+        if (user) {
+          return res.status(200).json({
+            success: true,
+            message: "Verification Request Submitted Successfully",
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,
@@ -685,7 +703,7 @@ authController.put(
 authController.get(
   "/verification-request",
   tokenMiddleware,
-  /*   upload.single("image"), */
+  /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
       let user = await User.find({});
@@ -723,7 +741,7 @@ authController.get(
 authController.get(
   "/verify-identity/request/:id",
   tokenMiddleware,
-  /*   upload.single("image"), */
+  /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
       /*       console.log("====================================");
@@ -763,7 +781,7 @@ authController.get(
 authController.get(
   "/verify-identity/:id",
   tokenMiddleware,
-  /*   upload.single("image"), */
+  /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
       const user = await User.findById(req.params.id);
@@ -809,13 +827,28 @@ authController.put("/verification-request/:id", async (req, res) => {
     );
 
     if (req.body.action === "reject") {
-      user.verificationPicture.map((picture) => {
-        const imagePath = `assets/images/User/${picture}`;
-        fs.unlink(imagePath, (err) => {});
-      });
-      user.verificationPicture = [];
+      /*     user.verificationPicture.map(async (picture) => { */
+      /* const imagePath = `assets/images/User/${picture}`; */
+      /* fs.unlink(imagePath, (err) => {}); */
+      const cloud = await cloudinaryUploader(
+        "destroy",
+        "",
+        "image",
+        folderPath,
+        user.verificationPicture[0]
+      );
+      /*   }); */
 
-      await user.save();
+      if (cloud !== "error") {
+        user.verificationPicture = [];
+
+        await user.save();
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
     } else {
       user.status = "verified";
       await user.save();
@@ -843,7 +876,7 @@ authController.put("/verification-request/:id", async (req, res) => {
     } else {
       return res.status(500).json({
         success: false,
-        message: "DB Error",
+        message: "Internal Server Error",
       });
     }
   } catch (error) {

@@ -1,9 +1,9 @@
 const emergencyFacilityController = require("express").Router();
 const EmergencyFacility = require("../models/EmergencyFacility");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-const uploadMiddleware = require("../middlewares/uploadMiddleware");
-/* const upload = uploadMiddleware("assets/images/Emergency Facility"); */
-
+const multerMiddleware = require("../middlewares/multerMiddleware");
+/* const upload = multerMiddleware("assets/images/Emergency Facility"); */
+const folderPath = "sagip/media/emergency-facility";
 const fs = require("fs");
 
 const {
@@ -11,12 +11,13 @@ const {
   isImage,
   isLessThanSize,
   isContactNumber,
+  cloudinaryUploader,
 } = require("./functionController");
 
 emergencyFacilityController.post(
   "/add",
   tokenMiddleware,
-  /*   upload.single("image"), */
+  multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
     try {
@@ -47,20 +48,35 @@ emergencyFacilityController.post(
         }
       }
       if (Object.keys(error).length === 0) {
-        const emergencyFacility = await EmergencyFacility.create({
-          name,
-          latitude,
-          longitude,
-          image: req.file.filename,
-          category,
-          contactNumber,
-        });
-        if (emergencyFacility) {
-          return res.status(200).json({
-            success: true,
-            message: "Data added successfully",
-            emergencyFacility,
+        const cloud = await cloudinaryUploader(
+          "upload",
+          req.file.path,
+          "image",
+          folderPath,
+          req.file.filename
+        );
+
+        if (cloud !== "error") {
+          const emergencyFacility = await EmergencyFacility.create({
+            name,
+            latitude,
+            longitude,
+            image: `${cloud.original_filename}.${cloud.format}`,
+            category,
+            contactNumber,
           });
+          if (emergencyFacility) {
+            return res.status(200).json({
+              success: true,
+              message: "Data added successfully",
+              emergencyFacility,
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
         } else {
           return res.status(500).json({
             success: false,
@@ -141,7 +157,7 @@ emergencyFacilityController.get("/:id", async (req, res) => {
 emergencyFacilityController.put(
   "/update/:id",
   tokenMiddleware,
-  /*   upload.single("image"), */
+  multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
     try {
@@ -184,16 +200,37 @@ emergencyFacilityController.put(
 
       if (Object.keys(error).length === 0) {
         const updateFields = { name, latitude, longitude, category, isFull };
-        let imagePath = "";
 
         if (hasChanged && req.file) {
-          updateFields.image = req.file.filename;
-
           const emergencyFacilityImage = await EmergencyFacility.findById(
             req.params.id
           );
-          if (emergencyFacilityImage) {
-            imagePath = `assets/images/Emergency Facility/${emergencyFacilityImage.image}`;
+          await cloudinaryUploader(
+            "destroy",
+            "",
+            "image",
+            folderPath,
+            emergencyFacilityImage.image
+          );
+
+          updateFields.image = req.file.filename;
+          const cloud = await cloudinaryUploader(
+            "upload",
+            req.file.path,
+            "image",
+            folderPath,
+            req.file.filename
+          );
+
+          if (cloud !== "error") {
+            /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
+              cloud.format
+            }`; */
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
           }
         }
 
@@ -204,17 +241,6 @@ emergencyFacilityController.put(
         );
 
         if (emergencyFacility) {
-          if (hasChanged && req.file) {
-            fs.unlink(imagePath, (err) => {
-              /* if (err) {
-                return res.status(500).json({
-                  success: false,
-                  message: "Error deleting the image",
-                });
-              } */
-            });
-          }
-
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -247,25 +273,32 @@ emergencyFacilityController.delete(
   tokenMiddleware,
   async (req, res) => {
     try {
-      const emergencyFacility = await EmergencyFacility.findByIdAndDelete(
+      const emergencyFacilityImage = await EmergencyFacility.findById(
         req.params.id
       );
+      const cloud = await cloudinaryUploader(
+        "destroy",
+        "",
+        "image",
+        folderPath,
+        emergencyFacilityImage.image
+      );
+      if (cloud !== "error") {
+        const emergencyFacility = await EmergencyFacility.findByIdAndDelete(
+          req.params.id
+        );
 
-      if (emergencyFacility) {
-        const imagePath = `assets/images/Emergency Facility/${emergencyFacility.image}`;
-        fs.unlink(imagePath, (error) => {
-          /*  if (error) {
-            return res.status(500).json({
-              success: false,
-              message: "Error deleting the image.",
-            });
-          } else { */
+        if (emergencyFacility) {
           return res.status(200).json({
             success: true,
             message: "Deleted Successfully",
           });
-          /* } */
-        });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,

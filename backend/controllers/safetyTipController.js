@@ -14,8 +14,8 @@ const {
   cloudinaryUploader,
 } = require("./functionController");
 
-const upload = require("../middlewares/uploadMiddleware");
-//const upload = uploadMiddleware("assets/images/Safety Tip");
+const multerMiddleware = require("../middlewares/multerMiddleware");
+
 const folderPath = "sagip/media/safety-tips";
 const { cloudinary } = require("../utils/config");
 
@@ -24,7 +24,7 @@ const fs = require("fs");
 safetyTipController.post(
   "/add",
   tokenMiddleware,
-  upload.single("image"),
+  multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
     try {
@@ -84,7 +84,7 @@ safetyTipController.post(
         } else {
           return res.status(500).json({
             success: false,
-            message: "Internal Server Error: " + error,
+            message: "Internal Server Error",
           });
         }
       }
@@ -212,7 +212,7 @@ safetyTipController.get("/:id", async (req, res) => {
 safetyTipController.put(
   "/update/:id",
   tokenMiddleware,
-  upload.single("image"),
+  multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
     try {
@@ -223,9 +223,7 @@ safetyTipController.put(
         error["content"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(status)) error["status"] = "Required field";
-      console.log("====================================");
-      console.log();
-      console.log("====================================");
+
       if (hasChanged === "true") {
         if (!req.file) {
           error["image"] = "Required field";
@@ -242,10 +240,39 @@ safetyTipController.put(
 
       if (Object.keys(error).length === 0) {
         const updateFields = { title, content, category, status };
-        console.log("====================================");
-        console.log(status);
-        console.log("====================================");
 
+        if (hasChanged && req.file) {
+          const safetyTipImage = await SafetyTip.findById(req.params.id);
+          await cloudinaryUploader(
+            "destroy",
+            "",
+            "image",
+            folderPath,
+            safetyTipImage.image
+          );
+
+          updateFields.image = req.file.filename;
+          const cloud = await cloudinaryUploader(
+            "upload",
+            req.file.path,
+            "image",
+            folderPath,
+            req.file.filename
+          );
+
+          if (cloud !== "error") {
+            /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
+              cloud.format
+            }`; */
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
+
+          /*   safetyTip.save(); */
+        }
         const safetyTip = await SafetyTip.findByIdAndUpdate(
           req.params.id,
           updateFields,
@@ -253,27 +280,6 @@ safetyTipController.put(
         );
 
         if (safetyTip) {
-          if (hasChanged && req.file) {
-            const cloud = await cloudinaryUploader(
-              "upload",
-              req.file.path,
-              "image",
-              folderPath,
-              safetyTip.image
-            );
-
-            if (cloud !== "error") {
-              safetyTip.image = `${cloud.public_id.split("/").pop()}.${
-                cloud.format
-              }`;
-            } else {
-              return res.status(500).json({
-                success: false,
-                message: "Internal Server Error",
-              });
-            }
-            safetyTip.save();
-          }
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
