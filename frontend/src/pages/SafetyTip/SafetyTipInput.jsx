@@ -26,6 +26,7 @@ const SafetyTipInput = ({ type }) => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
 
   const [image, setImage] = useState(null);
@@ -45,6 +46,7 @@ const SafetyTipInput = ({ type }) => {
 
           setTitle(data.title);
           setContent(data.content);
+          setStatus(data.status);
           setCategory(data.category);
           setImageUrl(`http://localhost:5000/images/Safety Tip/${data.image}`);
           console.log(data.category);
@@ -65,6 +67,7 @@ const SafetyTipInput = ({ type }) => {
       formData.append("content", content);
       formData.append("category", category);
       formData.append("hasChanged", hasChanged);
+      formData.append("status", status);
       formData.append("image", image);
 
       let url, method;
@@ -162,6 +165,20 @@ const SafetyTipInput = ({ type }) => {
                     {category}
                   </option>
                 ))}
+              </select>
+            </div>
+            <div>
+              <label>Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="" hidden>
+                  Select a category
+                </option>
+
+                <option value="published">published</option>
+                <option value="draft">draft</option>
               </select>
             </div>
             <div>
