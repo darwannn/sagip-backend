@@ -131,7 +131,10 @@ safetyTipController.get("/published", async (req, res) => {
 /* get specific  */
 safetyTipController.get("/published/:id", async (req, res) => {
   try {
-    const safetyTip = await SafetyTip.findOne({ _id: id, status: "published" });
+    const safetyTip = await SafetyTip.findOne({
+      _id: req.params.id,
+      status: "published",
+    });
     if (safetyTip) {
       /*      return res.status(200).json(safetyTip); */
       return res.status(200).json({
