@@ -126,7 +126,7 @@ authController.post("/register", async (req, res) => {
     } */
 
     if (Object.keys(error).length == 0) {
-      profilePicture = "user_no_image.png";
+      profilePicture = "default.png";
       attempt = 0;
 
       if (verificationCode !== 0) {

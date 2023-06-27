@@ -15,11 +15,13 @@ const SafetyTips = () => {
   useEffect(() => {
     const fetchHazardReport = async () => {
       try {
-        const data = await request("/hazard-report/ongoing", "GET", {
+        const data = await request("/assistance-request/ongoing", "GET", {
           Authorization: `Bearer ${token}`,
         });
 
-        setFilteredHazardReport(data);
+        setFilteredHazardReport(
+          data.filter((report) => report.status !== "resolved")
+        );
       } catch (error) {
         console.error(error);
       }

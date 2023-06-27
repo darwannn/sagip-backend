@@ -1,5 +1,5 @@
-const hazardReportController = require("express").Router();
-const HazardReport = require("../models/HazardReport");
+const assistanceRequestController = require("express").Router();
+const AssistanceRequest = require("../models/AssistanceRequest");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const isInMalolos = require("../middlewares/isInMalolos");
 const {
@@ -9,17 +9,18 @@ const {
   isVideo,
   isLessThanSize,
   cloudinaryUploader,
+  createNotification,
 } = require("./functionController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
-const folderPath = "sagip/media/hazard-report";
+const folderPath = "sagip/media/assistance-request";
 const { cloudinary } = require("../utils/config");
 /* const upload = multerMiddleware("assets/images/Hazard Report"); */
 
 const fs = require("fs");
 const { log } = require("console");
 
-hazardReportController.post(
+assistanceRequestController.post(
   "/add",
   tokenMiddleware,
 
@@ -39,7 +40,6 @@ hazardReportController.post(
         municipality,
       } = req.body;
 
-      //naka default status sa model, wala nang iba
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -81,7 +81,7 @@ hazardReportController.post(
 
         if (cloud !== "error") {
           console.log("File uploaded successfully:", cloud.secure_url);
-          const hazardReport = await HazardReport.create({
+          const assistanceRequest = await AssistanceRequest.create({
             description,
             category,
             latitude,
@@ -92,11 +92,11 @@ hazardReportController.post(
             proof: `${cloud.original_filename}.${cloud.format}`,
             userId: req.user.id,
           });
-          if (hazardReport) {
+          if (assistanceRequest) {
             return res.status(200).json({
               success: true,
               message: "Added Successfully",
-              hazardReport,
+              assistanceRequest,
             });
           } else {
             return res.status(500).json({
@@ -126,20 +126,20 @@ hazardReportController.post(
   }
 );
 
-hazardReportController.get("/", async (req, res) => {
+assistanceRequestController.get("/", async (req, res) => {
   try {
-    const hazardReports = await HazardReport.find({}).populate(
+    const assistanceRequests = await AssistanceRequest.find({}).populate(
       "userId",
       "-password"
     );
 
-    if (hazardReports) {
-      return res.status(200).json(hazardReports);
+    if (assistanceRequests) {
+      return res.status(200).json(assistanceRequests);
       return res.status(200).json({
         /* success: true,
         message: "found", 
-        hazardReports,*/
-        ...hazardReports,
+        assistanceRequests,*/
+        ...assistanceRequests,
       });
     } else {
       return res.status(200).json({
@@ -154,19 +154,20 @@ hazardReportController.get("/", async (req, res) => {
     });
   }
 });
-hazardReportController.get("/ongoing", async (req, res) => {
+
+assistanceRequestController.get("/ongoing", async (req, res) => {
   try {
-    const hazardReports = await HazardReport.find({
+    const assistanceRequest = await AssistanceRequest.find({
       status: "ongoing",
     }).populate("userId", "-password");
 
-    if (hazardReports) {
-      return res.status(200).json(hazardReports);
+    if (assistanceRequest) {
+      return res.status(200).json(assistanceRequest);
       return res.status(200).json({
         /* success: true,
         message: "found", 
-        hazardReports,*/
-        ...hazardReports,
+        assistanceRequest,*/
+        ...assistanceRequest,
       });
     } else {
       return res.status(200).json({
@@ -182,18 +183,17 @@ hazardReportController.get("/ongoing", async (req, res) => {
   }
 });
 
-hazardReportController.get("/:id", async (req, res) => {
+assistanceRequestController.get("/:id", async (req, res) => {
   try {
-    const hazardReport = await HazardReport.findById(req.params.id).populate(
-      "userId",
-      "-password"
-    );
-    if (hazardReport) {
-      /*      return res.status(200).json(hazardReport); */
+    const assistanceRequest = await AssistanceRequest.findById(
+      req.params.id
+    ).populate("userId", "-password");
+    if (assistanceRequest) {
+      /*      return res.status(200).json(assistanceRequest); */
       return res.status(200).json({
         success: true,
         message: "found",
-        ...hazardReport._doc,
+        ...assistanceRequest._doc,
       });
     } else {
       return res.status(200).json({
@@ -209,7 +209,7 @@ hazardReportController.get("/:id", async (req, res) => {
   }
 });
 
-hazardReportController.put(
+assistanceRequestController.put(
   "/update/:id",
   tokenMiddleware,
   /*   multerMiddleware.single("image"), */
@@ -225,24 +225,24 @@ hazardReportController.put(
       }
       console.log(req.params.id);
       if (Object.keys(error).length === 0) {
-        const hazardReport = await HazardReport.findByIdAndUpdate(
+        const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
           req.params.id,
           { status: status },
           { new: true }
         );
-        if (hazardReport) {
+        if (assistanceRequest) {
           console.log(status);
           if (action === "verify") {
             return res.status(200).json({
               success: true,
               message: "Hazard Report Verified",
-              hazardReport,
+              assistanceRequest,
             });
           } else if (action === "resolve") {
             return res.status(200).json({
               success: true,
               message: "Hazard Report Resolved",
-              hazardReport,
+              assistanceRequest,
             });
           }
         } else {
@@ -267,50 +267,71 @@ hazardReportController.put(
   }
 );
 
-hazardReportController.delete(
+assistanceRequestController.put(
   "/delete/:id",
   tokenMiddleware,
   async (req, res) => {
+    const error = {};
     try {
-      let resource_type = "image";
-
-      const hazardReportImage = await HazardReport.findById(req.params.id);
-
-      if (!isVideo(hazardReportImage.proof)) {
-        resource_type = "video";
-      }
+      const { reason, note, userId } = req.body;
       console.log("====================================");
-      console.log(resource_type);
+      console.log(req.params.id);
+      console.log(req.body);
+      console.log(userId);
+      console.log(note);
       console.log("====================================");
+      if (isEmpty(reason)) error["reason"] = "Required field";
+      /*    if (isEmpty(note)) error["note"] = "Required field"; */
+      if (Object.keys(error).length === 0) {
+        let resource_type = "image";
 
-      const cloud = await cloudinaryUploader(
-        "destroy",
-        "",
-        resource_type,
-        folderPath,
-        hazardReportImage.proof
-      );
-      if (cloud !== "error") {
-        const hazardReport = await HazardReport.findByIdAndDelete(
+        const assistanceRequestImage = await AssistanceRequest.findById(
           req.params.id
         );
 
-        if (hazardReport) {
-          return res.status(200).json({
-            success: true,
-            message: "Deleted successfully",
-          });
+        if (!isVideo(assistanceRequestImage.proof)) {
+          resource_type = "video";
+        }
+        console.log("====================================");
+        console.log(resource_type);
+        console.log("====================================");
+
+        const cloud = await cloudinaryUploader(
+          "destroy",
+          "",
+          resource_type,
+          folderPath,
+          assistanceRequestImage.proof
+        );
+        await createNotification(userId, reason, note, "error");
+        if (cloud !== "error") {
+          const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
+            req.params.id
+          );
+
+          if (assistanceRequest) {
+            return res.status(200).json({
+              success: true,
+              message: "Deleted successfully",
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
         } else {
           return res.status(500).json({
             success: false,
             message: "Internal Server Error",
           });
         }
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
       }
     } catch (error) {
       return res.status(500).json({
@@ -321,4 +342,4 @@ hazardReportController.delete(
   }
 );
 
-module.exports = hazardReportController;
+module.exports = assistanceRequestController;

@@ -145,7 +145,7 @@ accountController.post("/create", async (req, res) => {
       } */
 
     if (Object.keys(error).length == 0) {
-      profilePicture = "user_no_image.png";
+      profilePicture = "default.png";
       attempt = 0;
 
       if (verificationCode !== 0) {
@@ -217,7 +217,7 @@ accountController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (user) {
-      if (user.profilePicture !== "user_no_image.png") {
+      if (user.profilePicture !== "default.png") {
         const imagePath = `assets/images/User/${user.profilePicture}`;
         fs.unlink(imagePath, (err) => {
           /* if (err) {
@@ -550,7 +550,7 @@ accountController.put(
 
         if (hasChanged && req.file) {
           const userImage = await User.findById(req.params.id);
-          if (!userImage.profilePicture.includes("user_no_image")) {
+          if (!userImage.profilePicture.includes("default")) {
             await cloudinaryUploader(
               "destroy",
               "",

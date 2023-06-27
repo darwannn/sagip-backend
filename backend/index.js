@@ -12,6 +12,7 @@ const safetyTipController = require("./controllers/safetyTipController");
 const emergencyFacilityController = require("./controllers/emergencyFacilityController");
 const teamController = require("./controllers/teamController");
 const hazardReportController = require("./controllers/hazardReportController");
+const assistanceRequestController = require("./controllers/assistanceRequestController");
 const notificationController = require("./controllers/notificationController");
 const wellnessSurveyController = require("./controllers/wellnessSurveyController");
 
@@ -39,6 +40,7 @@ app.use("/emergency-facility", emergencyFacilityController);
 app.use("/api", apiController);
 app.use("/team", teamController);
 app.use("/hazard-report", hazardReportController);
+app.use("/assistance-request", assistanceRequestController);
 app.use("/notification", notificationController);
 app.use("/wellness-survey", wellnessSurveyController);
 

@@ -60,6 +60,11 @@ import HazardReport from "./pages/HazardReport/HazardReport";
 /* import HazardReportDetails from "./pages/HazardReport/HazardReportDetails"; */
 import ManageHazardReport from "./pages/HazardReport/ManageHazardReport";
 
+import Request from "./pages/AssistanceRequest/Request";
+import AssistanceRequest from "./pages/AssistanceRequest/AssistanceRequest";
+/* import HazardReportDetails from "./pages/HazardReport/HazardReportDetails"; */
+import ManageAssistanceRequest from "./pages/AssistanceRequest/ManageAssistanceRequest";
+
 import Map from "./pages/Map";
 import ResponderMap from "./pages/ResponderMap";
 
@@ -242,21 +247,32 @@ const App = () => {
           element={<WellnessSurveyInput type="add" />}
         />
 
-        <Route path="/hazard" element={<Hazard />} />
-        <Route path="/hazard/report" element={<HazardReport />} />
         {/*    <Route path="/hazard/map" element={<HazardReportDetails />} />
         <Route path="/hazard/map/:id" element={<HazardReportDetails />} /> */}
+        <Route path="/hazard" element={<Hazard />} />
+        <Route path="/hazard/report" element={<HazardReport />} />
         <Route path="/manage/hazard-report" element={<ManageHazardReport />} />
+        <Route
+          path="/manage/hazard-report/:id"
+          element={<ManageHazardReport />}
+        />
+
+        <Route path="/request" element={<Request />} />
+        <Route path="/assistance/request" element={<AssistanceRequest />} />
+        <Route
+          path="/manage/assistance-request"
+          element={<ManageAssistanceRequest />}
+        />
+        <Route
+          path="/manage/assistance-request/:id"
+          element={<ManageAssistanceRequest />}
+        />
         <Route
           path="/manage/wellness-survey/report/:id"
           element={<WellnessSurveyReport />}
         />
         <Route path="/test" element={<Test />} />
         <Route path="/test2" element={<Test2 />} />
-        <Route
-          path="/manage/hazard-report/:id"
-          element={<ManageHazardReport />}
-        />
         <Route path="/manage/team/add" element={<TeamInput />} type="add" />
         {/* if no route path found*/}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}

@@ -91,14 +91,20 @@ function EmergencyFacility() {
           "akin itong notifcation, my notification use effect should be reloaded, toast should appear"
         );
       }
-      /*  if (data.to === user.id) {
-        alert("akin to");
-      } */
+
       console.log(data.content.latitude);
       console.log("+" + data.content.longitude);
       if (data.purpose === "location") {
         setResponderLatitude(data.content.latitude);
         setResponderLongitude(data.content.longitude);
+        getResponderRoute(
+          "DRIVING",
+          `${data.content.latitude},${data.content.longitude}`
+        );
+
+        console.log(duration);
+
+        console.log(distance);
       }
     });
     return () => {
@@ -113,7 +119,7 @@ function EmergencyFacility() {
           "/emergency-facility/",
           "GET"
         );
-        const hazardReportData = await request("/hazard-report/", "GET");
+        const hazardReportData = await request("/hazard-report/ongoing", "GET");
 
         setEmergencyFacility(emergencyFacilityData);
         setHazardReport(hazardReportData);
@@ -219,6 +225,35 @@ function EmergencyFacility() {
 
       console.log(results);
     } catch (error) {
+      /*  if (results.includes("no result")) { */
+      toast.error("no direction available");
+      /*  } */
+    }
+  }
+
+  async function getResponderRoute(transitType, origin) {
+    try {
+      //get latest report
+      const directionsService = new window.google.maps.DirectionsService();
+      let mapOptions = {};
+      /*  destination: destiantionRef.current.value, */
+
+      mapOptions = {
+        origin: `14.824108, 120.924803`,
+        destination: `14.791364, 120.932266`,
+        travelMode: "DRIVING",
+      };
+
+      const results = await directionsService.route(mapOptions);
+      //setDirectionsResponse(results);
+      setDistance(results.routes[0].legs[0].distance.text);
+      setDuration(results.routes[0].legs[0].duration.text);
+      setSteps(results.routes[0].legs[0].steps);
+
+      console.log(results);
+    } catch (error) {
+      console.log(error);
+
       /*  if (results.includes("no result")) { */
       toast.error("no direction available");
       /*  } */

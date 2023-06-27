@@ -69,6 +69,9 @@ function Home() {
       console.log("Received event:", data);
       if (data.to === user.id && data.purpose === "notification") {
         alert("I received a notification");
+        console.log("====================================");
+        console.log(data.content);
+        console.log("====================================");
       }
       if (data.purpose === "reload") {
         alert("Reload useEffect");
@@ -89,8 +92,8 @@ function Home() {
         Authorization: `Bearer ${token}`,
       },
       {
-        pusherTo: "648070cf9a74896d21b7d494",
-        purpose: "reload",
+        pusherTo: "64788dfd295e2f184e55d20f",
+        purpose: "notification",
         content: {
           latitude: 14.8527,
           longitude: 120.816,
