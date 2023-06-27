@@ -15,7 +15,7 @@ const {
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/assistance-request";
 const { cloudinary } = require("../utils/config");
-/* const upload = multerMiddleware("assets/images/Hazard Report"); */
+/* const upload = multerMiddleware("assets/images/Assistance Request"); */
 
 const fs = require("fs");
 const { log } = require("console");
@@ -159,7 +159,16 @@ assistanceRequestController.get("/ongoing", async (req, res) => {
   try {
     const assistanceRequest = await AssistanceRequest.find({
       status: "ongoing",
-    }).populate("userId", "-password");
+    })
+      .populate({
+        path: "assignedTeam",
+        populate: [
+          { path: "members", select: "-password" },
+          { path: "head", select: "-password" },
+        ],
+      })
+      .populate("userId", "-password")
+      .exec();
 
     if (assistanceRequest) {
       return res.status(200).json(assistanceRequest);
@@ -216,35 +225,21 @@ assistanceRequestController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { action } = req.body;
-      let = status = "";
-      if (action === "verify") {
-        status = "ongoing";
-      } else if (action === "resolve") {
-        status = "resolved";
-      }
-      console.log(req.params.id);
+      const { assignedTeam } = req.body;
+
+      console.log(assignedTeam);
       if (Object.keys(error).length === 0) {
         const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
           req.params.id,
-          { status: status },
+          { status: "ongoing", assignedTeam },
           { new: true }
         );
         if (assistanceRequest) {
-          console.log(status);
-          if (action === "verify") {
-            return res.status(200).json({
-              success: true,
-              message: "Hazard Report Verified",
-              assistanceRequest,
-            });
-          } else if (action === "resolve") {
-            return res.status(200).json({
-              success: true,
-              message: "Hazard Report Resolved",
-              assistanceRequest,
-            });
-          }
+          return res.status(200).json({
+            success: true,
+            message: "Assistance Request Verified",
+            assistanceRequest,
+          });
         } else {
           return res.status(500).json({
             success: false,

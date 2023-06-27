@@ -46,6 +46,7 @@ const ManageEmergencyFacility = () => {
   const { token } = useSelector((state) => state.auth);
 
   const [emergencyFacility, setEmergencyFacility] = useState([]);
+  const [responder, setResponder] = useState([]);
   const [filteredEmergencyFacility, setFilteredEmergencyFacility] = useState(
     []
   );
@@ -61,6 +62,7 @@ const ManageEmergencyFacility = () => {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [category, setCategory] = useState("");
+  const [assignedTeam, setAssignedTeam] = useState("");
 
   const [contactNumber, setContactNumber] = useState("");
   const [address, setAddress] = useState("");
@@ -109,7 +111,11 @@ const ManageEmergencyFacility = () => {
     const fetchEmergencyFacility = async () => {
       try {
         const data = await request("/assistance-request/", "GET");
+        const data1 = await request("/team/", "GET", {
+          Authorization: `Bearer ${token}`,
+        });
         console.log(data);
+        setResponder(data1);
         setEmergencyFacility(data);
         setFilteredEmergencyFacility(data);
       } catch (error) {
@@ -201,25 +207,15 @@ const ManageEmergencyFacility = () => {
 
   /* _________ */
 
-  const handleSubmit = async (type) => {
-    let formData = {};
+  const handleSubmit = async (assignedTeam) => {
     try {
-      let url, method;
-      if (type === "verify") {
-        url = `/assistance-request/update/${id}`;
-        method = "PUT";
-      } else if (type === "resolve") {
-        url = `/assistance-request/update/${id}`;
-        method = "PUT";
-      }
-
       const data = await request(
-        url,
-        method,
+        `/assistance-request/update/${id}`,
+        "PUT",
         {
           Authorization: `Bearer ${token}`,
         },
-        { action: type }
+        { assignedTeam }
       );
 
       console.log(data);
@@ -499,23 +495,26 @@ const ManageEmergencyFacility = () => {
             </div>
             {hazardStatus !== "resolved" && (
               <div>
-                {hazardStatus === "unverified" ? (
-                  <button
-                    onClick={() => {
-                      handleSubmit("verify");
-                    }}
-                  >
-                    Verify
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      handleSubmit("resolve");
-                    }}
-                  >
-                    Mark as Resolved
-                  </button>
-                )}
+                <>
+                  {/*  Verify */}
+                  <div>
+                    <label>Team: </label>
+                    <select
+                      value={assignedTeam}
+                      onChange={(e) => handleSubmit(e.target.value)}
+                    >
+                      <option value="" hidden>
+                        Select a category
+                      </option>
+                      {responder.map((category, index) => (
+                        <option key={index} value={category._id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+
                 <button
                   onClick={() => {
                     handleDismiss();

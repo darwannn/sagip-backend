@@ -60,6 +60,7 @@ function EmergencyFacility() {
   const [description, setDescription] = useState("");
 
   const [emergencyFacility, setEmergencyFacility] = useState([]);
+  const [assistanceRequest, setAssistanceRequest] = useState([]);
   const [filteredEmergencyFacility, setFilteredEmergencyFacility] = useState(
     []
   );
@@ -120,7 +121,12 @@ function EmergencyFacility() {
           "GET"
         );
         const hazardReportData = await request("/hazard-report/ongoing", "GET");
+        const assistanceRequestData = await request(
+          "/assistance-request/ongoing",
+          "GET"
+        );
 
+        setAssistanceRequest(assistanceRequestData);
         setEmergencyFacility(emergencyFacilityData);
         setHazardReport(hazardReportData);
       } catch (error) {
@@ -501,6 +507,25 @@ function EmergencyFacility() {
           {userLocation && isModalShown && <Marker position={userLocation} />}
           {/*   <Marker position={center} onClick={(marker) => handleMarkerClick(marker)} /> */}
           <div>
+            {assistanceRequest.map((emergencyFacility, index) => (
+              <Marker
+                icon={{
+                  // path: google.maps.SymbolPath.CIRCLE,
+                  url: require("../assets/hospital_icon.png"),
+                  fillColor: "#EB00FF",
+                  scaledSize: new window.google.maps.Size(35, 25),
+                }}
+                position={{
+                  lat: emergencyFacility.latitude,
+                  lng: emergencyFacility.longitude,
+                }}
+                onClick={(marker) => {
+                  setisModalShown(true);
+                  handleMarkerClick(marker, emergencyFacility, "request");
+                }}
+                key={index}
+              />
+            ))}
             {emergencyFacility.map((emergencyFacility, index) => (
               <Marker
                 icon={{
