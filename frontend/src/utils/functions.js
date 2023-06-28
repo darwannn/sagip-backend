@@ -1,3 +1,5 @@
+import Pusher from "pusher-js";
+
 export const reverseGeoCoding = (latitude, longitude) => {
   return new Promise((resolve, reject) => {
     const geocoder = new window.google.maps.Geocoder();
@@ -59,4 +61,27 @@ export const reverseGeoCoding = (latitude, longitude) => {
       }
     });
   });
+};
+
+//di gumagana pag promise
+export const receivePusher = (channelName, callback) => {
+  const pusher = new Pusher(process.env.REACT_APP_KEY, {
+    cluster: process.env.REACT_APP_CLUSTER,
+  });
+
+  const channel = pusher.subscribe(channelName);
+  const eventHandler = (data) => {
+    callback(data);
+
+    // Optionally, you can uncomment the line below to automatically unsubscribe after receiving the first event
+    // unsubscribe();
+  };
+  channel.bind("sagipEvent", eventHandler);
+
+  const unsubscribe = () => {
+    channel.unbind("sagipEvent", eventHandler);
+    pusher.unsubscribe(channelName);
+  };
+
+  return unsubscribe;
 };

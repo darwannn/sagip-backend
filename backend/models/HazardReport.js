@@ -41,6 +41,10 @@ const HazardReportSchema = new mongoose.Schema(
       type: String,
       default: "unverified",
     },
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

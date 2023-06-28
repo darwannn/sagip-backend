@@ -140,16 +140,19 @@ apiController.get("/weather", async (req, res) => {
 });
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
-  const { pusherTo, purpose, content } = req.body;
+  console.log("====================================");
+  console.log("pish");
+  console.log("====================================");
+  const { purpose, content, channel, to } = req.body;
   //console.log("p" + purpose);
   const data = {
     from: req.user.id,
-    to: pusherTo,
+    to,
     purpose,
     content,
   };
 
-  pusher.trigger("sagipChannel", "sagipEvent", data);
+  pusher.trigger(channel, "sagipEvent", data);
   res.send("Event triggered");
 });
 

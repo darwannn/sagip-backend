@@ -59,6 +59,7 @@ const ManageEmergencyFacility = () => {
   const [isModalShown, setisModalShown] = useState(false);
 
   const [name, setName] = useState("");
+  const [status, setStatus] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [category, setCategory] = useState("");
@@ -157,6 +158,7 @@ const ManageEmergencyFacility = () => {
           if (data.message !== "not found") {
             setName(data.name);
             setLatitude(data.latitude);
+            setStatus(data.status);
             setLongitude(data.longitude);
             setIsFull(data.isFull);
             setCategory(data.category);
@@ -195,6 +197,7 @@ const ManageEmergencyFacility = () => {
       formData.append("category", category);
       formData.append("hasChanged", hasChanged);
       formData.append("contactNumber", contactNumber);
+      formData.append("status", status);
       formData.append("image", image);
 
       let url, method;
@@ -502,6 +505,22 @@ const ManageEmergencyFacility = () => {
                   <label>Longitude: </label>
                   <div>{longitude}</div>
                 </div>
+
+                <>
+                  <label>Statsu: </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <option value="" hidden>
+                      Select a status
+                    </option>
+                    <option value="operational">operational</option>
+                    <option value="unoperational">unoperational</option>
+                    <option value="full">full</option>
+                  </select>
+                </>
+
                 <div>
                   {type === "update" && (
                     <div>
@@ -515,7 +534,10 @@ const ManageEmergencyFacility = () => {
                   )}
 
                   <label>Category: </label>
-                  <select onChange={(e) => setCategory(e.target.value)}>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  >
                     <option value="" hidden>
                       Select a category
                     </option>

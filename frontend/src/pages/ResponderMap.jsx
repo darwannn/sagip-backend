@@ -239,8 +239,8 @@ function EmergencyFacility() {
               Authorization: `Bearer ${token}`,
             },
             {
-              pusherTo: "648070cf9a74896d21b7d494",
-              purpose: "location",
+              to: "648070cf9a74896d21b7d494",
+              channel: "location",
               content: {
                 latitude: latitude,
                 longitude: longitude,

@@ -21,9 +21,11 @@ emergencyFacilityController.post(
   async (req, res) => {
     const error = {};
     try {
-      const { name, latitude, longitude, category, contactNumber } = req.body;
+      const { name, latitude, longitude, category, contactNumber, status } =
+        req.body;
 
       if (isEmpty(name)) error["name"] = "Required field";
+      if (isEmpty(status)) error["status"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["latitude"] = "Mark a location";
       if (isEmpty(category)) error["category"] = "Required field";
@@ -64,6 +66,7 @@ emergencyFacilityController.post(
             image: `${cloud.original_filename}.${cloud.format}`,
             category,
             contactNumber,
+            status,
           });
           if (emergencyFacility) {
             return res.status(200).json({
@@ -103,6 +106,34 @@ emergencyFacilityController.post(
 emergencyFacilityController.get("/", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({});
+    console.log(emergencyFacility);
+    if (emergencyFacility) {
+      return res.status(200).json(emergencyFacility);
+      return res.status(200).json({
+        /* success: true,
+        message: "found", 
+        emergencyFacility,*/
+        ...emergencyFacility,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
+  }
+});
+
+emergencyFacilityController.get("/operational", async (req, res) => {
+  try {
+    const emergencyFacility = await EmergencyFacility.find({
+      $or: [{ status: "operational" }, { status: "full" }],
+    });
     console.log(emergencyFacility);
     if (emergencyFacility) {
       return res.status(200).json(emergencyFacility);
@@ -167,11 +198,14 @@ emergencyFacilityController.put(
         longitude,
         category,
         hasChanged,
-        isFull,
+        /*   isFull, */
+        status,
         contactNumber,
       } = req.body;
 
       if (isEmpty(name)) error["name"] = "Required field";
+
+      if (isEmpty(status)) error["status"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Required field";
       if (isEmpty(longitude)) error["latitude"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
@@ -199,7 +233,13 @@ emergencyFacilityController.put(
       }
 
       if (Object.keys(error).length === 0) {
-        const updateFields = { name, latitude, longitude, category, isFull };
+        const updateFields = {
+          name,
+          latitude,
+          longitude,
+          category,
+          /* isFull */ status,
+        };
 
         if (hasChanged && req.file) {
           const emergencyFacilityImage = await EmergencyFacility.findById(

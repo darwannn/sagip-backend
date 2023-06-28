@@ -117,7 +117,7 @@ function EmergencyFacility() {
     const fetchEmergencyFacility = async () => {
       try {
         const emergencyFacilityData = await request(
-          "/emergency-facility/",
+          "/emergency-facility/operational",
           "GET"
         );
         const hazardReportData = await request("/hazard-report/ongoing", "GET");

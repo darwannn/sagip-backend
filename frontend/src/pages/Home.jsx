@@ -6,6 +6,7 @@ import { getServerResponse } from "../redux/serverResponseSlice";
 import { useSelector, useDispatch } from "react-redux";
 import Pusher from "pusher-js";
 import Navbar from "../components/Navbar";
+import { receivePusher } from "../utils/functions";
 
 import warningSound from "../assets/warning.mp3";
 
@@ -60,18 +61,16 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    const pusher = new Pusher(process.env.REACT_APP_KEY, {
+    /* const pusher = new Pusher(process.env.REACT_APP_KEY, {
       cluster: process.env.REACT_APP_CLUSTER,
     });
 
-    const channel = pusher.subscribe("sagipChannel");
+    const channel = pusher.subscribe("notification");
     channel.bind("sagipEvent", (data) => {
       console.log("Received event:", data);
-      if (data.to === user.id && data.purpose === "notification") {
+      if (data.to === user.id) {
         alert("I received a notification");
-        console.log("====================================");
-        console.log(data.content);
-        console.log("====================================");
+
       }
       if (data.purpose === "reload") {
         alert("Reload useEffect");
@@ -80,11 +79,24 @@ function Home() {
 
     return () => {
       pusher.unsubscribe("sagipChannel");
-    };
-  });
+    }; */
+    receivePusher("notification", (data) => {
+      /*  console.log("Received data:", data); */
+
+      if (data.to === user.id) {
+        toast.success("I received a notification");
+      }
+      if (data.purpose === "reload") {
+        alert("Reload useEffect");
+      }
+    });
+  }, []);
 
   const triggerPusher = async () => {
-    setPusherMessage("Pusher Test");
+    /*    setPusherMessage("Pusher Test"); */
+
+    console.log("triggerPusher");
+
     await request(
       "/api/pusher",
       "PUT",
@@ -92,8 +104,8 @@ function Home() {
         Authorization: `Bearer ${token}`,
       },
       {
-        pusherTo: "64788dfd295e2f184e55d20f",
-        purpose: "notification",
+        to: "64788dfd295e2f184e55d20f",
+        channel: "notification",
         content: {
           latitude: 14.8527,
           longitude: 120.816,

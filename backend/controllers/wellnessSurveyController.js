@@ -467,5 +467,34 @@ wellnessSurveyController.delete(
     }
   }
 );
+wellnessSurveyController.put(
+  "/archive/:id",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
+        req.params.id,
+        { isArchived: true },
+        { new: true }
+      );
+      if (wellnessSurvey) {
+        return res.status(200).json({
+          success: true,
+          message: "Archived Successfully",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 module.exports = wellnessSurveyController;
