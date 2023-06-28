@@ -3,10 +3,11 @@
 const isInMalolos = async (req, res, next) => {
   try {
     const { municipality } = req.body;
+
     console.log("=============sdsd=======================");
     console.log(municipality);
     console.log("====================================");
-    if (municipality !== "Malolos") {
+    if (municipality !== undefined && municipality !== "Malolos") {
       return res.status(400).json({
         success: false,
         message: "Unfortunately the selected area is outside Malolos!",

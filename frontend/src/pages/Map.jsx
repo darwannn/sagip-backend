@@ -9,6 +9,7 @@ import { emergencyFacilityCategory } from "../utils/categories";
 import hospitalIcon from "../assets/hospital_icon.png";
 import { toast } from "react-toastify";
 import Pusher from "pusher-js";
+import { receivePusher } from "../utils/functions";
 import {
   useJsApiLoader,
   GoogleMap,
@@ -80,37 +81,17 @@ function EmergencyFacility() {
 
   /* pusher */
   useEffect(() => {
-    const pusher = new Pusher(process.env.REACT_APP_KEY, {
-      cluster: process.env.REACT_APP_CLUSTER,
-    });
-
-    const channel = pusher.subscribe("sagipChannel");
-    channel.bind("sagipEvent", (data) => {
-      console.log("Received event:", data);
-      if (data.to === user.id && data.purpose === "notification") {
-        alert(
-          "akin itong notifcation, my notification use effect should be reloaded, toast should appear"
-        );
-      }
-
-      console.log(data.content.latitude);
-      console.log("+" + data.content.longitude);
-      if (data.purpose === "location") {
+    receivePusher("location", (data) => {
+      console.log(data);
+      if (data.to === user.id) {
         setResponderLatitude(data.content.latitude);
         setResponderLongitude(data.content.longitude);
         getResponderRoute(
           "DRIVING",
           `${data.content.latitude},${data.content.longitude}`
         );
-
-        console.log(duration);
-
-        console.log(distance);
       }
     });
-    return () => {
-      pusher.unsubscribe("sagipChannel");
-    };
   }, []);
 
   useEffect(() => {
@@ -255,7 +236,8 @@ function EmergencyFacility() {
       setDistance(results.routes[0].legs[0].distance.text);
       setDuration(results.routes[0].legs[0].duration.text);
       setSteps(results.routes[0].legs[0].steps);
-
+      console.log(results.routes[0].legs[0].duration.text);
+      console.log(results.routes[0].legs[0].distance.text);
       console.log(results);
     } catch (error) {
       console.log(error);

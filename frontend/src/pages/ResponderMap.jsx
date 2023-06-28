@@ -239,7 +239,7 @@ function EmergencyFacility() {
               Authorization: `Bearer ${token}`,
             },
             {
-              to: "648070cf9a74896d21b7d494",
+              to: "64788dfd295e2f184e55d20f",
               channel: "location",
               content: {
                 latitude: latitude,
@@ -449,10 +449,10 @@ function EmergencyFacility() {
           zoom={15}
           mapContainerStyle={{ width: "100%", height: "100%" }}
           options={{
-            restriction: {
+            /* restriction: {
               latLngBounds: malolosBounds,
               strictBounds: true,
-            },
+            }, */
             zoomControl: true,
             streetViewControl: false,
             mapTypeControl: false,
@@ -520,6 +520,20 @@ function EmergencyFacility() {
           }}
         >
           Share mt loc
+        </button>
+        <button
+          onClick={() => {
+            window.AndroidInterface?.startForegroundService();
+          }}
+        >
+          Startt Servcie
+        </button>
+        <button
+          onClick={() => {
+            window.AndroidInterface?.stopForegroundService();
+          }}
+        >
+          Stop Servcie
         </button>
       </div>
     </div>
