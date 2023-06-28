@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "https://sagip.onrender.com/";
+const BASE_URL = "https://sagip.onrender.com";
 
 export const request = async (url, method, headers = {}, body = {}) => {
   try {
