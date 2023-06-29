@@ -100,8 +100,8 @@ const userSchema = mongoose.Schema(
       type: Date,
     },
     fcmToken: {
-      type: String,
-      default: "",
+      type: [String],
+      default: [],
     },
 
     /*   teamId: {

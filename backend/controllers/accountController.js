@@ -636,10 +636,21 @@ accountController.put("/fcm", async (req, res) => {
 
       const user = await User.findOne(query);
 
-      console.log(user);
       if (user) {
-        user.fcmToken = fcmToken;
-        user.save();
+        const existingUser = await User.findOne({ fcmToken: fcmToken });
+        console.log("existingUser");
+        console.log(user);
+        if (existingUser) {
+          console.log(existingUser.fcmToken);
+          existingUser.fcmToken = existingUser.fcmToken.filter(
+            (token) => token !== fcmToken
+          );
+          await existingUser.save();
+        }
+        console.log(user.fcmToken);
+        user.fcmToken.push(fcmToken);
+        await user.save();
+
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -647,7 +658,7 @@ accountController.put("/fcm", async (req, res) => {
       } else {
         return res.status(400).json({
           success: true,
-          message: "Internal Server Error",
+          message: "Internal Server Error1",
         });
       }
     }

@@ -31,6 +31,13 @@ function Home() {
         const signalResponse = await request("/api/signal", "GET");
         setSignal(signalResponse.signal);
         const weatherResponse = await request("/api/weather", "GET");
+        const weatherResponse1 = await request(
+          "/account/fcm",
+          "PUT",
+          {},
+          { identifier: "darwinsanluis.ramos214@gmail.com", fcmToken: "11" }
+        );
+        console.log(weatherResponse1);
         setWeather(weatherResponse.weather);
       } catch (error) {
         console.error("Error fetching data:", error);

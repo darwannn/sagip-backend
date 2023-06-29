@@ -322,8 +322,7 @@ const getAllContactNumbersInBarangays = async (municipality, location) => {
 const getAllFcmTokensInMunicipality = async (municipality) => {
   try {
     const users = await User.find({ municipality: municipality });
-    const fcmTokens = users.map((user) => user.fcmToken);
-    return fcmTokens;
+    const fcmTokens = users.flatMap((user) => user.fcmToken);
   } catch (error) {
     return "Internal Server Error: " + error;
   }
@@ -335,7 +334,7 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
       barangay: { $in: location },
       municipality,
     });
-    const fcmTokens = users.map((user) => user.fcmToken);
+    const fcmTokens = users.flatMap((user) => user.fcmToken);
     return fcmTokens;
   } catch (error) {
     return "Internal Server Error: " + error;
