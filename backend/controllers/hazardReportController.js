@@ -320,5 +320,53 @@ hazardReportController.delete(
     }
   }
 );
+hazardReportController.put(
+  "/archive/:id",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      let hazardReport;
+      const { action } = req.body;
 
+      console.log(action);
+      if (action === "archive") {
+        hazardReport = await HazardReport.findByIdAndUpdate(
+          req.params.id,
+          { isArchived: true, archivedDate: Date.now() },
+          { new: true }
+        );
+      } else if (action === "unarchive") {
+        hazardReport = await HazardReport.findByIdAndUpdate(
+          req.params.id,
+          { isArchived: false, $unset: { archivedDate: Date.now() } },
+
+          { new: true }
+        );
+      }
+      if (hazardReport) {
+        if (action === "archive") {
+          return res.status(200).json({
+            success: true,
+            message: "Archived Successfully",
+          });
+        } else if (action === "unarchive") {
+          return res.status(200).json({
+            success: true,
+            message: "Unrchived Successfully",
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 module.exports = hazardReportController;

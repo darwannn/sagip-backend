@@ -86,6 +86,9 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    archivedDate: {
+      type: Date,
+    },
     status: {
       type: String,
       default: false,

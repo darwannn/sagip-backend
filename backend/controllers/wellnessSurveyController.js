@@ -472,16 +472,36 @@ wellnessSurveyController.put(
   tokenMiddleware,
   async (req, res) => {
     try {
-      const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
-        req.params.id,
-        { isArchived: true },
-        { new: true }
-      );
+      let wellnessSurvey;
+      const { action } = req.body;
+
+      console.log(action);
+      if (action === "archive") {
+        wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
+          req.params.id,
+          { isArchived: true, archivedDate: Date.now() },
+          { new: true }
+        );
+      } else if (action === "unarchive") {
+        wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
+          req.params.id,
+          { isArchived: false, $unset: { archivedDate: Date.now() } },
+
+          { new: true }
+        );
+      }
       if (wellnessSurvey) {
-        return res.status(200).json({
-          success: true,
-          message: "Archived Successfully",
-        });
+        if (action === "archive") {
+          return res.status(200).json({
+            success: true,
+            message: "Archived Successfully",
+          });
+        } else if (action === "unarchive") {
+          return res.status(200).json({
+            success: true,
+            message: "Unrchived Successfully",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,

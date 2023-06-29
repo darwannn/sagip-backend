@@ -4,7 +4,7 @@ const Notification = require("../models/Notification");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 /* const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); */ // 1 day expiration
-const codeExpiration = new Date(new Date().getTime() + 30 * 60000); //will expire after 30 minutes
+const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expire after 15 minutes
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
 const { cloudinary } = require("../utils/config");
 const isEmpty = (value) => {

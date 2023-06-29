@@ -45,6 +45,9 @@ const HazardReportSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    archivedDate: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
