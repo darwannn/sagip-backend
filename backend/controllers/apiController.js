@@ -137,6 +137,8 @@ apiController.get("/weather", async (req, res) => {
     .catch((error) => {
       res.status(500).json({ message: "An error occurred" });
     });
+
+  getAllFcmTokensInBarangays("Malolos", ["Guinhawa", "Dakila"]);
 });
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
@@ -334,7 +336,9 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
       barangay: { $in: location },
       municipality,
     });
+
     const fcmTokens = users.flatMap((user) => user.fcmToken);
+    //console.log(fcmTokens);
     return fcmTokens;
   } catch (error) {
     return "Internal Server Error: " + error;

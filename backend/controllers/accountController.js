@@ -638,16 +638,16 @@ accountController.put("/fcm", async (req, res) => {
 
       if (user) {
         const existingUser = await User.findOne({ fcmToken: fcmToken });
-        console.log("existingUser");
-        console.log(user);
+        /*    console.log("existingUser");
+        console.log(user); */
         if (existingUser) {
-          console.log(existingUser.fcmToken);
+          /*     console.log(existingUser.fcmToken); */
           existingUser.fcmToken = existingUser.fcmToken.filter(
             (token) => token !== fcmToken
           );
           await existingUser.save();
         }
-        console.log(user.fcmToken);
+        /*   console.log(user.fcmToken); */
         user.fcmToken.push(fcmToken);
         await user.save();
 
