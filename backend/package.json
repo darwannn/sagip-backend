@@ -8,6 +8,9 @@
     "start": "nodemon index.js",
     "dev": "concurrently \"npm start\" \"cd ../frontend && npm start\""
   },
+  "nodemonConfig": {
+    "ignore": ["temp"]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

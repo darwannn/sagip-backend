@@ -2,60 +2,66 @@ const User = require("../models/User");
 const AssistanceRequest = require("../models/AssistanceRequest");
 const WellnessSurvey = require("../models/WellnessSurvey");
 const HazardReport = require("../models/HazardReport");
-const { cloudinary } = require("../utils/config");
+
 const { MongoClient } = require("mongodb");
-const fs = require("fs");
+const { promises: fs } = require("fs");
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
+
+const dbName = "sagip";
+const dbURL = process.env.MONGO_URL;
+const currentDate = new Date().toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 const path = require("path");
-const { createObjectCsvWriter } = require("csv-writer");
+const folderPath = `sagip/backup/${currentDate}`;
+const { cloudinary } = require("../utils/config");
+
 async function backupDatabase() {
-  const uri =
-    "mongodb+srv://sagip:0OGHw78wfHrybYJq@cluster0.eqegern.mongodb.net/sagip?retryWrites=true&w=majority";
-  const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
   try {
+    const tempFolderPath = path.join(__dirname, "../temp");
+    const client = new MongoClient(dbURL, { useUnifiedTopology: true });
     await client.connect();
+    console.log("Connected successfully to the server");
+    const db = client.db(dbName);
+    const collections = await db.listCollections().toArray();
+    console.log(collections);
+    for (const collection of collections) {
+      const query = {};
+      const docs = await db.collection(collection.name).find(query).toArray();
+      const fileName = `${collection.name}.json`; // Change the file extension to .json
 
-    const database = client.db();
-    const collection = database.collection("User");
-    const data = await collection.find().toArray();
+      // Convert the documents to JSON format
+      const jsonDocs = JSON.stringify(docs);
 
-    if (data.length === 0) {
-      console.log("No data found in the collection.");
-      return;
+      // Write the JSON to a file
+      await fs.writeFile(path.join(tempFolderPath, fileName), jsonDocs);
+      console.log(`Successfully backed up ${collection.name} to ${fileName}`);
+
+      // Read the JSON file as a buffer
+      const fileBuffer = await fs.readFile(path.join(tempFolderPath, fileName));
+
+      // Upload the temporary file to Cloudinary
+      const cloudinaryUploadResult = await cloudinary.uploader.upload(
+        path.join(tempFolderPath, fileName),
+        {
+          folder: folderPath,
+          resource_type: "raw",
+          public_id: fileName,
+        }
+      );
+
+      console.log("Uploaded to Cloudinary:", cloudinaryUploadResult.secure_url);
+
+      // Delete the temporary file
+      // await fs.unlink(path.join(tempFolderPath, fileName));
     }
 
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    const jsonData = JSON.stringify(data);
-    console.log("Backup JSON Data:", jsonData);
-
-    const csvWriter = createObjectCsvWriter({
-      path: "backup.csv",
-      header: Object.keys(data[0]).map((key) => ({ id: key, title: key })),
-    });
-
-    await csvWriter.writeRecords(data);
-
-    const result = await cloudinary.uploader.upload("backup.csv", {
-      resource_type: "auto", // Change the resource_type based on your file type
-      folder: "sagip/backup",
-      public_id: `mongodb_backup_${currentDate}.csv`,
-      overwrite: true,
-    });
-
-    console.log("Backup uploaded to Cloudinary:", result);
-    console.log("Backup completed successfully.");
+    console.log("Backup completed successfully");
+    client.close();
   } catch (err) {
-    console.error("Error occurred during backup:", err);
-  } finally {
-    await client.close();
+    console.log("An error occurred during backup", err);
   }
 }
 
