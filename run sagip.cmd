@@ -1,2 +1,2 @@
 cd backend
-npm run dev
+npm run start:dev

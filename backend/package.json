@@ -5,12 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
-    "dev": "concurrently \"npm start\" \"cd ../frontend && npm start\""
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "start:dev": "concurrently \"npm run dev\" \"cd ../frontend && npm start\""
   },
-  "nodemonConfig": {
-    "ignore": ["temp"]
-  },
+
   "keywords": [],
   "author": "",
   "license": "ISC",

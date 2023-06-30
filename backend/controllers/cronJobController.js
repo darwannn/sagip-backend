@@ -6,7 +6,6 @@ const HazardReport = require("../models/HazardReport");
 const { MongoClient } = require("mongodb");
 const { promises: fs } = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
-
 const dbName = "sagip";
 const dbURL = process.env.MONGO_URL;
 const currentDate = new Date().toLocaleDateString("en-US", {
