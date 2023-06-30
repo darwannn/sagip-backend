@@ -6,7 +6,7 @@ const { cloudinary } = require("../utils/config");
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
-
+const { createObjectCsvWriter } = require("csv-writer");
 async function backupDatabase() {
   const uri =
     "mongodb+srv://sagip:0OGHw78wfHrybYJq@cluster0.eqegern.mongodb.net/sagip?retryWrites=true&w=majority";
@@ -22,8 +22,6 @@ async function backupDatabase() {
     const collection = database.collection("User");
     const data = await collection.find().toArray();
 
-    console.log("Retrieved data:", data);
-
     if (data.length === 0) {
       console.log("No data found in the collection.");
       return;
@@ -38,13 +36,21 @@ async function backupDatabase() {
     const jsonData = JSON.stringify(data);
     console.log("Backup JSON Data:", jsonData);
 
-    /*   const result = await cloudinary.uploader.upload(jsonData, {
-      resource_type: "raw",
-      public_id: `mongodb_backup_${currentDate}.json`,
-      overwrite: true,
-    }); */
+    const csvWriter = createObjectCsvWriter({
+      path: "backup.csv",
+      header: Object.keys(data[0]).map((key) => ({ id: key, title: key })),
+    });
 
-    /*    console.log("Backup uploaded to Cloudinary:", result); */
+    await csvWriter.writeRecords(data);
+
+    const result = await cloudinary.uploader.upload("backup.csv", {
+      resource_type: "auto", // Change the resource_type based on your file type
+      folder: "sagip/backup",
+      public_id: `mongodb_backup_${currentDate}.csv`,
+      overwrite: true,
+    });
+
+    console.log("Backup uploaded to Cloudinary:", result);
     console.log("Backup completed successfully.");
   } catch (err) {
     console.error("Error occurred during backup:", err);
