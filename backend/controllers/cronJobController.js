@@ -32,19 +32,15 @@ async function backupDatabase() {
     for (const collection of collections) {
       const query = {};
       const docs = await db.collection(collection.name).find(query).toArray();
-      const fileName = `${collection.name}.json`; // Change the file extension to .json
+      const fileName = `${collection.name}.json`;
 
-      // Convert the documents to JSON format
       const jsonDocs = JSON.stringify(docs);
 
-      // Write the JSON to a file
       await fs.writeFile(path.join(tempFolderPath, fileName), jsonDocs);
       console.log(`Successfully backed up ${collection.name} to ${fileName}`);
 
-      // Read the JSON file as a buffer
       const fileBuffer = await fs.readFile(path.join(tempFolderPath, fileName));
 
-      // Upload the temporary file to Cloudinary
       const cloudinaryUploadResult = await cloudinary.uploader.upload(
         path.join(tempFolderPath, fileName),
         {
@@ -56,8 +52,7 @@ async function backupDatabase() {
 
       console.log("Uploaded to Cloudinary:", cloudinaryUploadResult.secure_url);
 
-      // Delete the temporary file
-      // await fs.unlink(path.join(tempFolderPath, fileName));
+      await fs.unlink(path.join(tempFolderPath, fileName));
     }
 
     console.log("Backup completed successfully");
