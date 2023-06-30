@@ -1,3 +1,4 @@
+const cronJobController = require("express").Router();
 const User = require("../models/User");
 const AssistanceRequest = require("../models/AssistanceRequest");
 const WellnessSurvey = require("../models/WellnessSurvey");
@@ -16,7 +17,9 @@ const currentDate = new Date().toLocaleDateString("en-US", {
 const path = require("path");
 const folderPath = `sagip/backup/${currentDate}`;
 const { cloudinary } = require("../utils/config");
-
+cronJobController.post("/backup", async (req, res) => {
+  backupDatabase();
+});
 async function backupDatabase() {
   try {
     const tempFolderPath = path.join(__dirname, "../temp");
@@ -98,4 +101,5 @@ const deleteArchivedData = async () => {
 module.exports = {
   backupDatabase,
   deleteArchivedData,
+  cronJobController,
 };

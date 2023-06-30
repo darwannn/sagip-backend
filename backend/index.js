@@ -14,6 +14,7 @@ const teamController = require("./controllers/teamController");
 const hazardReportController = require("./controllers/hazardReportController");
 const assistanceRequestController = require("./controllers/assistanceRequestController");
 const notificationController = require("./controllers/notificationController");
+const { cronJobController } = require("./controllers/cronJobController");
 const wellnessSurveyController = require("./controllers/wellnessSurveyController");
 
 /* const multer = require("multer"); */
@@ -33,6 +34,7 @@ app.use("/images", express.static("assets/images"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/cron-job", cronJobController);
 app.use("/auth", authController);
 app.use("/account", accountController);
 app.use("/safety-tips", safetyTipController);
