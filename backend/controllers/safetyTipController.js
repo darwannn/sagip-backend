@@ -2,6 +2,8 @@ const safetyTipController = require("express").Router();
 const SafetyTip = require("../models/SafetyTip");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const isResident = require("../middlewares/isResident");
 const isAdmin = require("../middlewares/isAdmin");
 const isSuperAdmin = require("../middlewares/isSuperAdmin");
 const isResponder = require("../middlewares/isResponder");
@@ -17,13 +19,11 @@ const {
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
 const folderPath = "sagip/media/safety-tips";
-const { cloudinary } = require("../utils/config");
-
-const fs = require("fs");
 
 safetyTipController.post(
   "/add",
   tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */
   multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
@@ -105,7 +105,6 @@ safetyTipController.post(
   }
 );
 
-/* get all */
 safetyTipController.get("/", async (req, res) => {
   try {
     const safetyTips = await SafetyTip.find({});
@@ -130,6 +129,7 @@ safetyTipController.get("/", async (req, res) => {
     });
   }
 });
+
 safetyTipController.get("/published", async (req, res) => {
   try {
     const safetyTips = await SafetyTip.find({ status: "published" });
@@ -155,7 +155,6 @@ safetyTipController.get("/published", async (req, res) => {
   }
 });
 
-/* get specific  */
 safetyTipController.get("/published/:id", async (req, res) => {
   try {
     const safetyTip = await SafetyTip.findOne({
@@ -182,13 +181,10 @@ safetyTipController.get("/published/:id", async (req, res) => {
     });
   }
 });
-/* get specific  */
+
 safetyTipController.get("/:id", async (req, res) => {
   try {
     const safetyTip = await SafetyTip.findById(req.params.id);
-
-    /* safetyTip.views += 1;
-    await safetyTip.save(); */
 
     if (safetyTip) {
       /*      return res.status(200).json(safetyTip); */
@@ -213,7 +209,7 @@ safetyTipController.get("/:id", async (req, res) => {
 
 safetyTipController.put(
   "/update/:id",
-  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */
   multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
@@ -263,17 +259,12 @@ safetyTipController.put(
           );
 
           if (cloud !== "error") {
-            /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
-              cloud.format
-            }`; */
           } else {
             return res.status(500).json({
               success: false,
               message: "Internal Server Error",
             });
           }
-
-          /*   safetyTip.save(); */
         }
         const safetyTip = await SafetyTip.findByIdAndUpdate(
           req.params.id,
@@ -309,96 +300,125 @@ safetyTipController.put(
   }
 );
 
-safetyTipController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
-  try {
-    const safetyTipImage = await SafetyTip.findById(req.params.id);
-    const cloud = await cloudinaryUploader(
-      "destroy",
-      "",
-      "image",
-      folderPath,
-      safetyTipImage.image
-    );
-    if (cloud !== "error") {
-      const safetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
+safetyTipController.delete(
+  "/delete/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]),  */ async (req, res) => {
+    try {
+      const safetyTipImage = await SafetyTip.findById(req.params.id);
+      const cloud = await cloudinaryUploader(
+        "destroy",
+        "",
+        "image",
+        folderPath,
+        safetyTipImage.image
+      );
+      if (cloud !== "error") {
+        const safetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
 
-      if (safetyTip) {
-        return res.status(200).json({
-          success: true,
-          message: "Deleted successfully",
-        });
+        if (safetyTip) {
+          return res.status(200).json({
+            success: true,
+            message: "Deleted successfully",
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,
           message: "Internal Server Error",
         });
       }
-    } else {
+    } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
-safetyTipController.put("/saves/:id", tokenMiddleware, async (req, res) => {
-  try {
-    const safetyTip = await SafetyTip.findById(req.params.id);
-    if (safetyTip.saves.includes(req.user.id)) {
-      safetyTip.saves = safetyTip.saves.filter((id) => id !== req.user.id);
-      await safetyTip.save();
-      return res.status(200).json({
-        success: true,
-        message: "Unsaved Successfully",
-      });
-    } else {
-      safetyTip.saves.push(req.user.id);
-      await safetyTip.save();
+safetyTipController.put(
+  "/saves/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "resident",
+    "responder",
+    "dispatcher",
+    "admin",
+    "super-admin",
+  ]), */
+  async (req, res) => {
+    try {
+      const safetyTip = await SafetyTip.findById(req.params.id);
+      if (safetyTip.saves.includes(req.user.id)) {
+        safetyTip.saves = safetyTip.saves.filter((id) => id !== req.user.id);
+        await safetyTip.save();
+        return res.status(200).json({
+          success: true,
+          message: "Unsaved Successfully",
+        });
+      } else {
+        safetyTip.saves.push(req.user.id);
+        await safetyTip.save();
 
-      return res.status(200).json({
-        success: true,
-        message: "Saved Successfully",
+        return res.status(200).json({
+          success: true,
+          message: "Saved Successfully",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
-safetyTipController.get("/saved/:id", async (req, res) => {
-  try {
-    const safetyTip = await SafetyTip.find({
-      saves: req.params.id,
-    });
-    if (safetyTip) {
-      return res.status(200).json(safetyTip);
-      return res.status(200).json({
-        /* success: true,
+safetyTipController.get(
+  "/saved/:id",
+  /* tokenMiddleware,
+  userTypeMiddleware([
+    "resident",
+    "responder",
+    "dispatcher",
+    "admin",
+    "super-admin",
+  ]), */
+  async (req, res) => {
+    try {
+      const safetyTip = await SafetyTip.find({
+        saves: req.params.id,
+      });
+      if (safetyTip) {
+        return res.status(200).json(safetyTip);
+        return res.status(200).json({
+          /* success: true,
       message: "Record found", 
       safetyTips,*/
-        ...safetyTip,
-      });
-    } else {
-      return res.status(200).json({
+          ...safetyTip,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
         success: false,
-        message: "not found",
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
 module.exports = safetyTipController;
