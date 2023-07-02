@@ -37,6 +37,7 @@ import ManageEmergencyFacility from "./pages/EmergencyFacility/ManageEmergencyFa
 import SendAlert from "./pages/SendAlert";
 import Test from "./pages/Test";
 import Test2 from "./pages/Test2";
+import Test3 from "./pages/Test3";
 
 import ManageVerificationRequest from "./pages/Account/ManageVerificationRequest";
 
@@ -273,6 +274,7 @@ const App = () => {
         />
         <Route path="/test" element={<Test />} />
         <Route path="/test2" element={<Test2 />} />
+        <Route path="/test3" element={<Test3 />} />
         <Route path="/manage/team/add" element={<TeamInput />} type="add" />
         {/* if no route path found*/}
         {location.pathname !== "/" && <Route path="*" element={<Error />} />}

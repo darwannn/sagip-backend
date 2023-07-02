@@ -179,7 +179,7 @@ const ManageEmergencyFacility = () => {
             setHazardStatus(data.status);
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
-            if (data.proof.includes(".mp4")) {
+            if (data.proof.includes(".mkv")) {
               setProof(
                 `https://res.cloudinary.com/dantwvqrv/video/upload/v1687769867/sagip/media/assistance-request/${data.proof}`
               );
@@ -486,10 +486,9 @@ const ManageEmergencyFacility = () => {
               <div>{location}</div>
               <div>{description}</div>
 
-              {proof && checkFileType(proof) === "image" && (
+              {proof && checkFileType(proof) === "image" ? (
                 <img src={proof}></img>
-              )}
-              {proof && checkFileType(proof) === "video" && (
+              ) : (
                 <video src={proof} controls />
               )}
             </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Link, useParams, useNavigate } from "react-router-dom";
 
@@ -10,7 +10,6 @@ import { reverseGeoCoding } from "../../utils/functions";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Webcam from "react-webcam";
 
 import {
   useJsApiLoader,
@@ -56,19 +55,6 @@ const HazardReport = ({ type = "add" }) => {
     libraries,
   });
 
-  const webcamRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const [capturing, setCapturing] = useState(false);
-  const [proof, setProof] = useState(null);
-  const [recordedChunks, setRecordedChunks] = useState([]);
-  const [facingMode, setFacingMode] = useState("user");
-
-  const videoConstraints = {
-    width: 1280,
-    height: 720,
-    facingMode: facingMode,
-  };
-
   const [map, setMap] = useState(/** @type google.maps.Map */ (null));
   const [markerLatLng, setMarkerLatLng] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
@@ -102,6 +88,7 @@ const HazardReport = ({ type = "add" }) => {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
+  const [proof, setProof] = useState(null);
   const [proofName, setProofName] = useState("");
   const [proofUrl, setProofUrl] = useState("");
 
@@ -192,6 +179,38 @@ const HazardReport = ({ type = "add" }) => {
     }
   };
 
+  const onChangeImage = (e) => {
+    setProof(e.target.files[0]);
+    setProofName(e.target.files[0].name);
+    setHasChanged(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProofUrl(reader.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
+  const onChangeVideo = (e) => {
+    setProof(e.target.files[0]);
+    setProofName(e.target.files[0].name);
+    setHasChanged(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProofUrl(reader.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  };
+
+  const handleCloseImage = () => {
+    setProof(null);
+    hasChanged(false);
+    setProofName("");
+    setProofUrl("");
+  };
+
+  if (!isLoaded) {
+    return "<SkeletonText />";
+  }
+
   function handleMarkerClick(event) {
     const { latLng } = event;
     const latitude = latLng.lat();
@@ -226,88 +245,6 @@ const HazardReport = ({ type = "add" }) => {
       console.log("Geolocation is not supported by this browser.");
     }
   }
-
-  const handleStopCaptureClick = useCallback(() => {
-    mediaRecorderRef.current.stop();
-    setCapturing(false);
-  }, [mediaRecorderRef, webcamRef, setCapturing]);
-
-  const handleStartCaptureClick = useCallback(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: videoConstraints, audio: true })
-      .then((stream) => {
-        mediaRecorderRef.current = new MediaRecorder(stream);
-        mediaRecorderRef.current.addEventListener(
-          "dataavailable",
-          handleDataAvailable
-        );
-        mediaRecorderRef.current.start();
-
-        setCapturing(true);
-
-        setTimeout(() => {
-          handleStopCaptureClick();
-        }, 2000);
-      })
-      .catch((error) => {
-        console.error("Error accessing webcam:", error);
-      });
-  }, [
-    webcamRef,
-    setCapturing,
-    mediaRecorderRef,
-    videoConstraints,
-    handleStopCaptureClick,
-  ]);
-
-  const handleDataAvailable = useCallback(
-    ({ data }) => {
-      if (data.size > 0) {
-        setRecordedChunks((prev) => prev.concat(data));
-
-        const videoBlob = new Blob([data], { type: "video/mp4" });
-
-        const file = new File([videoBlob], "proof.mp4", { type: "video/mp4" });
-        setProof(file);
-        console.log("====================================");
-        console.log(file);
-        console.log("====================================");
-      }
-    },
-    [setRecordedChunks]
-  );
-
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-
-    const image = new Image();
-    image.src = imageSrc;
-
-    image.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = image.width;
-      canvas.height = image.height;
-
-      const context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0, image.width, image.height);
-
-      canvas.toBlob((blob) => {
-        const file = new File([blob], "proof.jpeg", { type: "image/jpeg" });
-        setProof(file);
-      }, "image/jpeg");
-    };
-  }, [webcamRef]);
-
-  const toggleFacingMode = useCallback(() => {
-    setFacingMode((prevFacingMode) =>
-      prevFacingMode === "user" ? "environment" : "user"
-    );
-  }, []);
-
-  if (!isLoaded) {
-    return "<SkeletonText />";
-  }
-
   return (
     <>
       <Navbar />
@@ -437,37 +374,52 @@ const HazardReport = ({ type = "add" }) => {
               <div>
                 <button type="submit">Submit</button>
               </div>
+              <label htmlFor="image">
+                Image: <span>Upload Photo</span>
+              </label>
+              {/*  <input type="file" accept="image/*" capture="camera"></input> */}
+              <input
+                id="image"
+                type="file"
+                accept="image/*"
+                capture="camera"
+                onChange={onChangeImage}
+                onClick={() =>
+                  window.AndroidInterface?.setMediaChooser("camera")
+                }
+              />
+
+              <label htmlFor="video">
+                Video: <span>Upload Video</span>
+              </label>
+              <input
+                id="video"
+                type="file"
+                accept="video/*"
+                capture="camcorder"
+                onChange={onChangeVideo}
+                onClick={() =>
+                  window.AndroidInterface?.setMediaChooser("camcorder")
+                }
+              />
+              {/* {videoUrl && <video src={videoUrl} controls />} */}
+              {/*  {proofUrl && <img src={proofUrl} />}
+              {proofUrl && (
+                <div>
+                  {proofUrl.includes("data:image")}
+                  {proofUrl}
+                </div>
+              )}
+              {proofUrl && <video src={proofUrl} controls />} */}
+
+              {proofUrl && proofUrl.includes("data:image") && (
+                <img src={proofUrl} />
+              )}
+              {proofUrl && proofUrl.includes("data:video") && (
+                <video src={proofUrl} controls />
+              )}
             </div>
           </form>
-          <>
-            <Webcam
-              audio={false}
-              ref={webcamRef}
-              height={720}
-              width={1280}
-              videoConstraints={videoConstraints}
-            />
-            {capturing ? (
-              <button onClick={handleStopCaptureClick}>Stop Capture</button>
-            ) : (
-              <button onClick={handleStartCaptureClick}>Start Capture</button>
-            )}
-            <button onClick={capture}>Capture photo</button>
-            <button onClick={toggleFacingMode}>
-              Toggle Camera: {facingMode === "user" ? "Back" : "Front"}
-            </button>
-            {proof && (
-              <div>
-                <h2>Proof:</h2>
-                {proof.type.includes("image") ? (
-                  <img src={URL.createObjectURL(proof)} alt={proof.name} />
-                ) : (
-                  <video src={URL.createObjectURL(proof)} controls />
-                )}
-                <p>File Name: {proof.name}</p>
-              </div>
-            )}
-          </>
         </div>
       </div>
     </>

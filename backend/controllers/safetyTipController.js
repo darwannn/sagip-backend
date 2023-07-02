@@ -34,7 +34,9 @@ safetyTipController.post(
       console.log(title);
       console.log(category);
       console.log("====================================");
-
+      console.log("====================================");
+      console.log(req.file);
+      console.log("====================================");
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";

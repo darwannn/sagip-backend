@@ -9,6 +9,7 @@ import Navbar from "../components/Navbar";
 import { receivePusher } from "../utils/functions";
 
 import warningSound from "../assets/warning.mp3";
+import image from "../assets/hospital_icon.png";
 
 function Home() {
   const dispatch = useDispatch();
@@ -22,9 +23,33 @@ function Home() {
   const [intervalId, setIntervalId] = useState(null); // Added intervalId state
 
   useEffect(() => {
+    if ("Notification" in window) {
+      Notification.requestPermission()
+        .then((permission) => {
+          if (permission === "granted") {
+            const notificationOptions = {
+              body: "Hello",
+              icon: "/path/to/notification-icon.png",
+            };
+
+            const notification = new Notification("Title", notificationOptions);
+
+            const duration = 5000;
+            setTimeout(() => {
+              notification.close();
+            }, duration);
+          }
+        })
+        .catch((error) => {
+          console.error("Error requesting notification permission:", error);
+        });
+    } else {
+      console.log("Notifications not supported");
+    }
     const fetchData = async () => {
       if (serverResponse !== "") {
         toast.success(serverResponse);
+
         dispatch(getServerResponse());
       }
       try {
