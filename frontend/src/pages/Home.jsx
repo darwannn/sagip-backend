@@ -129,7 +129,7 @@ function Home() {
 
     console.log("triggerPusher");
 
-    await request(
+    const data = await request(
       "/api/pusher",
       "PUT",
       {
@@ -144,6 +144,9 @@ function Home() {
         },
       }
     );
+    console.log("=============pusher data =======================");
+    console.log(data);
+    console.log("====================================");
   };
 
   const handleMouseDown = () => {

@@ -144,10 +144,10 @@ apiController.get("/weather", async (req, res) => {
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
   console.log("====================================");
-  console.log("pish");
+  console.log("push");
   console.log("====================================");
   const { purpose, content, channel, to } = req.body;
-  //console.log("p" + purpose);
+
   const data = {
     from: req.user.id,
     to,
@@ -155,9 +155,29 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
     content,
   };
 
-  pusher.trigger(channel, "sagipEvent", data);
-  res.send("Event triggered");
+  if (await createPusher(channel, data)) {
+    return res.status(200).json({
+      success: true,
+      message: "Pusher sent successfully",
+    });
+  }
 });
+
+const createPusher = async (channel, data) => {
+  console.log("====================================");
+  console.log("new push");
+  console.log("====================================");
+  pusher.trigger(channel, "sagipEvent", data, (error, info) => {
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error.message,
+      });
+    } else {
+      return true;
+    }
+  });
+};
 
 apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   const error = {};
@@ -401,5 +421,6 @@ const sendNotificationToken = (title, body, tokens) => {
 
 module.exports = {
   sendSMS,
+  createPusher,
   apiController,
 };
