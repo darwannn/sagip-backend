@@ -52,9 +52,10 @@ const Test3 = () => {
     ({ data }) => {
       if (data.size > 0) {
         setRecordedChunks((prev) => prev.concat(data));
-
+        //data is blob
         const videoBlob = new Blob([data], { type: "video/mp4" });
-
+        console.log("data");
+        console.log(data);
         const file = new File([videoBlob], "proof.mp4", { type: "video/mp4" });
         setProof(file);
         console.log("====================================");
@@ -66,8 +67,11 @@ const Test3 = () => {
   );
 
   const capture = useCallback(() => {
+    //imageSrc is base64
     const imageSrc = webcamRef.current.getScreenshot();
-
+    console.log("====================================");
+    console.log(imageSrc);
+    console.log("====================================");
     const image = new Image();
     image.src = imageSrc;
 
@@ -78,7 +82,7 @@ const Test3 = () => {
 
       const context = canvas.getContext("2d");
       context.drawImage(image, 0, 0, image.width, image.height);
-
+      //convert to file
       canvas.toBlob((blob) => {
         const file = new File([blob], "proof.jpeg", { type: "image/jpeg" });
         setProof(file);

@@ -179,7 +179,7 @@ const ManageEmergencyFacility = () => {
             setHazardStatus(data.status);
             setCategory(data.category);
             setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
-            if (data.proof.includes(".mkv")) {
+            if (data.proof.includes(".mp4")) {
               setProof(
                 `https://res.cloudinary.com/dantwvqrv/video/upload/v1687769867/sagip/media/assistance-request/${data.proof}`
               );

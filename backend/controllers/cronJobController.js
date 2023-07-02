@@ -55,10 +55,16 @@ async function backupDatabase() {
       await fs.unlink(path.join(tempFolderPath, fileName));
     }
 
-    console.log("Backup completed successfully");
     client.close();
-  } catch (err) {
-    console.log("An error occurred during backup", err);
+    return res.status(200).json({
+      success: true,
+      message: "Backup successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
   }
 }
 
@@ -86,10 +92,15 @@ const deleteArchivedData = async () => {
       isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
     });
-
-    console.log("Archived data deleted successfully");
+    return res.status(200).json({
+      success: true,
+      message: "Archived data deleted successfully",
+    });
   } catch (error) {
-    console.error("Error deleting archived data:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
   }
 };
 

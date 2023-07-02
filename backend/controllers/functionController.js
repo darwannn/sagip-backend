@@ -211,15 +211,21 @@ const cloudinaryUploader = async (
   folderPath,
   public_id
 ) => {
-  let cloudinaryResult;
+  let cloudinaryResult, fileFormat;
 
   try {
     if (action === "upload") {
+      if (resource_type === "image") {
+        fileFormat = "jpeg";
+      } else if (resource_type === "video") {
+        fileFormat = "mp4";
+      }
       await cloudinary.uploader
         .upload(filePath, {
           resource_type: resource_type,
           folder: folderPath,
           public_id: public_id.replace(/\.[^/.]+$/, ""),
+          format: fileFormat,
         })
         .then(async (result) => {
           cloudinaryResult = result;
