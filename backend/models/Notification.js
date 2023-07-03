@@ -8,6 +8,9 @@ const NotificationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    linkId: {
+      type: mongoose.Types.ObjectId,
+    },
     title: {
       type: String,
       required: true,

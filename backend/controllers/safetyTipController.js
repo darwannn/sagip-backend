@@ -79,6 +79,7 @@ safetyTipController.post(
           if (safetyTip) {
             await createPusher("safety-tips", "reload", {});
             /*  createNotificationAll(
+              safetyTip._id,
               "Discover the Latest Safety Tip",
               `Explore the recently added safety tip: ${title}`,
               "info"

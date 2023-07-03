@@ -78,6 +78,7 @@ emergencyFacilityController.post(
           });
           if (emergencyFacility) {
             /* createNotificationAll(
+              emergencyFacility._id,
               `A ${category} is added`,
               `Checkout the new ${category}: ${name} `,
               "info"

@@ -185,12 +185,13 @@ teamController.delete(
     try {
       const team = await Team.findByIdAndDelete(req.params.id);
       const teamMembers = [team.head, ...team.members];
-      await createNotification(
+      /*  await createNotification(
         [teamMembers],
+        team._id,
         `${team.name} Removed`,
         "Your team has been removed",
         "info"
-      );
+      ); */
       if (team) {
         /* await createPusher("team", "reload", {}); */
         return res.status(200).json({
@@ -255,6 +256,7 @@ teamController.put(
         if (newTeamId === "unassigned") {
           /* await createNotification(
           [userId],
+           team._id,
           `You have been unassigned`,
           `You have been remove from ${team.name}`,
           "info"
@@ -263,6 +265,7 @@ teamController.put(
           // walang prev team
           /* await createNotification(
           [userId],
+           team._id,
           `You have been assigned`,
           `You have been assigned to ${team.name} as member`,
           "info"
@@ -270,6 +273,7 @@ teamController.put(
         } else {
           /* await createNotification(
           [userId],
+           team._id,
           `You have been reassigned`,
           `You have been assigned to ${team.name} as member`,
           "info"
@@ -319,12 +323,14 @@ teamController.put(
         if (team) {
           /* await createNotification(
             [head],
+             team._id,
             `You have been assigned`,
             `You have been assigned to ${team.name} as head`,
             "info"
           );
           await createNotification(
             [members],
+             team._id,
             `You have been assigned`,
             `You have been assigned to ${team.name} as member`,
             "info"
