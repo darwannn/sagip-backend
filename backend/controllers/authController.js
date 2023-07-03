@@ -25,7 +25,7 @@ const {
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
-const { sendSMS, apiController } = require("./apiController");
+const { sendSMS, createPusher } = require("./apiController");
 
 /* const currentDate = new Date(); */
 const codeExpiration = new Date(new Date().getTime() + 30 * 60000);

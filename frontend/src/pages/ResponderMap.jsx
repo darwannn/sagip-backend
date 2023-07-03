@@ -239,7 +239,7 @@ function EmergencyFacility() {
               Authorization: `Bearer ${token}`,
             },
             {
-              to: "64788dfd295e2f184e55d20f",
+              event: "64788dfd295e2f184e55d20f",
               channel: "location",
               content: {
                 latitude: latitude,

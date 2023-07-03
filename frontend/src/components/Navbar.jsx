@@ -20,7 +20,7 @@ const Navbar = () => {
         const data = await request(`/notification/`, "GET", {
           Authorization: `Bearer ${token}`,
         });
-        setNotification(data.notifications);
+        setNotification(data);
         /*    console.log(data); */
       } catch (error) {
         console.error(error);

@@ -2,10 +2,10 @@ const emergencyFacilityController = require("express").Router();
 const EmergencyFacility = require("../models/EmergencyFacility");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const multerMiddleware = require("../middlewares/multerMiddleware");
-/* const upload = multerMiddleware("assets/images/Emergency Facility"); */
-const folderPath = "sagip/media/emergency-facility";
-const fs = require("fs");
 
+const folderPath = "sagip/media/emergency-facility";
+const { sendSMS, createPusher } = require("./apiController");
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const {
   isEmpty,
   isImage,
@@ -17,6 +17,10 @@ const {
 emergencyFacilityController.post(
   "/add",
   tokenMiddleware,
+  /*  userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]), */
   multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
@@ -49,6 +53,7 @@ emergencyFacilityController.post(
           }
         }
       }
+
       if (Object.keys(error).length === 0) {
         const cloud = await cloudinaryUploader(
           "upload",
@@ -69,6 +74,7 @@ emergencyFacilityController.post(
             status,
           });
           if (emergencyFacility) {
+            /*   await createPusher("emergency-facility", "reload", {}); */
             return res.status(200).json({
               success: true,
               message: "Data added successfully",
@@ -102,7 +108,6 @@ emergencyFacilityController.post(
   }
 );
 
-/* get all */
 emergencyFacilityController.get("/", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({});
@@ -157,7 +162,6 @@ emergencyFacilityController.get("/operational", async (req, res) => {
   }
 });
 
-/* get specific  */
 emergencyFacilityController.get("/:id", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.findById(req.params.id);
@@ -188,6 +192,10 @@ emergencyFacilityController.get("/:id", async (req, res) => {
 emergencyFacilityController.put(
   "/update/:id",
   tokenMiddleware,
+  /*   userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]), */
   multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
@@ -198,7 +206,6 @@ emergencyFacilityController.put(
         longitude,
         category,
         hasChanged,
-        /*   isFull, */
         status,
         contactNumber,
       } = req.body;
@@ -238,7 +245,7 @@ emergencyFacilityController.put(
           latitude,
           longitude,
           category,
-          /* isFull */ status,
+          status,
         };
 
         if (hasChanged && req.file) {
@@ -263,9 +270,6 @@ emergencyFacilityController.put(
           );
 
           if (cloud !== "error") {
-            /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
-              cloud.format
-            }`; */
           } else {
             return res.status(500).json({
               success: false,
@@ -281,6 +285,7 @@ emergencyFacilityController.put(
         );
 
         if (emergencyFacility) {
+          await createPusher("emergency-facility", "reload", {});
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -311,6 +316,10 @@ emergencyFacilityController.put(
 emergencyFacilityController.delete(
   "/delete/:id",
   tokenMiddleware,
+  /*  userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]), */
   async (req, res) => {
     try {
       const emergencyFacilityImage = await EmergencyFacility.findById(
@@ -329,6 +338,7 @@ emergencyFacilityController.delete(
         );
 
         if (emergencyFacility) {
+          /*     await createPusher("emergency-facility", "reload", {}); */
           return res.status(200).json({
             success: true,
             message: "Deleted Successfully",

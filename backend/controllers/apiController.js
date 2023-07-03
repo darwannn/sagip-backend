@@ -5,7 +5,7 @@ const User = require("../models/User");
 const Pusher = require("pusher");
 const municipality = "Malolos";
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-const { backupDatabase } = require("./cronJobController");
+
 const { firebase } = require("../utils/config");
 
 const pusher = new Pusher({
@@ -118,7 +118,6 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
-  //backupDatabase();
   sendNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
@@ -146,16 +145,15 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
   console.log("====================================");
   console.log("push");
   console.log("====================================");
-  const { purpose, content, channel, to } = req.body;
+  const { purpose, content, channel, event } = req.body;
 
   const data = {
     from: req.user.id,
-    to,
     purpose,
     content,
   };
 
-  if (await createPusher(channel, data)) {
+  if (await createPusher(channel, event, data)) {
     return res.status(200).json({
       success: true,
       message: "Pusher sent successfully",
@@ -163,17 +161,20 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
   }
 });
 
-const createPusher = async (channel, data) => {
+const createPusher = async (channel, event, data) => {
   console.log("====================================");
   console.log("new push");
   console.log("====================================");
-  pusher.trigger(channel, "sagipEvent", data, (error, info) => {
+  pusher.trigger(channel, event, data, (error, info) => {
     if (error) {
+      console.log("pusher false");
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error.message,
       });
     } else {
+      console.log("pusher true");
+
       return true;
     }
   });

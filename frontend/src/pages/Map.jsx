@@ -81,9 +81,9 @@ function EmergencyFacility() {
 
   /* pusher */
   useEffect(() => {
-    receivePusher("location", (data) => {
+    receivePusher("64788dfd295e2f184e55d20f", "location", (data) => {
       console.log(data);
-      if (data.to === user.id) {
+      if (data.content) {
         setResponderLatitude(data.content.latitude);
         setResponderLongitude(data.content.longitude);
         getResponderRoute(

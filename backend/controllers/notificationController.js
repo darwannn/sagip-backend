@@ -9,7 +9,8 @@ notificationController.get("/", tokenMiddleware, async (req, res) => {
     console.log(req.user.id);
     const notification = await Notification.findOne({ userId: req.user.id });
     if (notification) {
-      return res.status(200).json(notification);
+      // console.log(notification._doc);
+      return res.status(200).json(notification._doc.notifications);
       return res.status(200).json({
         /* success: true,
         message: "found", 

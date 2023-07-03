@@ -64,7 +64,9 @@ export const reverseGeoCoding = (latitude, longitude) => {
 };
 
 //di gumagana pag promise
-export const receivePusher = (channelName, callback) => {
+//channel name either location, notification or reload
+// event name sino mag rereceive
+export const receivePusher = (channelName, eventName, callback) => {
   const pusher = new Pusher(process.env.REACT_APP_KEY, {
     cluster: process.env.REACT_APP_CLUSTER,
   });
@@ -73,13 +75,13 @@ export const receivePusher = (channelName, callback) => {
   const eventHandler = (data) => {
     callback(data);
 
-    // Optionally, you can uncomment the line below to automatically unsubscribe after receiving the first event
+    //uncomment to automatically unsubscribe
     // unsubscribe();
   };
-  channel.bind("sagipEvent", eventHandler);
+  channel.bind(eventName, eventHandler);
 
   const unsubscribe = () => {
-    channel.unbind("sagipEvent", eventHandler);
+    channel.unbind(eventName, eventHandler);
     pusher.unsubscribe(channelName);
   };
 

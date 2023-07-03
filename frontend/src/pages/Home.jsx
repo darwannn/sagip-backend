@@ -98,7 +98,7 @@ function Home() {
     });
 
     const channel = pusher.subscribe("notification");
-    channel.bind("sagipEvent", (data) => {
+    channel.bind("64788dfd295e2f184e55d20f", (data) => {
       console.log("Received event:", data);
       if (data.to === user.id) {
         alert("I received a notification");
@@ -112,15 +112,19 @@ function Home() {
     return () => {
       pusher.unsubscribe("sagipChannel");
     }; */
-    receivePusher("notification", (data) => {
+    receivePusher("64788dfd295e2f184e55d20f", "notification", (data) => {
       /*  console.log("Received data:", data); */
 
-      if (data.to === user.id) {
+      if (data.content) {
+        console.log(data.content);
         toast.success("I received a notification");
       }
       if (data.purpose === "reload") {
         alert("Reload useEffect");
       }
+    });
+    receivePusher("emergency-facility", "reload", (data) => {
+      toast.success("emergency-facility reload");
     });
   }, []);
 
@@ -136,8 +140,8 @@ function Home() {
         Authorization: `Bearer ${token}`,
       },
       {
-        to: "64788dfd295e2f184e55d20f",
-        channel: "notification",
+        event: "notification",
+        channel: "64788dfd295e2f184e55d20f",
         content: {
           latitude: 14.8527,
           longitude: 120.816,

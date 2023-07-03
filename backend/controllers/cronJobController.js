@@ -6,27 +6,26 @@ const HazardReport = require("../models/HazardReport");
 
 const { MongoClient } = require("mongodb");
 const { promises: fs } = require("fs");
-const createCsvWriter = require("csv-writer").createObjectCsvWriter;
-const dbName = "sagip";
-const dbURL = process.env.MONGO_URL;
+
+const path = require("path");
+
+const { cloudinary } = require("../utils/config");
 const currentDate = new Date().toLocaleDateString("en-US", {
   year: "numeric",
   month: "long",
   day: "numeric",
 });
-const path = require("path");
 const folderPath = `sagip/backup/${currentDate}`;
-const { cloudinary } = require("../utils/config");
+
 cronJobController.post("/backup", async (req, res) => {
-  backupDatabase();
-});
-async function backupDatabase() {
   try {
     const tempFolderPath = path.join(__dirname, "../temp");
-    const client = new MongoClient(dbURL, { useUnifiedTopology: true });
+    const client = new MongoClient(process.env.MONGO_URL, {
+      useUnifiedTopology: true,
+    });
     await client.connect();
     console.log("Connected successfully to the server");
-    const db = client.db(dbName);
+    const db = client.db("sagip");
     const collections = await db.listCollections().toArray();
     console.log(collections);
     for (const collection of collections) {
@@ -66,7 +65,7 @@ async function backupDatabase() {
       message: "Internal Server Error: " + error,
     });
   }
-}
+});
 
 const deleteArchivedData = async () => {
   try {
@@ -105,7 +104,6 @@ const deleteArchivedData = async () => {
 };
 
 module.exports = {
-  backupDatabase,
   deleteArchivedData,
   cronJobController,
 };
