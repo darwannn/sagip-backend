@@ -8,6 +8,10 @@ const isAdmin = require("../middlewares/isAdmin");
 const isSuperAdmin = require("../middlewares/isSuperAdmin");
 const isResponder = require("../middlewares/isResponder");
 const isDispatcher = require("../middlewares/isDispatcher");
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 
 const {
   isEmpty,
@@ -15,6 +19,7 @@ const {
   isLessThanSize,
   cloudinaryUploader,
 } = require("./functionController");
+const { createPusher } = require("./apiController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
@@ -72,6 +77,12 @@ safetyTipController.post(
             image: `${cloud.original_filename}.${cloud.format}`,
           });
           if (safetyTip) {
+            await createPusher("safety-tips", "reload", {});
+            /*  createNotificationAll(
+              "Discover the Latest Safety Tip",
+              `Explore the recently added safety tip: ${title}`,
+              "info"
+            ); */
             return res.status(200).json({
               success: true,
               message: "Added successfully",
@@ -222,7 +233,7 @@ safetyTipController.put(
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(status)) error["status"] = "Required field";
 
-      if (hasChanged === "true") {
+      if (hasChanged === true) {
         if (!req.file) {
           error["image"] = "Required field";
         } else {
@@ -273,6 +284,7 @@ safetyTipController.put(
         );
 
         if (safetyTip) {
+          await createPusher("safety-tips", "reload", {});
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -318,8 +330,10 @@ safetyTipController.delete(
       );
       if (cloud !== "error") {
         const safetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
-
+        console.log("safetyTip");
+        console.log(safetyTip.title);
         if (safetyTip) {
+          await createPusher("safety-tips", "reload", {});
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",

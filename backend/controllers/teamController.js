@@ -3,11 +3,16 @@ const Team = require("../models/Team");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
-
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const { createPusher } = require("./apiController");
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 teamController.post(
   "/add",
   tokenMiddleware,
-
+  /*  userTypeMiddleware(["admin", "super-admin"]), */
   async (req, res) => {
     const error = {};
     try {
@@ -21,6 +26,7 @@ teamController.post(
         });
 
         if (team) {
+          /*  await createPusher("team", "reload", {}); */
           return res.status(200).json({
             success: true,
             message: "Added Successfully",
@@ -48,7 +54,6 @@ teamController.post(
   }
 );
 
-/* get all */
 teamController.get("/", async (req, res) => {
   try {
     const team = await Team.find({})
@@ -79,10 +84,6 @@ teamController.get("/", async (req, res) => {
 
 teamController.get("/responder", async (req, res) => {
   try {
-    /*   let responders = await User.find({
-      userType: "resident",
-    }).populate("teamId"); */
-
     const teams = await Team.find({}).populate("head").populate("members");
 
     if (teams.length > 0) {
@@ -131,7 +132,7 @@ teamController.get("/responder", async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        /* message: "Data found", */
+        /* message: "found", */
         assignedResponders: assignedResponders,
         unassignedResponders: unassignedResponders,
         responders: [...unassignedResponders, ...assignedResponders],
@@ -176,110 +177,105 @@ teamController.get("/:id", async (req, res) => {
   }
 });
 
-teamController.delete("/delete/:id", tokenMiddleware, async (req, res) => {
-  try {
-    const team = await Team.findByIdAndDelete(req.params.id);
-
-    if (team) {
-      return res.status(200).json({
-        success: true,
-        message: "Deleted Successfully",
-      });
-    } else {
+teamController.delete(
+  "/delete/:id",
+  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */
+  async (req, res) => {
+    try {
+      const team = await Team.findByIdAndDelete(req.params.id);
+      const teamMembers = [team.head, ...team.members];
+      await createNotification(
+        [teamMembers],
+        `${team.name} Removed`,
+        "Your team has been removed",
+        "info"
+      );
+      if (team) {
+        /* await createPusher("team", "reload", {}); */
+        return res.status(200).json({
+          success: true,
+          message: "Deleted Successfully",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
-teamController.put("/update/assignment/", tokenMiddleware, async (req, res) => {
-  /* const error = {}; */
-  try {
-    const { newTeamId, userId, prevTeamId } = req.body;
+teamController.put(
+  "/update/assignment/",
+  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+    try {
+      const { newTeamId, userId, prevTeamId } = req.body;
 
-    /* if (Object.keys(error).length === 0) { */
-    let team;
-    //may team gagawing unassigned
-    if (newTeamId === "unassigned") {
-      console.log("====================================");
-      console.log("unassigned");
-      console.log("====================================");
-      team = await Team.findByIdAndUpdate(
-        prevTeamId,
-        { $pull: { members: userId } },
-        { new: true }
-      );
-    } else if (prevTeamId === "") {
-      // walang prev team
-      team = await Team.findByIdAndUpdate(
-        newTeamId,
-        { $push: { members: userId } },
-        { new: true }
-      );
-    } else {
-      const removeTeam = await Team.findByIdAndUpdate(
-        prevTeamId,
-        { $pull: { members: userId } },
-        { new: true }
-      );
-      team = await Team.findByIdAndUpdate(
-        newTeamId,
-        { $push: { members: userId } },
-        { new: true }
-      );
-    }
-
-    if (team) {
-      return res.status(200).json({
-        success: true,
-        message: "Updated Successfully",
-        team,
-      });
-    } else {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-      });
-    }
-    /*  } */
-
-    /*  if (Object.keys(error).length !== 0) {
-        error["success"] = false;
-        error["message"] = "input error";
-        return res.status(400).json(error);
-      } */
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
-  }
-});
-teamController.put("/update/:id", tokenMiddleware, async (req, res) => {
-  const error = {};
-  try {
-    const { head, members } = req.body;
-    /*  console.log(head); */
-    console.log(members);
-
-    if (isEmpty(head)) error["head"] = "Required field";
-    if (members.length === 0) error["members"] = "Required field";
-
-    if (Object.keys(error).length === 0) {
-      const updateFields = { head, members };
-
-      const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
-        new: true,
-      });
+      let team;
+      //may team gagawing unassigned
+      if (newTeamId === "unassigned") {
+        console.log("====================================");
+        console.log("unassigned");
+        console.log("====================================");
+        team = await Team.findByIdAndUpdate(
+          prevTeamId,
+          { $pull: { members: userId } },
+          { new: true }
+        );
+      } else if (prevTeamId === "") {
+        // walang prev team
+        team = await Team.findByIdAndUpdate(
+          newTeamId,
+          { $push: { members: userId } },
+          { new: true }
+        );
+      } else {
+        const removeTeam = await Team.findByIdAndUpdate(
+          prevTeamId,
+          { $pull: { members: userId } },
+          { new: true }
+        );
+        team = await Team.findByIdAndUpdate(
+          newTeamId,
+          { $push: { members: userId } },
+          { new: true }
+        );
+      }
 
       if (team) {
+        //may team gagawing unassigned
+        if (newTeamId === "unassigned") {
+          /* await createNotification(
+          [userId],
+          `You have been unassigned`,
+          `You have been remove from ${team.name}`,
+          "info"
+        ); */
+        } else if (prevTeamId === "") {
+          // walang prev team
+          /* await createNotification(
+          [userId],
+          `You have been assigned`,
+          `You have been assigned to ${team.name} as member`,
+          "info"
+        ); */
+        } else {
+          /* await createNotification(
+          [userId],
+          `You have been reassigned`,
+          `You have been assigned to ${team.name} as member`,
+          "info"
+        ); */
+        }
+        /* await createPusher("team", "reload", {}); */
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -291,19 +287,74 @@ teamController.put("/update/:id", tokenMiddleware, async (req, res) => {
           message: "Internal Server Error",
         });
       }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
     }
-
-    if (Object.keys(error).length !== 0) {
-      error["success"] = false;
-      error["message"] = "input error";
-      return res.status(400).json(error);
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
+teamController.put(
+  "/update/:id",
+  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+    const error = {};
+    try {
+      const { head, members } = req.body;
+      /*  console.log(head); */
+      console.log(members);
+
+      if (isEmpty(head)) error["head"] = "Required field";
+      if (members.length === 0) error["members"] = "Required field";
+
+      if (Object.keys(error).length === 0) {
+        const updateFields = { head, members };
+        /*      const previousTeam = await Team.findById(req.params.id);
+        const previousMembers = previousTeam.members; */
+        const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
+          new: true,
+        });
+
+        if (team) {
+          /* await createNotification(
+            [head],
+            `You have been assigned`,
+            `You have been assigned to ${team.name} as head`,
+            "info"
+          );
+          await createNotification(
+            [members],
+            `You have been assigned`,
+            `You have been assigned to ${team.name} as member`,
+            "info"
+          ); */
+          /*  await createPusher("team", "reload", {}); */
+          return res.status(200).json({
+            success: true,
+            message: "Updated Successfully",
+            team,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 module.exports = teamController;

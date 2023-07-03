@@ -10,7 +10,7 @@ const {
   createNotificationAll,
 } = require("./notificationController");
 const { firebase } = require("../utils/config");
-
+const { isEmpty } = require("./functionController");
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
   key: process.env.PUSHER_KEY,
@@ -121,10 +121,10 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
-  sendNotificationToken("title", "body", [
+  createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
-  sendNotificationTopic("Topic", "body", "sagip");
+  createPushNotificationTopic("Topic", "body", "sagip");
   console.log("====================================");
   console.log("localhost");
   console.log("====================================");
@@ -145,8 +145,8 @@ apiController.get("/weather", async (req, res) => {
 });
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
-  /*   await createNotification(req.user.id, "title", "message", "category"); */
-  /*   await createNotificationAll("title", "message", "category"); */
+  /*  await createNotification([req.user.id], "title", "message", "category"); */
+  /*  await createNotificationAll("title", "message", "category"); */
   console.log("====================================");
   console.log("push");
   console.log("====================================");
@@ -242,7 +242,7 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
     /*    console.log(contactNumbers);
     console.log(fcmTokens);
 
-    sendNotificationToken(alertTitle, alertMessage, fcmTokens); */
+    createPushNotificationToken(alertTitle, alertMessage, fcmTokens); */
 
     try {
       const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
@@ -318,13 +318,13 @@ const sendBulkSMS = async (message, contactNumbers) => {
       throw error;
     });
 };
-
+/* 
 const isEmpty = (value) => {
   if (value == "") {
     return true;
   }
 };
-
+ */
 const getAllContactNumbersInMunicipality = async (municipality) => {
   try {
     const users = await User.find({ municipality: municipality });
@@ -372,7 +372,7 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   }
 };
 
-const sendNotificationTopic = (title, body, topic) => {
+const createPushNotificationTopic = (title, body, topic) => {
   const message = {
     notification: {
       title: title,
@@ -391,7 +391,7 @@ const sendNotificationTopic = (title, body, topic) => {
       console.log("Failed to send notification:", error);
     });
 };
-const sendNotificationToken = (title, body, tokens) => {
+const createPushNotificationToken = (title, body, tokens) => {
   const message = {
     notification: {
       title: title,
@@ -426,6 +426,8 @@ const sendNotificationToken = (title, body, tokens) => {
 };
 
 module.exports = {
+  createPushNotificationTopic,
+  createPushNotificationToken,
   sendSMS,
   createPusher,
   apiController,

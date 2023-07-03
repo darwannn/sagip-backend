@@ -4,6 +4,10 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+/* const {
+  createPushNotificationTopic,
+  createPushNotificationToken,
+} = require("./apiController"); */
 
 notificationController.get("/", tokenMiddleware, async (req, res) => {
   try {
@@ -85,17 +89,26 @@ notificationController.delete(
   }
 );
 
-const createNotification = async (id, title, message, category) => {
-  await Notification.create({
-    userId: id,
-    title: title,
-    message: message,
-    category: category,
+const createNotification = async (ids, title, message, category) => {
+  /*  createPushNotificationToken("title", "body", [
+    "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
+  ]); */
+  const notifications = ids.map(async (id) => {
+    await Notification.create({
+      userId: id,
+      title: title,
+      message: message,
+      category: category,
+    });
   });
-  console.log("notification created");
+
+  await Promise.all(notifications);
+
+  console.log("notifications created");
 };
 
 const createNotificationAll = async (title, message, category) => {
+  /*  createPushNotificationTopic(title, message, "sagip"); */
   const users = await User.find({});
   if (users) {
     users.map(async (user) => {
@@ -111,17 +124,8 @@ const createNotificationAll = async (title, message, category) => {
   console.log("notification created all");
 };
 
-/* const updateNotification = async () => {
-  const notification = await Notification.create({
-    userId: user._doc._id,
-    notifications: [],
-  });
-  return notification;
-};
- */
 module.exports = {
+  notificationController,
   createNotificationAll,
   createNotification,
-  /*   updateNotification, */
-  notificationController,
 };

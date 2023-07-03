@@ -4,10 +4,7 @@ const dotenv = require("dotenv").config();
 const cors = require("cors");
 const authController = require("./controllers/authController");
 const accountController = require("./controllers/accountController");
-const {
-  sendVerificationCode,
-  apiController,
-} = require("./controllers/apiController");
+const { apiController } = require("./controllers/apiController");
 const safetyTipController = require("./controllers/safetyTipController");
 const emergencyFacilityController = require("./controllers/emergencyFacilityController");
 const teamController = require("./controllers/teamController");

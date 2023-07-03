@@ -13,7 +13,10 @@ const {
   isContactNumber,
   cloudinaryUploader,
 } = require("./functionController");
-
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 emergencyFacilityController.post(
   "/add",
   tokenMiddleware,
@@ -74,10 +77,15 @@ emergencyFacilityController.post(
             status,
           });
           if (emergencyFacility) {
-            /*   await createPusher("emergency-facility", "reload", {}); */
+            /* createNotificationAll(
+              `A ${category} is added`,
+              `Checkout the new ${category}: ${name} `,
+              "info"
+            ); */
+            await createPusher("emergency-facility", "reload", {});
             return res.status(200).json({
               success: true,
-              message: "Data added successfully",
+              message: "Added successfully",
               emergencyFacility,
             });
           } else {
@@ -225,7 +233,7 @@ emergencyFacilityController.put(
         }
       }
 
-      if (hasChanged === "true") {
+      if (hasChanged === true) {
         if (!req.file) {
           error["image"] = "Required field";
         } else {
@@ -338,7 +346,7 @@ emergencyFacilityController.delete(
         );
 
         if (emergencyFacility) {
-          /*     await createPusher("emergency-facility", "reload", {}); */
+          await createPusher("emergency-facility", "reload", {});
           return res.status(200).json({
             success: true,
             message: "Deleted Successfully",
