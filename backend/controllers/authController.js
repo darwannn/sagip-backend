@@ -24,18 +24,16 @@ const { createNotification } = require("./notificationController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
-const { sendSMS, createPusher } = require("./apiController");
 
 /* const currentDate = new Date(); */
 const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
-/* const upload = multerMiddleware("assets/images/User"); */
 
 const folderPath = "sagip/media/user";
-const { cloudinary } = require("../utils/config");
 
-const fs = require("fs");
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const { createPusher } = require("./apiController");
 
 authController.post("/register", async (req, res) => {
   try {
@@ -217,6 +215,13 @@ authController.post("/register", async (req, res) => {
 authController.post(
   "/contact-verification",
   tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   async (req, res) => {
     try {
       const error = {};
@@ -344,6 +349,13 @@ authController.post(
 authController.post(
   "/password-verification",
   tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   async (req, res) => {
     try {
       const { password } = req.body;
@@ -523,12 +535,21 @@ authController.post("/forgot-password", async (req, res) => {
   }
 });
 
-authController.put("/new-password", tokenMiddleware, async (req, res) => {
-  try {
-    const error = {};
-    const { password, confirmPassword } = req.body;
+authController.put(
+  "/new-password",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
+    try {
+      const error = {};
+      const { password, confirmPassword } = req.body;
 
-    /* if (isEmpty(password)) {
+      /* if (isEmpty(password)) {
       error["password"] = "Required field";
     } else {
       if (verifyPassword(password)) {
@@ -536,95 +557,114 @@ authController.put("/new-password", tokenMiddleware, async (req, res) => {
       }
     } */
 
-    if (isEmpty(confirmPassword)) {
-      error["confirmPassword"] = "Required field";
-    } else {
-      if (!isEmpty(password)) {
-        if (password !== confirmPassword) {
-          error["confirmPassword"] = "Password did not match";
+      if (isEmpty(confirmPassword)) {
+        error["confirmPassword"] = "Required field";
+      } else {
+        if (!isEmpty(password)) {
+          if (password !== confirmPassword) {
+            error["confirmPassword"] = "Password did not match";
+          }
         }
       }
-    }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
-    if (Object.keys(error).length == 0) {
-      console.log(req.user);
-      const user = await User.findByIdAndUpdate(req.user.id, {
-        verificationCode: 0,
-        password: hashedPassword,
-      });
+      if (Object.keys(error).length == 0) {
+        console.log(req.user);
+        const user = await User.findByIdAndUpdate(req.user.id, {
+          verificationCode: 0,
+          password: hashedPassword,
+        });
 
-      if (user) {
-        if (req.body.for) {
-          return res.status(200).json({
-            success: true,
-            message:
-              "Password has been changed successfully. You can now login with your new password",
-          });
+        if (user) {
+          if (req.body.for) {
+            return res.status(200).json({
+              success: true,
+              message:
+                "Password has been changed successfully. You can now login with your new password",
+            });
+          } else {
+            return res.status(200).json({
+              success: true,
+              message: "Password has been changed successfully",
+            });
+          }
         } else {
-          return res.status(200).json({
-            success: true,
-            message: "Password has been changed successfully",
+          /* error["message"] = "Database Error"; */
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
           });
         }
+      }
+
+      if (Object.keys(error).length != 0) {
+        console.log("error");
+        error["message"] = "input error";
+        res.status(400).json(error);
+      }
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
+//general resend
+authController.put(
+  "/resend-code",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
+    try {
+      console.log("====================================");
+      console.log("resend");
+      console.log("====================================");
+      const user = await updateVerificationCode(req.user.id);
+
+      if (user) {
+        //console.log("Current COde: " + generatedCode);
+
+        return res.status(200).json({
+          success: true,
+          message: "Verification code has been resent",
+        });
       } else {
-        /* error["message"] = "Database Error"; */
         return res.status(500).json({
           success: false,
           message: "Internal Server Error",
         });
       }
-    }
-
-    if (Object.keys(error).length != 0) {
-      console.log("error");
-      error["message"] = "input error";
-      res.status(400).json(error);
-    }
-  } catch (error) {
-    // If an exception occurs, respond with an internal server error
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
-  }
-});
-
-//general resend
-authController.put("/resend-code", tokenMiddleware, async (req, res) => {
-  try {
-    console.log("====================================");
-    console.log("resend");
-    console.log("====================================");
-    const user = await updateVerificationCode(req.user.id);
-
-    if (user) {
-      //console.log("Current COde: " + generatedCode);
-
-      return res.status(200).json({
-        success: true,
-        message: "Verification code has been resent",
-      });
-    } else {
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    // If an exception occurs, respond with an internal server error
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
+//create verification request
 authController.put(
   "/verify-identity",
   tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   multerMiddleware.single("selfieImage"),
   async (req, res) => {
     try {
@@ -702,6 +742,10 @@ authController.put(
 authController.get(
   "/verification-request",
   tokenMiddleware,
+  /* userTypeMiddleware([
+  
+  "super-admin",
+]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
@@ -737,9 +781,17 @@ authController.get(
     }
   }
 );
+
 authController.get(
   "/verify-identity/request/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
@@ -777,9 +829,13 @@ authController.get(
   }
 );
 
+// manage detils
 authController.get(
   "/verify-identity/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+  "super-admin",
+]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
@@ -813,79 +869,94 @@ authController.get(
   }
 );
 
-authController.put("/verification-request/:id", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        $unset: {
-          verificationRequestDate: Date.now(),
+//manage control reject or verify
+authController.put(
+  "/verification-request/:id",
+  /* tokenMiddleware,
+  userTypeMiddleware([
+"super-admin",
+]), */ async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        {
+          $unset: {
+            verificationRequestDate: Date.now(),
+          },
         },
-      },
-      { new: true }
-    );
-
-    if (req.body.action === "reject") {
-      /*     user.verificationPicture.map(async (picture) => { */
-      /* const imagePath = `assets/images/User/${picture}`; */
-      /* fs.unlink(imagePath, (err) => {}); */
-      const cloud = await cloudinaryUploader(
-        "destroy",
-        "",
-        "image",
-        folderPath,
-        user.verificationPicture[0]
+        { new: true }
       );
-      /*   }); */
 
-      if (cloud !== "error") {
-        user.verificationPicture = [];
+      if (req.body.action === "reject") {
+        /*     user.verificationPicture.map(async (picture) => { */
+        /* const imagePath = `assets/images/User/${picture}`; */
+        /* fs.unlink(imagePath, (err) => {}); */
+        const cloud = await cloudinaryUploader(
+          "destroy",
+          "",
+          "image",
+          folderPath,
+          user.verificationPicture[0]
+        );
+        /*   }); */
 
+        if (cloud !== "error") {
+          user.verificationPicture = [];
+
+          await user.save();
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      } else {
+        user.status = "verified";
         await user.save();
+      }
+
+      if (user) {
+        if (req.body.action === "reject") {
+          /* sendSMS(`Verification Request Rejected`, user.contactNumber); */
+
+          await createNotification(
+            req.params.id,
+            "title",
+            "message",
+            "category"
+          );
+
+          return res.status(200).json({
+            success: true,
+            message: "Verification Request Rejected",
+          });
+        } else {
+          await createNotification(
+            req.params.id,
+            "title",
+            "message",
+            "category"
+          );
+          /*  sendSMS(`Verification Request Approved`, user.contactNumber); */
+
+          return res.status(200).json({
+            success: true,
+            message: "Verification Request Approved",
+          });
+        }
       } else {
         return res.status(500).json({
           success: false,
           message: "Internal Server Error",
         });
       }
-    } else {
-      user.status = "verified";
-      await user.save();
-    }
-
-    if (user) {
-      if (req.body.action === "reject") {
-        /* sendSMS(`Verification Request Rejected`, user.contactNumber); */
-
-        await createNotification(req.params.id, "title", "message", "category");
-
-        return res.status(200).json({
-          success: true,
-          message: "Verification Request Rejected",
-        });
-      } else {
-        await createNotification(req.params.id, "title", "message", "category");
-        /*  sendSMS(`Verification Request Approved`, user.contactNumber); */
-
-        return res.status(200).json({
-          success: true,
-          message: "Verification Request Approved",
-        });
-      }
-    } else {
+    } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
-
-/* functions ---------------------------------------- */
+);
 
 module.exports = authController;

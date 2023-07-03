@@ -5,7 +5,6 @@ const isInMalolos = require("../middlewares/isInMalolos");
 const {
   isEmpty,
   isImage,
-  isValidExtensions,
   isVideo,
   isLessThanSize,
   cloudinaryUploader,
@@ -14,16 +13,20 @@ const { createNotification } = require("./notificationController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/assistance-request";
-const { cloudinary } = require("../utils/config");
-/* const upload = multerMiddleware("assets/images/Assistance Request"); */
 
-const fs = require("fs");
-const { log } = require("console");
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const { createPusher } = require("./apiController");
 
 assistanceRequestController.post(
   "/add",
   tokenMiddleware,
-
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   multerMiddleware.single("proof"),
   isInMalolos,
   async (req, res) => {
@@ -93,6 +96,7 @@ assistanceRequestController.post(
             userId: req.user.id,
           });
           if (assistanceRequest) {
+            /* await createPusher("assistance-request", "reload", {}); */
             return res.status(200).json({
               success: true,
               message: "Added Successfully",
@@ -221,6 +225,12 @@ assistanceRequestController.get("/:id", async (req, res) => {
 assistanceRequestController.put(
   "/update/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+      "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     const error = {};
@@ -235,6 +245,7 @@ assistanceRequestController.put(
           { new: true }
         );
         if (assistanceRequest) {
+          /* await createPusher("assistance-request", "reload", {}); */
           return res.status(200).json({
             success: true,
             message: "Assistance Request Verified",
@@ -265,6 +276,12 @@ assistanceRequestController.put(
 assistanceRequestController.put(
   "/delete/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+      "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   async (req, res) => {
     const error = {};
     try {
@@ -305,6 +322,7 @@ assistanceRequestController.put(
           );
 
           if (assistanceRequest) {
+            /* await createPusher("assistance-request", "reload", {}); */
             return res.status(200).json({
               success: true,
               message: "Deleted successfully",
@@ -339,6 +357,12 @@ assistanceRequestController.put(
 assistanceRequestController.put(
   "/archive/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+      "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   async (req, res) => {
     try {
       let assistanceRequest;
@@ -360,6 +384,7 @@ assistanceRequestController.put(
         );
       }
       if (assistanceRequest) {
+        /* await createPusher("assistance-request", "reload", {}); */
         if (action === "archive") {
           return res.status(200).json({
             success: true,

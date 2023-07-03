@@ -5,7 +5,6 @@ const isInMalolos = require("../middlewares/isInMalolos");
 const {
   isEmpty,
   isImage,
-  isValidExtensions,
   isVideo,
   isLessThanSize,
   cloudinaryUploader,
@@ -13,16 +12,20 @@ const {
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/hazard-report";
-const { cloudinary } = require("../utils/config");
-/* const upload = multerMiddleware("assets/images/Hazard Report"); */
 
-const fs = require("fs");
-const { log } = require("console");
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const { createPusher } = require("./apiController");
 
 hazardReportController.post(
   "/add",
   tokenMiddleware,
-
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   multerMiddleware.single("proof"),
   isInMalolos,
   async (req, res) => {
@@ -93,6 +96,7 @@ hazardReportController.post(
             userId: req.user.id,
           });
           if (hazardReport) {
+            /*     await createPusher("hazard-report", "reload", {}); */
             return res.status(200).json({
               success: true,
               message: "Added Successfully",
@@ -212,6 +216,12 @@ hazardReportController.get("/:id", async (req, res) => {
 hazardReportController.put(
   "/update/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+     "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     const error = {};
@@ -231,7 +241,7 @@ hazardReportController.put(
           { new: true }
         );
         if (hazardReport) {
-          console.log(status);
+          /*  await createPusher("hazard-report", "reload", {}); */
           if (action === "verify") {
             return res.status(200).json({
               success: true,
@@ -270,6 +280,12 @@ hazardReportController.put(
 hazardReportController.delete(
   "/delete/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+      "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   async (req, res) => {
     try {
       let resource_type = "image";
@@ -296,6 +312,7 @@ hazardReportController.delete(
         );
 
         if (hazardReport) {
+          /*       await createPusher("hazard-report", "reload", {}); */
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",
@@ -323,6 +340,12 @@ hazardReportController.delete(
 hazardReportController.put(
   "/archive/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+      "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
   async (req, res) => {
     try {
       let hazardReport;
@@ -344,6 +367,7 @@ hazardReportController.put(
         );
       }
       if (hazardReport) {
+        /*   await createPusher("hazard-report", "reload", {}); */
         if (action === "archive") {
           return res.status(200).json({
             success: true,

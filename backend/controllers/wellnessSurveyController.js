@@ -3,67 +3,76 @@ const WellnessSurvey = require("../models/WellnessSurvey");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty } = require("./functionController");
+const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const { createPusher } = require("./apiController");
 
-wellnessSurveyController.post("/add", tokenMiddleware, async (req, res) => {
-  const error = {};
-  try {
-    const { title, category, isActive } = req.body;
+wellnessSurveyController.post(
+  "/add",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
+    const error = {};
+    try {
+      const { title, category, isActive } = req.body;
 
-    if (isEmpty(title)) error["title"] = "Required field";
-    if (isEmpty(category)) error["category"] = "Required field";
+      if (isEmpty(title)) error["title"] = "Required field";
+      if (isEmpty(category)) error["category"] = "Required field";
 
-    const activeWellnessSurvey = await WellnessSurvey.find({
-      isActive: true,
-    });
+      const activeWellnessSurvey = await WellnessSurvey.find({
+        isActive: true,
+      });
 
-    if (Object.keys(error).length === 0) {
-      if (!(activeWellnessSurvey.length !== 0 && isActive)) {
-        /* error["category"] = "There is already an active survey"; */
+      if (Object.keys(error).length === 0) {
+        if (!(activeWellnessSurvey.length !== 0 && isActive)) {
+          /* error["category"] = "There is already an active survey"; */
 
-        const activeWellnessSurvey = await WellnessSurvey.find({
-          isActive: true,
-        });
-
-        const wellnessSurvey = await WellnessSurvey.create({
-          title,
-          category,
-          isActive,
-        });
-
-        if (wellnessSurvey) {
-          return res.status(200).json({
-            success: true,
-            message: "Added successfully",
-            wellnessSurvey,
+          const activeWellnessSurvey = await WellnessSurvey.find({
+            isActive: true,
           });
+
+          const wellnessSurvey = await WellnessSurvey.create({
+            title,
+            category,
+            isActive,
+          });
+
+          if (wellnessSurvey) {
+            /*  await createPusher("wellness-survey", "reload", {}); */
+            return res.status(200).json({
+              success: true,
+              message: "Added successfully",
+              wellnessSurvey,
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
         } else {
           return res.status(500).json({
             success: false,
-            message: "Internal Server Error",
+            message: "There is already an active survey",
           });
         }
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "There is already an active survey",
-        });
       }
-    }
 
-    if (Object.keys(error).length !== 0) {
-      error["success"] = false;
-      error["message"] = "input error";
-      return res.status(400).json(error);
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
-/* get all */
 wellnessSurveyController.get("/", async (req, res) => {
   try {
     const wellnessSurvey = await WellnessSurvey.find({});
@@ -88,6 +97,7 @@ wellnessSurveyController.get("/", async (req, res) => {
     });
   }
 });
+
 wellnessSurveyController.get("/report/:id", async (req, res) => {
   try {
     /* const barangay =  [
@@ -206,17 +216,14 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
         unaffected: {},
       };
 
-      // Initialize counts for each barangay
       barangay.forEach((barangayName) => {
         barangayCounts.affected[barangayName] = 0;
         barangayCounts.unaffected[barangayName] = 0;
       });
 
-      // Initialize count for 'other'
       barangayCounts.affected.Other = 0;
       barangayCounts.unaffected.Other = 0;
 
-      // Count affected users in each barangay
       wellnessSurvey.affected.forEach((user) => {
         const userBarangay = user.barangay;
         if (barangay.includes(userBarangay)) {
@@ -226,7 +233,6 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
         }
       });
 
-      // Count unaffected users in each barangay
       wellnessSurvey.unaffected.forEach((user) => {
         const userBarangay = user.barangay;
         if (barangay.includes(userBarangay)) {
@@ -260,51 +266,64 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
     });
   }
 });
-wellnessSurveyController.get("/active", tokenMiddleware, async (req, res) => {
-  try {
-    const wellnessSurvey = await WellnessSurvey.findOne({ isActive: true });
 
-    const user = await User.findOne({
-      _id: req.user.id,
-    });
+wellnessSurveyController.get(
+  "/active",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "resident",
+    "responder",
+    "dispatcher",
+    "admin",
+    "super-admin",
+  ]), */ async (req, res) => {
+    try {
+      const wellnessSurvey = await WellnessSurvey.findOne({ isActive: true });
 
-    if (user.userType === "resident") {
-      let surveyResponse = [
-        ...wellnessSurvey.affected,
-        ...wellnessSurvey.unaffected,
-      ];
-      let isResponded = false;
-
-      surveyResponse.map((response) => {
-        if (response.toString() === req.user.id) {
-          isResponded = true;
-          return;
-        } else {
-          isResponded = false;
-        }
+      const user = await User.findOne({
+        _id: req.user.id,
       });
-      if (isResponded) {
-        return res.status(200).json({
-          success: false,
-          message: "already responded",
+
+      if (user.userType === "resident") {
+        let surveyResponse = [
+          ...wellnessSurvey.affected,
+          ...wellnessSurvey.unaffected,
+        ];
+        let isResponded = false;
+
+        surveyResponse.map((response) => {
+          if (response.toString() === req.user.id) {
+            isResponded = true;
+            return;
+          } else {
+            isResponded = false;
+          }
         });
+        if (isResponded) {
+          return res.status(200).json({
+            success: false,
+            message: "already responded",
+          });
+        } else {
+          return res.status(200).json({
+            success: true,
+            message: "success",
+            ...wellnessSurvey._doc,
+          });
+        }
       } else {
         return res
           .status(200)
           .json({ success: true, message: "success", ...wellnessSurvey._doc });
       }
-    } else {
-      return res
-        .status(200)
-        .json({ success: true, message: "success", ...wellnessSurvey._doc });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
   }
-});
+);
 
 wellnessSurveyController.get("/:id", async (req, res) => {
   try {
@@ -334,6 +353,10 @@ wellnessSurveyController.get("/:id", async (req, res) => {
 wellnessSurveyController.put(
   "/update/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]), */
   async (req, res) => {
     const error = {};
     try {
@@ -356,7 +379,6 @@ wellnessSurveyController.put(
       } */
 
       if (Object.keys(error).length === 0) {
-        //already an active
         if (
           !(
             activeWellnessSurvey.length !== 0 &&
@@ -373,6 +395,7 @@ wellnessSurveyController.put(
           );
 
           if (wellnessSurvey) {
+            /* await createPusher("wellness-survey", "reload", {}); */
             return res.status(200).json({
               success: true,
               message: "Updated successfully",
@@ -406,49 +429,65 @@ wellnessSurveyController.put(
   }
 );
 
-wellnessSurveyController.put("/answer", tokenMiddleware, async (req, res) => {
-  try {
-    const { surveyId, answer } = req.body;
-    console.log(surveyId);
-    const update = {};
-    update[answer] = req.user.id;
+wellnessSurveyController.put(
+  "/answer",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
+    try {
+      const { surveyId, answer } = req.body;
+      console.log(surveyId);
+      const update = {};
+      update[answer] = req.user.id;
 
-    const wellnessSurvey = await WellnessSurvey.findOneAndUpdate(
-      { _id: surveyId },
-      { $push: update },
-      { new: true }
-    );
+      const wellnessSurvey = await WellnessSurvey.findOneAndUpdate(
+        { _id: surveyId },
+        { $push: update },
+        { new: true }
+      );
 
-    if (wellnessSurvey) {
-      return res.json({
-        success: true,
-        message: "Answered Submitted Successfully",
-        wellnessSurvey,
-      });
-    } else {
-      return res.status(404).json({
+      if (wellnessSurvey) {
+        /*  await createPusher("wellness-survey", "reload", {}); */
+        return res.json({
+          success: true,
+          message: "Answered Submitted Successfully",
+          wellnessSurvey,
+        });
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
         success: false,
-        message: "not found",
+        message: "Internal Server Error: " + error,
+        error: error.toString(),
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-      error: error.toString(),
-    });
   }
-});
+);
 
 wellnessSurveyController.delete(
   "/delete/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]), */
   async (req, res) => {
     try {
       const wellnessSurvey = await WellnessSurvey.findByIdAndDelete(
         req.params.id
       );
       if (wellnessSurvey) {
+        /*  await createPusher("wellness-survey", "reload", {}); */
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",
@@ -470,6 +509,10 @@ wellnessSurveyController.delete(
 wellnessSurveyController.put(
   "/archive/:id",
   tokenMiddleware,
+  /* userTypeMiddleware([
+    "admin",
+    "super-admin",
+  ]), */
   async (req, res) => {
     try {
       let wellnessSurvey;
@@ -491,6 +534,7 @@ wellnessSurveyController.put(
         );
       }
       if (wellnessSurvey) {
+        /* await createPusher("wellness-survey", "reload", {}); */
         if (action === "archive") {
           return res.status(200).json({
             success: true,
