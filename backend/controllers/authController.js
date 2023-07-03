@@ -6,8 +6,6 @@ const bcrypt = require("bcryptjs");
 const {
   isEmpty,
 
-  createNotification,
-
   isEmailExists,
 
   isContactNumberExists,
@@ -22,6 +20,7 @@ const {
   updateVerificationCode,
   cloudinaryUploader,
 } = require("./functionController");
+const { createNotification } = require("./notificationController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
@@ -166,11 +165,11 @@ authController.post("/register", async (req, res) => {
         status: "unverified",
       });
 
-      const notification = await Notification.create({
+      /* const notification = await Notification.create({
         userId: user._doc._id,
         notifications: [],
-      });
-      if (user && notification) {
+      }); */
+      if (user) {
         console.log("success");
 
         /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */

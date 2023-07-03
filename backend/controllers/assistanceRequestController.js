@@ -9,8 +9,8 @@ const {
   isVideo,
   isLessThanSize,
   cloudinaryUploader,
-  createNotification,
 } = require("./functionController");
+const { createNotification } = require("./notificationController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/assistance-request";

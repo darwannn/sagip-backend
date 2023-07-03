@@ -5,7 +5,10 @@ const User = require("../models/User");
 const Pusher = require("pusher");
 const municipality = "Malolos";
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 const { firebase } = require("../utils/config");
 
 const pusher = new Pusher({
@@ -142,6 +145,8 @@ apiController.get("/weather", async (req, res) => {
 });
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
+  /*   await createNotification(req.user.id, "title", "message", "category"); */
+  /*   await createNotificationAll("title", "message", "category"); */
   console.log("====================================");
   console.log("push");
   console.log("====================================");

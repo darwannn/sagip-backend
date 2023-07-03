@@ -179,12 +179,12 @@ accountController.post("/create", async (req, res) => {
         status: "varified",
       });
 
-      const notification = await Notification.create({
+      /* const notification = await Notification.create({
         userId: user._doc._id,
         notifications: [],
-      });
+      }); */
 
-      if (user && notification) {
+      if (user) {
         /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
         return res.status(200).json({
           success: true,

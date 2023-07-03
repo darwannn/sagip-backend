@@ -21,7 +21,7 @@ const Navbar = () => {
           Authorization: `Bearer ${token}`,
         });
         setNotification(data);
-        /*    console.log(data); */
+        console.log(data);
       } catch (error) {
         console.error(error);
       }
@@ -50,13 +50,10 @@ const Navbar = () => {
     try {
       console.log(notificationId);
       const data = await request(
-        "/notification/delete",
-        "PUT",
+        `/notification/delete/${notificationId}`,
+        "DELETE",
         {
           Authorization: `Bearer ${token}`,
-        },
-        {
-          notificationId,
         }
       );
       console.log(data);
@@ -97,7 +94,7 @@ const Navbar = () => {
                 <div>{notification.message}</div>
                 <div onClick={() => handleDelete(notification._id)}>delete</div>
 
-                {moment(notification.dateSent).format("MMMM DD, YYYY HH:mm A")}
+                {moment(notification.createdAt).format("MMMM DD, YYYY HH:mm A")}
               </div>
             );
           })}

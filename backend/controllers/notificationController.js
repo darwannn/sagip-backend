@@ -1,5 +1,6 @@
 const notificationController = require("express").Router();
 
+const User = require("../models/User");
 const Notification = require("../models/Notification");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -7,10 +8,11 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 notificationController.get("/", tokenMiddleware, async (req, res) => {
   try {
     console.log(req.user.id);
-    const notification = await Notification.findOne({ userId: req.user.id });
+    const notification = await Notification.find({ userId: req.user.id });
+    console.log(notification);
     if (notification) {
       // console.log(notification._doc);
-      return res.status(200).json(notification._doc.notifications);
+      return res.status(200).json(notification);
       return res.status(200).json({
         /* success: true,
         message: "found", 
@@ -36,7 +38,7 @@ notificationController.put("/read", tokenMiddleware, async (req, res) => {
   try {
     const notification = await Notification.updateMany(
       { userId: req.user.id },
-      { $set: { "notifications.$[].isRead": true } }
+      { $set: { isRead: true } }
     );
 
     if (notification) {
@@ -57,30 +59,69 @@ notificationController.put("/read", tokenMiddleware, async (req, res) => {
     });
   }
 });
-notificationController.put("/delete", tokenMiddleware, async (req, res) => {
-  try {
-    const notification = await Notification.updateOne(
-      { userId: req.user.id },
-      { $pull: { notifications: { _id: req.body.notificationId } } }
-    );
-
-    if (notification) {
-      return res.status(200).json({
-        success: true,
-        message: "Deleted Successfully",
-      });
-    } else {
+notificationController.delete(
+  "/delete/:id",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const notification = await Notification.findByIdAndDelete(req.params.id);
+      if (notification) {
+        return res.status(200).json({
+          success: true,
+          message: "Deleted Successfully",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: "Internal Server Error: " + error,
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
+  }
+);
+
+const createNotification = async (id, title, message, category) => {
+  await Notification.create({
+    userId: id,
+    title: title,
+    message: message,
+    category: category,
+  });
+  console.log("notification created");
+};
+
+const createNotificationAll = async (title, message, category) => {
+  const users = await User.find({});
+  if (users) {
+    users.map(async (user) => {
+      const notification = new Notification({
+        userId: user._id,
+        title: title,
+        message: message,
+        category: category,
+      });
+      await notification.save();
     });
   }
-});
+  console.log("notification created all");
+};
 
-module.exports = notificationController;
+/* const updateNotification = async () => {
+  const notification = await Notification.create({
+    userId: user._doc._id,
+    notifications: [],
+  });
+  return notification;
+};
+ */
+module.exports = {
+  createNotificationAll,
+  createNotification,
+  /*   updateNotification, */
+  notificationController,
+};

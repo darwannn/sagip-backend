@@ -8,31 +8,25 @@ const NotificationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    notifications: [
-      {
-        title: {
-          type: String,
-          required: true,
-        },
-        message: {
-          type: String,
-          required: true,
-        },
-        dateSent: {
-          type: Date,
-          required: true,
-        },
-        category: {
-          type: String,
-          required: true,
-        },
-        isRead: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    ],
+    title: {
+      type: String,
+      required: true,
+    },
+    message: {
+      type: String,
+      required: true,
+    },
+
+    category: {
+      type: String,
+      required: true,
+    },
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
   },
+
   { timestamps: true }
 );
 

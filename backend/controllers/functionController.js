@@ -153,47 +153,23 @@ const generateToken = (id) => {
   );
 };
 
-const createNotification = async (id, title, message, category) => {
-  await Notification.findOneAndUpdate(
-    { userId: id },
-    {
-      $push: {
-        notifications: {
-          title: title,
-          message: message,
-          dateSent: Date.now(),
-          category: category,
-          isRead: false,
-        },
-      },
-    }
-  );
-};
-
-const createEmptyNotification = async (id) => {
+/* const createEmptyNotification = async (id) => {
   const notification = await Notification.create({
     userId: id,
     notifications: [],
   });
 
   return notification;
-};
+}; */
 
-const updateNotification = async () => {
-  const notification = await Notification.create({
-    userId: user._doc._id,
-    notifications: [],
-  });
-  return notification;
-};
-
-const readNotification = async (id) => {
+/* const readNotification = async (id) => {
   const notification = await Notification.updateMany(
     { userId: id },
     { $set: { "notifications.$[].isRead": true } }
   );
   return notification;
-};
+}; */
+
 const updateVerificationCode = async (id) => {
   let generatedCode = await generateCode();
 
@@ -254,10 +230,7 @@ module.exports = {
   isEmpty,
   isImage,
   isLessThanSize,
-  createEmptyNotification,
-  createNotification,
-  readNotification,
-  updateNotification,
+
   isEmailExists,
   isEmailOwner,
   isContactNumberOwner,

@@ -13,7 +13,9 @@ const emergencyFacilityController = require("./controllers/emergencyFacilityCont
 const teamController = require("./controllers/teamController");
 const hazardReportController = require("./controllers/hazardReportController");
 const assistanceRequestController = require("./controllers/assistanceRequestController");
-const notificationController = require("./controllers/notificationController");
+const {
+  notificationController,
+} = require("./controllers/notificationController");
 const { cronJobController } = require("./controllers/cronJobController");
 const wellnessSurveyController = require("./controllers/wellnessSurveyController");
 
