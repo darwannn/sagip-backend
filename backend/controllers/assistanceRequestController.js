@@ -15,7 +15,7 @@ const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/assistance-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher } = require("./apiController");
+const { createPusher, sendSMS, sendBulkSMS } = require("./apiController");
 
 assistanceRequestController.post(
   "/add",
@@ -235,20 +235,86 @@ assistanceRequestController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { assignedTeam } = req.body;
-
-      console.log(assignedTeam);
+      const { action, assignedTeam } = req.body;
+      // let = status = "";
+      let updateFields = {};
+      if (action === "verify") {
+        //status = "ongoing";
+        updateFields = { status: "ongoing", assignedTeam };
+      } else if (action === "resolve") {
+        // status = "resolved";
+        updateFields = { status: "resolved" };
+      }
+      // console.log(assignedTeam);
       if (Object.keys(error).length === 0) {
         const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
           req.params.id,
-          { status: "ongoing", assignedTeam },
+          updateFields,
+          { new: true }
+        );
+
+        if (assistanceRequest) {
+          //sendSMS(`${assistanceRequest.teamId} is on the way`, assistanceRequest.userId.contactNumber);
+          /* await createPusher("assistance-request", "reload", {}); */
+          if (action === "verify") {
+            return res.status(200).json({
+              success: true,
+              message: "Assistance Request Verified",
+              // assistanceRequest,
+            });
+          } else if (action === "resolve") {
+            return res.status(200).json({
+              success: true,
+              message: "Assistance Request Resolved",
+              // assistanceRequest,
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+/* assistanceRequestController.put(
+  "/resolve/:id",
+  tokenMiddleware,
+//   userTypeMiddleware([
+//       "responder",
+//   "dispatcher",
+//   "admin",
+//   "super-admin",
+// ]),
+//     multerMiddleware.single("image"),
+  async (req, res) => {
+    const error = {};
+    try {
+      if (Object.keys(error).length === 0) {
+        const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
+          req.params.id,
+          { status: "resolved" },
           { new: true }
         );
         if (assistanceRequest) {
-          /* await createPusher("assistance-request", "reload", {}); */
+          //sendSMS(`${assistanceRequest.teamId} is on the way`, assistanceRequest.userId.contactNumber);
+          //await createPusher("assistance-request", "reload", {});
           return res.status(200).json({
             success: true,
-            message: "Assistance Request Verified",
+            message: "Assistance Request Resolved",
             assistanceRequest,
           });
         } else {
@@ -271,7 +337,7 @@ assistanceRequestController.put(
       });
     }
   }
-);
+); */
 
 assistanceRequestController.put(
   "/delete/:id",

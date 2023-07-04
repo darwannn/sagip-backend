@@ -204,15 +204,16 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error: " + contactNumbers,
+          message: "Internal Server Error:1 " + contactNumbers,
         });
       }
       console.log(contactNumbers);
       fcmTokens = await getAllFcmTokensInMunicipality("Malolos");
+      console.log(fcmTokens);
       if (!Array.isArray(fcmTokens)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error: " + contactNumbers,
+          message: "Internal Server Error:2 " + contactNumbers,
         });
       }
     } else {
@@ -226,14 +227,14 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error: " + contactNumbers,
+          message: "Internal Server Error:3 " + contactNumbers,
         });
       }
       fcmTokens = await getAllFcmTokensInBarangays("Malolos", location);
       if (!Array.isArray(fcmTokens)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error: " + contactNumbers,
+          message: "Internal Server Error:4 " + contactNumbers,
         });
       }
     }
@@ -250,7 +251,10 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       if (smsResponse.error === 0) {
         return res
           .status(200)
-          .json({ success: true, message: smsResponse.message });
+          .json({ success: true, message: "SMS sent successfully" });
+        /*     return res
+          .status(200)
+          .json({ success: true, message: smsResponse.message }); */
       } else {
         return res
           .status(400)
@@ -271,59 +275,57 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
 });
 
 const sendSMS = async (message, contactNumber) => {
-  const smsData = {
-    token: process.env.SMS_API,
-    sendto: contactNumber,
-    body: message,
-    sim: "0",
-    device_id: process.env.DEVICE_ID,
-    urgent: "1",
-  };
+  // const smsData = {
+  //   token: process.env.SMS_API,
+  //   sendto: contactNumber,
+  //   body: message,
+  //   sim: "0",
+  //   device_id: process.env.DEVICE_ID,
+  //   urgent: "1",
+  // };
 
-  return axios
-    .post("https://smsgateway24.com/getdata/addsms", null, {
-      params: smsData,
-    })
-    .then(function (response) {
-      return response.data;
-    })
-    .catch(function (error) {
-      throw error;
-    });
+  // return axios
+  //   .post("https://smsgateway24.com/getdata/addsms", null, {
+  //     params: smsData,
+  //   })
+  //   .then(function (response) {
+  //     return response.data;
+  //   })
+  //   .catch(function (error) {
+  //     throw error;
+  //   });
+  console.log("send sms");
+  return { error: 0, message: "testing" };
 };
 
 const sendBulkSMS = async (message, contactNumbers) => {
-  console.log(process.env.DEVICE_ID);
-  const smsData = contactNumbers.map((contactNumber) => ({
-    sendto: contactNumber,
-    body: message,
-    sim: "0",
-    device_id: process.env.DEVICE_ID,
-    urgent: "1",
-  }));
+  // console.log(process.env.DEVICE_ID);
+  // const smsData = contactNumbers.map((contactNumber) => ({
+  //   sendto: contactNumber,
+  //   body: message,
+  //   sim: "0",
+  //   device_id: process.env.DEVICE_ID,
+  //   urgent: "1",
+  // }));
 
-  const params = {
-    token: process.env.SMS_API,
-    smsdata: smsData,
-  };
+  // const params = {
+  //   token: process.env.SMS_API,
+  //   smsdata: smsData,
+  // };
 
-  return axios
-    .post("https://smsgateway24.com/getdata/addalotofsms", params)
+  // return axios
+  //   .post("https://smsgateway24.com/getdata/addalotofsms", params)
 
-    .then(function (response) {
-      return response.data;
-    })
-    .catch(function (error) {
-      throw error;
-    });
+  //   .then(function (response) {
+  //     return response.data;
+  //   })
+  //   .catch(function (error) {
+  //     throw error;
+  //   });
+  console.log("send bulk sms");
+  return { error: 0, message: "testing" };
 };
-/* 
-const isEmpty = (value) => {
-  if (value == "") {
-    return true;
-  }
-};
- */
+
 const getAllContactNumbersInMunicipality = async (municipality) => {
   try {
     const users = await User.find({ municipality: municipality });
@@ -351,6 +353,7 @@ const getAllFcmTokensInMunicipality = async (municipality) => {
   try {
     const users = await User.find({ municipality: municipality });
     const fcmTokens = users.flatMap((user) => user.fcmToken);
+    return fcmTokens;
   } catch (error) {
     return "Internal Server Error: " + error;
   }
@@ -428,6 +431,7 @@ module.exports = {
   createPushNotificationTopic,
   createPushNotificationToken,
   sendSMS,
+  sendBulkSMS,
   createPusher,
   apiController,
 };

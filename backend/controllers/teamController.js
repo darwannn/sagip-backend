@@ -4,7 +4,7 @@ const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty, isImage, isLessThanSize } = require("./functionController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher } = require("./apiController");
+const { createPusher, sendSMS, sendBulkSMS } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,

@@ -215,7 +215,8 @@ const ManageEmergencyFacility = () => {
         {
           Authorization: `Bearer ${token}`,
         },
-        { assignedTeam }
+        /* { action: "verify", assignedTeam } */
+        { action: "resolve" }
       );
 
       console.log(data);
@@ -227,6 +228,26 @@ const ManageEmergencyFacility = () => {
         setisModalShown(false);
         setShouldFetchData(true);
         setMarkerLatLng(null);
+        /* setType(null); */
+      } else {
+        toast.error(message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleResolved = async (assignedTeam) => {
+    try {
+      const data = await request(`/assistance-request/resolve/${id}`, "PUT", {
+        Authorization: `Bearer ${token}`,
+      });
+
+      console.log(data);
+
+      const { success, message } = data;
+      if (success) {
+        toast.success(message);
+
         /* setType(null); */
       } else {
         toast.error(message);
@@ -514,6 +535,13 @@ const ManageEmergencyFacility = () => {
                   </div>
                 </>
 
+                <button
+                  onClick={() => {
+                    handleResolved();
+                  }}
+                >
+                  REsolved
+                </button>
                 <button
                   onClick={() => {
                     handleDismiss();
