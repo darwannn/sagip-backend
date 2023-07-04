@@ -67,7 +67,7 @@ cronJobController.post("/backup", async (req, res) => {
   }
 });
 
-const deleteArchivedData = async () => {
+cronJobController.post("/delete", async (req, res) => {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -91,6 +91,7 @@ const deleteArchivedData = async () => {
       isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
     });
+
     return res.status(200).json({
       success: true,
       message: "Archived data deleted successfully",
@@ -101,9 +102,7 @@ const deleteArchivedData = async () => {
       message: "Internal Server Error: " + error,
     });
   }
-};
-
+});
 module.exports = {
-  deleteArchivedData,
   cronJobController,
 };
