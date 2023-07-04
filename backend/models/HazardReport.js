@@ -52,18 +52,4 @@ const HazardReportSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* HazardReportSchema.pre("remove", async function (next) {
-  const User = mongoose.model("User");
-  const user = await User.findById(this.userId);
-
-  if (user) {
-    await HazardReport.updateMany(
-      { userId: user._id },
-      { $unset: { userId: "" } }
-    );
-  }
-
-  next();
-}); */
-
 module.exports = mongoose.model("HazardReport", HazardReportSchema);

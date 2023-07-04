@@ -1,1 +1,88 @@
-[{"_id":"6481e72e96f2cc39029f6932","title":"ttr","category":"Flood Safety","unaffected":["648070cf9a74896d21b7d494","64788dfd295e2f184e55d20f","64788dfd295e2f184e55d20f"],"affected":["648070cf9a74896d21b7d494","648070cf9a74896d21b7d494","648070cf9a74896d21b7d494","64788dfd295e2f184e55d20f","64788dfd295e2f184e55d20f"],"isActive":false,"createdAt":"2023-06-08T14:35:26.299Z","updatedAt":"2023-06-29T08:48:30.243Z","__v":0,"isArchived":false},{"_id":"6497c1d9ecec0ad8fb9f0d7a","title":"6y6y","category":"Preparedness","unaffected":[],"affected":[],"isActive":false,"createdAt":"2023-06-25T04:26:01.542Z","updatedAt":"2023-06-25T04:26:01.542Z","__v":0},{"_id":"6497c1deecec0ad8fb9f0d7e","title":"6y6y","category":"Preparedness","unaffected":[],"affected":[],"isActive":true,"createdAt":"2023-06-25T04:26:06.936Z","updatedAt":"2023-06-29T08:41:53.673Z","__v":0,"archivedDate":"2023-06-29T08:39:20.225Z","isArchived":false},{"_id":"6497c200ecec0ad8fb9f0d9f","title":"er","category":"Preparedness","unaffected":[],"affected":[],"isActive":false,"createdAt":"2023-06-25T04:26:40.362Z","updatedAt":"2023-06-25T04:26:40.362Z","__v":0}]
+[{
+    "_id": {
+        "$oid": "6481e72e96f2cc39029f6932"
+    },
+    "title": "ttr",
+    "category": "Flood Safety",
+    "unaffected": [{
+        "$oid": "648070cf9a74896d21b7d494"
+    }, {
+        "$oid": "64788dfd295e2f184e55d20f"
+    }, {
+        "$oid": "64788dfd295e2f184e55d20f"
+    }, {
+        "$oid": "64788dfd295e2f184e55d20f"
+    }],
+    "affected": [{
+        "$oid": "648070cf9a74896d21b7d494"
+    }, {
+        "$oid": "648070cf9a74896d21b7d494"
+    }, {
+        "$oid": "648070cf9a74896d21b7d494"
+    }, {
+        "$oid": "64788dfd295e2f184e55d20f"
+    }, {
+        "$oid": "64788dfd295e2f184e55d20f"
+    }],
+    "isActive": false,
+    "createdAt": {
+        "$date": "2023-06-08T14:35:26.299Z"
+    },
+    "updatedAt": {
+        "$date": "2023-06-29T08:48:30.243Z"
+    },
+    "__v": 0,
+    "isArchived": false
+}, {
+    "_id": {
+        "$oid": "6497c1d9ecec0ad8fb9f0d7a"
+    },
+    "title": "6y6y",
+    "category": "Preparedness",
+    "unaffected": [],
+    "affected": [],
+    "isActive": false,
+    "createdAt": {
+        "$date": "2023-06-25T04:26:01.542Z"
+    },
+    "updatedAt": {
+        "$date": "2023-06-25T04:26:01.542Z"
+    },
+    "__v": 0
+}, {
+    "_id": {
+        "$oid": "6497c1deecec0ad8fb9f0d7e"
+    },
+    "title": "6y6y",
+    "category": "Preparedness",
+    "unaffected": [],
+    "affected": [],
+    "isActive": true,
+    "createdAt": {
+        "$date": "2023-06-25T04:26:06.936Z"
+    },
+    "updatedAt": {
+        "$date": "2023-06-29T08:41:53.673Z"
+    },
+    "__v": 0,
+    "archivedDate": {
+        "$date": "2023-06-29T08:39:20.225Z"
+    },
+    "isArchived": false
+}, {
+    "_id": {
+        "$oid": "6497c200ecec0ad8fb9f0d9f"
+    },
+    "title": "er",
+    "category": "Preparedness",
+    "unaffected": [],
+    "affected": [],
+    "isActive": false,
+    "createdAt": {
+        "$date": "2023-06-25T04:26:40.362Z"
+    },
+    "updatedAt": {
+        "$date": "2023-06-25T04:26:40.362Z"
+    },
+    "__v": 0
+}]

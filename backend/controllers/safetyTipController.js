@@ -374,7 +374,9 @@ safetyTipController.put(
     try {
       const safetyTip = await SafetyTip.findById(req.params.id);
       if (safetyTip.saves.includes(req.user.id)) {
-        safetyTip.saves = safetyTip.saves.filter((id) => id !== req.user.id);
+        safetyTip.saves = safetyTip.saves.filter(
+          (id) => !id.equals(req.user.id)
+        );
         await safetyTip.save();
         return res.status(200).json({
           success: true,

@@ -6,7 +6,7 @@ const HazardReport = require("../models/HazardReport");
 
 const { MongoClient } = require("mongodb");
 const { promises: fs } = require("fs");
-
+const { ObjectId } = require("mongodb");
 const path = require("path");
 
 const { cloudinary } = require("../utils/config");
@@ -31,9 +31,34 @@ cronJobController.post("/backup", async (req, res) => {
     for (const collection of collections) {
       const query = {};
       const docs = await db.collection(collection.name).find(query).toArray();
-      const fileName = `${collection.name}.json`;
+      const transformedDocs = docs.map((doc) => {
+        const transformedDoc = {};
 
-      const jsonDocs = JSON.stringify(docs);
+        for (const field in doc) {
+          if (typeof doc[field] === "object" && doc[field] instanceof Date) {
+            transformedDoc[field] = { $date: doc[field] };
+          } else if (Array.isArray(doc[field])) {
+            transformedDoc[field] = doc[field].map((element) => {
+              if (typeof element === "object" && element instanceof Date) {
+                return { $date: element };
+              } else if (/^[0-9a-fA-F]{24}$/.test(element)) {
+                return { $oid: element };
+              } else {
+                return element;
+              }
+            });
+          } else if (/^[0-9a-fA-F]{24}$/.test(doc[field])) {
+            transformedDoc[field] = { $oid: doc[field] };
+          } else {
+            transformedDoc[field] = doc[field];
+          }
+        }
+
+        return transformedDoc;
+      });
+
+      const fileName = `${collection.name}.json`;
+      const jsonDocs = JSON.stringify(transformedDocs);
 
       await fs.writeFile(path.join(tempFolderPath, fileName), jsonDocs);
       console.log(`Successfully backed up ${collection.name} to ${fileName}`);
@@ -57,7 +82,7 @@ cronJobController.post("/backup", async (req, res) => {
     client.close();
     return res.status(200).json({
       success: true,
-      message: "Backup successfully",
+      message: "Backup successful",
     });
   } catch (error) {
     return res.status(500).json({
@@ -72,16 +97,6 @@ cronJobController.post("/delete", async (req, res) => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    await User.deleteMany({
-      isArchived: true,
-      archivedDate: { $lte: thirtyDaysAgo },
-    });
-
-    await AssistanceRequest.deleteMany({
-      isArchived: true,
-      archivedDate: { $lte: thirtyDaysAgo },
-    });
-
     await WellnessSurvey.deleteMany({
       isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
@@ -91,7 +106,17 @@ cronJobController.post("/delete", async (req, res) => {
       isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
     });
+    const archivedUsers = await User.find({
+      archivedDate: { $lte: thirtyDaysAgo },
+    });
 
+    for (const user of archivedUsers) {
+      await user.remove();
+    }
+    await AssistanceRequest.deleteMany({
+      isArchived: true,
+      archivedDate: { $lte: thirtyDaysAgo },
+    });
     return res.status(200).json({
       success: true,
       message: "Archived data deleted successfully",

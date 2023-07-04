@@ -3,11 +3,6 @@ mongoose.pluralize(null);
 
 const SafetyTipSchema = new mongoose.Schema(
   {
-    /* userId: {
-      type: mongoose.Types.ObjectId,
-      ref: "User",
-      required: true,
-    }, */
     title: {
       type: String,
       required: true,
@@ -32,10 +27,13 @@ const SafetyTipSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     }, */
-    saves: {
-      type: [String],
-      default: [],
-    },
+    saves: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "User",
+        default: [],
+      },
+    ],
   },
   { timestamps: true }
 );

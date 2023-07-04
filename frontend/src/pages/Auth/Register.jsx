@@ -69,7 +69,7 @@ const Register = () => {
       if (success) {
         dispatch(register(data));
         toast.success(message);
-        navigate("/register/contact-verification");
+        /*      navigate("/register/contact-verification"); */
         return;
       } else {
         if (message !== "input error") {

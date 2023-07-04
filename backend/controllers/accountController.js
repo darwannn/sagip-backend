@@ -234,7 +234,8 @@ accountController.delete(
       userImage.image
     );
     if (cloud !== "error") { */
-      const user = await User.findByIdAndDelete(req.params.id);
+      const user = await User.findById(req.params.id);
+      await user.remove();
 
       if (user) {
         if (user.profilePicture !== "default.png") {

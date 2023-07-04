@@ -122,4 +122,29 @@ const userSchema = mongoose.Schema(
   }
 );
 
+userSchema.pre("remove", async function (next) {
+  console.log("remove ====================================");
+  console.log(this._id);
+  console.log("remove ====================================");
+  const HazardReport = mongoose.model("HazardReport");
+  const AssistanceRequest = mongoose.model("AssistanceRequest");
+  const Notification = mongoose.model("Notification");
+  const SafetyTip = mongoose.model("SafetyTip");
+  const Team = mongoose.model("Team");
+  const WellnessSurvey = mongoose.model("WellnessSurvey");
+
+  await HazardReport.deleteMany({ userId: this._id });
+  await AssistanceRequest.deleteMany({ userId: this._id });
+  await Notification.deleteMany({ userId: this._id });
+  await SafetyTip.updateMany({}, { $pull: { saves: this._id } });
+  await Team.updateMany({ head: this._id }, { $set: { head: null } });
+  await Team.updateMany({}, { $pull: { members: this._id } });
+  await WellnessSurvey.updateMany({}, { $pull: { affected: this._id } });
+
+  // Remove user from unaffected array in all WellnessSurvey documents
+  await WellnessSurvey.updateMany({}, { $pull: { unaffected: this._id } });
+
+  next();
+});
+
 module.exports = mongoose.model("User", userSchema);
