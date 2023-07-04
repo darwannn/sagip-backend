@@ -159,10 +159,16 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
   };
 
   if (await createPusher(channel, event, data)) {
+    console.log("true");
     return res.status(200).json({
       success: true,
       message: "Pusher sent successfully",
     });
+  } else {
+    console.log("false");
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
   }
 });
 
@@ -170,19 +176,12 @@ const createPusher = async (channel, event, data) => {
   console.log("====================================");
   console.log("new push");
   console.log("====================================");
-  pusher.trigger(channel, event, data, (error, info) => {
-    if (error) {
-      console.log("pusher false");
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error.message,
-      });
-    } else {
-      console.log("pusher true");
-
-      return true;
-    }
-  });
+  try {
+    pusher.trigger(channel, event, data);
+    return true;
+  } catch (error) {
+    return false;
+  }
 };
 
 apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
