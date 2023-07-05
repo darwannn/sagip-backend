@@ -16,10 +16,11 @@ wellnessSurveyController.post(
     const error = {};
     try {
       let { title, category, /* isActive */ status } = req.body;
-      status = status.toLowerCase();
+      if (typeof status === "string") status = status.toLowerCase();
+
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
-
+      if (isEmpty(status)) error["status"] = "Required field";
       const activeWellnessSurvey = await WellnessSurvey.find({
         status: "active",
       });
@@ -360,10 +361,12 @@ wellnessSurveyController.put(
     const error = {};
     try {
       let { title, category, status } = req.body;
-      status = status.toLowerCase();
+
+      if (typeof status === "string") status = status.toLowerCase();
+
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
-
+      if (isEmpty(status)) error["status"] = "Required field";
       const activeWellnessSurvey = await WellnessSurvey.find({
         status: "active",
       });

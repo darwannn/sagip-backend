@@ -25,7 +25,7 @@ const WellnessSurveyInput = ({ type }) => {
   const { token } = useSelector((state) => state.auth);
 
   const [title, setTitle] = useState("");
-  const [status, setStatus] = useState(false);
+  const [status, setStatus] = useState("");
   /*   const [isActive, setIsActive] = useState(false); */
   const [category, setCategory] = useState("");
 

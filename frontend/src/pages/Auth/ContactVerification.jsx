@@ -17,6 +17,70 @@ const ContactVerification = ({ type }) => {
 
     try {
       const data = await request(
+        `/auth/contact-verification/${type}`,
+        "POST",
+        { Authorization: `Bearer ${token}` },
+        { code }
+      );
+
+      const { success, message } = data;
+      console.log("====================================");
+      console.log(data);
+      console.log("====================================");
+      if (success) {
+        if (type === "register") {
+          navigate("/");
+          dispatch(contactVerification(data));
+          window.AndroidInterface?.updateFcmToken(data.user.email);
+          toast.success(message);
+        } else if (type === "forgot-password") {
+          navigate("/new-password");
+          dispatch(contactVerification(data));
+          toast.success(message);
+        } else if (type === "login") {
+          navigate("/login");
+          dispatch(contactVerification(data));
+          toast.success(message);
+        } else if (type === "contact") {
+          console.log("====================================");
+          console.log("new contact?");
+          console.log("====================================");
+          const data = await request(
+            `/account/update/contact-number`,
+            "PUT",
+            { Authorization: `Bearer ${token}` },
+            { contactNumber: newContactNumber }
+          );
+          const { success, message } = data;
+          console.log(data);
+
+          if (success) {
+            toast.success(message);
+
+            return;
+          } else {
+            if (message != "input error") {
+              toast.success(message);
+            } else {
+            }
+          }
+        }
+      } else {
+        if (message !== "input error") {
+          toast.error(message);
+        } else {
+          toast.error(message);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  /*  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await request(
         "/auth/contact-verification",
         "POST",
         { Authorization: `Bearer ${token}` },
@@ -75,7 +139,7 @@ const ContactVerification = ({ type }) => {
     } catch (error) {
       console.error(error);
     }
-  };
+  }; */
   const handleResend = async () => {
     try {
       const data = await request(

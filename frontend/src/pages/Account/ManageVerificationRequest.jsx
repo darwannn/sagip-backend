@@ -122,6 +122,32 @@ const VerificationRequest = () => {
 
     try {
       const data = await request(
+        `/auth/verification-request/reject/${id}`,
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        }
+        /*  { action: "reject" } */
+      );
+      const { success, message } = data;
+      console.log(data);
+
+      if (success) {
+        toast.success(message);
+
+        return;
+      } else {
+        toast.success(message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  /* const handleReject = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await request(
         `/auth/verification-request/${id}`,
         "PUT",
         {
@@ -142,8 +168,34 @@ const VerificationRequest = () => {
     } catch (error) {
       console.error(error);
     }
-  };
+  }; */
   const handleVerify = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = await request(
+        `/auth/verification-request/approve/${id}`,
+        "PUT",
+        {
+          Authorization: `Bearer ${token}`,
+        }
+        /*   { action: "approve" } */
+      );
+      const { success, message } = data;
+      console.log(data);
+
+      if (success) {
+        toast.success(message);
+
+        return;
+      } else {
+        toast.success(message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  /* const handleVerify = async (e) => {
     e.preventDefault();
 
     try {
@@ -168,7 +220,7 @@ const VerificationRequest = () => {
     } catch (error) {
       console.error(error);
     }
-  };
+  }; */
 
   return (
     <>

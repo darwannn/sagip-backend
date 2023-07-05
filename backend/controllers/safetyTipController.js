@@ -34,7 +34,7 @@ safetyTipController.post(
     const error = {};
     try {
       let { title, content, category, status } = req.body;
-      status = status.toLowerCase();
+      if (typeof status === "string") status = status.toLowerCase();
       console.log("======status==============================");
       console.log(status);
       console.log(title);
@@ -228,7 +228,7 @@ safetyTipController.put(
     const error = {};
     try {
       let { title, content, category, status, hasChanged } = req.body;
-      status = status.toLowerCase();
+      if (typeof status === "string") status = status.toLowerCase();
       console.log("===========f=========================");
       console.log(status);
       console.log("====================================");

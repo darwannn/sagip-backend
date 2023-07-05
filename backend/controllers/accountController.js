@@ -88,6 +88,8 @@ accountController.post(
         verificationCode,
       } = req.body;
 
+      if (typeof status === "string") userType = userType.toLowerCase();
+
       if (isEmpty(userType)) error["userType"] = "Required field";
 
       if (isEmpty(email)) {
@@ -182,7 +184,7 @@ accountController.post(
           verificationCode: 0,
           codeExpiration,
           userType,
-          status: "varified",
+          status: "verified",
         });
 
         /* const notification = await Notification.create({
@@ -315,8 +317,9 @@ accountController.put(
   }
 );
 
+//ito yung endpoint para magsend ng verification code sa contact number, para mavalidate din yung contact number
 accountController.put(
-  "/update/contact-number/contact-verification",
+  "/update/:action/send-code",
   tokenMiddleware,
   /*  userTypeMiddleware([
     "resident",
@@ -328,47 +331,59 @@ accountController.put(
   async (req, res) => {
     try {
       const error = {};
-      let { contactNumber } = req.body;
 
-      if (isEmpty(contactNumber)) {
-        error["contact"] = "Required field";
-      } else {
-        if (isContactNumber(contactNumber)) {
-          error["contact"] = "Invalid contact number";
+      let action = req.params.action.toLowerCase();
+      if (action === "contact-number") {
+        console.log("====================================");
+        console.log(action);
+        console.log("====================================");
+        let { contactNumber } = req.body;
+
+        if (isEmpty(contactNumber)) {
+          error["contact"] = "Required field";
         } else {
-          if (await isContactNumberExists(contactNumber)) {
-            if (await isContactNumberOwner(req.user.id, contactNumber)) {
-              error["contact"] = "Input a new contact numebr";
-            } else {
-              error["contact"] = "Contact number already taken";
+          if (isContactNumber(contactNumber)) {
+            error["contact"] = "Invalid contact number";
+          } else {
+            if (await isContactNumberExists(contactNumber)) {
+              if (await isContactNumberOwner(req.user.id, contactNumber)) {
+                error["contact"] = "Input a new contact numebr";
+              } else {
+                error["contact"] = "Contact number already taken";
+              }
             }
           }
         }
-      }
 
-      if (Object.keys(error).length == 0) {
-        const user = await updateVerificationCode(req.user.id);
+        if (Object.keys(error).length == 0) {
+          const user = await updateVerificationCode(req.user.id);
 
-        if (user) {
-          //console.log("Current COde: " + generatedCode);
+          if (user) {
+            //console.log("Current COde: " + generatedCode);
 
-          return res.status(200).json({
-            success: true,
-            message: "Verification code has been resent",
-          });
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
+            return res.status(200).json({
+              success: true,
+              message: "Verification code has been resent",
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
         }
-      }
 
-      if (Object.keys(error).length != 0) {
-        error["success"] = false;
-        error["message"] = "input error";
+        if (Object.keys(error).length != 0) {
+          error["success"] = false;
+          error["message"] = "input error";
 
-        return res.status(400).json(error);
+          return res.status(400).json(error);
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found",
+        });
       }
     } catch (error) {
       return res.status(500).json({
@@ -465,7 +480,12 @@ accountController.put(
         isArchived,
         hasChanged,
       } = req.body;
-
+      if (typeof status === "string") {
+        userType = userType.toLowerCase();
+        status = status.toLowerCase();
+      }
+      if (isEmpty(status)) error["status"] = "Required field";
+      if (isEmpty(userType)) error["userType"] = "Required field";
       if (isEmpty(email)) {
         error["email"] = "Required field";
       } else {
@@ -610,7 +630,7 @@ accountController.put(
 );
 
 accountController.put(
-  "/archive/:id",
+  "/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
   "resident",
@@ -621,41 +641,51 @@ accountController.put(
 ]), */
   async (req, res) => {
     try {
-      let user;
-      const { action } = req.body;
-
-      console.log(action);
-      if (action === "archive") {
-        user = await User.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: true, archivedDate: Date.now() },
-          { new: true }
-        );
-      } else if (action === "unarchive") {
-        user = await User.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: false, $unset: { archivedDate: Date.now() } },
-
-          { new: true }
-        );
-      }
-      if (user) {
-        /* await createPusher("user", "reload", {}); */
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        console.log(action);
         if (action === "archive") {
-          return res.status(200).json({
-            success: true,
-            message: "Archived Successfully",
-          });
+          updateFields = {
+            isArchived: true,
+            archivedDate: Date.now(),
+            status: "inactive",
+          };
         } else if (action === "unarchive") {
-          return res.status(200).json({
-            success: true,
-            message: "Unrchived Successfully",
+          updateFields = {
+            isArchived: false,
+            $unset: { archivedDate: Date.now() },
+          };
+        }
+        const user = await User.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+
+          { new: true }
+        );
+        if (user) {
+          /* await createPusher("user", "reload", {}); */
+          if (action === "archive") {
+            return res.status(200).json({
+              success: true,
+              message: "Archived Successfully",
+            });
+          } else if (action === "unarchive") {
+            return res.status(200).json({
+              success: true,
+              message: "Unrchived Successfully",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
           });
         }
       } else {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error",
+          message: "Error 404: Not Found",
         });
       }
     } catch (error) {

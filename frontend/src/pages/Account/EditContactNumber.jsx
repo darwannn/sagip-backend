@@ -44,9 +44,9 @@ const EditContactNumber = () => {
 
     try {
       dispatch(newContactNumber(contactNumber));
-
+      //account/update/${action}/contact-verification
       const data = await request(
-        `/account/update/contact-number/contact-verification`,
+        `/account/update/contact-number/send-code`,
         "PUT",
         {
           Authorization: `Bearer ${token}`,

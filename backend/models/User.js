@@ -71,7 +71,7 @@ const userSchema = mongoose.Schema(
 
     userType: {
       type: String,
-      required: true,
+      default: "resident",
     },
     isOnline: {
       type: Boolean,
@@ -91,7 +91,7 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      default: false,
+      default: "unverified",
     },
 
     verificationPicture: {

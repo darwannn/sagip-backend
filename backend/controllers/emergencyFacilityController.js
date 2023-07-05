@@ -30,7 +30,7 @@ emergencyFacilityController.post(
     try {
       let { name, latitude, longitude, category, contactNumber, status } =
         req.body;
-      status = status.toLowerCase();
+      if (typeof status === "string") status = status.toLowerCase();
       if (isEmpty(name)) error["name"] = "Required field";
       if (isEmpty(status)) error["status"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -218,7 +218,7 @@ emergencyFacilityController.put(
         status,
         contactNumber,
       } = req.body;
-      status = status.toLowerCase();
+      if (typeof status === "string") status = status.toLowerCase();
       if (isEmpty(name)) error["name"] = "Required field";
 
       if (isEmpty(status)) error["status"] = "Required field";

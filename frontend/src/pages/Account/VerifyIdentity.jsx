@@ -15,13 +15,12 @@ function VerifyIdentity() {
 
     const fetchAccountDetails = async () => {
       try {
-        const options = {
-          Authorization: `Bearer ${token}`,
-        };
         const data = await request(
           `/auth/verify-identity/request/${user.id}`,
           "GET",
-          options
+          {
+            Authorization: `Bearer ${token}`,
+          }
         );
 
         console.log(data);
