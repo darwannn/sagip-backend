@@ -40,27 +40,4 @@ const WellnessSurveySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* WellnessSurveySchema.pre("remove", async function (next) {
-  const User = mongoose.model("User");
-  const users = await User.find({
-    _id: { $in: [...this.unaffected, ...this.affected] },
-  });
-
-  for (const user of users) {
-    await WellnessSurvey.updateMany(
-      {
-        $or: [{ unaffected: user._id }, { affected: user._id }],
-      },
-      {
-        $pull: {
-          unaffected: user._id,
-          affected: user._id,
-        },
-      }
-    );
-  }
-
-  next();
-}); */
-
 module.exports = mongoose.model("WellnessSurvey", WellnessSurveySchema);

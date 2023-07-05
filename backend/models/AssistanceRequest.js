@@ -55,18 +55,4 @@ const AssistanceRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/* AssistanceRequestSchema.pre("remove", async function (next) {
-  const User = mongoose.model("User");
-  const user = await User.findById(this.userId);
-
-  if (user) {
-    await AssistanceRequest.updateMany(
-      { userId: user._id },
-      { $unset: { userId: "" } }
-    );
-  }
-
-  next();
-}); */
-
 module.exports = mongoose.model("AssistanceRequest", AssistanceRequestSchema);

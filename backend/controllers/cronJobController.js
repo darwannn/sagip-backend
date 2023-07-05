@@ -4,9 +4,9 @@ const AssistanceRequest = require("../models/AssistanceRequest");
 const WellnessSurvey = require("../models/WellnessSurvey");
 const HazardReport = require("../models/HazardReport");
 
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const { promises: fs } = require("fs");
-const { ObjectId } = require("mongodb");
+
 const path = require("path");
 
 const { cloudinary } = require("../utils/config");
@@ -39,15 +39,15 @@ cronJobController.post("/backup", async (req, res) => {
             transformedDoc[field] = { $date: doc[field] };
           } else if (Array.isArray(doc[field])) {
             transformedDoc[field] = doc[field].map((element) => {
-              if (typeof element === "object" && element instanceof Date) {
+              /* if (typeof element === "object" && element instanceof Date) {
                 return { $date: element };
-              } else if (/^[0-9a-fA-F]{24}$/.test(element)) {
+              } else */ if (isValidObjectId(doc[element])) {
                 return { $oid: element };
               } else {
                 return element;
               }
             });
-          } else if (/^[0-9a-fA-F]{24}$/.test(doc[field])) {
+          } else if (isValidObjectId(doc[field])) {
             transformedDoc[field] = { $oid: doc[field] };
           } else {
             transformedDoc[field] = doc[field];
@@ -98,12 +98,10 @@ cronJobController.post("/delete", async (req, res) => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     await WellnessSurvey.deleteMany({
-      isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
     });
 
     await HazardReport.deleteMany({
-      isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
     });
     const archivedUsers = await User.find({
@@ -114,9 +112,9 @@ cronJobController.post("/delete", async (req, res) => {
       await user.remove();
     }
     await AssistanceRequest.deleteMany({
-      isArchived: true,
       archivedDate: { $lte: thirtyDaysAgo },
     });
+
     return res.status(200).json({
       success: true,
       message: "Archived data deleted successfully",
@@ -128,6 +126,11 @@ cronJobController.post("/delete", async (req, res) => {
     });
   }
 });
+
+const isValidObjectId = (value) => {
+  return ObjectId.isValid(value) && /^[0-9a-fA-F]{24}$/.test(value);
+};
+
 module.exports = {
   cronJobController,
 };

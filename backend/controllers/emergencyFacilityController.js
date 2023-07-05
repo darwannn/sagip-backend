@@ -146,7 +146,7 @@ emergencyFacilityController.get("/", async (req, res) => {
 emergencyFacilityController.get("/operational", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({
-      $or: [{ status: "operational" }, { status: "full" }],
+      $or: [{ status: /operational/i }, { status: /full/i }],
     });
     console.log(emergencyFacility);
     if (emergencyFacility) {
