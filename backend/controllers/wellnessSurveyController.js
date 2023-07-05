@@ -15,8 +15,8 @@ wellnessSurveyController.post(
 ]), */ async (req, res) => {
     const error = {};
     try {
-      const { title, category, /* isActive */ status } = req.body;
-
+      let { title, category, /* isActive */ status } = req.body;
+      status = status.toLowerCase();
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
 
@@ -359,8 +359,8 @@ wellnessSurveyController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { title, category, status } = req.body;
-
+      let { title, category, status } = req.body;
+      status = status.toLowerCase();
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
 
@@ -506,7 +506,7 @@ wellnessSurveyController.delete(
   }
 );
 wellnessSurveyController.put(
-  "/archive/:id",
+  "/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
     "admin",
@@ -514,41 +514,50 @@ wellnessSurveyController.put(
   ]), */
   async (req, res) => {
     try {
-      let wellnessSurvey;
-      const { action } = req.body;
-
-      console.log(action);
-      if (action === "archive") {
-        wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: true, archivedDate: Date.now() },
-          { new: true }
-        );
-      } else if (action === "unarchive") {
-        wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: false, $unset: { archivedDate: Date.now() } },
-
-          { new: true }
-        );
-      }
-      if (wellnessSurvey) {
-        /* await createPusher("wellness-survey", "reload", {}); */
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        console.log(action);
         if (action === "archive") {
-          return res.status(200).json({
-            success: true,
-            message: "Archived Successfully",
-          });
+          updateFields = {
+            isArchived: true,
+            archivedDate: Date.now(),
+            status: "inactive",
+          };
         } else if (action === "unarchive") {
-          return res.status(200).json({
-            success: true,
-            message: "Unrchived Successfully",
+          updateFields = {
+            isArchived: false,
+            $unset: { archivedDate: Date.now() },
+          };
+        }
+        const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+          { new: true }
+        );
+        if (wellnessSurvey) {
+          /* await createPusher("wellness-survey", "reload", {}); */
+          if (action === "archive") {
+            return res.status(200).json({
+              success: true,
+              message: "Archived Successfully",
+            });
+          } else if (action === "unarchive") {
+            return res.status(200).json({
+              success: true,
+              message: "Unrchived Successfully",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
           });
         }
       } else {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error",
+          message: "Error 404: Not Found",
         });
       }
     } catch (error) {

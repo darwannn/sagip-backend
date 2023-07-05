@@ -209,14 +209,15 @@ const ManageEmergencyFacility = () => {
 
   const handleSubmit = async (assignedTeam) => {
     try {
+      const type = "resolve";
       const data = await request(
-        `/assistance-request/update/${id}`,
+        `/assistance-request/update/${type}/${id}`,
         "PUT",
         {
           Authorization: `Bearer ${token}`,
         },
-        /* { action: "verify", assignedTeam } */
-        { action: "resolve" }
+        { assignedTeam }
+        /* { action: "resolve" } */
       );
 
       console.log(data);
@@ -537,10 +538,10 @@ const ManageEmergencyFacility = () => {
 
                 <button
                   onClick={() => {
-                    handleResolved();
+                    handleSubmit("");
                   }}
                 >
-                  REsolved
+                  Submit
                 </button>
                 <button
                   onClick={() => {

@@ -33,7 +33,8 @@ safetyTipController.post(
   async (req, res) => {
     const error = {};
     try {
-      const { title, content, category, status } = req.body;
+      let { title, content, category, status } = req.body;
+      status = status.toLowerCase();
       console.log("======status==============================");
       console.log(status);
       console.log(title);
@@ -226,8 +227,11 @@ safetyTipController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { title, content, category, status, hasChanged } = req.body;
-
+      let { title, content, category, status, hasChanged } = req.body;
+      status = status.toLowerCase();
+      console.log("===========f=========================");
+      console.log(status);
+      console.log("====================================");
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";
@@ -249,7 +253,12 @@ safetyTipController.put(
       }
 
       if (Object.keys(error).length === 0) {
-        const updateFields = { title, content, category, status };
+        const updateFields = {
+          title,
+          content,
+          category,
+          status,
+        };
 
         if (hasChanged && req.file) {
           const safetyTipImage = await SafetyTip.findById(req.params.id);

@@ -38,7 +38,6 @@ assistanceRequestController.post(
         category,
         latitude,
         longitude,
-        status,
         street,
         municipality,
       } = req.body;
@@ -91,7 +90,6 @@ assistanceRequestController.post(
             longitude,
             street,
             municipality,
-            status,
             proof: `${cloud.original_filename}.${cloud.format}`,
             userId: req.user.id,
           });
@@ -223,7 +221,7 @@ assistanceRequestController.get("/:id", async (req, res) => {
 });
 
 assistanceRequestController.put(
-  "/update/:id",
+  "/update/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
       "responder",
@@ -235,18 +233,21 @@ assistanceRequestController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { action, assignedTeam } = req.body;
+      let action = req.params.action.toLowerCase();
+      const { assignedTeam } = req.body;
       // let = status = "";
       let updateFields = {};
       if (action === "verify") {
-        //status = "ongoing";
-        updateFields = { status: "ongoing", assignedTeam };
-      } else if (action === "resolve") {
-        // status = "resolved";
-        updateFields = { status: "resolved" };
+        if (isEmpty(assignedTeam))
+          error["assignedTeam"] = "Please select a team to respond";
       }
       // console.log(assignedTeam);
       if (Object.keys(error).length === 0) {
+        if (action === "verify") {
+          updateFields = { status: "ongoing", assignedTeam };
+        } else if (action === "resolve") {
+          updateFields = { status: "resolved" };
+        }
         const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
           req.params.id,
           updateFields,
@@ -381,7 +382,7 @@ assistanceRequestController.put(
           folderPath,
           assistanceRequestImage.proof
         );
-        await createNotification(userId, reason, note, "error");
+        await createNotification([userId], null, reason, note, "error");
         if (cloud !== "error") {
           const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
             req.params.id
@@ -420,60 +421,5 @@ assistanceRequestController.put(
     }
   }
 );
-assistanceRequestController.put(
-  "/archive/:id",
-  tokenMiddleware,
-  /* userTypeMiddleware([
-      "responder",
-  "dispatcher",
-  "admin",
-  "super-admin",
-]), */
-  async (req, res) => {
-    try {
-      let assistanceRequest;
-      const { action } = req.body;
 
-      console.log(action);
-      if (action === "archive") {
-        assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: true, archivedDate: Date.now() },
-          { new: true }
-        );
-      } else if (action === "unarchive") {
-        assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: false, $unset: { archivedDate: Date.now() } },
-
-          { new: true }
-        );
-      }
-      if (assistanceRequest) {
-        /* await createPusher("assistance-request", "reload", {}); */
-        if (action === "archive") {
-          return res.status(200).json({
-            success: true,
-            message: "Archived Successfully",
-          });
-        } else if (action === "unarchive") {
-          return res.status(200).json({
-            success: true,
-            message: "Unrchived Successfully",
-          });
-        }
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-);
 module.exports = assistanceRequestController;

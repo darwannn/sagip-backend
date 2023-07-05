@@ -37,7 +37,7 @@ hazardReportController.post(
         category,
         latitude,
         longitude,
-        status,
+
         street,
         municipality,
       } = req.body;
@@ -91,7 +91,7 @@ hazardReportController.post(
             longitude,
             street,
             municipality,
-            status,
+
             proof: `${cloud.original_filename}.${cloud.format}`,
             userId: req.user.id,
           });
@@ -214,7 +214,7 @@ hazardReportController.get("/:id", async (req, res) => {
 });
 
 hazardReportController.put(
-  "/update/:id",
+  "/update/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
      "responder",
@@ -223,17 +223,22 @@ hazardReportController.put(
   "super-admin",
 ]), */
   /*   multerMiddleware.single("image"), */
+
   async (req, res) => {
     const error = {};
     try {
-      const { action } = req.body;
+      let action = req.params.action.toLowerCase();
       let = status = "";
+
       if (action === "verify") {
         status = "ongoing";
       } else if (action === "resolve") {
         status = "resolved";
       }
+      console.log(action);
+      console.log("new");
       console.log(req.params.id);
+      console.log(status);
       if (Object.keys(error).length === 0) {
         const hazardReport = await HazardReport.findByIdAndUpdate(
           req.params.id,
@@ -338,7 +343,7 @@ hazardReportController.delete(
   }
 );
 hazardReportController.put(
-  "/archive/:id",
+  "/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
       "responder",
@@ -348,44 +353,52 @@ hazardReportController.put(
 ]), */
   async (req, res) => {
     try {
-      let hazardReport;
-      const { action } = req.body;
-
-      console.log(action);
-      if (action === "archive") {
-        hazardReport = await HazardReport.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: true, archivedDate: Date.now() },
-          { new: true }
-        );
-      } else if (action === "unarchive") {
-        hazardReport = await HazardReport.findByIdAndUpdate(
-          req.params.id,
-          { isArchived: false, $unset: { archivedDate: Date.now() } },
-
-          { new: true }
-        );
-      }
-      if (hazardReport) {
-        console.log("====================================");
-        console.log("hazardReport");
-        console.log("====================================");
-        /*   await createPusher("hazard-report", "reload", {}); */
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        console.log(action);
         if (action === "archive") {
-          return res.status(200).json({
-            success: true,
-            message: "Archived Successfully",
-          });
+          updateFields = {
+            isArchived: true,
+            archivedDate: Date.now(),
+          };
         } else if (action === "unarchive") {
-          return res.status(200).json({
-            success: true,
-            message: "Unrchived Successfully",
+          updateFields = {
+            isArchived: false,
+            $unset: { archivedDate: Date.now() },
+          };
+        }
+        const hazardReport = await HazardReport.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+          { new: true }
+        );
+        if (hazardReport) {
+          console.log("====================================");
+          console.log("hazardReport");
+          console.log("====================================");
+          /*   await createPusher("hazard-report", "reload", {}); */
+          if (action === "archive") {
+            return res.status(200).json({
+              success: true,
+              message: "Archived Successfully",
+            });
+          } else if (action === "unarchive") {
+            return res.status(200).json({
+              success: true,
+              message: "Unrchived Successfully",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
           });
         }
       } else {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error",
+          message: "Error 404: Not Found",
         });
       }
     } catch (error) {

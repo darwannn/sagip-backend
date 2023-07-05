@@ -145,8 +145,14 @@ apiController.get("/weather", async (req, res) => {
 });
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
-  /*  await createNotification([req.user.id], "title", "message", "category"); */
-  /*  await createNotificationAll("title", "message", "category"); */
+  /*  await createNotification(
+    [req.user.id],
+    req.user.id,
+    "title1",
+    "message1",
+    "category1"
+  );
+  await createNotificationAll(req.user.id, "title2", "message2", "category2"); */
   console.log("====================================");
   console.log("push");
   console.log("====================================");

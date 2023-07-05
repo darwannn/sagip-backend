@@ -516,7 +516,7 @@ const ManageEmergencyFacility = () => {
                       Select a status
                     </option>
                     <option value="operational">operational</option>
-                    <option value="unoperational">unoperational</option>
+                    <option value="non-operational">non-operational</option>
                     <option value="full">full</option>
                   </select>
                 </>

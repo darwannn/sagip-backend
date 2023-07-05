@@ -20,10 +20,11 @@ const NotificationSchema = new mongoose.Schema(
       required: true,
     },
 
-    category: {
+    type: {
       type: String,
       required: true,
     },
+
     isRead: {
       type: Boolean,
       default: false,

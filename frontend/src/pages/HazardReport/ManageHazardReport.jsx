@@ -197,24 +197,21 @@ const ManageEmergencyFacility = () => {
     let formData = {};
     try {
       let url, method;
-      if (type === "verify") {
-        url = `/hazard-report/update/${id}`;
-        method = "PUT";
-      } else if (type === "resolve") {
-        url = `/hazard-report/update/${id}`;
-        method = "PUT";
-      }
+
+      url = `/hazard-report/update/${type}/${id}`;
+      method = "PUT";
 
       const data = await request(
         url,
         method,
         {
           Authorization: `Bearer ${token}`,
-        },
-        { action: type }
+        }
+        /*     { action: type } */
       );
 
       console.log(data);
+      console.log("data");
 
       const { success, message } = data;
       if (success) {

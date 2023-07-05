@@ -89,7 +89,7 @@ notificationController.delete(
   }
 );
 
-const createNotification = async (ids, linkId, title, message, category) => {
+const createNotification = async (ids, linkId, title, message, type) => {
   /*  createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]); */
@@ -98,7 +98,7 @@ const createNotification = async (ids, linkId, title, message, category) => {
       userId: id,
       title,
       message,
-      category,
+      type,
       linkId,
     });
   });
@@ -108,7 +108,7 @@ const createNotification = async (ids, linkId, title, message, category) => {
   console.log("notifications created");
 };
 
-const createNotificationAll = async (linkId, title, message, category) => {
+const createNotificationAll = async (linkId, title, message, type) => {
   /*  createPushNotificationTopic(title, message, "sagip"); */
   const users = await User.find({});
   if (users) {
@@ -117,7 +117,7 @@ const createNotificationAll = async (linkId, title, message, category) => {
         userId: user._id,
         title,
         message,
-        category,
+        type,
         linkId,
       });
       await notification.save();

@@ -28,9 +28,9 @@ emergencyFacilityController.post(
   async (req, res) => {
     const error = {};
     try {
-      const { name, latitude, longitude, category, contactNumber, status } =
+      let { name, latitude, longitude, category, contactNumber, status } =
         req.body;
-
+      status = status.toLowerCase();
       if (isEmpty(name)) error["name"] = "Required field";
       if (isEmpty(status)) error["status"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -146,7 +146,7 @@ emergencyFacilityController.get("/", async (req, res) => {
 emergencyFacilityController.get("/operational", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({
-      $or: [{ status: /operational/i }, { status: /full/i }],
+      $or: [{ status: "operational" }, { status: "full" }],
     });
     console.log(emergencyFacility);
     if (emergencyFacility) {
@@ -209,7 +209,7 @@ emergencyFacilityController.put(
   async (req, res) => {
     const error = {};
     try {
-      const {
+      let {
         name,
         latitude,
         longitude,
@@ -218,7 +218,7 @@ emergencyFacilityController.put(
         status,
         contactNumber,
       } = req.body;
-
+      status = status.toLowerCase();
       if (isEmpty(name)) error["name"] = "Required field";
 
       if (isEmpty(status)) error["status"] = "Required field";
