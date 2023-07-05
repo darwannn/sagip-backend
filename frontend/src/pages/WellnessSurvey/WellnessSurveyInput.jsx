@@ -25,7 +25,8 @@ const WellnessSurveyInput = ({ type }) => {
   const { token } = useSelector((state) => state.auth);
 
   const [title, setTitle] = useState("");
-  const [isActive, setIsActive] = useState(false);
+  const [status, setStatus] = useState(false);
+  /*   const [isActive, setIsActive] = useState(false); */
   const [category, setCategory] = useState("");
 
   useEffect(() => {
@@ -42,7 +43,8 @@ const WellnessSurveyInput = ({ type }) => {
           setTitle(data.title);
 
           setCategory(data.category);
-          setIsActive(data.isActive);
+          /*      setIsActive(data.isActive); */
+          setStatus(data.status);
         } catch (error) {
           console.error(error);
         }
@@ -77,7 +79,8 @@ const WellnessSurveyInput = ({ type }) => {
         {
           category,
           title,
-          isActive,
+          /*  isActive, */
+          status,
         }
       );
       console.log(data);
@@ -131,13 +134,27 @@ const WellnessSurveyInput = ({ type }) => {
                 ))}
               </select>
             </div>
-            <div>
+            {/*  <div>
               <label>Active</label>
               <input
                 type="checkbox"
                 onChange={(e) => setIsActive(e.target.checked)}
                 checked={isActive}
               />
+            </div> */}
+            <div>
+              <label>Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="" hidden>
+                  Select a category
+                </option>
+
+                <option value="active">active</option>
+                <option value="inactive">inactive</option>
+              </select>
             </div>
             <div>
               <button type="submit">Submit</button>

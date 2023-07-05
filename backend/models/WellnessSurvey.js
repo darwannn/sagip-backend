@@ -25,9 +25,13 @@ const WellnessSurveySchema = new mongoose.Schema(
         default: [],
       },
     ],
-    isActive: {
+    /* isActive: {
       type: Boolean,
       default: false,
+    }, */
+    status: {
+      type: String,
+      required: true,
     },
     isArchived: {
       type: Boolean,

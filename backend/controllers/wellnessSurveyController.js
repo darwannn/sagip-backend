@@ -15,27 +15,26 @@ wellnessSurveyController.post(
 ]), */ async (req, res) => {
     const error = {};
     try {
-      const { title, category, isActive } = req.body;
+      const { title, category, /* isActive */ status } = req.body;
 
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
 
       const activeWellnessSurvey = await WellnessSurvey.find({
-        isActive: true,
+        status: "active",
       });
+      /*   const activeWellnessSurvey = await WellnessSurvey.find({
+        isActive: true,
+      }); */
 
       if (Object.keys(error).length === 0) {
-        if (!(activeWellnessSurvey.length !== 0 && isActive)) {
+        if (!(activeWellnessSurvey.length !== 0 && status === "active")) {
           /* error["category"] = "There is already an active survey"; */
-
-          const activeWellnessSurvey = await WellnessSurvey.find({
-            isActive: true,
-          });
 
           const wellnessSurvey = await WellnessSurvey.create({
             title,
             category,
-            isActive,
+            status,
           });
 
           if (wellnessSurvey) {
@@ -278,7 +277,7 @@ wellnessSurveyController.get(
     "super-admin",
   ]), */ async (req, res) => {
     try {
-      const wellnessSurvey = await WellnessSurvey.findOne({ isActive: true });
+      const wellnessSurvey = await WellnessSurvey.findOne({ status: "active" });
 
       const user = await User.findOne({
         _id: req.user.id,
@@ -360,13 +359,13 @@ wellnessSurveyController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { title, category, isActive } = req.body;
+      const { title, category, status } = req.body;
 
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
 
       const activeWellnessSurvey = await WellnessSurvey.find({
-        isActive: true,
+        status: "active",
       });
 
       /*    console.log("====================================");
@@ -383,10 +382,10 @@ wellnessSurveyController.put(
           !(
             activeWellnessSurvey.length !== 0 &&
             activeWellnessSurvey._id !== req.params.id &&
-            isActive
+            status === "active"
           )
         ) {
-          const updateFields = { title, isActive, category };
+          const updateFields = { title, status, category };
 
           const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
             req.params.id,
