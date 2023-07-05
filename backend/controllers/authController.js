@@ -210,7 +210,7 @@ authController.post("/register", async (req, res) => {
   }
 });
 
-authController.post(
+authController.put(
   "/contact-verification/:action",
   tokenMiddleware,
   //   userTypeMiddleware([
@@ -311,11 +311,35 @@ authController.post(
                     },
                     token: generateToken(user._id),
                   });
-                if (action === "contact")
-                  return res.status(200).json({
+                if (action === "contact") {
+                  /*  return res.status(200).json({
                     success: true,
                     message: "Contact number has been updated successfully",
-                  });
+                  }); */
+
+                  let { contactNumber } = req.body;
+                  console.log("====================================");
+                  console.log(contactNumber);
+                  console.log("====================================");
+                  const userContactNumber = await User.findByIdAndUpdate(
+                    req.user.id,
+                    { contactNumber },
+                    {
+                      new: true,
+                    }
+                  );
+                  if (userContactNumber) {
+                    return res.status(200).json({
+                      success: true,
+                      message: "Contact Number Updated Successfully",
+                    });
+                  } else {
+                    return res.status(500).json({
+                      success: false,
+                      message: "Internal Server Error",
+                    });
+                  }
+                }
               } else {
                 error["code"] = "Incorrect verification code";
                 user.attempt += 1;

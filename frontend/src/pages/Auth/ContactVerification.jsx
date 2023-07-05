@@ -18,9 +18,9 @@ const ContactVerification = ({ type }) => {
     try {
       const data = await request(
         `/auth/contact-verification/${type}`,
-        "POST",
+        "PUT",
         { Authorization: `Bearer ${token}` },
-        { code }
+        { code, contactNumber: newContactNumber }
       );
 
       const { success, message } = data;
@@ -42,7 +42,7 @@ const ContactVerification = ({ type }) => {
           dispatch(contactVerification(data));
           toast.success(message);
         } else if (type === "contact") {
-          console.log("====================================");
+          /*  console.log("====================================");
           console.log("new contact?");
           console.log("====================================");
           const data = await request(
@@ -54,16 +54,16 @@ const ContactVerification = ({ type }) => {
           const { success, message } = data;
           console.log(data);
 
-          if (success) {
-            toast.success(message);
-
-            return;
-          } else {
+          if (success) { */
+          toast.success(message);
+          /* 
+          return; */
+          /* } else {
             if (message != "input error") {
               toast.success(message);
             } else {
             }
-          }
+          } */
         }
       } else {
         if (message !== "input error") {
