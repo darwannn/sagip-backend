@@ -2,6 +2,7 @@ const authController = require("express").Router();
 const User = require("../models/User");
 const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
+const moment = require("moment");
 
 const {
   isEmpty,
@@ -17,6 +18,7 @@ const {
   generateToken,
   updateVerificationCode,
   cloudinaryUploader,
+  calculateArchivedDate,
 } = require("./functionController");
 const { createNotification } = require("./notificationController");
 
@@ -591,6 +593,7 @@ authController.post("/login", async (req, res) => {
             // Check if the user has exceeded the maximum number of attempts
 
             // Reset the attempt number if the password is correct
+            /* if (!user.archivedDate) { */
             user.attempt = 0;
             await user.save();
 
@@ -605,6 +608,20 @@ authController.post("/login", async (req, res) => {
               },
               token: generateToken(user._id),
             });
+            /* } else {
+              const data = calculateArchivedDate();
+              if (data) {
+                const { daysLeft, deletionDate } = data;
+                return res.status(200).json({
+                  isArchived: true,
+                  success: false,
+                  daysLeft,
+                  deletionDate,
+                  message: `Your account is scheduled for Deltetion on ${deletionDate}. 
+                  To keep your account deletion scheduled in ${daysLeft}, you can simply log out.`,
+                });
+              }
+            } */
           }
         } else {
           error["password"] = "Incorrect password";
@@ -661,6 +678,7 @@ authController.post("/forgot-password", async (req, res) => {
               "Account suspended. Please contact us if you think this isn't right",
           });
         } else {
+          /* if (!user.archivedDate) { */
           //console.log("Current COde: " + generatedCode);
           return res.status(200).json({
             success: true,
@@ -673,6 +691,20 @@ authController.post("/forgot-password", async (req, res) => {
             },
             token: generateToken(user._id),
           });
+          /* } else {
+            const data = calculateArchivedDate();
+            if (data) {
+              const { daysLeft, deletionDate } = data;
+              return res.status(200).json({
+                isArchived: true,
+                success: false,
+                daysLeft,
+                deletionDate,
+                message: `Your account is scheduled for Deltetion on ${deletionDate}. 
+              To keep your account deletion scheduled in ${daysLeft}, you can simply log out.`,
+              });
+            }
+          } */
         }
       } else {
         error["error"] = "Database Error";
@@ -1030,7 +1062,7 @@ authController.get(
 );
 
 //manage control reject or verify
-/* authController.put(
+authController.put(
   "/verification-request/:action/:id",
   tokenMiddleware,
   //   userTypeMiddleware([
@@ -1128,8 +1160,8 @@ authController.get(
       });
     }
   }
-); */
-authController.put(
+);
+/* authController.put(
   "/verification-request/:id",
   //   tokenMiddleware,
   //   userTypeMiddleware([
@@ -1214,5 +1246,5 @@ authController.put(
     }
   }
 );
-
+ */
 module.exports = authController;

@@ -11,9 +11,8 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 notificationController.get("/", tokenMiddleware, async (req, res) => {
   try {
-    console.log(req.user.id);
     const notification = await Notification.find({ userId: req.user.id });
-    console.log(notification);
+
     if (notification) {
       // console.log(notification._doc);
       return res.status(200).json(notification);

@@ -1,6 +1,6 @@
 const path = require("path");
 const Notification = require("../models/Notification");
-
+const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 /* const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); */ // 1 day expiration
@@ -153,6 +153,15 @@ const generateToken = (id) => {
   );
 };
 
+const calculateArchivedDate = (date) => {
+  const archivedDate = moment(date);
+  const daysUntilArchive = 30;
+  const targetDate = moment(archivedDate).add(daysUntilArchive, "days");
+  const currentDate = moment();
+  const daysLeft = targetDate.diff(currentDate, "days");
+  const deletionDate = targetDate.format("MMMM DD, YYYY");
+  return { daysLeft, deletionDate };
+};
 /* const createEmptyNotification = async (id) => {
   const notification = await Notification.create({
     userId: id,
@@ -246,4 +255,5 @@ module.exports = {
   isVideo,
   isValidExtensions,
   cloudinaryUploader,
+  calculateArchivedDate,
 };

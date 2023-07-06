@@ -753,28 +753,46 @@ accountController.put("/fcm", async (req, res) => {
   }
 });
 
-accountController.get("/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (user) {
-      /*      return res.status(200).json(user); */
-      return res.status(200).json({
-        success: true,
-        message: "found",
-        ...user._doc,
-      });
-    } else {
-      return res.status(200).json({
+accountController.get(
+  "/:id",
+  /* tokenMiddleware, */ async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+
+      if (user) {
+        /* console.log("====================================");
+      console.log(user._doc._id);
+      console.log(req.user.id);
+      console.log(user._doc.archivedDate);
+      console.log("====================================");
+      if (
+        req.user.id === user._doc._id.toString() &&
+        user._doc.archivedDate !== null
+      ) {
+        return res.status(200).json({
+          success: false,
+          message: "account archived",
+        });
+      } else { */
+        return res.status(200).json({
+          success: true,
+          message: "found",
+          ...user._doc,
+        });
+        /*  } */
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
         success: false,
         message: "not found",
       });
     }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "not found",
-    });
   }
-});
+);
 
 module.exports = accountController;

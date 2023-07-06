@@ -9,7 +9,7 @@ const NotificationSchema = new mongoose.Schema(
       required: true,
     },
     linkId: {
-      type: mongoose.Types.ObjectId,
+      type: String,
     },
     title: {
       type: String,
