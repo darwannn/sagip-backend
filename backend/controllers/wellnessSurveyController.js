@@ -299,19 +299,23 @@ wellnessSurveyController.get(
       ];
       let isResponded = false;
 
-      surveyResponse.map((response) => {
-        if (response.toString() == req.user.id) {
+      for (const response of surveyResponse) {
+        console.log("====================================");
+        console.log("response:", response.toString());
+        console.log("req.user.id:", req.user.id);
+        console.log(
+          "response === req.user.id:",
+          response.toString() === req.user.id
+        );
+        console.log("====================================");
+
+        if (response.toString() === req.user.id) {
           isResponded = true;
-          return;
+          break;
         } else {
           isResponded = false;
         }
-        console.log("====================================");
-        console.log(surveyResponse);
-        console.log(response.toString());
-        console.log("l" + req.user.id);
-        console.log("====================================");
-      });
+      }
       console.log("====================================");
       console.log(isResponded);
       console.log("====================================");
