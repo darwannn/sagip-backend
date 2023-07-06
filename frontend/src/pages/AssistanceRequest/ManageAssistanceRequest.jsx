@@ -111,7 +111,7 @@ const ManageEmergencyFacility = () => {
     const fetchEmergencyFacility = async () => {
       try {
         const data = await request("/assistance-request/", "GET");
-        const data1 = await request("/team/", "GET", {
+        const data1 = await request("/team/active", "GET", {
           Authorization: `Bearer ${token}`,
         });
         console.log(data);

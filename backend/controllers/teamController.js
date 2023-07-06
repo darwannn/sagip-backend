@@ -81,6 +81,35 @@ teamController.get("/", async (req, res) => {
     });
   }
 });
+teamController.get("/active", async (req, res) => {
+  try {
+    const team = await Team.find({
+      $and: [{ head: { $ne: null } }, { members: { $ne: [] } }],
+    })
+      .populate("head", "-password")
+      .populate("members", "-password");
+
+    if (team) {
+      return res.status(200).json(team);
+      return res.status(200).json({
+        /* success: true,
+        message: "found", 
+        team,*/
+        ...team,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
 
 teamController.get("/responder", async (req, res) => {
   try {
@@ -92,35 +121,44 @@ teamController.get("/responder", async (req, res) => {
 
       for (const team of teams) {
         if (team.head) {
-          assignedResponders.push({
-            _id: team.head._id,
-            firstname: team.head.firstname,
-            middlename: team.head.middlename,
-            lastname: team.head.lastname,
-            email: team.head.email,
-            teamName: team.name,
-            teamId: team._id,
-          });
+          console.log("====================================");
+          console.log(team.head);
+          console.log("====================================");
+          if (team.head.isArchived === false) {
+            assignedResponders.push({
+              _id: team.head._id,
+              firstname: team.head.firstname,
+              middlename: team.head.middlename,
+              lastname: team.head.lastname,
+              email: team.head.email,
+              teamName: team.name,
+              teamId: team._id,
+            });
+          }
         }
 
         for (const member of team.members) {
-          assignedResponders.push({
-            _id: member._id,
-            firstname: member.firstname,
-            middlename: member.middlename,
-            lastname: member.lastname,
-            email: member.email,
-            teamName: team.name,
-            teamId: team._id,
-          });
+          if (member.isArchived === false) {
+            assignedResponders.push({
+              _id: member._id,
+              firstname: member.firstname,
+              middlename: member.middlename,
+              lastname: member.lastname,
+              email: member.email,
+              teamName: team.name,
+              teamId: team._id,
+            });
+          }
         }
       }
 
       const assignedUserIds = assignedResponders.map((user) => user._id);
       console.log(assignedUserIds);
       const unassignedUsers = await User.find({
-        userType: "resident",
+        userType: "responder",
         _id: { $nin: assignedUserIds },
+        archivedDate: { $exists: false },
+        isArchived: false,
       });
       unassignedResponders = unassignedUsers.map((user) => ({
         _id: user._id,
@@ -307,6 +345,7 @@ teamController.put(
     try {
       const { head, members } = req.body;
       /*  console.log(head); */
+      console.log(head);
       console.log(members);
 
       if (isEmpty(head)) error["head"] = "Required field";

@@ -30,7 +30,7 @@ const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
-const folderPath = "sagip/media/user";
+const folderPath = "sagip/media/verification-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const { createPusher } = require("./apiController");
@@ -123,7 +123,7 @@ authController.post("/register", async (req, res) => {
     } */
 
     if (Object.keys(error).length == 0) {
-      profilePicture = "default.png";
+      profilePicture = "default.jpg";
       attempt = 0;
 
       if (verificationCode !== 0) {
@@ -1094,17 +1094,26 @@ authController.put(
             folderPath,
             user.verificationPicture[0]
           );
+          user.verificationPicture.map(async (picture) => {
+            await cloudinaryUploader(
+              "destroy",
+              "",
+              "image",
+              folderPath,
+              picture
+            );
+          });
 
-          if (cloud !== "error") {
-            user.verificationPicture = [];
+          /*  if (cloud !== "error") { */
+          user.verificationPicture = [];
 
-            await user.save();
-          } else {
+          await user.save();
+          /* } else {
             return res.status(500).json({
               success: false,
               message: "Internal Server Error",
             });
-          }
+          } */
         } else if (action === "approve") {
           user.status = "verified";
           await user.save();

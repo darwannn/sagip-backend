@@ -471,9 +471,9 @@ const ManageEmergencyFacility = () => {
             <div>
               <Link to="/manage/hazard-report">Go Back</Link>
               <h2> EmergencyFacility</h2>
-              <div>{name}</div>
+              {/*  <div>{name}</div>
               <div>{contactNumber}</div>
-              <div>{address}</div>
+              <div>{address}</div> */}
 
               <div>{category}</div>
               <div>{longitude}</div>

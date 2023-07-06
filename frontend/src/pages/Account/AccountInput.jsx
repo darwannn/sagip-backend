@@ -83,7 +83,7 @@ const AccountInput = ({ user, type }) => {
     e.preventDefault();
     let url, method, formData;
     if (type === "add") {
-      url = "/account/create";
+      url = "/account/add";
       method = "POST";
       formData = {
         email,

@@ -132,10 +132,14 @@ hazardReportController.post(
 
 hazardReportController.get("/", async (req, res) => {
   try {
-    const hazardReports = await HazardReport.find({}).populate(
+    /* const hazardReports = await HazardReport.find({}).populate(
       "userId",
       "-password"
-    );
+    ); */
+    const hazardReports = await HazardReport.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("userId", "-password");
 
     if (hazardReports) {
       return res.status(200).json(hazardReports);
@@ -160,8 +164,13 @@ hazardReportController.get("/", async (req, res) => {
 });
 hazardReportController.get("/ongoing", async (req, res) => {
   try {
+    /* const hazardReports = await HazardReport.find({
+      status: "ongoing",
+    }).populate("userId", "-password"); */
     const hazardReports = await HazardReport.find({
       status: "ongoing",
+      archivedDate: { $exists: false },
+      isArchived: false,
     }).populate("userId", "-password");
 
     if (hazardReports) {
@@ -188,10 +197,15 @@ hazardReportController.get("/ongoing", async (req, res) => {
 
 hazardReportController.get("/:id", async (req, res) => {
   try {
-    const hazardReport = await HazardReport.findById(req.params.id).populate(
+    const hazardReport = await HazardReport.findOne({
+      _id: req.params.id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("userId", "-password");
+    /* const hazardReport = await HazardReport.findById(req.params.id).populate(
       "userId",
       "-password"
-    );
+    ); */
     if (hazardReport) {
       /*      return res.status(200).json(hazardReport); */
       return res.status(200).json({

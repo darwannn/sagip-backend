@@ -34,7 +34,11 @@ const { createPusher } = require("./apiController");
 accountController.get("/", async (req, res) => {
   try {
     const user = await User.find({});
-
+    /* const user = await User.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    });
+ */
     if (user) {
       return res.status(200).json(user);
       return res.status(200).json({
@@ -58,7 +62,7 @@ accountController.get("/", async (req, res) => {
 });
 
 accountController.post(
-  "/create",
+  "/add",
   /*  tokenMiddleware,
   userTypeMiddleware([
     
@@ -80,14 +84,13 @@ accountController.post(
         street,
         birthdate,
         gender,
-        password,
 
         userType,
         profilePicture,
         attempt,
         verificationCode,
       } = req.body;
-
+      let password = "sagip";
       if (typeof status === "string") userType = userType.toLowerCase();
 
       if (isEmpty(userType)) error["userType"] = "Required field";
@@ -153,7 +156,7 @@ accountController.post(
       } */
 
       if (Object.keys(error).length == 0) {
-        profilePicture = "default.png";
+        profilePicture = "default.jpg";
         attempt = 0;
 
         if (verificationCode !== 0) {
@@ -240,8 +243,8 @@ accountController.delete(
       await user.remove();
 
       if (user) {
-        if (user.profilePicture !== "default.png") {
-          const cloud = await cloudinaryUploader(
+        if (user.profilePicture !== "default.jpg") {
+          await cloudinaryUploader(
             "destroy",
             "",
             "image",
@@ -249,6 +252,17 @@ accountController.delete(
             user.profilePicture
           );
         }
+
+        user.verificationPicture.map(async (picture) => {
+          await cloudinaryUploader(
+            "destroy",
+            "",
+            "image",
+            "sagip/media/verification-request",
+            picture
+          );
+        });
+
         /*  await createPusher("user", "reload", {}); */
         return res.status(200).json({
           success: true,
@@ -475,16 +489,16 @@ accountController.put(
         attempt,
         verificationCode,
         userType,
-        status,
+        //status,
         isBanned,
         isArchived,
         hasChanged,
       } = req.body;
-      if (typeof status === "string") {
-        userType = userType.toLowerCase();
-        status = status.toLowerCase();
-      }
-      if (isEmpty(status)) error["status"] = "Required field";
+      // if (typeof status === "string") {
+      //   userType = userType.toLowerCase();
+      //   status = status.toLowerCase();
+      // }
+      // if (isEmpty(status)) error["status"] = "Required field";
       if (isEmpty(userType)) error["userType"] = "Required field";
       if (isEmpty(email)) {
         error["email"] = "Required field";
@@ -552,11 +566,11 @@ accountController.put(
           attempt,
           verificationCode,
           userType,
-          status,
+          // status,
           hasChanged,
         };
         console.log("isArchived");
-        console.log(isArchived);
+        //console.log(status);
         if (isArchived === true || isArchived === "true") {
           updateFields.archivedDate = Date.now();
         } else {
@@ -757,6 +771,11 @@ accountController.get(
   "/:id",
   /* tokenMiddleware, */ async (req, res) => {
     try {
+      /* const user = await User.findOne({
+        _id: req.params.id,
+        archivedDate: { $exists: false },
+        isArchived: false,
+      }) */
       const user = await User.findById(req.params.id);
 
       if (user) {

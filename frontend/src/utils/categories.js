@@ -5,6 +5,7 @@ export const safetyTipsCategory = [
   "Flood Safety",
   "Heat Safety",
 ];
+export const wellnessCategory = ["All", "Earthqueke", "Flood"];
 
 export const emergencyFacilityCategory = [
   "All",

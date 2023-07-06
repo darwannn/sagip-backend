@@ -130,11 +130,14 @@ assistanceRequestController.post(
 
 assistanceRequestController.get("/", async (req, res) => {
   try {
-    const assistanceRequests = await AssistanceRequest.find({}).populate(
+    /*  const assistanceRequests = await AssistanceRequest.find({}).populate(
       "userId",
       "-password"
-    );
-
+    ); */
+    const assistanceRequests = await AssistanceRequest.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("userId", "-password");
     if (assistanceRequests) {
       return res.status(200).json(assistanceRequests);
       return res.status(200).json({
@@ -159,8 +162,13 @@ assistanceRequestController.get("/", async (req, res) => {
 
 assistanceRequestController.get("/ongoing", async (req, res) => {
   try {
+    /* const assistanceRequest = await AssistanceRequest.find({
+      status: "ongoing",
+    }) */
     const assistanceRequest = await AssistanceRequest.find({
       status: "ongoing",
+      archivedDate: { $exists: false },
+      isArchived: false,
     })
       .populate({
         path: "assignedTeam",
@@ -196,9 +204,14 @@ assistanceRequestController.get("/ongoing", async (req, res) => {
 
 assistanceRequestController.get("/:id", async (req, res) => {
   try {
-    const assistanceRequest = await AssistanceRequest.findById(
+    /* const assistanceRequest = await AssistanceRequest.findById(
       req.params.id
-    ).populate("userId", "-password");
+    ).populate("userId", "-password"); */
+    const assistanceRequest = await AssistanceRequest.findOne({
+      _id: req.params.id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("userId", "-password");
     if (assistanceRequest) {
       /*      return res.status(200).json(assistanceRequest); */
       return res.status(200).json({

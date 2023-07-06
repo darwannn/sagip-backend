@@ -172,7 +172,7 @@ const Register = () => {
             onChange={(e) => setGender(e.target.value)}
           />
           <input
-            type="text"
+            type="date"
             placeholder="Birthdate..."
             onChange={(e) => setBirthdate(e.target.value)}
           />

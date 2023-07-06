@@ -5,7 +5,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import { request } from "../../utils/axios";
-import { safetyTipsCategory } from "../../utils/categories";
+import { wellnessCategory } from "../../utils/categories";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -127,7 +127,7 @@ const WellnessSurveyInput = ({ type }) => {
                 <option value="" hidden>
                   Select a category
                 </option>
-                {safetyTipsCategory.slice(1).map((category) => (
+                {wellnessCategory.slice(1).map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>

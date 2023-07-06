@@ -340,7 +340,7 @@ const VerificationRequest = () => {
               (picture, index) => (
                 <>
                   <img
-                    src={`https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/user/${picture}`}
+                    src={`https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/verification-request/${picture}`}
                     key={index}
                     style={{ width: "300px" }}
                     onClick={() => setToggler(!toggler)}
@@ -348,7 +348,7 @@ const VerificationRequest = () => {
                   <FsLightbox
                     toggler={toggler}
                     sources={[
-                      `https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/user/${picture}`,
+                      `https://res.cloudinary.com/dantwvqrv/image/upload/v1687796337/sagip/media/verification-request/${picture}`,
                     ]}
                     type="image"
                   />

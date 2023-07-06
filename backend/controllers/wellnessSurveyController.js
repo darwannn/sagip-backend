@@ -75,7 +75,10 @@ wellnessSurveyController.post(
 
 wellnessSurveyController.get("/", async (req, res) => {
   try {
-    const wellnessSurvey = await WellnessSurvey.find({});
+    const wellnessSurvey = await WellnessSurvey.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    });
     if (wellnessSurvey) {
       return res.status(200).json(wellnessSurvey);
       return res.status(200).json({
@@ -206,7 +209,12 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
       "Taal",
       "Tikay",
     ];
-    const wellnessSurvey = await WellnessSurvey.findById(req.params.id)
+    /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id) */
+    const wellnessSurvey = await WellnessSurvey.findOne({
+      _id: req.params.id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    })
       .populate("unaffected")
       .populate("affected");
 
@@ -284,38 +292,46 @@ wellnessSurveyController.get(
         _id: req.user.id,
       });
 
-      if (user.userType === "resident") {
-        let surveyResponse = [
-          ...wellnessSurvey.affected,
-          ...wellnessSurvey.unaffected,
-        ];
-        let isResponded = false;
+      /*   if (user.userType === "resident") { */
+      let surveyResponse = [
+        ...wellnessSurvey.affected,
+        ...wellnessSurvey.unaffected,
+      ];
+      let isResponded = false;
 
-        surveyResponse.map((response) => {
-          if (response.toString() === req.user.id) {
-            isResponded = true;
-            return;
-          } else {
-            isResponded = false;
-          }
-        });
-        if (isResponded) {
-          return res.status(200).json({
-            success: false,
-            message: "already responded",
-          });
+      surveyResponse.map((response) => {
+        if (response.toString() == req.user.id) {
+          isResponded = true;
+          return;
         } else {
-          return res.status(200).json({
-            success: true,
-            message: "success",
-            ...wellnessSurvey._doc,
-          });
+          isResponded = false;
         }
+        console.log("====================================");
+        console.log(surveyResponse);
+        console.log(response.toString());
+        console.log("l" + req.user.id);
+        console.log("====================================");
+      });
+      console.log("====================================");
+      console.log(isResponded);
+      console.log("====================================");
+      if (isResponded) {
+        return res.status(200).json({
+          success: false,
+          message: "already responded",
+        });
       } else {
+        return res.status(200).json({
+          success: true,
+          message: "success",
+          ...wellnessSurvey._doc,
+        });
+      }
+      /* } else {
         return res
           .status(200)
           .json({ success: true, message: "success", ...wellnessSurvey._doc });
-      }
+      } */
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -327,7 +343,12 @@ wellnessSurveyController.get(
 
 wellnessSurveyController.get("/:id", async (req, res) => {
   try {
-    const wellnessSurvey = await WellnessSurvey.findById(req.params.id);
+    const wellnessSurvey = await WellnessSurvey.findOne({
+      _id: req.params.id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    });
+    /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id); */
 
     if (wellnessSurvey) {
       /*      return res.status(200).json(wellnessSurvey); */
