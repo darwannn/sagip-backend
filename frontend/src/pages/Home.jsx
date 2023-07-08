@@ -135,6 +135,12 @@ function Home() {
     receivePusher("verification-request-mobile", "reload", (data) => {
       toast.success("reload-user request");
     });
+    receivePusher("account", "reload", (data) => {
+      toast.success("accoutn reload");
+    });
+    receivePusher(user.id, "reload", (data) => {
+      toast.success("user reload");
+    });
   }, []);
 
   const triggerPusher = async () => {

@@ -29,8 +29,12 @@ const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/user";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher } = require("./apiController");
 
+const { createPusher, sendSMS } = require("./apiController");
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 accountController.get("/", async (req, res) => {
   try {
     const user = await User.find({});
@@ -262,6 +266,14 @@ accountController.delete(
             picture
           );
         });
+        await createPusher("account", "reload", {});
+        /*  createNotification(
+            req.params.id,
+            req.params.id,
+            "Account Deleted",
+            `Your account has been deleted`,
+            "info"
+          ); */
 
         /*  await createPusher("user", "reload", {}); */
         return res.status(200).json({
@@ -289,16 +301,16 @@ accountController.delete(
   }
 );
 
-accountController.put(
+/* accountController.put(
   "/update/contact-number",
   tokenMiddleware,
-  /*  userTypeMiddleware([
-    "resident",
-    "responder",
-    "dispatcher",
-    "admin",
-    "super-admin",
-  ]), */
+  //  userTypeMiddleware([
+  //   "resident",
+  //   "responder",
+  //   "dispatcher",
+  //   "admin",
+  //   "super-admin",
+  // ]),
   async (req, res) => {
     try {
       let { contactNumber } = req.body;
@@ -312,6 +324,15 @@ accountController.put(
       });
 
       if (user) {
+        await createPusher("account", "reload", {});
+        //  createNotification(
+        //     req.params.id,
+        //     req.params.id,
+        //     "Account Deleted",
+        //     `Your account has been deleted`,
+        //     "info"
+        //   );
+
         return res.status(200).json({
           success: true,
           message: "Contact Number Updated Successfully",
@@ -329,7 +350,7 @@ accountController.put(
       });
     }
   }
-);
+); */
 
 //ito yung endpoint para magsend ng verification code sa contact number, para mavalidate din yung contact number
 accountController.put(
@@ -614,6 +635,7 @@ accountController.put(
         });
 
         if (user) {
+          await createPusher(req.params.id, "reload", {});
           /* await createPusher("user", "reload", {});  */
           return res.status(200).json({
             success: true,
@@ -679,6 +701,7 @@ accountController.put(
         if (user) {
           /* await createPusher("user", "reload", {}); */
           if (action === "archive") {
+            await createPusher(req.params.id, "reload", {});
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",
