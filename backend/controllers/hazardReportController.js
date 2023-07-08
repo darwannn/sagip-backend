@@ -8,6 +8,7 @@ const {
   isVideo,
   isLessThanSize,
   cloudinaryUploader,
+  getUsersId,
 } = require("./functionController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
@@ -15,7 +16,10 @@ const folderPath = "sagip/media/hazard-report";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const { createPusher } = require("./apiController");
-
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 hazardReportController.post(
   "/add",
   tokenMiddleware,
@@ -97,6 +101,16 @@ hazardReportController.post(
           });
           if (hazardReport) {
             /*     await createPusher("hazard-report", "reload", {}); */
+            await createPusher("hazard-report-web", "reload", {});
+
+            const userIds = await getUsersId("dispatcher");
+            createNotification(
+              userIds,
+              req.user.id,
+              "New hazport report",
+              `${category} on ${street} ${municipality}`,
+              "info"
+            );
             return res.status(200).json({
               success: true,
               message: "Added Successfully",
@@ -260,14 +274,31 @@ hazardReportController.put(
           { new: true }
         );
         if (hazardReport) {
-          /*  await createPusher("hazard-report", "reload", {}); */
+          await createPusher("hazard-report-mobile", "reload", {});
+          await createPusher(`${hazardReport.userId}`, "reload", {});
+
           if (action === "verify") {
+            createNotification(
+              [hazardReport.userId],
+              hazardReport.userId,
+              "Hazard Report Verified",
+              `Your hazard report has been verified`,
+              "success"
+            );
+
             return res.status(200).json({
               success: true,
               message: "Hazard Report Verified",
               hazardReport,
             });
           } else if (action === "resolve") {
+            createNotification(
+              [hazardReport.userId],
+              hazardReport.userId,
+              "Hazard Report Resolved",
+              `Your hazard report has been resolved`,
+              "success"
+            );
             return res.status(200).json({
               success: true,
               message: "Hazard Report Resolved",
@@ -331,6 +362,15 @@ hazardReportController.delete(
         );
 
         if (hazardReport) {
+          await createPusher(`${hazardReport.userId}`, "reload", {});
+          await createPusher("hazard-report-mobile", "reload", {});
+          createNotification(
+            [hazardReport.userId],
+            hazardReport.userId,
+            "Hazard Report Deleted",
+            `Your hazard report has been deleted`,
+            "error"
+          );
           /*       await createPusher("hazard-report", "reload", {}); */
           return res.status(200).json({
             success: true,
@@ -393,6 +433,15 @@ hazardReportController.put(
           console.log("====================================");
           /*   await createPusher("hazard-report", "reload", {}); */
           if (action === "archive") {
+            await createPusher(`${hazardReport.userId}`, "reload", {});
+            await createPusher("hazard-report-mobile", "reload", {});
+            createNotification(
+              [hazardReport.userId],
+              hazardReport.userId,
+              "Hazard Report Deleted",
+              `Your hazard report has been deleted`,
+              "error"
+            );
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",

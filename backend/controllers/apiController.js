@@ -210,7 +210,7 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error:1 " + contactNumbers,
+          message: "Internal Server Error: " + contactNumbers,
         });
       }
       console.log(contactNumbers);

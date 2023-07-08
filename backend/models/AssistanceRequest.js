@@ -11,6 +11,7 @@ const AssistanceRequestSchema = new mongoose.Schema(
     assignedTeam: {
       type: mongoose.Types.ObjectId,
       ref: "Team",
+      default: null,
     },
     description: {
       type: String,

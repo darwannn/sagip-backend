@@ -135,6 +135,18 @@ function Home() {
     receivePusher("verification-request-mobile", "reload", (data) => {
       toast.success("reload-user request");
     });
+    receivePusher("assistance-request-web", "reload", (data) => {
+      toast.success("assistance-request-web");
+    });
+    receivePusher("assistance-request-mobile", "reload", (data) => {
+      toast.success("assistance-request-mobile");
+    });
+    receivePusher("hazard-report-web", "reload", (data) => {
+      toast.success("hazard-report-web");
+    });
+    receivePusher("hazard-report-mobile", "reload", (data) => {
+      toast.success("hazard-report-mobile");
+    });
     receivePusher("account", "reload", (data) => {
       toast.success("accoutn reload");
     });

@@ -8,15 +8,18 @@ const {
   isVideo,
   isLessThanSize,
   cloudinaryUploader,
+  getUsersId,
 } = require("./functionController");
-const { createNotification } = require("./notificationController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/assistance-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const { createPusher, sendSMS, sendBulkSMS } = require("./apiController");
-
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 assistanceRequestController.post(
   "/add",
   tokenMiddleware,
@@ -94,7 +97,16 @@ assistanceRequestController.post(
             userId: req.user.id,
           });
           if (assistanceRequest) {
-            /* await createPusher("assistance-request", "reload", {}); */
+            await createPusher("assistance-request-web", "reload", {});
+            const userIds = await getUsersId("dispatcher");
+            createNotification(
+              userIds,
+              req.user.id,
+              "New assistance request",
+              `${category} on ${street} ${municipality}`,
+              "info"
+            );
+
             return res.status(200).json({
               success: true,
               message: "Added Successfully",
@@ -137,7 +149,15 @@ assistanceRequestController.get("/", async (req, res) => {
     const assistanceRequests = await AssistanceRequest.find({
       archivedDate: { $exists: false },
       isArchived: false,
-    }).populate("userId", "-password");
+    })
+      .populate("userId", "-password")
+      .populate({
+        path: "assignedTeam",
+        populate: [
+          { path: "members", select: "-password" },
+          { path: "head", select: "-password" },
+        ],
+      });
     if (assistanceRequests) {
       return res.status(200).json(assistanceRequests);
       return res.status(200).json({
@@ -211,7 +231,15 @@ assistanceRequestController.get("/:id", async (req, res) => {
       _id: req.params.id,
       archivedDate: { $exists: false },
       isArchived: false,
-    }).populate("userId", "-password");
+    })
+      .populate("userId", "-password")
+      .populate({
+        path: "assignedTeam",
+        populate: [
+          { path: "members", select: "-password" },
+          { path: "head", select: "-password" },
+        ],
+      });
     if (assistanceRequest) {
       /*      return res.status(200).json(assistanceRequest); */
       return res.status(200).json({
@@ -265,18 +293,45 @@ assistanceRequestController.put(
           req.params.id,
           updateFields,
           { new: true }
-        );
-
+        )
+          .populate("assignedTeam")
+          .populate("userId");
+        console.log("====================================");
+        console.log(assistanceRequest.userId.contactNumber);
+        console.log("====================================");
         if (assistanceRequest) {
-          //sendSMS(`${assistanceRequest.teamId} is on the way`, assistanceRequest.userId.contactNumber);
+          console.log("==========sss==========================");
+          console.log(assistanceRequest.userId._id);
+          console.log("====================================");
           /* await createPusher("assistance-request", "reload", {}); */
+          await createPusher(`${assistanceRequest.userId._id}`, "reload", {});
+          await createPusher("assistance-request-mobile", "reload", {});
           if (action === "verify") {
+            sendSMS(
+              `${assistanceRequest.assignedTeam.name} is on the way`,
+              assistanceRequest.userId.contactNumber
+            );
+
+            createNotification(
+              [assistanceRequest.userId],
+              assistanceRequest.userId,
+              "Request Approved",
+              `Your request has been approved. ${assistanceRequest.assignedTeam.name} is on the way`,
+              "success"
+            );
             return res.status(200).json({
               success: true,
               message: "Assistance Request Verified",
               // assistanceRequest,
             });
           } else if (action === "resolve") {
+            createNotification(
+              [assistanceRequest.userId],
+              assistanceRequest.userId,
+              "Request Resolved",
+              "Your request has resolved.",
+              "success"
+            );
             return res.status(200).json({
               success: true,
               message: "Assistance Request Resolved",
@@ -365,11 +420,11 @@ assistanceRequestController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { reason, note, userId } = req.body;
+      const { reason, note } = req.body;
       console.log("====================================");
       console.log(req.params.id);
       console.log(req.body);
-      console.log(userId);
+
       console.log(note);
       console.log("====================================");
       if (isEmpty(reason)) error["reason"] = "Required field";
@@ -395,13 +450,30 @@ assistanceRequestController.put(
           folderPath,
           assistanceRequestImage.proof
         );
-        await createNotification([userId], null, reason, note, "error");
+        /* await createNotification([userId], null, reason, note, "error"); */
         if (cloud !== "error") {
           const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
             req.params.id
           );
 
           if (assistanceRequest) {
+            console.log("====================================");
+            console.log(assistanceRequest.userId.contactNumber);
+            console.log("====================================");
+            sendSMS(
+              `Your request has deleted. ${reason}`,
+              assistanceRequest.userId.contactNumber
+            );
+
+            await createPusher(`${assistanceRequest.userId}`, "reload", {});
+            await createPusher("assistance-request-mobile", "reload", {});
+            createNotification(
+              [assistanceRequest.userId],
+              assistanceRequest.userId,
+              "Request Delete",
+              `${reason}`,
+              "error"
+            );
             /* await createPusher("assistance-request", "reload", {}); */
             return res.status(200).json({
               success: true,
@@ -434,5 +506,96 @@ assistanceRequestController.put(
     }
   }
 );
+assistanceRequestController.put(
+  "/:action/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+      "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
+  async (req, res) => {
+    const error = {};
+    try {
+      const { reason, note } = req.body;
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        if (isEmpty(reason)) error["reason"] = "Required field";
+        if (Object.keys(error).length === 0) {
+          console.log("====================================");
+          console.log(reason);
+          console.log(note);
+          console.log("====================================");
+          console.log(action);
+          if (action === "archive") {
+            updateFields = {
+              isArchived: true,
+              archivedDate: Date.now(),
+            };
+          } else if (action === "unarchive") {
+            updateFields = {
+              isArchived: false,
+              $unset: { archivedDate: Date.now() },
+            };
+          }
+          const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
+            req.params.id,
+            updateFields,
+            { new: true }
+          );
+          if (assistanceRequest) {
+            console.log("====================================");
+            console.log("assistanceRequest");
+            console.log("====================================");
 
+            if (action === "archive") {
+              console.log("=======jjj=============================");
+              console.log(assistanceRequest.userId);
+              console.log("====================================");
+              await createPusher(`${assistanceRequest.userId}`, "reload", {});
+              createNotification(
+                [assistanceRequest.userId],
+                assistanceRequest.userId,
+                "Request Deleted",
+                `Your request has been deleted`,
+                "error"
+              );
+              return res.status(200).json({
+                success: true,
+                message: "Archived Successfully",
+              });
+            } else if (action === "unarchive") {
+              return res.status(200).json({
+                success: true,
+                message: "Unrchived Successfully",
+              });
+            }
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "not found",
+            });
+          }
+        }
+        if (Object.keys(error).length !== 0) {
+          error["success"] = false;
+          error["message"] = "input error";
+          return res.status(400).json(error);
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 module.exports = assistanceRequestController;

@@ -209,6 +209,7 @@ const ManageEmergencyFacility = () => {
 
   const handleSubmit = async (assignedTeam) => {
     try {
+      assignedTeam = "64a6d2deea160b889a498dc5";
       const type = "resolve";
       const data = await request(
         `/assistance-request/update/${type}/${id}`,
@@ -265,7 +266,7 @@ const ManageEmergencyFacility = () => {
         {
           Authorization: `Bearer ${token}`,
         },
-        { userId, reason, note }
+        { reason, note }
       );
 
       console.log(data);
@@ -538,13 +539,6 @@ const ManageEmergencyFacility = () => {
 
                 <button
                   onClick={() => {
-                    handleSubmit("");
-                  }}
-                >
-                  Submit
-                </button>
-                <button
-                  onClick={() => {
                     handleDismiss();
                   }}
                 >
@@ -555,6 +549,13 @@ const ManageEmergencyFacility = () => {
           </div>
 
           <>
+            <button
+              onClick={() => {
+                handleSubmit("");
+              }}
+            >
+              Submit
+            </button>
             reason
             <input
               type="text"

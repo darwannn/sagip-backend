@@ -488,7 +488,34 @@ const ManageEmergencyFacility = () => {
                 <video src={proof} controls />
               )}
             </div>
-            {hazardStatus !== "resolved" && (
+            <>
+              <div>
+                <button
+                  onClick={() => {
+                    handleSubmit("verify");
+                  }}
+                >
+                  Verify
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleSubmit("resolve");
+                  }}
+                >
+                  Mark as Resolved
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleDismiss();
+                  }}
+                >
+                  Dismiss
+                </button>
+              </div>
+
+              {/* {hazardStatus !== "resolved" && (
               <div>
                 {hazardStatus === "unverified" ? (
                   <button
@@ -515,7 +542,9 @@ const ManageEmergencyFacility = () => {
                   Dismiss
                 </button>
               </div>
-            )}
+
+            )} */}
+            </>
           </div>
         </>
       )}

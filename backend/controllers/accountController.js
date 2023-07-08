@@ -266,7 +266,7 @@ accountController.delete(
             picture
           );
         });
-        await createPusher("account", "reload", {});
+        await createPusher(`${user._id}`, "reload", {});
         /*  createNotification(
             req.params.id,
             req.params.id,
@@ -635,7 +635,7 @@ accountController.put(
         });
 
         if (user) {
-          await createPusher(req.params.id, "reload", {});
+          await createPusher(`${req.params.id}`, "reload", {});
           /* await createPusher("user", "reload", {});  */
           return res.status(200).json({
             success: true,
@@ -701,7 +701,7 @@ accountController.put(
         if (user) {
           /* await createPusher("user", "reload", {}); */
           if (action === "archive") {
-            await createPusher(req.params.id, "reload", {});
+            await createPusher(`${req.params.id}`, "reload", {});
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",
