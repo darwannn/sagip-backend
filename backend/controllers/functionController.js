@@ -182,10 +182,14 @@ const calculateArchivedDate = (date) => {
 const updateVerificationCode = async (id) => {
   let generatedCode = await generateCode();
 
-  const user = await User.findByIdAndUpdate(id, {
-    verificationCode: generatedCode,
-    codeExpiration: codeExpiration,
-  });
+  const user = await User.findByIdAndUpdate(
+    id,
+    {
+      verificationCode: generatedCode,
+      codeExpiration: codeExpiration,
+    },
+    { new: true }
+  );
   return user;
 };
 
@@ -235,6 +239,19 @@ const cloudinaryUploader = async (
   return cloudinaryResult;
 };
 
+const getUsersId = async (userType) => {
+  try {
+    let userIds = [];
+    const users = await User.find({ userType });
+    userIds = users.map((user) => user._id);
+
+    return userIds;
+  } catch (error) {
+    console.error("Internal Server Error: " + error);
+    throw error;
+  }
+};
+
 module.exports = {
   isEmpty,
   isImage,
@@ -256,4 +273,5 @@ module.exports = {
   isValidExtensions,
   cloudinaryUploader,
   calculateArchivedDate,
+  getUsersId,
 };

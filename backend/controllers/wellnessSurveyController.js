@@ -5,7 +5,10 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty } = require("./functionController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const { createPusher } = require("./apiController");
-
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 wellnessSurveyController.post(
   "/add",
   tokenMiddleware,
@@ -39,7 +42,15 @@ wellnessSurveyController.post(
           });
 
           if (wellnessSurvey) {
-            /*  await createPusher("wellness-survey", "reload", {}); */
+            if (status === "active") {
+              await createPusher("wellness-survey", "reload", {});
+              createNotificationAll(
+                wellnessSurvey._id,
+                "A new ",
+                `Explore the recently added safety tip: ${title}`,
+                "info"
+              );
+            }
             return res.status(200).json({
               success: true,
               message: "Added successfully",
@@ -422,6 +433,15 @@ wellnessSurveyController.put(
           );
 
           if (wellnessSurvey) {
+            if (status === "active") {
+              await createPusher("wellness-survey", "reload", {});
+              createNotificationAll(
+                wellnessSurvey._id,
+                "A new ",
+                `Explore the recently added safety tip: ${title}`,
+                "info"
+              );
+            }
             /* await createPusher("wellness-survey", "reload", {}); */
             return res.status(200).json({
               success: true,
@@ -514,7 +534,9 @@ wellnessSurveyController.delete(
         req.params.id
       );
       if (wellnessSurvey) {
-        /*  await createPusher("wellness-survey", "reload", {}); */
+        if (wellnessSurvey.status === "active") {
+          await createPusher("wellness-survey", "reload", {});
+        }
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",
@@ -555,16 +577,20 @@ wellnessSurveyController.put(
         } else if (action === "unarchive") {
           updateFields = {
             isArchived: false,
+            /* status: "active", */
             $unset: { archivedDate: Date.now() },
           };
         }
         const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
           req.params.id,
-          updateFields,
-          { new: true }
+          updateFields
+          /*  { new: true } */
         );
+
         if (wellnessSurvey) {
-          /* await createPusher("wellness-survey", "reload", {}); */
+          if (wellnessSurvey.status === "active") {
+            await createPusher("wellness-survey", "reload", {});
+          }
           if (action === "archive") {
             return res.status(200).json({
               success: true,

@@ -79,12 +79,12 @@ safetyTipController.post(
           });
           if (safetyTip) {
             await createPusher("safety-tips", "reload", {});
-            /*  createNotificationAll(
+            createNotificationAll(
               safetyTip._id,
               "Discover the Latest Safety Tip",
               `Explore the recently added safety tip: ${title}`,
               "info"
-            ); */
+            );
             return res.status(200).json({
               success: true,
               message: "Added successfully",

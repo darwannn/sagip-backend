@@ -126,6 +126,15 @@ function Home() {
     receivePusher("emergency-facility", "reload", (data) => {
       toast.success("emergency-facility reload");
     });
+    receivePusher("wellness-survey", "reload", (data) => {
+      toast.success("wellness-survey reload");
+    });
+    receivePusher("verification-request-web", "reload", (data) => {
+      toast.success("reload table request");
+    });
+    receivePusher("verification-request-mobile", "reload", (data) => {
+      toast.success("reload-user request");
+    });
   }, []);
 
   const triggerPusher = async () => {

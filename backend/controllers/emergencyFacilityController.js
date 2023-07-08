@@ -77,12 +77,12 @@ emergencyFacilityController.post(
             status,
           });
           if (emergencyFacility) {
-            /* createNotificationAll(
+            createNotificationAll(
               emergencyFacility._id,
               `A ${category} is added`,
               `Checkout the new ${category}: ${name} `,
               "info"
-            ); */
+            );
             await createPusher("emergency-facility", "reload", {});
             return res.status(200).json({
               success: true,

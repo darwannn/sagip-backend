@@ -19,8 +19,8 @@ const {
   updateVerificationCode,
   cloudinaryUploader,
   calculateArchivedDate,
+  getUsersId,
 } = require("./functionController");
-const { createNotification } = require("./notificationController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
@@ -33,8 +33,11 @@ const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/verification-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher } = require("./apiController");
-
+const { createPusher, sendSMS } = require("./apiController");
+const {
+  createNotification,
+  createNotificationAll,
+} = require("./notificationController");
 authController.post("/register", async (req, res) => {
   try {
     const error = {};
@@ -172,24 +175,24 @@ authController.post("/register", async (req, res) => {
 
         /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
 
-        if (verificationCode !== 0) {
-          return res.status(200).json({
-            success: true,
-            message: "A verification has been sent to your contact number",
-            user: {
-              for: "register",
-              id: user._doc._id,
-              userType: user._doc.userType,
-              status: user._doc.status,
-            },
-            token: generateToken(user._id),
-          });
-        } else {
+        /*  if (verificationCode !== 0) { */
+        return res.status(200).json({
+          success: true,
+          message: "A verification has been sent to your contact number",
+          user: {
+            for: "register",
+            id: user._doc._id,
+            userType: user._doc.userType,
+            status: user._doc.status,
+          },
+          token: generateToken(user._id),
+        });
+        /* } else {
           return res.status(200).json({
             success: true,
             message: "Created Successfully",
           });
-        }
+        } */
       } else {
         return res.status(500).json({
           success: false,
@@ -273,7 +276,15 @@ authController.put(
                 user.verificationCode = 0;
                 await user.save();
 
-                if (action === "register")
+                if (action === "register") {
+                  createNotification(
+                    [req.user.id],
+                    req.user.id,
+                    "Welcome to SAGIP",
+                    "Get to know more about us",
+                    "info"
+                  );
+
                   return res.status(200).json({
                     success: true,
                     message:
@@ -287,7 +298,7 @@ authController.put(
                     },
                     token: generateToken(user._id),
                   });
-
+                }
                 if (action === "forgot-password")
                   return res.status(200).json({
                     success: true,
@@ -331,6 +342,13 @@ authController.put(
                     }
                   );
                   if (userContactNumber) {
+                    createNotification(
+                      [req.user.id],
+                      req.user.id,
+                      "Contact Number Updated",
+                      "Your contact number has been updated",
+                      "info"
+                    );
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
@@ -590,25 +608,29 @@ authController.post("/login", async (req, res) => {
                 "Account suspended. Please contact us if you think this isn't right",
             });
           } else {
-            // Check if the user has exceeded the maximum number of attempts
+            console.log("====================================");
+            console.log(user.status);
+            console.log("====================================");
+            if (!(user.status === "unverified")) {
+              // Check if the user has exceeded the maximum number of attempts
 
-            // Reset the attempt number if the password is correct
-            /* if (!user.archivedDate) { */
-            user.attempt = 0;
-            await user.save();
+              // Reset the attempt number if the password is correct
+              /* if (!user.archivedDate) { */
+              user.attempt = 0;
+              await user.save();
 
-            return res.status(200).json({
-              success: true,
-              message: "Login Successfully",
-              user: {
-                for: "login",
-                id: user._doc._id,
-                userType: user._doc.userType,
-                status: user._doc.status,
-              },
-              token: generateToken(user._id),
-            });
-            /* } else {
+              return res.status(200).json({
+                success: true,
+                message: "Login Successfully",
+                user: {
+                  for: "login",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(user._id),
+              });
+              /* } else {
               const data = calculateArchivedDate();
               if (data) {
                 const { daysLeft, deletionDate } = data;
@@ -622,6 +644,36 @@ authController.post("/login", async (req, res) => {
                 });
               }
             } */
+            } else {
+              /* return res.status(500).json({
+                success: false,
+                message: "Internal Server Error: " + error,
+              }); */
+              const userVerificationCode = await updateVerificationCode(
+                user._id
+              );
+              sendSMS(
+                `Your SAGIP verification code is ${userVerificationCode.verificationCode}`,
+                userVerificationCode.contactNumber
+              );
+
+              if (userVerificationCode) {
+                console.log(
+                  "Current COde: " + userVerificationCode.verificationCode
+                );
+                return res.status(200).json({
+                  success: false,
+                  message: `Please verify your contact number.Verification code has been send to ${userVerificationCode.contactNumber}`,
+                  user: {
+                    for: "register",
+                    id: userVerificationCode._doc._id,
+                    userType: userVerificationCode._doc.userType,
+                    status: userVerificationCode._doc.status,
+                  },
+                  token: generateToken(userVerificationCode._id),
+                });
+              }
+            }
           }
         } else {
           error["password"] = "Incorrect password";
@@ -775,6 +827,13 @@ authController.put(
                 "Password has been changed successfully. You can now login with your new password",
             });
           } else {
+            createNotification(
+              [req.user.id],
+              req.user.id,
+              "Password has been changed",
+              "Your password has been changed",
+              "info"
+            );
             return res.status(200).json({
               success: true,
               message: "Password has been changed successfully",
@@ -822,7 +881,11 @@ authController.put(
       const user = await updateVerificationCode(req.user.id);
 
       if (user) {
-        //console.log("Current COde: " + generatedCode);
+        console.log("Current COde: " + user.verificationCode);
+        sendSMS(
+          `Your SAGIP verification code is ${user.verificationCode}`,
+          user.contactNumber
+        );
 
         return res.status(200).json({
           success: true,
@@ -906,6 +969,18 @@ authController.put(
         );
 
         if (user) {
+          const userIds = await getUsersId("super-admin");
+          await createPusher("verification-request-web", "reload", {});
+          createNotification(
+            userIds,
+            req.user.id,
+            "New verification request",
+            `${user.firstname} ${user.firstname} sends a verification request`,
+            "info"
+          );
+          console.log("====================================");
+          console.log(userIds);
+          console.log("====================================");
           return res.status(200).json({
             success: true,
             message: "Verification Request Submitted Successfully",
@@ -1121,29 +1196,29 @@ authController.put(
 
         if (user) {
           if (action === "reject") {
-            //sendSMS(`Verification Request Rejected`, user.contactNumber);
-
-            await createNotification(
-              [req.params.id],
-              req.params.id,
-              "title",
-              "message",
-              "category"
+            sendSMS(`Verification Request Rejected`, user.contactNumber);
+            await createPusher("verification-request-mobile", "reload", {});
+            createNotification(
+              [user._id],
+              user._id,
+              "Verification Request Rejected",
+              `Your verification request has been rejected`,
+              "error"
             );
-
             return res.status(200).json({
               success: true,
               message: "Verification Request Rejected",
             });
           } else if (action === "approve") {
-            await createNotification(
-              [req.params.id],
-              req.params.id,
-              "title",
-              "message",
-              "category"
+            sendSMS(`Verification Request Approved`, user.contactNumber);
+            await createPusher("verification-request-mobile", "reload", {});
+            createNotification(
+              [user._id],
+              user._id,
+              "Verification Request Approved",
+              `Your account is now verified`,
+              "success"
             );
-            //sendSMS(`Verification Request Approved`, user.contactNumber);
 
             return res.status(200).json({
               success: true,

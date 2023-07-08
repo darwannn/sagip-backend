@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 
-import { login } from "../../redux/authSlice";
+import { login, register } from "../../redux/authSlice";
 
 import { setServerResponse } from "../../redux/serverResponseSlice";
 import { useDispatch } from "react-redux";
@@ -58,9 +58,13 @@ const Login = () => {
           if (message.includes("attempts")) {
             navigate("/login/contact-verification");
           }
+          if (message.includes("verify")) {
+            dispatch(register(data));
+            navigate("/register/contact-verification");
+          }
         } else {
           toast.error(message);
-          //dito ilalagay yung mga error message sa specific input field
+
           setIdetifierErrorMessage(data.identifier);
           setPasswordErrorMessage(data.password);
         }

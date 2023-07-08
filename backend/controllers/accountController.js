@@ -663,7 +663,6 @@ accountController.put(
           updateFields = {
             isArchived: true,
             archivedDate: Date.now(),
-            status: "inactive",
           };
         } else if (action === "unarchive") {
           updateFields = {
