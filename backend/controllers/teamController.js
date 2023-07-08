@@ -1,8 +1,14 @@
 const teamController = require("express").Router();
 const Team = require("../models/Team");
+const AssistanceRequest = require("../models/AssistanceRequest");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-const { isEmpty, isImage, isLessThanSize } = require("./functionController");
+const {
+  isEmpty,
+  isImage,
+  isLessThanSize,
+  getTeamMembersId,
+} = require("./functionController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const { createPusher, sendSMS, sendBulkSMS } = require("./apiController");
 const {
@@ -83,8 +89,19 @@ teamController.get("/", async (req, res) => {
 });
 teamController.get("/active", async (req, res) => {
   try {
+    const assignedTeams = await AssistanceRequest.find(
+      { status: "ongoing" },
+      "assignedTeam"
+    );
+    /*    console.log("====================================");
+    console.log(await getTeamMembersId("64a6d2deea160b889a498dc5"));
+    console.log("===================================="); */
     const team = await Team.find({
-      $and: [{ head: { $ne: null } }, { members: { $ne: [] } }],
+      $and: [
+        { head: { $ne: null } },
+        { members: { $ne: [] } },
+        { _id: { $nin: assignedTeams.map((item) => item.assignedTeam) } },
+      ],
     })
       .populate("head", "-password")
       .populate("members", "-password");
@@ -222,16 +239,24 @@ teamController.delete(
   async (req, res) => {
     try {
       const team = await Team.findByIdAndDelete(req.params.id);
-      const teamMembers = [team.head, ...team.members];
-      /*  await createNotification(
-        [teamMembers],
-        team._id,
-        `${team.name} Removed`,
-        "Your team has been removed",
-        "info"
-      ); */
       if (team) {
-        /* await createPusher("team", "reload", {}); */
+        const teamMembers = [team.head, ...team.members];
+        console.log("========teamMembers============================");
+        console.log(teamMembers);
+        console.log("====================================");
+        if (team.head !== null || team.members.length !== 0) {
+          console.log("====================================");
+          console.log("inside");
+          console.log("====================================");
+          await createNotification(
+            teamMembers,
+            team._id,
+            `${team.name} Removed`,
+            "Your team has been removed",
+            "info"
+          );
+          await createPusher("team", "reload", {});
+        }
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",
@@ -259,12 +284,14 @@ teamController.put(
       const { newTeamId, userId, prevTeamId } = req.body;
 
       let team;
+      let removedTeam;
+      let reassignedTeam;
       //may team gagawing unassigned
       if (newTeamId === "unassigned") {
         console.log("====================================");
-        console.log("unassigned");
+        console.log(prevTeamId);
         console.log("====================================");
-        team = await Team.findByIdAndUpdate(
+        removedTeam = await Team.findByIdAndUpdate(
           prevTeamId,
           { $pull: { members: userId } },
           { new: true }
@@ -277,7 +304,7 @@ teamController.put(
           { new: true }
         );
       } else {
-        const removeTeam = await Team.findByIdAndUpdate(
+        reassignedTeam = await Team.findByIdAndUpdate(
           prevTeamId,
           { $pull: { members: userId } },
           { new: true }
@@ -289,33 +316,33 @@ teamController.put(
         );
       }
 
-      if (team) {
+      if (team || removedTeam || reassignedTeam) {
         //may team gagawing unassigned
         if (newTeamId === "unassigned") {
-          /* await createNotification(
-          [userId],
-           team._id,
-          `You have been unassigned`,
-          `You have been remove from ${team.name}`,
-          "info"
-        ); */
+          await createNotification(
+            [userId],
+            userId,
+            `You have been unassigned`,
+            `You have been remove from ${removedTeam.name}`,
+            "info"
+          );
         } else if (prevTeamId === "") {
           // walang prev team
-          /* await createNotification(
-          [userId],
-           team._id,
-          `You have been assigned`,
-          `You have been assigned to ${team.name} as member`,
-          "info"
-        ); */
+          await createNotification(
+            [userId],
+            userId,
+            `You have been assigned`,
+            `You have been assigned to ${team.name} as member`,
+            "info"
+          );
         } else {
-          /* await createNotification(
-          [userId],
-           team._id,
-          `You have been reassigned`,
-          `You have been assigned to ${team.name} as member`,
-          "info"
-        ); */
+          await createNotification(
+            [userId],
+            userId,
+            `You have been reassigned`,
+            `You have been assigned to ${team.name} as member`,
+            "info"
+          );
         }
         /* await createPusher("team", "reload", {}); */
         return res.status(200).json({
@@ -360,20 +387,21 @@ teamController.put(
         });
 
         if (team) {
-          /* await createNotification(
+          await createPusher("team", "reload", {});
+          await createNotification(
             [head],
-             team._id,
+            team._id,
             `You have been assigned`,
             `You have been assigned to ${team.name} as head`,
             "info"
           );
           await createNotification(
-            [members],
-             team._id,
+            members,
+            team._id,
             `You have been assigned`,
             `You have been assigned to ${team.name} as member`,
             "info"
-          ); */
+          );
           /*  await createPusher("team", "reload", {}); */
           return res.status(200).json({
             success: true,

@@ -3,6 +3,7 @@ const Notification = require("../models/Notification");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Team = require("../models/Team");
 /* const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); */ // 1 day expiration
 const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expire after 15 minutes
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
@@ -239,6 +240,18 @@ const cloudinaryUploader = async (
   return cloudinaryResult;
 };
 
+const getTeamMembersId = async (id) => {
+  try {
+    let userIds = [];
+    const teams = await Team.findOne({ _id: id });
+    userIds = [teams.head, ...teams.members];
+
+    return userIds;
+  } catch (error) {
+    console.error("Internal Server Error: " + error);
+    throw error;
+  }
+};
 const getUsersId = async (userType) => {
   try {
     let userIds = [];
@@ -274,4 +287,5 @@ module.exports = {
   cloudinaryUploader,
   calculateArchivedDate,
   getUsersId,
+  getTeamMembersId,
 };
