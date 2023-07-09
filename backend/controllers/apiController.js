@@ -8,6 +8,8 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const {
   createNotification,
   createNotificationAll,
+  createPushNotificationTopic,
+  createPushNotificationToken,
 } = require("./notificationController");
 const { firebase } = require("../utils/config");
 const { isEmpty } = require("./functionController");
@@ -380,62 +382,7 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   }
 };
 
-const createPushNotificationTopic = (title, body, topic) => {
-  const message = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    topic: topic,
-  };
-
-  firebase
-    .messaging()
-    .send(message)
-    .then((response) => {
-      console.log("Notification sent successfully:", response);
-    })
-    .catch((error) => {
-      console.log("Failed to send notification:", error);
-    });
-};
-const createPushNotificationToken = (title, body, tokens) => {
-  const message = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    tokens: tokens,
-  };
-
-  firebase
-    .messaging()
-    .sendMulticast(message)
-    .then((response) => {
-      if (response.failureCount > 0) {
-        const failedTokens = [];
-        response.responses.forEach((resp, idx) => {
-          if (!resp.success) {
-            failedTokens.push(tokens[idx]);
-          }
-        });
-        console.log("List of tokens that caused failures: " + failedTokens);
-      }
-      /* else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      } */
-    })
-    .catch((error) => {
-      return "Internal Server Error: " + error;
-    });
-};
-
 module.exports = {
-  createPushNotificationTopic,
-  createPushNotificationToken,
   sendSMS,
   sendBulkSMS,
   createPusher,

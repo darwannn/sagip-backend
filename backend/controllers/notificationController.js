@@ -4,11 +4,7 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-/* const {
-  createPushNotificationTopic,
-  createPushNotificationToken,
-} = require("./apiController"); */
-
+const { firebase } = require("../utils/config");
 notificationController.get("/", tokenMiddleware, async (req, res) => {
   try {
     const notification = await Notification.find({ userId: req.user.id });
@@ -89,9 +85,6 @@ notificationController.delete(
 );
 
 const createNotification = async (ids, linkId, title, message, type) => {
-  /* createPushNotificationToken(title, message, [
-    "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
-  ]); */
   const notifications = ids.map(async (id) => {
     await Notification.create({
       userId: id,
@@ -104,6 +97,10 @@ const createNotification = async (ids, linkId, title, message, type) => {
 
   await Promise.all(notifications);
 
+  const users = await User.find({ _id: { $in: ids } }, { fcmToken: 1 });
+  const fcmTokens = users.map((user) => user.fcmToken).flat();
+
+  createPushNotificationToken(title, message, fcmTokens);
   console.log("notifications created");
 };
 
@@ -125,8 +122,64 @@ const createNotificationAll = async (linkId, title, message, type) => {
   console.log("notification created all");
 };
 
+const createPushNotificationToken = (title, body, tokens) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    tokens: tokens,
+  };
+
+  firebase
+    .messaging()
+    .sendMulticast(message)
+    .then((response) => {
+      if (response.failureCount > 0) {
+        const failedTokens = [];
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            failedTokens.push(tokens[idx]);
+          }
+        });
+        console.log("List of tokens that caused failures: " + failedTokens);
+      }
+      /* else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      } */
+    })
+    .catch((error) => {
+      return "Internal Server Error: " + error;
+    });
+};
+
+const createPushNotificationTopic = (title, body, topic) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    topic: topic,
+  };
+
+  firebase
+    .messaging()
+    .send(message)
+    .then((response) => {
+      console.log("Notification sent successfully:", response);
+    })
+    .catch((error) => {
+      console.log("Failed to send notification:", error);
+    });
+};
+
 module.exports = {
   notificationController,
   createNotificationAll,
   createNotification,
+  createPushNotificationTopic,
+  createPushNotificationToken,
 };
