@@ -59,7 +59,9 @@ const HazardReport = ({ type = "add" }) => {
   const webcamRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
+  const [requestId, setRequestId] = useState("");
   const [proof, setProof] = useState(null);
+  const [proofpic, setProofpic] = useState(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [facingMode, setFacingMode] = useState("user");
 
@@ -101,34 +103,67 @@ const HazardReport = ({ type = "add" }) => {
   const [category, setCategory] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [street, setStreet] = useState("");
+  const [municipality, setMunicipality] = useState("");
 
   const [proofName, setProofName] = useState("");
   const [proofUrl, setProofUrl] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
-    if (type === "update") {
-      const fetchSafetyTipDetails = async () => {
-        try {
-          const data = await request(`/assistance-request/${id}`, "GET", {
-            Authorization: `Bearer ${token}`,
-          });
+    /* if (type === "update") { */
+    const fetchSafetyTipDetails = async () => {
+      try {
+        const data = await request(`/assistance-request/myrequest`, "GET", {
+          Authorization: `Bearer ${token}`,
+        });
+        /*  const { success, message } = data;
 
+        if (success) { */
+
+        console.log("====================================");
+        console.log(data);
+        console.log("====================================");
+
+        if (data.success === false) {
+          setIsVerifying(false);
+        } else {
+          setIsVerifying(true);
+          setLatitude(data.latitude);
+          setLongitude(data.longitude);
           setTitle(data.title);
+          setRequestId(data._id);
+          setMunicipality(data.municipality);
+          setStreet(data.street);
           setDescription(data.description);
           setCategory(data.category);
-          setProofUrl(
-            `https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/assistance-request/${data.proof}`
-          );
-          console.log(data.category);
-          console.log(category);
-        } catch (error) {
-          console.error(error);
+
+          if (data.proof.includes(".jpg")) {
+            setProofpic(
+              `https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/assistance-request/${data.proof}`
+            );
+          } else {
+            setProofpic(
+              `https://res.cloudinary.com/dantwvqrv/video/upload/v1687689617/sagip/media/assistance-request/${data.proof}`
+            );
+          }
+          console.log("data.category");
+          console.log(data);
+          /* } else {
+            if (message === "verifying") {
+              setIsVerifying(true);
+            }
+          } */
         }
-      };
-      fetchSafetyTipDetails();
-    }
+        setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSafetyTipDetails();
+    /* } */
   }, [type, setTitle, setDescription, setCategory, token]);
 
   const handleSubmit = async (e) => {
@@ -146,7 +181,7 @@ const HazardReport = ({ type = "add" }) => {
       formData.append("latitude", latitude);
       formData.append("longitude", longitude);
       formData.append("category", category);
-      formData.append("hasChanged", hasChanged);
+      //formData.append("hasChanged", hasChanged);
       formData.append("proof", proof);
       formData.append("street", street);
       formData.append("municipality", municipality);
@@ -155,14 +190,19 @@ const HazardReport = ({ type = "add" }) => {
       console.log(municipality);
 
       let url, method;
-      if (type === "add") {
+      if (isVerifying === false) {
         url = "/assistance-request/add";
         method = "POST";
-      } else if (type === "update") {
-        url = `/assistance-request/update/${id}`;
+      } else if (isVerifying === true) {
+        formData.append("hasChanged", hasChanged);
+        url = `/assistance-request/update/${requestId}`;
         method = "PUT";
       }
-
+      console.log("=====hasChanged===============================");
+      console.log(hasChanged);
+      console.log(url);
+      console.log("======isVerifying==============================");
+      console.log(isVerifying);
       const data = await request(
         url,
         method,
@@ -229,10 +269,12 @@ const HazardReport = ({ type = "add" }) => {
 
   const handleStopCaptureClick = useCallback(() => {
     mediaRecorderRef.current.stop();
+    setHasChanged(true);
     setCapturing(false);
   }, [mediaRecorderRef, webcamRef, setCapturing]);
 
   const handleStartCaptureClick = useCallback(() => {
+    setHasChanged(true);
     navigator.mediaDevices
       .getUserMedia({ video: videoConstraints, audio: true })
       .then((stream) => {
@@ -294,6 +336,7 @@ const HazardReport = ({ type = "add" }) => {
       canvas.toBlob((blob) => {
         const file = new File([blob], "proof.jpeg", { type: "image/jpeg" });
         setProof(file);
+        setHasChanged(true);
       }, "image/jpeg");
     };
   }, [webcamRef]);
@@ -465,6 +508,16 @@ const HazardReport = ({ type = "add" }) => {
                   <video src={URL.createObjectURL(proof)} controls />
                 )}
                 <p>File Name: {proof.name}</p>
+              </div>
+            )}
+            {proofpic && (
+              <div>
+                <h2></h2>
+                {proofpic.includes(".jpg") ? (
+                  <img src={proofpic} />
+                ) : (
+                  <video src={proofpic} controls />
+                )}
               </div>
             )}
           </>

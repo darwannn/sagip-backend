@@ -209,6 +209,50 @@ hazardReportController.get("/ongoing", async (req, res) => {
   }
 });
 
+hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
+  try {
+    console.log("====================================");
+    console.log(req.user.id);
+    console.log("====================================");
+    const hazardReport = await HazardReport.findOne({
+      userId: req.user.id,
+      status: { $in: ["ongoing", "unverified"] },
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("userId", "-password");
+    console.log("====================================");
+    console.log(hazardReport);
+    console.log("====================================");
+    if (hazardReport) {
+      /*      return res.status(200).json(hazardReport); */
+      /* if (hazardReport.status === "unverified") { */
+      /* return res.status(200).json({
+          success: false,
+          message: "we are still verifying the report",
+        }); */
+      /* } else { */
+      return res.status(200).json(hazardReport);
+      return res.status(200).json({
+        /* success: true,
+        message: "found", 
+        hazardReport,*/
+        ...hazardReport,
+      });
+      /*  } */
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
+  }
+});
+
 hazardReportController.get("/:id", async (req, res) => {
   try {
     const hazardReport = await HazardReport.findOne({
@@ -223,8 +267,8 @@ hazardReportController.get("/:id", async (req, res) => {
     if (hazardReport) {
       /*      return res.status(200).json(hazardReport); */
       return res.status(200).json({
-        success: true,
-        message: "found",
+        /*  success: true,
+        message: "found", */
         ...hazardReport._doc,
       });
     } else {
@@ -240,6 +284,163 @@ hazardReportController.get("/:id", async (req, res) => {
     });
   }
 });
+
+hazardReportController.put(
+  "/update/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
+  multerMiddleware.single("proof"),
+  isInMalolos,
+  async (req, res) => {
+    let resource_type = "image";
+    let old_resource_type = "image";
+    const error = {};
+    try {
+      const {
+        description,
+        category,
+        latitude,
+        longitude,
+        street,
+        municipality,
+        hasChanged,
+      } = req.body;
+
+      if (isEmpty(category)) error["category"] = "Required field";
+      if (isEmpty(description)) error["description"] = "Required field";
+      if (isEmpty(latitude)) error["latitude"] = "Mark a location";
+      if (isEmpty(longitude)) error["longitude"] = "Mark a location";
+      console.log("=====req.file===============================");
+      console.log(req.file);
+      console.log("====================================");
+
+      if (hasChanged === "true" || hasChanged === true) {
+        console.log("changeeeeeeeeeeee");
+        if (!req.file) {
+          error["proof"] = "Required field";
+        } else {
+          if (
+            !isVideo(req.file.originalname) &&
+            !isImage(req.file.originalname)
+          ) {
+            error["proof"] = "Only PNG, JPEG, JPG, and MP4 files are allowed";
+          } else {
+            console.log("1else11111");
+            if (!isImage(req.file.originalname)) {
+              if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+                error["proof"] = "File size should be less than 10MB";
+              }
+              console.log("111111");
+            }
+            if (!isVideo(req.file.originalname)) {
+              console.log("222222");
+              resource_type = "video";
+              if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
+                error["proof"] = "File size should be less than 50MB";
+              }
+            }
+          }
+        }
+      } else {
+        console.log("not change");
+      }
+      console.log("=======hasChanged==================");
+      console.log(hasChanged);
+      console.log("====================================");
+      if (Object.keys(error).length === 0) {
+        const updateFields = {
+          description,
+          category,
+          latitude,
+          longitude,
+          street,
+          municipality,
+        };
+
+        console.log("====================================");
+        /*  console.log(req.file.originalname); */
+        console.log(resource_type);
+        console.log("====================================");
+        if (hasChanged && req.file) {
+          const hazardReport = await HazardReport.findById(req.params.id);
+
+          if (hazardReport.proof.includes(".mp4")) {
+            old_resource_type = "video";
+          }
+          await cloudinaryUploader(
+            "destroy",
+            "",
+            old_resource_type,
+            folderPath,
+            hazardReport.proof
+          );
+
+          const cloud = await cloudinaryUploader(
+            "upload",
+            req.file.path,
+            resource_type,
+            folderPath,
+            req.file.filename
+          );
+          updateFields.proof = `${cloud.original_filename}.${cloud.format}`;
+
+          if (cloud !== "error") {
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
+        }
+
+        const hazardReport = await HazardReport.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+          { new: true }
+        );
+        if (hazardReport) {
+          await createPusher("assistance-request-web", "reload", {});
+          const userIds = await getUsersId("dispatcher");
+          createNotification(
+            userIds,
+            req.user.id,
+            " assistance request updated",
+            `${category} on ${street} ${municipality}`,
+            "info"
+          );
+
+          return res.status(200).json({
+            success: true,
+            message: "Updated Successfully",
+            hazardReport,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 hazardReportController.put(
   "/update/:action/:id",

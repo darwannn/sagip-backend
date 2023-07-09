@@ -269,7 +269,7 @@ emergencyFacilityController.put(
             emergencyFacilityImage.image
           );
 
-          updateFields.image = req.file.filename;
+          /* updateFields.image = req.file.filename; */
           const cloud = await cloudinaryUploader(
             "upload",
             req.file.path,
@@ -277,7 +277,7 @@ emergencyFacilityController.put(
             folderPath,
             req.file.filename
           );
-
+          updateFields.image = `${cloud.original_filename}.${cloud.format}`;
           if (cloud !== "error") {
           } else {
             return res.status(500).json({

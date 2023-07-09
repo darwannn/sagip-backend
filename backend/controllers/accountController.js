@@ -609,7 +609,6 @@ accountController.put(
               userImage.profilePicture
             );
           }
-          updateFields.profilePicture = req.file.filename;
 
           const cloud = await cloudinaryUploader(
             "upload",
@@ -618,6 +617,7 @@ accountController.put(
             folderPath,
             req.file.filename
           );
+          updateFields.profilePicture = `${cloud.original_filename}.${cloud.format}`;
           if (cloud !== "error") {
             /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
                 cloud.format

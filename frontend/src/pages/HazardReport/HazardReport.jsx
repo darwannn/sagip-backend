@@ -87,6 +87,11 @@ const HazardReport = ({ type = "add" }) => {
   const [category, setCategory] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [requestId, setRequestId] = useState("");
+  const [municipality, setMunicipality] = useState("");
+  const [sreet, setStreet] = useState("");
+  const [proofpic, setProofpic] = useState("");
 
   const [proof, setProof] = useState(null);
   const [proofName, setProofName] = useState("");
@@ -95,60 +100,94 @@ const HazardReport = ({ type = "add" }) => {
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
-    if (type === "update") {
-      const fetchSafetyTipDetails = async () => {
-        try {
-          const data = await request(`/hazard-report/${id}`, "GET", {
-            Authorization: `Bearer ${token}`,
-          });
+    const fetchSafetyTipDetails = async () => {
+      try {
+        const data = await request(`/hazard-report/myreport`, "GET", {
+          Authorization: `Bearer ${token}`,
+        });
+        /*  const { success, message } = data;
 
+        if (success) { */
+
+        console.log("====================================");
+        console.log(data);
+        console.log("====================================");
+
+        if (data.success === false) {
+          setIsVerifying(false);
+        } else {
+          setIsVerifying(true);
+          setLatitude(data.latitude);
+          setLongitude(data.longitude);
           setTitle(data.title);
+          setRequestId(data._id);
+          setMunicipality(data.municipality);
+          setStreet(data.street);
           setDescription(data.description);
           setCategory(data.category);
-          setProofUrl(
-            `https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/safety-tips/${data.proof}`
-          );
-          console.log(data.category);
-          console.log(category);
-        } catch (error) {
-          console.error(error);
+
+          if (data.proof.includes(".jpg")) {
+            setProofpic(
+              `https://res.cloudinary.com/dantwvqrv/image/upload/v1687689617/sagip/media/hazard-report/${data.proof}`
+            );
+          } else {
+            setProofpic(
+              `https://res.cloudinary.com/dantwvqrv/video/upload/v1687689617/sagip/media/hazard-report/${data.proof}`
+            );
+          }
+          console.log("data.category");
+          console.log(data);
+          /* } else {
+            if (message === "verifying") {
+              setIsVerifying(true);
+            }
+          } */
         }
-      };
-      fetchSafetyTipDetails();
-    }
+        setMarkerLatLng({ lat: data.latitude, lng: data.longitude });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchSafetyTipDetails();
   }, [type, setTitle, setDescription, setCategory, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const formData = new FormData();
-      if (longitude && latitude) {
-        const locationName = await new Promise((resolve, reject) => {
-          reverseGeoCoding(latitude, longitude).then(resolve).catch(reject);
-        });
-        const { street, municipality } = locationName;
-        formData.append("street", street);
-        formData.append("municipality", municipality);
-      }
-      /*    if (municipality === "Malolos") { */
+      const locationName = await new Promise((resolve, reject) => {
+        reverseGeoCoding(latitude, longitude).then(resolve).catch(reject);
+      });
 
+      const { street, municipality } = locationName;
+      /*    if (municipality === "Malolos") { */
+      const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
       formData.append("latitude", latitude);
       formData.append("longitude", longitude);
       formData.append("category", category);
-      formData.append("hasChanged", hasChanged);
+      //formData.append("hasChanged", hasChanged);
       formData.append("proof", proof);
+      formData.append("street", street);
+      formData.append("municipality", municipality);
+
+      console.log(street);
+      console.log(municipality);
 
       let url, method;
-      if (type === "add") {
+      if (isVerifying === false) {
         url = "/hazard-report/add";
         method = "POST";
-      } else if (type === "update") {
-        url = `/hazard-report/update/${id}`;
+      } else if (isVerifying === true) {
+        formData.append("hasChanged", hasChanged);
+        url = `/hazard-report/update/${requestId}`;
         method = "PUT";
       }
-
+      console.log("=====hasChanged===============================");
+      console.log(hasChanged);
+      console.log(url);
+      console.log("======isVerifying==============================");
+      console.log(isVerifying);
       const data = await request(
         url,
         method,
@@ -247,6 +286,8 @@ const HazardReport = ({ type = "add" }) => {
   return (
     <>
       <Navbar />
+
+      <div>{isVerifying}</div>
       <div>
         <div
           style={{
@@ -416,6 +457,16 @@ const HazardReport = ({ type = "add" }) => {
               )}
               {proofUrl && proofUrl.includes("data:video") && (
                 <video src={proofUrl} controls />
+              )}
+              {proofpic && (
+                <div>
+                  <h2></h2>
+                  {proofpic.includes(".jpg") ? (
+                    <img src={proofpic} />
+                  ) : (
+                    <video src={proofpic} controls />
+                  )}
+                </div>
               )}
             </div>
           </form>

@@ -270,7 +270,7 @@ safetyTipController.put(
             safetyTipImage.image
           );
 
-          updateFields.image = req.file.filename;
+          /*  updateFields.image = req.file.filename; */
           const cloud = await cloudinaryUploader(
             "upload",
             req.file.path,
@@ -278,6 +278,7 @@ safetyTipController.put(
             folderPath,
             req.file.filename
           );
+          updateFields.image = `${cloud.original_filename}.${cloud.format}`;
 
           if (cloud !== "error") {
           } else {
