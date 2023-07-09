@@ -43,8 +43,10 @@ assistanceRequestController.post(
         longitude,
         street,
         municipality,
+        answers,
       } = req.body;
 
+      if (isEmpty(answers)) error["answers"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -93,6 +95,7 @@ assistanceRequestController.post(
             longitude,
             street,
             municipality,
+            answers: answers.split(","),
             proof: `${cloud.original_filename}.${cloud.format}`,
             userId: req.user.id,
           });
@@ -146,6 +149,7 @@ assistanceRequestController.get("/", async (req, res) => {
       "userId",
       "-password"
     ); */
+
     const assistanceRequests = await AssistanceRequest.find({
       archivedDate: { $exists: false },
       isArchived: false,
@@ -343,8 +347,9 @@ assistanceRequestController.put(
         street,
         municipality,
         hasChanged,
+        answers,
       } = req.body;
-
+      if (isEmpty(answers)) error["answers"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -394,6 +399,7 @@ assistanceRequestController.put(
           longitude,
           street,
           municipality,
+          answers: answers.split(","),
         };
 
         console.log("====================================");

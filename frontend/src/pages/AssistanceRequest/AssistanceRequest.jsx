@@ -104,6 +104,7 @@ const HazardReport = ({ type = "add" }) => {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [street, setStreet] = useState("");
+  const [answer, setAnswer] = useState([]);
   const [municipality, setMunicipality] = useState("");
 
   const [proofName, setProofName] = useState("");
@@ -173,6 +174,8 @@ const HazardReport = ({ type = "add" }) => {
         reverseGeoCoding(latitude, longitude).then(resolve).catch(reject);
       });
 
+      /*       setAnswer(["1", "2"]); */
+
       const { street, municipality } = locationName;
       /*    if (municipality === "Malolos") { */
       const formData = new FormData();
@@ -185,6 +188,7 @@ const HazardReport = ({ type = "add" }) => {
       formData.append("proof", proof);
       formData.append("street", street);
       formData.append("municipality", municipality);
+      formData.append("answers", ["1", "2"]);
 
       console.log(street);
       console.log(municipality);

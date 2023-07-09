@@ -41,6 +41,24 @@ const AssistanceRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    /*  situation: {
+      question: {
+        type: String,
+        required: true,
+      },
+      answers: {
+        answers: {
+          type: String,
+          required: true,
+        },
+      },
+    }, */
+    answers: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
     status: {
       type: String,
       default: "unverified",
