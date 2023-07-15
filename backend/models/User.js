@@ -73,11 +73,15 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "resident",
     },
-    isOnline: {
+    /*   isOnline: {
       type: Boolean,
       default: false,
-    },
+    }, */
 
+    emailStatus: {
+      type: String,
+      default: "unverified",
+    },
     isBanned: {
       type: Boolean,
       default: false,

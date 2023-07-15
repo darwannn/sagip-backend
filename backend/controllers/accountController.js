@@ -30,7 +30,7 @@ const folderPath = "sagip/media/user";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 
-const { createPusher, sendSMS } = require("./apiController");
+const { createPusher, sendSMS, sendEmail } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
@@ -412,7 +412,20 @@ accountController.put(
         }
         if (Object.keys(error).length == 0) {
           const user = await updateVerificationCode(req.user.id);
-
+          if (action === "contact-number") {
+            /*     sendSMS(`Your SAGIP verification code is ${generatedCode}`,contactNumber) */
+          }
+          console.log("====================================");
+          console.log(user._doc.email);
+          console.log(user.verificationCode);
+          console.log("====================================");
+          if (action === "email") {
+            sendEmail(
+              email,
+              "SAGIP verification code",
+              `Your SAGIP verification code is ${user.verificationCode}`
+            );
+          }
           if (user) {
             //console.log("Current COde: " + generatedCode);
             if (action === "contact-number") {

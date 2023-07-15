@@ -4,6 +4,7 @@ const { DateTime } = require("luxon");
 const User = require("../models/User");
 const Pusher = require("pusher");
 const municipality = "Malolos";
+const nodemailer = require("nodemailer");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const {
   createNotification,
@@ -123,10 +124,15 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
-  createPushNotificationToken("title", "body", [
+  /*   createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
-  createPushNotificationTopic("Topic", "body", "sagip");
+  createPushNotificationTopic("Topic", "body", "sagip"); */
+  /*   sendEmail(
+    "darwinsanluis.ramos14@gmail.com",
+    "SAGIP verification code",
+    `Your SAGIP verification code is`
+  ); */
   console.log("====================================");
   console.log("localhost");
   console.log("====================================");
@@ -381,10 +387,34 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
     return "Internal Server Error: " + error;
   }
 };
+async function sendEmail(to, subject, html) {
+  try {
+    let transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "snackwise.hagonoy@gmail.com",
+        pass: "gesjppxbvxkswodb",
+      },
+    });
 
+    let info = await transporter.sendMail({
+      from: "sagip.cityofmalolos.drrmo@gmail.com",
+      to,
+      subject,
+      html,
+    });
+
+    console.log(info.messageId);
+  } catch (error) {
+    console.log(error);
+  }
+}
 module.exports = {
   sendSMS,
   sendBulkSMS,
   createPusher,
+  sendEmail,
   apiController,
 };

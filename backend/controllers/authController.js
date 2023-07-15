@@ -3,7 +3,7 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
 const moment = require("moment");
-
+const nodemailer = require("nodemailer");
 const {
   isEmpty,
   isEmailExists,
@@ -34,7 +34,7 @@ const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/verification-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher, sendSMS } = require("./apiController");
+const { createPusher, sendSMS, sendEmail } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
@@ -367,14 +367,14 @@ authController.put(
                   console.log("====================================");
                   console.log(email);
                   console.log("====================================");
-                  const userContactNumber = await User.findByIdAndUpdate(
+                  const userEmail = await User.findByIdAndUpdate(
                     req.user.id,
-                    { email },
+                    { email, emailStatus: "verified" },
                     {
                       new: true,
                     }
                   );
-                  if (userContactNumber) {
+                  if (userEmail) {
                     createNotification(
                       [req.user.id],
                       req.user.id,
@@ -760,8 +760,13 @@ authController.post("/forgot-password", async (req, res) => {
 
       if (user) {
         if (identifierType === "email") {
-          /*     sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
+          sendEmail(
+            user._doc.email,
+            "SAGIP verification code",
+            `Your SAGIP verification code is ${generatedCode}`
+          );
         } else if (identifierType === "contactNumber") {
+          /*     sendSMS(`Your SAGIP verification code is ${generatedCode}`,user.contactNumber) */
         }
         if (user.isBanned) {
           return res.status(500).json({
@@ -920,7 +925,7 @@ authController.put(
 
 //general resend
 authController.put(
-  "/resend-code",
+  "/resend-code/",
   tokenMiddleware,
   /* userTypeMiddleware([
   "resident",
