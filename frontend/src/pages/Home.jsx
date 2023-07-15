@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { request } from "../utils/axios";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getServerResponse } from "../redux/serverResponseSlice";
 import { useSelector, useDispatch } from "react-redux";
@@ -12,6 +12,7 @@ import warningSound from "../assets/warning.mp3";
 import image from "../assets/hospital_icon.png";
 
 function Home() {
+  const location = useLocation();
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
   const { serverResponse } = useSelector((state) => state.serverResponse);
@@ -93,36 +94,38 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    /* const pusher = new Pusher(process.env.REACT_APP_KEY, {
-      cluster: process.env.REACT_APP_CLUSTER,
-    });
+    // const pusher = new Pusher(process.env.REACT_APP_KEY, {
+    //   cluster: process.env.REACT_APP_CLUSTER,
+    // });
 
-    const channel = pusher.subscribe("notification");
-    channel.bind("64788dfd295e2f184e55d20f", (data) => {
-      console.log("Received event:", data);
-      if (data.to === user.id) {
-        alert("I received a notification");
+    // const channel = pusher.subscribe("64788dfd295e2f184e55d20f");
+    // channel.bind("notification", (data) => {
+    //   console.log("Received event:", data);
 
-      }
-      if (data.purpose === "reload") {
-        alert("Reload useEffect");
-      }
-    });
+    //   toast.success("I received a notification" + location.pathname);
 
-    return () => {
-      pusher.unsubscribe("sagipChannel");
-    }; */
+    //   // if (data.purpose === "reload") {
+    //   //   alert("Reload useEffect");
+    //   // }
+    // });
+
+    // return () => {
+    //   pusher.unsubscribe("sagipChannel");
+    // };
+
     receivePusher("64788dfd295e2f184e55d20f", "notification", (data) => {
-      /*  console.log("Received data:", data); */
-
+      // console.log("Received data:", data);
+      //if (location.pathname === "/register") {
       if (data.content) {
         console.log(data.content);
-        toast.success("I received a notification");
+        toast.success("I received a notification" + location.pathname);
       }
       if (data.purpose === "reload") {
         alert("Reload useEffect");
       }
+      //  }
     });
+
     receivePusher("emergency-facility", "reload", (data) => {
       toast.success("emergency-facility reload");
     });
@@ -268,6 +271,7 @@ function Home() {
       <br />
       <div>PUSHER API TESTT</div>
       <div>
+        <Link to={`/map`}>register</Link>
         <h1>Pusher Test</h1>
         <button onClick={triggerPusher}>Trigger Event</button>
       </div>

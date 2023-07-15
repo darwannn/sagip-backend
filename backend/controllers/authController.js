@@ -9,6 +9,7 @@ const {
   isEmailExists,
   isContactNumberExists,
   checkIdentifier,
+  checkIdentifierType,
   isEmail,
   isContactNumber,
   isNumber,
@@ -236,7 +237,8 @@ authController.put(
         action === "register" ||
         action === "forgot-password" ||
         action === "login" ||
-        action === "contact"
+        action === "contact" ||
+        action === "email"
       ) {
         if (isEmpty(code)) {
           error["code"] = "Required field";
@@ -352,6 +354,37 @@ authController.put(
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
+                    });
+                  } else {
+                    return res.status(500).json({
+                      success: false,
+                      message: "Internal Server Error",
+                    });
+                  }
+                }
+                if (action === "email") {
+                  let { email } = req.body;
+                  console.log("====================================");
+                  console.log(email);
+                  console.log("====================================");
+                  const userContactNumber = await User.findByIdAndUpdate(
+                    req.user.id,
+                    { email },
+                    {
+                      new: true,
+                    }
+                  );
+                  if (userContactNumber) {
+                    createNotification(
+                      [req.user.id],
+                      req.user.id,
+                      "Email Updated",
+                      "Your email has been updated",
+                      "info"
+                    );
+                    return res.status(200).json({
+                      success: true,
+                      message: "Email Updated Successfully",
                     });
                   } else {
                     return res.status(500).json({
@@ -699,6 +732,7 @@ authController.post("/login", async (req, res) => {
 
 authController.post("/forgot-password", async (req, res) => {
   let accountExists;
+
   try {
     const error = {};
     const identifier = req.body.identifier;
@@ -712,7 +746,10 @@ authController.post("/forgot-password", async (req, res) => {
       }
     }
 
+    console.log(accountExists);
+
     if (Object.keys(error).length == 0) {
+      let identifierType = await checkIdentifierType(identifier);
       let generatedCode = await generateCode();
       console.log(accountExists.id);
 
@@ -722,7 +759,10 @@ authController.post("/forgot-password", async (req, res) => {
       });
 
       if (user) {
-        /*     sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
+        if (identifierType === "email") {
+          /*     sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
+        } else if (identifierType === "contactNumber") {
+        }
         if (user.isBanned) {
           return res.status(500).json({
             success: false,
@@ -732,17 +772,32 @@ authController.post("/forgot-password", async (req, res) => {
         } else {
           /* if (!user.archivedDate) { */
           //console.log("Current COde: " + generatedCode);
-          return res.status(200).json({
-            success: true,
-            message: `Verification code has been sent to ${user._doc.contactNumber}`,
-            user: {
-              for: "forgot-password",
-              id: user._doc._id,
-              userType: user._doc.userType,
-              status: user._doc.status,
-            },
-            token: generateToken(user._id),
-          });
+
+          if (identifierType === "email") {
+            return res.status(200).json({
+              success: true,
+              message: `Verification code has been sent to ${user._doc.email}`,
+              user: {
+                for: "forgot-password",
+                id: user._doc._id,
+                userType: user._doc.userType,
+                status: user._doc.status,
+              },
+              token: generateToken(user._id),
+            });
+          } else if (identifierType === "contactNumber") {
+            return res.status(200).json({
+              success: true,
+              message: `Verification code has been sent to ${user._doc.contactNumber}`,
+              user: {
+                for: "forgot-password",
+                id: user._doc._id,
+                userType: user._doc.userType,
+                status: user._doc.status,
+              },
+              token: generateToken(user._id),
+            });
+          }
           /* } else {
             const data = calculateArchivedDate();
             if (data) {

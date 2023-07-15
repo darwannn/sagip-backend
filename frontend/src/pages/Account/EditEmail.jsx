@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
-import { newContactNumber } from "../../redux/authSlice";
+import { newEmail } from "../../redux/authSlice";
 
 import { request } from "../../utils/axios";
 
@@ -14,12 +14,12 @@ import "react-quill/dist/quill.snow.css";
 
 import Navbar from "../../components/Navbar";
 
-const EditContactNumber = () => {
+const EditEmail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
 
-  const [contactNumber, setContactNumber] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     console.log(user);
@@ -31,7 +31,7 @@ const EditContactNumber = () => {
         });
         console.log(data);
 
-        setContactNumber(data.contactNumber);
+        setEmail(data.email);
       } catch (error) {
         console.error(error);
       }
@@ -43,16 +43,16 @@ const EditContactNumber = () => {
     e.preventDefault();
 
     try {
-      dispatch(newContactNumber(contactNumber));
+      dispatch(newEmail(email));
       //account/update/${action}/contact-verification
       const data = await request(
-        `/account/update/contact-number/send-code`,
+        `/account/update/email/send-code`,
         "PUT",
         {
           Authorization: `Bearer ${token}`,
         },
         {
-          contactNumber,
+          email,
         }
       );
       const { success, message } = data;
@@ -60,7 +60,7 @@ const EditContactNumber = () => {
 
       if (success) {
         toast.success(message);
-        navigate("/profile/contact-number/contact-verification");
+        navigate("/profile/email/contact-verification");
         return;
       } else {
         toast.error(message);
@@ -75,13 +75,13 @@ const EditContactNumber = () => {
       <Navbar />
       <div>
         <div>
-          <h2>Update Contact Number</h2>
+          <h2>Update Email</h2>
           <form onSubmit={handleSubmit}>
             <input
               type="text"
               placeholder="Contact Number..."
-              value={contactNumber}
-              onChange={(e) => setContactNumber(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
 
             <div>
@@ -94,4 +94,4 @@ const EditContactNumber = () => {
   );
 };
 
-export default EditContactNumber;
+export default EditEmail;

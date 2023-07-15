@@ -131,7 +131,7 @@ const createPushNotificationToken = (title, body, tokens) => {
     tokens: tokens,
   };
 
-  firebase
+  /* firebase
     .messaging()
     .sendMulticast(message)
     .then((response) => {
@@ -144,16 +144,11 @@ const createPushNotificationToken = (title, body, tokens) => {
         });
         console.log("List of tokens that caused failures: " + failedTokens);
       }
-      /* else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      } */
+     
     })
     .catch((error) => {
       return "Internal Server Error: " + error;
-    });
+    }); */
 };
 
 const createPushNotificationTopic = (title, body, topic) => {
@@ -165,7 +160,7 @@ const createPushNotificationTopic = (title, body, topic) => {
     topic: topic,
   };
 
-  firebase
+  /*   firebase
     .messaging()
     .send(message)
     .then((response) => {
@@ -173,7 +168,7 @@ const createPushNotificationTopic = (title, body, topic) => {
     })
     .catch((error) => {
       console.log("Failed to send notification:", error);
-    });
+    }); */
 };
 
 module.exports = {

@@ -4,6 +4,7 @@ const initialState = {
   user: null,
   token: null,
   newContactNumber: null,
+  newEmail: null,
 };
 
 export const authSlice = createSlice({
@@ -48,6 +49,9 @@ export const authSlice = createSlice({
     newContactNumber(state, action) {
       state.newContactNumber = action.payload;
     },
+    newEmail(state, action) {
+      state.newEmail = action.payload;
+    },
   },
 });
 
@@ -59,6 +63,7 @@ export const {
   forgotPassword,
   newPassword,
   newContactNumber,
+  newEmail,
 } = authSlice.actions;
 
 export default authSlice.reducer;

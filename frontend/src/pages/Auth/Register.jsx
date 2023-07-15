@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
-
+import Pusher from "pusher-js";
 import { register } from "../../redux/authSlice";
 import { useDispatch } from "react-redux";
 
@@ -31,6 +31,12 @@ const Register = () => {
 
   const [isResident, setIsResident] = useState(false);
 
+  useEffect(() => {
+    const pusher = new Pusher(process.env.REACT_APP_KEY, {
+      cluster: process.env.REACT_APP_CLUSTER,
+    });
+    pusher.unsubscribeAll();
+  });
   const handleRegister = async (e) => {
     e.preventDefault();
 

@@ -47,6 +47,7 @@ import AccountInput from "./pages/Account/AccountInput";
 import VerifyIdentity from "./pages/Account/VerifyIdentity";
 import EditPersonalInformation from "./pages/Account/EditPersonalInformation";
 import EditContactNumber from "./pages/Account/EditContactNumber";
+import EditEmail from "./pages/Account/EditEmail";
 import PasswordVerification from "./pages/Auth/PasswordVerification";
 
 import ManageTeam from "./pages/Team/ManageTeam";
@@ -212,9 +213,14 @@ const App = () => {
           path="/profile/contact-number/edit"
           element={<EditContactNumber />}
         />
+        <Route path="/profile/email/edit" element={<EditEmail />} />
         <Route
           path="/profile/contact-number/contact-verification"
           element={<ContactVerification type="contact" />}
+        />
+        <Route
+          path="/profile/email/contact-verification"
+          element={<ContactVerification type="email" />}
         />
         <Route
           path="/profile/password-verification"

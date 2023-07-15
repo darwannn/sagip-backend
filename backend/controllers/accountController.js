@@ -366,40 +366,67 @@ accountController.put(
   async (req, res) => {
     try {
       const error = {};
-
+      console.log("====================================");
       let action = req.params.action.toLowerCase();
-      if (action === "contact-number") {
-        console.log("====================================");
-        console.log(action);
-        console.log("====================================");
-        let { contactNumber } = req.body;
+      console.log(action);
+      let contactNumber;
+      let email;
+      if (action === "contact-number" || action === "email") {
+        if (action === "contact-number") {
+          contactNumber = req.body.contactNumber;
 
-        if (isEmpty(contactNumber)) {
-          error["contact"] = "Required field";
-        } else {
-          if (isContactNumber(contactNumber)) {
-            error["contact"] = "Invalid contact number";
+          if (isEmpty(contactNumber)) {
+            error["contact"] = "Required field";
           } else {
-            if (await isContactNumberExists(contactNumber)) {
-              if (await isContactNumberOwner(req.user.id, contactNumber)) {
-                error["contact"] = "Input a new contact numebr";
-              } else {
-                error["contact"] = "Contact number already taken";
+            if (isContactNumber(contactNumber)) {
+              error["contact"] = "Invalid contact number";
+            } else {
+              if (await isContactNumberExists(contactNumber)) {
+                if (await isContactNumberOwner(req.user.id, contactNumber)) {
+                  error["contact"] = "Input a new contact numebr";
+                } else {
+                  error["contact"] = "Contact number already taken";
+                }
               }
             }
           }
         }
+        if (action === "email") {
+          email = req.body.email;
 
+          if (isEmpty(email)) {
+            error["email"] = "Required field";
+          } else {
+            if (isEmail(email)) {
+              error["email"] = "Invalid email address";
+            } else {
+              if (await isEmailExists(email)) {
+                if (await isEmailOwner(req.user.id, email)) {
+                  error["email"] = "input a new email address";
+                } else {
+                  error["email"] = "Email address already taken";
+                }
+              }
+            }
+          }
+        }
         if (Object.keys(error).length == 0) {
           const user = await updateVerificationCode(req.user.id);
 
           if (user) {
             //console.log("Current COde: " + generatedCode);
-
-            return res.status(200).json({
-              success: true,
-              message: "Verification code has been resent",
-            });
+            if (action === "contact-number") {
+              return res.status(200).json({
+                success: true,
+                message: `Verification code has been sent to ${contactNumber}`,
+              });
+            }
+            if (action === "email") {
+              return res.status(200).json({
+                success: true,
+                message: `Verification code has been sent to ${email}`,
+              });
+            }
           } else {
             return res.status(500).json({
               success: false,
@@ -498,7 +525,7 @@ accountController.put(
         firstname,
         middlename,
         lastname,
-        email,
+        //email,
         region,
         province,
         municipality,
@@ -521,21 +548,21 @@ accountController.put(
       // }
       // if (isEmpty(status)) error["status"] = "Required field";
       if (isEmpty(userType)) error["userType"] = "Required field";
-      if (isEmpty(email)) {
-        error["email"] = "Required field";
-      } else {
-        if (isEmail(email)) {
-          error["email"] = "Invalid email address";
-        } else {
-          if (await isEmailExists(email)) {
-            if (await isEmailOwner(id, email)) {
-              /*   error["email"] = "input a new email address"; */
-            } else {
-              error["email"] = "Email address already taken";
-            }
-          }
-        }
-      }
+      // if (isEmpty(email)) {
+      //   error["email"] = "Required field";
+      // } else {
+      //   if (isEmail(email)) {
+      //     error["email"] = "Invalid email address";
+      //   } else {
+      //     if (await isEmailExists(email)) {
+      //       if (await isEmailOwner(id, email)) {
+      //         /*   error["email"] = "input a new email address"; */
+      //       } else {
+      //         error["email"] = "Email address already taken";
+      //       }
+      //     }
+      //   }
+      // }
 
       if (isEmpty(firstname)) error["firstname"] = "Required field";
       if (isEmpty(lastname)) error["lastname"] = "Required field";
@@ -575,7 +602,7 @@ accountController.put(
           lastname,
           isBanned,
           isArchived,
-          email,
+          // email,
           region,
           province,
           municipality,

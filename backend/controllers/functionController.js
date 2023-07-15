@@ -88,6 +88,15 @@ const isEmail = (value) => {
   }
 };
 
+const checkIdentifierType = async (identifier) => {
+  let identierType;
+  if (identifier.includes("@")) {
+    identierType = "email";
+  } else if (/^09\d{9}$/.test(identifier)) {
+    identierType = "contactNumber";
+  }
+  return identierType;
+};
 const checkIdentifier = async (identifier) => {
   let identierType;
   if (identifier.includes("@")) {
@@ -288,4 +297,5 @@ module.exports = {
   calculateArchivedDate,
   getUsersId,
   getTeamMembersId,
+  checkIdentifierType,
 };
