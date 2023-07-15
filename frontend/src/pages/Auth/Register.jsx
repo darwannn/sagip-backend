@@ -31,12 +31,12 @@ const Register = () => {
 
   const [isResident, setIsResident] = useState(false);
 
-  useEffect(() => {
+  /* useEffect(() => {
     const pusher = new Pusher(process.env.REACT_APP_KEY, {
       cluster: process.env.REACT_APP_CLUSTER,
     });
     pusher.unsubscribeAll();
-  });
+  }); */
   const handleRegister = async (e) => {
     e.preventDefault();
 

@@ -92,8 +92,25 @@ function Home() {
 
     fetchWellnessSurveys();
   }, []);
+  /*  useEffect(() => {
+    const pusher = new Pusher(process.env.REACT_APP_KEY, {
+      cluster: process.env.REACT_APP_CLUSTER,
+    });
+    const channel = pusher.subscribe("64788dfd295e2f184e55d20f");
 
-  useEffect(() => {
+    const handleEvent = (data) => {
+      console.log(data);
+    };
+
+    channel.bind("notification", handleEvent);
+
+    return () => {
+      channel.unbind("notification", handleEvent);
+      pusher.unsubscribe("64788dfd295e2f184e55d20f");
+    };
+  }, []); */
+
+  /* useEffect(() => {
     // const pusher = new Pusher(process.env.REACT_APP_KEY, {
     //   cluster: process.env.REACT_APP_CLUSTER,
     // });
@@ -119,9 +136,6 @@ function Home() {
       if (data.content) {
         console.log(data.content);
         toast.success("I received a notification" + location.pathname);
-      }
-      if (data.purpose === "reload") {
-        alert("Reload useEffect");
       }
       //  }
     });
@@ -156,7 +170,24 @@ function Home() {
     receivePusher(user.id, "reload", (data) => {
       toast.success("user reload");
     });
-  }, []);
+  }, []); */
+
+  useEffect(() => {
+    const unsubscribe = receivePusher(
+      "64788dfd295e2f184e55d20f",
+      "notification",
+      (data) => {
+        if (data.content) {
+          console.log(data.content);
+          toast.success("I received a notification");
+        }
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  });
 
   const triggerPusher = async () => {
     /*    setPusherMessage("Pusher Test"); */
