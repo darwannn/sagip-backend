@@ -123,32 +123,36 @@ const createNotificationAll = async (linkId, title, message, type) => {
 };
 
 const createPushNotificationToken = (title, body, tokens) => {
-  const message = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    tokens: tokens,
-  };
+  if (tokens.length !== 0) {
+    const message = {
+      notification: {
+        title: title,
+        body: body,
+      },
+      tokens: tokens,
+    };
 
-  /* firebase
-    .messaging()
-    .sendMulticast(message)
-    .then((response) => {
-      if (response.failureCount > 0) {
-        const failedTokens = [];
-        response.responses.forEach((resp, idx) => {
-          if (!resp.success) {
-            failedTokens.push(tokens[idx]);
-          }
-        });
-        console.log("List of tokens that caused failures: " + failedTokens);
-      }
-     
-    })
-    .catch((error) => {
-      return "Internal Server Error: " + error;
-    }); */
+    firebase
+      .messaging()
+      .sendMulticast(message)
+      .then((response) => {
+        if (response.failureCount > 0) {
+          const failedTokens = [];
+          response.responses.forEach((resp, idx) => {
+            if (!resp.success) {
+              failedTokens.push(tokens[idx]);
+            }
+          });
+          console.log("List of tokens that caused failures: " + failedTokens);
+        }
+      })
+      .catch((error) => {
+        return "Internal Server Error: " + error;
+      });
+  }
+  console.log("====================================");
+  console.log("ahhhhhh");
+  console.log("====================================");
 };
 
 const createPushNotificationTopic = (title, body, topic) => {

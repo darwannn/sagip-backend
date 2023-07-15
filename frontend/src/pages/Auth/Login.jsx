@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import { Link, useNavigate } from "react-router-dom";
 
-import { login, register } from "../../redux/authSlice";
+import { login, register, verificationIdentifier } from "../../redux/authSlice";
 
 import { setServerResponse } from "../../redux/serverResponseSlice";
 import { useDispatch } from "react-redux";
@@ -56,10 +56,12 @@ const Login = () => {
       } else {
         if (message.toLowerCase() !== "input error") {
           if (message.includes("attempts")) {
+            dispatch(verificationIdentifier(identifier));
             navigate("/login/contact-verification");
           }
           if (message.includes("verify")) {
             dispatch(register(data));
+            dispatch(verificationIdentifier(identifier));
             navigate("/register/contact-verification");
           }
         } else {

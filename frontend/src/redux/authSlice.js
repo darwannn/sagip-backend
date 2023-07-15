@@ -5,6 +5,7 @@ const initialState = {
   token: null,
   newContactNumber: null,
   newEmail: null,
+  verificationIdentifier: null,
 };
 
 export const authSlice = createSlice({
@@ -52,6 +53,9 @@ export const authSlice = createSlice({
     newEmail(state, action) {
       state.newEmail = action.payload;
     },
+    verificationIdentifier(state, action) {
+      state.verificationIdentifier = action.payload;
+    },
   },
 });
 
@@ -64,6 +68,7 @@ export const {
   newPassword,
   newContactNumber,
   newEmail,
+  verificationIdentifier,
 } = authSlice.actions;
 
 export default authSlice.reducer;

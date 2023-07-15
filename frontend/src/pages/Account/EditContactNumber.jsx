@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
-import { newContactNumber } from "../../redux/authSlice";
+import {
+  newContactNumber,
+  verificationIdentifier,
+} from "../../redux/authSlice";
 
 import { request } from "../../utils/axios";
 
@@ -60,6 +63,7 @@ const EditContactNumber = () => {
 
       if (success) {
         toast.success(message);
+        dispatch(verificationIdentifier(contactNumber));
         navigate("/profile/contact-number/contact-verification");
         return;
       } else {

@@ -9,9 +9,8 @@ import "react-toastify/dist/ReactToastify.css";
 const ContactVerification = ({ type }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token, newContactNumber, newEmail } = useSelector(
-    (state) => state.auth
-  );
+  const { token, newContactNumber, newEmail, verificationIdentifier } =
+    useSelector((state) => state.auth);
   const [code, setCode] = useState("");
 
   const handleSubmit = async (e) => {
@@ -19,7 +18,7 @@ const ContactVerification = ({ type }) => {
 
     try {
       const data = await request(
-        `/auth/contact-verification/${type}`,
+        `/auth/verification-code/${type}`,
         "PUT",
         { Authorization: `Bearer ${token}` },
         { code, contactNumber: newContactNumber, email: newEmail }
@@ -145,10 +144,10 @@ const ContactVerification = ({ type }) => {
   const handleResend = async () => {
     try {
       const data = await request(
-        "/auth/resend-code",
+        `/auth/resend-code/`,
         "PUT",
-        { Authorization: `Bearer ${token}` } /* ,
-        { code, type } */
+        { Authorization: `Bearer ${token}` },
+        { identifier: verificationIdentifier }
       );
       console.log(data);
 

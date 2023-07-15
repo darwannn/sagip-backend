@@ -217,7 +217,7 @@ authController.post("/register", async (req, res) => {
 });
 
 authController.put(
-  "/contact-verification/:action",
+  "/verification-code/:action",
   tokenMiddleware,
   //   userTypeMiddleware([
   //   "resident",
@@ -750,23 +750,23 @@ authController.post("/forgot-password", async (req, res) => {
 
     if (Object.keys(error).length == 0) {
       let identifierType = await checkIdentifierType(identifier);
-      let generatedCode = await generateCode();
-      console.log(accountExists.id);
+      // let generatedCode = await generateCode();
+      // console.log(accountExists.id);
 
-      const user = await User.findByIdAndUpdate(accountExists.id, {
-        verificationCode: generatedCode,
-        codeExpiration: codeExpiration,
-      });
-
+      // const user = await User.findByIdAndUpdate(accountExists.id, {
+      //   verificationCode: generatedCode,
+      //   codeExpiration: codeExpiration,
+      // });
+      const user = await updateVerificationCode(accountExists.id);
       if (user) {
         if (identifierType === "email") {
           sendEmail(
-            user._doc.email,
+            user.email,
             "SAGIP verification code",
-            `Your SAGIP verification code is ${generatedCode}`
+            `Your SAGIP verification code is ${user.verificationCode}`
           );
         } else if (identifierType === "contactNumber") {
-          /*     sendSMS(`Your SAGIP verification code is ${generatedCode}`,user.contactNumber) */
+          /*     sendSMS(`Your SAGIP verification code is ${user.verificationCode}`,user.contactNumber) */
         }
         if (user.isBanned) {
           return res.status(500).json({
@@ -935,21 +935,54 @@ authController.put(
   "super-admin",
 ]), */ async (req, res) => {
     try {
-      console.log("====================================");
-      console.log("resend");
-      console.log("====================================");
+      // let action = req.params.action.toLowerCase();
+      // if (
+      //   action === "register" ||
+      //   action === "forgot-password" ||
+      //   action === "login" ||
+      //   action === "contact" ||
+      //   action === "email"
+      // ) {
+      const identifier = req.body.identifier;
+
+      // if (action === "register") {
+      // }
+      // if (action === "forgot-password") {
+      // }
+
+      // if (action === "login") {
+      // }
+
+      // if (action === "contact") {
+      // }
+      // if (action === "email") {
+      // }
+
       const user = await updateVerificationCode(req.user.id);
 
       if (user) {
         console.log("Current COde: " + user.verificationCode);
-        sendSMS(
-          `Your SAGIP verification code is ${user.verificationCode}`,
-          user.contactNumber
-        );
+        let identifierType = await checkIdentifierType(identifier);
 
+        if (identifierType === "email") {
+          sendEmail(
+            identifier,
+            "SAGIP verification code",
+            `Your SAGIP verification code is ${user.verificationCode}`
+          );
+        } else if (identifierType === "contactNumber") {
+          sendSMS(
+            `Your SAGIP verification code is ${user.verificationCode}`,
+            identifier
+          );
+          /*  return res.status(200).json({
+            success: true,
+            message: `Verification code has been resent to ${identifier}`,
+          }); */
+        }
         return res.status(200).json({
           success: true,
-          message: "Verification code has been resent",
+          message: `Verification code has been resent to ${identifier}`,
         });
       } else {
         return res.status(500).json({
@@ -957,6 +990,12 @@ authController.put(
           message: "Internal Server Error",
         });
       }
+      // } else {
+      //   return res.status(500).json({
+      //     success: false,
+      //     message: "Error 404: Not Found",
+      //   });
+      // }
     } catch (error) {
       // If an exception occurs, respond with an internal server error
       return res.status(500).json({

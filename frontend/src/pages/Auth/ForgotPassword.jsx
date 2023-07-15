@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { forgotPassword } from "../../redux/authSlice";
+import { forgotPassword, verificationIdentifier } from "../../redux/authSlice";
 import { useDispatch } from "react-redux";
 
 import { toast } from "react-toastify";
@@ -34,6 +34,7 @@ const ForgotPassword = () => {
       const { success, message } = data;
       if (success) {
         dispatch(forgotPassword(data));
+        dispatch(verificationIdentifier(identifier));
         toast.success(message);
         navigate("/forgot-password/contact-verification");
       } else {

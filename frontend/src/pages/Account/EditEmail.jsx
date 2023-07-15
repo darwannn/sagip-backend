@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
-import { newEmail } from "../../redux/authSlice";
+import { newEmail, verificationIdentifier } from "../../redux/authSlice";
 
 import { request } from "../../utils/axios";
 
@@ -60,6 +60,7 @@ const EditEmail = () => {
 
       if (success) {
         toast.success(message);
+        dispatch(verificationIdentifier(email));
         navigate("/profile/email/contact-verification");
         return;
       } else {
