@@ -156,23 +156,25 @@ const createPushNotificationToken = (title, body, tokens) => {
 };
 
 const createPushNotificationTopic = (title, body, topic) => {
-  const message = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    topic: topic,
-  };
+  if (tokens.length !== 0) {
+    const message = {
+      notification: {
+        title: title,
+        body: body,
+      },
+      topic: topic,
+    };
 
-  /*   firebase
-    .messaging()
-    .send(message)
-    .then((response) => {
-      console.log("Notification sent successfully:", response);
-    })
-    .catch((error) => {
-      console.log("Failed to send notification:", error);
-    }); */
+    firebase
+      .messaging()
+      .send(message)
+      .then((response) => {
+        console.log("Notification sent successfully:", response);
+      })
+      .catch((error) => {
+        console.log("Failed to send notification:", error);
+      });
+  }
 };
 
 module.exports = {
