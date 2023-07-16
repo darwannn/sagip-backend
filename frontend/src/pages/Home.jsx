@@ -22,6 +22,7 @@ function Home() {
   const [wellnessSurveys, setWellnessSurveys] = useState();
   const [isAnswered, setIsAnswered] = useState(false);
   const [intervalId, setIntervalId] = useState(null); // Added intervalId state
+  const [isSOSPlaying, setIsSOSPlaying] = useState(false); // Added intervalId state
 
   useEffect(() => {
     if ("Notification" in window) {
@@ -238,24 +239,30 @@ function Home() {
 
   let audioRef;
   const playSound = async () => {
-    if (window.AndroidInterface) {
-      window.AndroidInterface.playSOS();
-    } else {
+    if (!isSOSPlaying) {
+      if (window.AndroidInterface) {
+        window.AndroidInterface.playSOS();
+      } else {
+        audioRef = new Audio(warningSound);
+        audioRef.loop = true;
+        audioRef.play();
+      }
+      setIsSOSPlaying(true);
     }
-    /*  audioRef = new Audio(warningSound);
-    audioRef.loop = true;
-    audioRef.play(); */
   };
 
   const stopSound = () => {
-    if (window.AndroidInterface) {
-      window.AndroidInterface.stopSOS();
-    } else {
+    if (isSOSPlaying) {
+      if (window.AndroidInterface) {
+        window.AndroidInterface.stopSOS();
+      } else {
+        if (audioRef) {
+          audioRef.pause();
+          audioRef.currentTime = 0;
+        }
+      }
+      setIsSOSPlaying(false);
     }
-    /*  if (audioRef) {
-      audioRef.pause();
-      audioRef.currentTime = 0;
-    } */
   };
 
   const answerSurvey = async (surveyId, answer) => {
