@@ -84,5 +84,9 @@ export const receivePusher = (channelName, eventName, callback) => {
     pusher.unsubscribe(channelName);
   };
 
-  return unsubscribe;
+  return {
+    unsubscribe: () => {
+      unsubscribe();
+    },
+  };
 };

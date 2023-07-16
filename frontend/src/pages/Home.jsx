@@ -173,21 +173,19 @@ function Home() {
   }, []); */
 
   useEffect(() => {
-    const unsubscribe = receivePusher(
+    const pusherSubscription = receivePusher(
       "64788dfd295e2f184e55d20f",
       "notification",
       (data) => {
         if (data.content) {
           console.log(data.content);
-          toast.success("I received a notification");
+          toast.success("I received a notification" + location.pathname);
         }
       }
     );
 
-    return () => {
-      unsubscribe();
-    };
-  });
+    return pusherSubscription.unsubscribe;
+  }, []);
 
   const triggerPusher = async () => {
     /*    setPusherMessage("Pusher Test"); */
@@ -240,16 +238,24 @@ function Home() {
 
   let audioRef;
   const playSound = async () => {
-    audioRef = new Audio(warningSound);
+    if (window.AndroidInterface) {
+      window.AndroidInterface.playSOS();
+    } else {
+    }
+    /*  audioRef = new Audio(warningSound);
     audioRef.loop = true;
-    audioRef.play();
+    audioRef.play(); */
   };
 
   const stopSound = () => {
-    if (audioRef) {
+    if (window.AndroidInterface) {
+      window.AndroidInterface.stopSOS();
+    } else {
+    }
+    /*  if (audioRef) {
       audioRef.pause();
       audioRef.currentTime = 0;
-    }
+    } */
   };
 
   const answerSurvey = async (surveyId, answer) => {
