@@ -1,5 +1,6 @@
 const assistanceRequestController = require("express").Router();
 const AssistanceRequest = require("../models/AssistanceRequest");
+const Team = require("../models/Team");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const isInMalolos = require("../middlewares/isInMalolos");
 const {
@@ -225,6 +226,118 @@ assistanceRequestController.get("/ongoing", async (req, res) => {
     });
   }
 });
+
+assistanceRequestController.get(
+  "/response",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "responder",
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
+    try {
+      /* let userId = "64a6df2b64b1389a52aa020d"; */
+      /*  let userId = "64a6de4164b1389a52aa0205"; */
+
+      const team = await Team.findOne({
+        $or: [{ head: req.user.id }, { members: req.user.id }],
+      });
+      console.log("====================================");
+      console.log(team._id);
+      console.log("====================================");
+      const assistanceRequest = await AssistanceRequest.find({
+        assignedTeam: team._id,
+        archivedDate: { $exists: false },
+        isArchived: false,
+      }).populate("userId", "-password");
+      /* .populate({
+        path: "assignedTeam",
+        populate: [
+          { path: "members", select: "-password" },
+          { path: "head", select: "-password" },
+        ],
+      })
+      .populate("userId", "-password")
+      .exec(); */
+
+      if (assistanceRequest) {
+        return res.status(200).json(assistanceRequest);
+        return res.status(200).json({
+          /* success: true,
+        message: "found", 
+        assistanceRequest,*/
+          ...assistanceRequest,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+assistanceRequestController.get(
+  "/torespond",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "responder",
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
+    try {
+      /*    let userId = "64a6df2b64b1389a52aa020d"; */
+
+      const team = await Team.findOne({
+        $or: [{ head: req.user.id }, { members: req.user.id }],
+      });
+      console.log("====================================");
+      console.log(team._id);
+      console.log("====================================");
+      const assistanceRequest = await AssistanceRequest.find({
+        assignedTeam: team._id,
+        status: "ongoing",
+        archivedDate: { $exists: false },
+        isArchived: false,
+      }).populate("userId", "-password");
+      /* .populate({
+        path: "assignedTeam",
+        populate: [
+          { path: "members", select: "-password" },
+          { path: "head", select: "-password" },
+        ],
+      })
+      .populate("userId", "-password")
+      .exec();
+ */
+      if (assistanceRequest) {
+        return res.status(200).json(assistanceRequest);
+        return res.status(200).json({
+          /* success: true,
+        message: "found", 
+        assistanceRequest,*/
+          ...assistanceRequest,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
 assistanceRequestController.get(
   "/myrequest",
   tokenMiddleware,

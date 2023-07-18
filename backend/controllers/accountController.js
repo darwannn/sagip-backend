@@ -484,15 +484,15 @@ accountController.put(
 
     try {
       const error = {};
-      //default password
+
       const password = "sagip";
       console.log(password);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
+      console.log(req.params.id);
       if (Object.keys(error).length == 0) {
-        console.log(req.user.id);
-        const user = await User.findByIdAndUpdate(req.user.id, {
+        const user = await User.findByIdAndUpdate(req.params.id, {
           attempt: 0,
           password: hashedPassword,
         });
@@ -500,7 +500,7 @@ accountController.put(
         if (user) {
           return res.status(200).json({
             success: true,
-            message: "Password has been reset successfully",
+            message: "Password has been reset successfullyy",
           });
         } else {
           return res.status(500).json({
