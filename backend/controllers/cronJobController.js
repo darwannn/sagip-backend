@@ -3,7 +3,7 @@ const User = require("../models/User");
 const AssistanceRequest = require("../models/AssistanceRequest");
 const WellnessSurvey = require("../models/WellnessSurvey");
 const HazardReport = require("../models/HazardReport");
-
+const moment = require("moment");
 const { MongoClient, ObjectId } = require("mongodb");
 const { promises: fs } = require("fs");
 
@@ -118,6 +118,36 @@ cronJobController.post("/delete", async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Archived data deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
+
+cronJobController.post("/inactive", async (req, res) => {
+  try {
+    const currentDate = moment().startOf("day");
+
+    const wellnessSurvey = await WellnessSurvey.find({
+      endDate: {
+        $lte: currentDate.toDate(),
+      },
+      status: "active",
+    });
+
+    const updatedSurveys = await Promise.all(
+      wellnessSurvey.map(async (survey) => {
+        survey.status = "inactive";
+        return survey.save();
+      })
+    );
+    
+    return res.status(200).json({
+      success: true,
+      message: "Survey status updated successfully",
     });
   } catch (error) {
     return res.status(500).json({

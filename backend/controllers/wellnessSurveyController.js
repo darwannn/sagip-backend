@@ -18,12 +18,13 @@ wellnessSurveyController.post(
 ]), */ async (req, res) => {
     const error = {};
     try {
-      let { title, category, /* isActive */ status } = req.body;
+      let { title, category, /* isActive */ status, endDate } = req.body;
       if (typeof status === "string") status = status.toLowerCase();
-
+      status = "active";
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(status)) error["status"] = "Required field";
+      if (isEmpty(endDate)) error["endDate"] = "Required field";
       const activeWellnessSurvey = await WellnessSurvey.find({
         status: "active",
       });
@@ -39,6 +40,8 @@ wellnessSurveyController.post(
             title,
             category,
             status,
+
+            endDate,
           });
 
           if (wellnessSurvey) {
@@ -287,7 +290,7 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
 });
 
 wellnessSurveyController.get(
-  "/active",
+  "/myresponse",
   tokenMiddleware,
   /* userTypeMiddleware([
     "resident",
@@ -356,6 +359,35 @@ wellnessSurveyController.get(
   }
 );
 
+wellnessSurveyController.get("/active", async (req, res) => {
+  try {
+    const wellnessSurvey = await WellnessSurvey.findOne({
+      archivedDate: { $exists: false },
+      isArchived: false,
+      status: "active",
+    });
+    /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id); */
+
+    if (wellnessSurvey) {
+      /*      return res.status(200).json(wellnessSurvey); */
+      return res.status(200).json({
+        success: true,
+        /*    message: "found", */
+        ...wellnessSurvey._doc,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
+  }
+});
 wellnessSurveyController.get("/:id", async (req, res) => {
   try {
     const wellnessSurvey = await WellnessSurvey.findOne({
@@ -396,13 +428,14 @@ wellnessSurveyController.put(
   async (req, res) => {
     const error = {};
     try {
-      let { title, category, status } = req.body;
+      let { title, category, status, endDate } = req.body;
 
       if (typeof status === "string") status = status.toLowerCase();
 
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(status)) error["status"] = "Required field";
+      if (isEmpty(endDate)) error["endDate"] = "Required field";
       const activeWellnessSurvey = await WellnessSurvey.find({
         status: "active",
       });
@@ -424,7 +457,7 @@ wellnessSurveyController.put(
             status === "active"
           )
         ) {
-          const updateFields = { title, status, category };
+          const updateFields = { title, status, category, endDate };
 
           const wellnessSurvey = await WellnessSurvey.findByIdAndUpdate(
             req.params.id,

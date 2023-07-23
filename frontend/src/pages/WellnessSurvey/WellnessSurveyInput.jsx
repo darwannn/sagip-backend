@@ -25,6 +25,7 @@ const WellnessSurveyInput = ({ type }) => {
   const { token } = useSelector((state) => state.auth);
 
   const [title, setTitle] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("");
   /*   const [isActive, setIsActive] = useState(false); */
   const [category, setCategory] = useState("");
@@ -41,6 +42,7 @@ const WellnessSurveyInput = ({ type }) => {
           const data = await request(`/wellness-survey/${id}`, "GET", options);
 
           setTitle(data.title);
+          setEndDate(data.endDate);
 
           setCategory(data.category);
           /*      setIsActive(data.isActive); */
@@ -79,6 +81,7 @@ const WellnessSurveyInput = ({ type }) => {
         {
           category,
           title,
+          endDate,
           /*  isActive, */
           status,
         }
@@ -115,6 +118,15 @@ const WellnessSurveyInput = ({ type }) => {
                 placeholder="Title..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>End Date: </label>
+              <input
+                type="date"
+                placeholder="Date..."
+                value={title}
+                onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
 

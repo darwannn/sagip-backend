@@ -202,13 +202,16 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   const error = {};
   let { alertTitle, alertMessage, location } = req.body;
 
+  console.log("====================================");
+  console.log(req.user.id);
+  console.log(alertTitle);
+  console.log(alertMessage);
+  console.log(location);
+  console.log("====================================");
   if (isEmpty(alertTitle)) error["alertTitle"] = "Required field";
   if (isEmpty(alertMessage)) error["alertMessage"] = "Required field";
   if (location.length === 0) error["location"] = "Required field";
 
-  console.log("====================================");
-  console.log(location);
-  console.log("====================================");
   if (Object.keys(error).length == 0) {
     let contactNumbers = [];
     let fcmTokens = [];

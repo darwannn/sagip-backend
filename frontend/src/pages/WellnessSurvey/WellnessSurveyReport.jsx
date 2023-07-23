@@ -8,7 +8,6 @@ import {
   Page,
   Text,
   View,
-  StyleSheet,
   Image,
 } from "@react-pdf/renderer";
 import moment from "moment";
@@ -19,24 +18,6 @@ import {
   TableBody,
   DataTableCell,
 } from "@david.kucsai/react-pdf-table";
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 20,
-  },
-
-  logo: {
-    width: "50px",
-    height: "50px",
-  },
-  viewer: {
-    width: "100vw",
-    height: "100vh",
-  },
-});
 
 const InvoiceTemplate = () => {
   const { id } = useParams();
@@ -62,15 +43,15 @@ const InvoiceTemplate = () => {
   }, []);
 
   return (
-    <PDFViewer style={styles.viewer}>
+    <PDFViewer className="w-screen h-screen">
       <Document>
-        <Page>
-          <View style={styles.header}>
+        <Page style={{ padding: "20px" }}>
+          <View className="mb-20">
             <Image
-              source={require("../../assets/hospital_icon.png")}
-              style={styles.logo}
+              src={require("../../assets/hospital_icon.png")}
+              className="w-16 h-16"
             />
-            <Text>SAGIP{"\n"}City of Malolos</Text>
+            <Text className="block font-bold">SAGIP{"\n"}City of Malolos</Text>
 
             <Text>City Disaster Risk Reduction Management Office</Text>
             <Text>1/F New City Hall Building</Text>
@@ -78,7 +59,9 @@ const InvoiceTemplate = () => {
           </View>
 
           <View>
-            <Text>Wellness Safety Check Survey Report</Text>
+            <Text className="font-bold text-lg">
+              Wellness Safety Check Survey Report
+            </Text>
             <Text>
               {reportData && reportData.title}{" "}
               {reportData &&
@@ -91,7 +74,7 @@ const InvoiceTemplate = () => {
           </View>
 
           <View>
-            <Text>Affected and Unaffected</Text>
+            <Text className="font-bold mt-4">Affected and Unaffected</Text>
             <Text>{"\n"}</Text>
 
             <Table
@@ -118,29 +101,6 @@ const InvoiceTemplate = () => {
               </TableBody>
             </Table>
           </View>
-
-          {/* <View>
-            <Text>affected</Text>
-            <Table
-              data={
-                reportData &&
-                reportData.affected &&
-                Object.keys(reportData.affected).map((area) => ({
-                  area: area,
-                  count: reportData.affected[area],
-                }))
-              }
-            >
-              <TableHeader>
-                <TableCell>Barangay</TableCell>
-                <TableCell>Count</TableCell>
-              </TableHeader>
-              <TableBody>
-                <DataTableCell getContent={(r) => r.area} />
-                <DataTableCell getContent={(r) => r.count} />
-              </TableBody>
-            </Table>
-          </View> */}
         </Page>
       </Document>
     </PDFViewer>
