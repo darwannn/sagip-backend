@@ -238,7 +238,7 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
         unaffected: {},
       };
 
-      barangay.forEach((barangayName) => {
+      barangay.map((barangayName) => {
         barangayCounts.affected[barangayName] = 0;
         barangayCounts.unaffected[barangayName] = 0;
       });
@@ -246,7 +246,7 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
       barangayCounts.affected.Other = 0;
       barangayCounts.unaffected.Other = 0;
 
-      wellnessSurvey.affected.forEach((user) => {
+      wellnessSurvey.affected.map((user) => {
         const userBarangay = user.barangay;
         if (barangay.includes(userBarangay)) {
           barangayCounts.affected[userBarangay]++;
@@ -255,7 +255,7 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
         }
       });
 
-      wellnessSurvey.unaffected.forEach((user) => {
+      wellnessSurvey.unaffected.map((user) => {
         const userBarangay = user.barangay;
         if (barangay.includes(userBarangay)) {
           barangayCounts.unaffected[userBarangay]++;
@@ -266,9 +266,11 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
 
       return res.status(200).json({
         success: true,
+        _id: wellnessSurvey._id,
         title: wellnessSurvey.title,
         category: wellnessSurvey.category,
-        date: wellnessSurvey.createdAt,
+        startDate: wellnessSurvey.startDate,
+        endDate: wellnessSurvey.endDate,
         responseCount:
           wellnessSurvey.affected.length + wellnessSurvey.unaffected.length,
         affectedCount: wellnessSurvey.affected.length,
