@@ -209,7 +209,9 @@ teamController.get("/responder", async (req, res) => {
 
 teamController.get("/:id", async (req, res) => {
   try {
-    const team = await Team.findById(req.params.id);
+    const team = await Team.findById(req.params.id)
+      .populate("head", "-password")
+      .populate("members", "-password");
 
     if (team) {
       /*      return res.status(200).json(team); */
