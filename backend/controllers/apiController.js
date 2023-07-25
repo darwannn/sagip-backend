@@ -1,6 +1,6 @@
 const apiController = require("express").Router();
 const axios = require("axios");
-const { DateTime } = require("luxon");
+const moment = require("moment");
 const User = require("../models/User");
 const Pusher = require("pusher");
 const municipality = "Malolos";
@@ -55,7 +55,12 @@ apiController.get("/signal", async (req, res) => {
     const filename = link.substring(link.lastIndexOf("/") + 1);
     let counter = 0;
     let looping = true;
+    console.log("====================================");
+    console.log(filename);
+    console.log("====================================");
 
+    const filenamParts = filename.split("_");
+    const typhoonName = filenamParts[filenamParts.length - 1].split(".")[0];
     do {
       const parseUrl = `https://pagasa.chlod.net/api/v1/bulletin/parse/${filename}`;
       let parseResponse;
@@ -73,53 +78,60 @@ apiController.get("/signal", async (req, res) => {
           break;
         }
       }
-
       if (parseResponse && parseResponse.status === 200) {
         looping = false;
         const parseData = await axios.get(parseUrl).then((res) => res.data);
-
-        const dateString = "2023-06-12T12:00:00.000Z";
-        const targetDate = DateTime.fromISO(dateString);
-        const currentDate = DateTime.now();
+        /* all data */
+        /* const sampleExpirationDate = "2023-06-12T12:00:00.000Z"; */
+        const targetDate = moment(parseData.bulletin.info.expires);
+        const currentDate = moment();
 
         if (currentDate > targetDate) {
-          return res.status(201).json({ signal: 0 });
+          return res
+            .status(200)
+            .json({ success: true, message: "no typhoon", signal: 0 });
         } else {
           let hasSignal = false;
 
-          for (const [signal, signalData] of Object.entries(
-            parseData.bulletin.signals
-          )) {
-            if (signalData !== null) {
-              const areas = Object.values(signalData.areas);
-              for (const area of areas) {
-                for (const location of area) {
-                  if (
-                    location.includes &&
-                    location.includes.objects &&
-                    location.includes.objects.includes(municipality)
-                  ) {
-                    return res.status(201).json({
-                      signal: `${signal}`,
-                      track:
-                        "https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_chedeng.png",
-                    });
-                  } else if (location.name === municipality) {
-                    hasSignal = true;
-                  }
-                }
+          Object.entries(parseData.bulletin.signals).forEach(
+            ([signal, signalData]) => {
+              if (signalData !== null && !hasSignal) {
+                const areas = Object.values(signalData.areas);
+                areas.forEach((area) => {
+                  area.forEach((location) => {
+                    if (
+                      (location.includes &&
+                        location.includes.objects &&
+                        location.includes.objects.includes(municipality)) ||
+                      location.name === "Bulacan"
+                    ) {
+                      console.log("1");
+                      hasSignal = true;
+                      return res.status(200).json({
+                        success: true,
+                        signal: `${signal}`,
+                        message: `Malolos is under Signal No.${signal}`,
+                        track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_${typhoonName}.png`,
+                      });
+                    }
+                  });
+                });
               }
             }
-          }
+          );
 
           if (!hasSignal) {
-            return res.status(201).json({ signal: 0 });
+            return res
+              .status(200)
+              .json({ success: true, message: "no signal", signal: 0 });
           }
         }
       }
     } while (looping);
   } catch (error) {
-    return res.status(500).json({ message: "An error occurred" });
+    return res
+      .status(500)
+      .json({ success: false, message: "An error occurred" });
   }
 });
 

@@ -1116,7 +1116,8 @@ authController.get(
   async (req, res) => {
     try {
       let user = await User.find({});
-
+      /* sort */
+      user.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       user = user.filter(
         (record) =>
           record.verificationPicture.length !== 0 &&

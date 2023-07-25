@@ -10,11 +10,7 @@ const { promises: fs } = require("fs");
 const path = require("path");
 
 const { cloudinary } = require("../utils/config");
-const currentDate = new Date().toLocaleDateString("en-US", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
+const currentDate = moment().format("MMMM DD, YYYY");
 const folderPath = `sagip/backup/${currentDate}`;
 
 cronJobController.post("/backup", async (req, res) => {
@@ -144,7 +140,7 @@ cronJobController.post("/inactive", async (req, res) => {
         return survey.save();
       })
     );
-    
+
     return res.status(200).json({
       success: true,
       message: "Survey status updated successfully",
