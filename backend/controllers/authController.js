@@ -1115,7 +1115,12 @@ authController.get(
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
-      let user = await User.find({});
+      let user = await User.find({
+        archivedDate: { $exists: false },
+        isArchived: false,
+      });
+
+      /* let user = await User.find({}); */
       /* sort */
       user.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       user = user.filter(

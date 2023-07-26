@@ -37,12 +37,12 @@ const {
 } = require("./notificationController");
 accountController.get("/", async (req, res) => {
   try {
-    const user = await User.find({});
-    /* const user = await User.find({
+    /* const user = await User.find({}); */
+    const user = await User.find({
       archivedDate: { $exists: false },
       isArchived: false,
     });
- */
+
     if (user) {
       return res.status(200).json(user);
       return res.status(200).json({
@@ -833,12 +833,12 @@ accountController.get(
   "/:id",
   /* tokenMiddleware, */ async (req, res) => {
     try {
-      /* const user = await User.findOne({
+      const user = await User.findOne({
         _id: req.params.id,
         archivedDate: { $exists: false },
         isArchived: false,
-      }) */
-      const user = await User.findById(req.params.id);
+      });
+      //const user = await User.findById(req.params.id);
 
       if (user) {
         /* console.log("====================================");
