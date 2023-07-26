@@ -538,7 +538,8 @@ accountController.put(
         firstname,
         middlename,
         lastname,
-        //email,
+        email,
+        contactNumber,
         region,
         province,
         municipality,
@@ -560,22 +561,42 @@ accountController.put(
       //   status = status.toLowerCase();
       // }
       // if (isEmpty(status)) error["status"] = "Required field";
+      console.log("====================================");
+      console.log(email);
+      console.log(contactNumber);
+      console.log("====================================");
       if (isEmpty(userType)) error["userType"] = "Required field";
-      // if (isEmpty(email)) {
-      //   error["email"] = "Required field";
-      // } else {
-      //   if (isEmail(email)) {
-      //     error["email"] = "Invalid email address";
-      //   } else {
-      //     if (await isEmailExists(email)) {
-      //       if (await isEmailOwner(id, email)) {
-      //         /*   error["email"] = "input a new email address"; */
-      //       } else {
-      //         error["email"] = "Email address already taken";
-      //       }
-      //     }
-      //   }
-      // }
+      if (isEmpty(email)) {
+        error["email"] = "Required field";
+      } else {
+        if (isEmail(email)) {
+          error["email"] = "Invalid email address";
+        } else {
+          if (await isEmailExists(email)) {
+            if (await isEmailOwner(req.params.id, email)) {
+              /*   error["email"] = "input a new email address"; */
+            } else {
+              error["email"] = "Email address already taken";
+            }
+          }
+        }
+      }
+
+      if (isEmpty(contactNumber)) {
+        error["contact"] = "Required field";
+      } else {
+        if (isContactNumber(contactNumber)) {
+          error["contact"] = "Invalid Contact Number";
+        } else {
+          if (await isContactNumberExists(contactNumber)) {
+            if (await isContactNumberOwner(req.params.id, contactNumber)) {
+              /*   error["email"] = "input a new email address"; */
+            } else {
+              error["contact"] = "Contact number already taken";
+            }
+          }
+        }
+      }
 
       if (isEmpty(firstname)) error["firstname"] = "Required field";
       if (isEmpty(lastname)) error["lastname"] = "Required field";
@@ -615,7 +636,8 @@ accountController.put(
           lastname,
           isBanned,
           isArchived,
-          // email,
+          email,
+          contactNumber,
           region,
           province,
           municipality,
