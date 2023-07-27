@@ -38,10 +38,10 @@ emergencyFacilityController.post(
       if (isEmpty(category)) error["category"] = "Required field";
 
       if (isEmpty(contactNumber)) {
-        error["contact"] = "Required field";
+        error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "Invalid contact number";
+          error["contactNumber"] = "Invalid contact number";
         }
       }
 
@@ -227,10 +227,10 @@ emergencyFacilityController.put(
       if (isEmpty(category)) error["category"] = "Required field";
 
       if (isEmpty(contactNumber)) {
-        error["contact"] = "Required field";
+        error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "Invalid contact number";
+          error["contactNumber"] = "Invalid contact number";
         }
       }
 

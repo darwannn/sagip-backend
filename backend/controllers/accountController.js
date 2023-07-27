@@ -112,13 +112,13 @@ accountController.post(
       }
 
       if (isEmpty(contactNumber)) {
-        error["contact"] = "Required field";
+        error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "Invalid Contact Number";
+          error["contactNumber"] = "Invalid Contact Number";
         } else {
           if (await isContactNumberExists(contactNumber)) {
-            error["contact"] = "Contact number already taken";
+            error["contactNumber"] = "Contact number already taken";
           }
         }
       }
@@ -376,16 +376,16 @@ accountController.put(
           contactNumber = req.body.contactNumber;
 
           if (isEmpty(contactNumber)) {
-            error["contact"] = "Required field";
+            error["contactNumber"] = "Required field";
           } else {
             if (isContactNumber(contactNumber)) {
-              error["contact"] = "Invalid contact number";
+              error["contactNumber"] = "Invalid contact number";
             } else {
               if (await isContactNumberExists(contactNumber)) {
                 if (await isContactNumberOwner(req.user.id, contactNumber)) {
-                  error["contact"] = "Input a new contact numebr";
+                  error["contactNumber"] = "Input a new contact numebr";
                 } else {
-                  error["contact"] = "Contact number already taken";
+                  error["contactNumber"] = "Contact number already taken";
                 }
               }
             }
@@ -583,16 +583,16 @@ accountController.put(
       }
 
       if (isEmpty(contactNumber)) {
-        error["contact"] = "Required field";
+        error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contact"] = "Invalid Contact Number";
+          error["contactNumber"] = "Invalid Contact Number";
         } else {
           if (await isContactNumberExists(contactNumber)) {
             if (await isContactNumberOwner(req.params.id, contactNumber)) {
               /*   error["email"] = "input a new email address"; */
             } else {
-              error["contact"] = "Contact number already taken";
+              error["contactNumber"] = "Contact number already taken";
             }
           }
         }

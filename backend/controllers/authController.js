@@ -79,13 +79,13 @@ authController.post("/register", async (req, res) => {
     }
 
     if (isEmpty(contactNumber)) {
-      error["contact"] = "Required field";
+      error["contactNumber"] = "Required field";
     } else {
       if (isContactNumber(contactNumber)) {
-        error["contact"] = "must be a number";
+        error["contactNumber"] = "Must be a number";
       } else {
         if (await isContactNumberExists(contactNumber)) {
-          error["contact"] = "Contact Number already exists";
+          error["contactNumber"] = "Contact Number already exists";
         }
       }
     }
