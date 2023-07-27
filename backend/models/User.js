@@ -120,6 +120,15 @@ const userSchema = mongoose.Schema(
       type: String,
       default: false,
     }, */
+
+    lastDismissedRequestDate: {
+      type: Date,
+      default: Date.now,
+    },
+    dismissedRequestCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

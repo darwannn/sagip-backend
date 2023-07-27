@@ -1,6 +1,7 @@
 const assistanceRequestController = require("express").Router();
 const AssistanceRequest = require("../models/AssistanceRequest");
 const Team = require("../models/Team");
+const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const isInMalolos = require("../middlewares/isInMalolos");
 const {
@@ -10,6 +11,7 @@ const {
   isLessThanSize,
   cloudinaryUploader,
   getUsersId,
+  dismissedRequestCount,
 } = require("./functionController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
@@ -792,6 +794,19 @@ assistanceRequestController.put(
           );
 
           if (assistanceRequest) {
+            /* const user = await User.findByIdAndUpdate(
+              assistanceRequest.userId,
+              {
+                $inc: { dismissedRequestCount: 1 },
+              },
+              { new: true }
+            );
+            if (user.dismissedRequestCount === 3) {
+              user.isBanned = true;
+            } */
+
+            /*    dismissedRequestCount("delete", assistanceRequest.userId); */
+
             console.log("====================================");
             console.log(assistanceRequest.userId.contactNumber);
             console.log("====================================");
@@ -886,6 +901,19 @@ assistanceRequestController.put(
             console.log("====================================");
 
             if (action === "archive") {
+              /*  const user = await User.findByIdAndUpdate(
+                assistanceRequest.userId,
+                {
+                  $inc: { dismissedRequestCount: 1 },
+                },
+                { new: true }
+              );
+              if (user.dismissedRequestCount === 3) {
+                user.isBanned = true;
+              }
+ */
+              dismissedRequestCount("archive", assistanceRequest.userId);
+
               console.log("=======jjj=============================");
               console.log(assistanceRequest.userId);
               console.log("====================================");
@@ -902,6 +930,14 @@ assistanceRequestController.put(
                 message: "Archived Successfully",
               });
             } else if (action === "unarchive") {
+              /* const user = await User.findByIdAndUpdate(
+                assistanceRequest.userId,
+                {
+                  $dec: { dismissedRequestCount: 1 },
+                }
+              ); */
+
+              dismissedRequestCount("unarchive", assistanceRequest.userId);
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",
@@ -933,4 +969,5 @@ assistanceRequestController.put(
     }
   }
 );
+
 module.exports = assistanceRequestController;

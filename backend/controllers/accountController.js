@@ -550,6 +550,7 @@ accountController.put(
         profilePicture,
         attempt,
         verificationCode,
+        dismissedRequestCount,
         userType,
         //status,
         isBanned,
@@ -565,6 +566,8 @@ accountController.put(
       console.log(email);
       console.log(contactNumber);
       console.log("====================================");
+      if (isEmpty(dismissedRequestCount))
+        error["dismissedRequestCount"] = "Required field";
       if (isEmpty(userType)) error["userType"] = "Required field";
       if (isEmpty(email)) {
         error["email"] = "Required field";
@@ -631,6 +634,7 @@ accountController.put(
 
       if (Object.keys(error).length == 0) {
         const updateFields = {
+          dismissedRequestCount,
           firstname,
           middlename,
           lastname,

@@ -274,6 +274,30 @@ const getUsersId = async (userType) => {
   }
 };
 
+const dismissedRequestCount = async (action, userId) => {
+  let updateFields;
+
+  if (action === "unarchive") {
+    updateFields = {
+      $inc: { dismissedRequestCount: -1 },
+    };
+  } else {
+    updateFields = {
+      lastDismissedRequestDate: Date.now(),
+      $inc: { dismissedRequestCount: 1 },
+    };
+  }
+  const user = await User.findByIdAndUpdate(userId, updateFields, {
+    new: true,
+  });
+  if (user.dismissedRequestCount >= 3) {
+    user.isBanned = true;
+  } else {
+    user.isBanned = false;
+  }
+  user.save();
+};
+
 module.exports = {
   isEmpty,
   isImage,
@@ -298,4 +322,5 @@ module.exports = {
   getUsersId,
   getTeamMembersId,
   checkIdentifierType,
+  dismissedRequestCount,
 };

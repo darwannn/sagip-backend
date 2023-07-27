@@ -9,6 +9,7 @@ const {
   isLessThanSize,
   cloudinaryUploader,
   getUsersId,
+  dismissedRequestCount,
 } = require("./functionController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
@@ -214,6 +215,11 @@ hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
     console.log("====================================");
     console.log(req.user.id);
     console.log("====================================");
+    /*   const hazardReport = await HazardReport.find({
+      userId: req.user.id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("userId", "-password"); */
     const hazardReport = await HazardReport.findOne({
       userId: req.user.id,
       status: { $in: ["ongoing", "unverified"] },
@@ -634,6 +640,7 @@ hazardReportController.put(
           console.log("====================================");
           /*   await createPusher("hazard-report", "reload", {}); */
           if (action === "archive") {
+            dismissedRequestCount("archive", hazardReport.userId);
             await createPusher(`${hazardReport.userId}`, "reload", {});
             await createPusher("hazard-report-mobile", "reload", {});
             createNotification(
@@ -648,6 +655,7 @@ hazardReportController.put(
               message: "Archived Successfully",
             });
           } else if (action === "unarchive") {
+            dismissedRequestCount("unarchive", hazardReport.userId);
             return res.status(200).json({
               success: true,
               message: "Unrchived Successfully",
