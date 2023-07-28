@@ -372,10 +372,18 @@ teamController.put(
   /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
     const error = {};
     try {
-      const { head, members } = req.body;
+      let { head, members } = req.body;
       /*  console.log(head); */
       console.log(head);
       console.log(members);
+      const oldTeam = await Team.findById(req.params.id);
+
+      // Update the team properties with the new values
+      if (isEmpty(head)) head = oldTeam.head;
+      members = [...members, ...oldTeam.members];
+
+      // Save the updated team object to the database
+      const updatedTeam = await oldTeam.save();
 
       // if (isEmpty(head)) error["head"] = "Required field";
       // if (members.length === 0) error["members"] = "Required field";

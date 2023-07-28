@@ -246,9 +246,7 @@ const ManageTeam = ({ type }) => {
         },
         {
           head: "64a6de4164b1389a52aa0205",
-          members: ["64a6eaa1b6846bdbfa2a6ca1", "64a6df2b64b1389a52aa020d"],
-          /*  head,
-          members: member, */
+          members: ["64a6de4164b1389a52aa0205"],
         }
       );
 
