@@ -153,12 +153,21 @@ const ManageTeam = ({ type }) => {
     let newTeamId = e.target.value;
     try {
       const data = await request(
-        `/team/update/assignment/`,
+        `/team/update/assignment/head`,
         "PUT",
         {
           Authorization: `Bearer ${token}`,
         },
-        { newTeamId, userId, prevTeamId }
+        {
+          newTeamId: "unassigned",
+          userId: "64a6de4164b1389a52aa0205",
+          prevTeamId: "64c367bc79edf62106a40e6f",
+
+          /* head */
+          /*  newTeamId: "unassigned",
+          userId: "64c367bc79edf62106a40e6f",
+          prevTeamId: "64c367bc79edf62106a40e6f", */
+        }
       );
       const { success, message } = data;
       console.log(data);
@@ -245,7 +254,7 @@ const ManageTeam = ({ type }) => {
           Authorization: `Bearer ${token}`,
         },
         {
-          head: "64a6de4164b1389a52aa0205",
+          head: "",
           members: ["64a6de4164b1389a52aa0205"],
         }
       );
@@ -346,6 +355,7 @@ const ManageTeam = ({ type }) => {
   return (
     <>
       <Navbar />
+      <button onClick={handleUpdateIndividual}>handleUpdateIndividual</button>
       <Link to={"/manage/team/responder"}>Manage Responder</Link>
       <div>
         {filteredVerificationRequest.length > 0 ? (

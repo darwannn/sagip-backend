@@ -279,11 +279,137 @@ teamController.delete(
 );
 
 teamController.put(
-  "/update/assignment/",
+  "/update/assignment/:action",
   tokenMiddleware,
   /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
     try {
+      let action = req.params.action.toLowerCase();
       const { newTeamId, userId, prevTeamId } = req.body;
+      console.log(userId);
+      console.log(newTeamId);
+      console.log(prevTeamId);
+
+      let team;
+      let removedTeam;
+      let reassignedTeam;
+      //may team gagawing unassigned
+      if (newTeamId === "unassigned") {
+        if (action === "member") {
+          console.log("====================================");
+          console.log(prevTeamId);
+          console.log("====================================");
+          removedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { $pull: { members: userId } },
+            { new: true }
+          );
+          console.log("mem");
+        } else if (action === "head") {
+          removedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { head: null },
+            { new: true }
+          );
+          console.log("head1");
+        }
+        console.log("removedTeam:", removedTeam);
+      } else if (prevTeamId === "") {
+        // walang prev team
+        if (action === "member") {
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { $push: { members: userId } },
+            { new: true }
+          );
+        } else if (action === "head") {
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { head: userId },
+            { new: true }
+          );
+        }
+      } else {
+        if (action === "member") {
+          reassignedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { $pull: { members: userId } },
+            { new: true }
+          );
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { $push: { members: userId } },
+            { new: true }
+          );
+        } else if (action === "head") {
+          reassignedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { head: "" },
+            { new: true }
+          );
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { head: userId },
+            { new: true }
+          );
+        }
+      }
+      console.log("====================================");
+      console.log(removedTeam);
+      console.log("====================================");
+      if (team || removedTeam || reassignedTeam) {
+        //may team gagawing unassigned
+        if (newTeamId === "unassigned") {
+          await createNotification(
+            [userId],
+            userId,
+            `You have been unassigned`,
+            `You have been remove from ${removedTeam.name}`,
+            "info"
+          );
+        } else if (prevTeamId === "") {
+          // walang prev team
+          await createNotification(
+            [userId],
+            userId,
+            `You have been assigned`,
+            `You have been assigned to ${team.name} `,
+            "info"
+          );
+        } else {
+          await createNotification(
+            [userId],
+            userId,
+            `You have been reassigned`,
+            `You have been assigned to ${team.name} `,
+            "info"
+          );
+        }
+        /* await createPusher("team", "reload", {}); */
+        return res.status(200).json({
+          success: true,
+          message: "Updated Successfully",
+          team,
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+teamController.put(
+  "/update/unassign/:action",
+  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+    try {
+      const { newTeamId, userId } = req.body;
 
       let team;
       let removedTeam;
