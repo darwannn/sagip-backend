@@ -126,20 +126,20 @@ accountController.post(
       if (isEmpty(firstname)) error["firstname"] = "Required field";
       if (isEmpty(middlename)) error["middlename"] = "Required field";
       if (isEmpty(lastname)) error["lastname"] = "Required field";
-      if (isEmpty(birthdate)) error["birthdate"] = "Required field";
+      /* if (isEmpty(birthdate)) error["birthdate"] = "Required field";
       if (isEmpty(gender)) error["gender"] = "Required field";
 
-      /*  if (isResident === "true") {
-        region = "Region III";
-        province = "Bulacan";
-        municipality = "Malolos";
-      } else { */
+      //  if (isResident === "true") {
+      //   region = "Region III";
+      //   province = "Bulacan";
+      //   municipality = "Malolos";
+      // } else {
       if (isEmpty(region)) error["region"] = "Required field";
       if (isEmpty(province)) error["province"] = "Required field";
       if (isEmpty(municipality)) error["municipality"] = "Required field";
-      /*  } */
+      //  }
       if (isEmpty(barangay)) error["barangay"] = "Required field";
-      if (isEmpty(street)) error["street"] = "Required field";
+      if (isEmpty(street)) error["street"] = "Required field"; */
 
       /* if (isEmpty(password)) {
         error["password"] = "Required field";
@@ -520,7 +520,7 @@ accountController.put(
 
 //personal profile
 accountController.put(
-  "/update/:id",
+  "/:action/update/:id",
   /*  userTypeMiddleware([
     "resident",
     "responder",
@@ -528,18 +528,19 @@ accountController.put(
     "admin",
     "super-admin",
   ]), */
-
   multerMiddleware.single("image"),
   async (req, res) => {
     try {
+      console.log("=================ss==================");
+      console.log(req.params.action);
+      console.log("====================================");
       const error = {};
       let {
-        id,
         firstname,
         middlename,
         lastname,
         email,
-        contactNumber,
+        /*   contactNumber, */
         region,
         province,
         municipality,
@@ -550,7 +551,7 @@ accountController.put(
         profilePicture,
         attempt,
         verificationCode,
-        dismissedRequestCount,
+        // dismissedRequestCount,
         userType,
         //status,
         isBanned,
@@ -563,11 +564,12 @@ accountController.put(
       // }
       // if (isEmpty(status)) error["status"] = "Required field";
       console.log("====================================");
-      console.log(email);
-      console.log(contactNumber);
+      /* console.log(email);
+      console.log(contactNumber); */
       console.log("====================================");
-      if (isEmpty(dismissedRequestCount))
-        error["dismissedRequestCount"] = "Required field";
+
+      /*  if (isEmpty(dismissedRequestCount))
+        error["dismissedRequestCount"] = "Required field"; */
       if (isEmpty(userType)) error["userType"] = "Required field";
       if (isEmpty(email)) {
         error["email"] = "Required field";
@@ -584,8 +586,7 @@ accountController.put(
           }
         }
       }
-
-      if (isEmpty(contactNumber)) {
+      /* if (isEmpty(contactNumber)) {
         error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
@@ -593,30 +594,34 @@ accountController.put(
         } else {
           if (await isContactNumberExists(contactNumber)) {
             if (await isContactNumberOwner(req.params.id, contactNumber)) {
-              /*   error["email"] = "input a new email address"; */
+                // error["email"] = "input a new email address";
             } else {
               error["contactNumber"] = "Contact number already taken";
             }
           }
         }
+      } */
+
+      if (req.params.action === "profile") {
+        if (isEmpty(firstname)) error["firstname"] = "Required field";
+        if (isEmpty(lastname)) error["lastname"] = "Required field";
+        if (isEmpty(middlename)) error["middlename"] = "Required field";
+
+        if (isEmpty(birthdate)) error["birthdate"] = "Required field";
+        if (isEmpty(gender)) error["gender"] = "Required field";
+
+        //  if (isResident === "true") {
+        //   region = "Region III";
+        //   province = "Bulacan";
+        //   municipality = "Malolos";
+        // } else {
+        if (isEmpty(region)) error["region"] = "Required field";
+        if (isEmpty(province)) error["province"] = "Required field";
+        if (isEmpty(municipality)) error["municipality"] = "Required field";
+        // }
+        if (isEmpty(barangay)) error["barangay"] = "Required field";
+        if (isEmpty(street)) error["street"] = "Required field";
       }
-
-      if (isEmpty(firstname)) error["firstname"] = "Required field";
-      if (isEmpty(lastname)) error["lastname"] = "Required field";
-      if (isEmpty(birthdate)) error["birthdate"] = "Required field";
-      if (isEmpty(gender)) error["gender"] = "Required field";
-
-      /*    if (isResident === "true") {
-          region = "Region III";
-          province = "Bulacan";
-          municipality = "Malolos";
-        } else { */
-      if (isEmpty(region)) error["region"] = "Required field";
-      if (isEmpty(province)) error["province"] = "Required field";
-      if (isEmpty(municipality)) error["municipality"] = "Required field";
-      /* } */
-      if (isEmpty(barangay)) error["barangay"] = "Required field";
-      if (isEmpty(street)) error["street"] = "Required field";
 
       if (hasChanged === "true") {
         if (!req.file) {
@@ -634,14 +639,14 @@ accountController.put(
 
       if (Object.keys(error).length == 0) {
         const updateFields = {
-          dismissedRequestCount,
+          // dismissedRequestCount,
           firstname,
           middlename,
           lastname,
           isBanned,
           isArchived,
           email,
-          contactNumber,
+          //contactNumber,
           region,
           province,
           municipality,

@@ -1,4 +1,5 @@
 const wellnessSurveyController = require("express").Router();
+const { getBarangays } = require("@efdiaz/psgc");
 const WellnessSurvey = require("../models/WellnessSurvey");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -170,7 +171,7 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
       "taal",
       "tikay",
     ]; */
-    const barangay = [
+    const barangay2 = [
       "Anilao",
       "Atlag",
       "Babatnin",
@@ -223,6 +224,11 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
       "Taal",
       "Tikay",
     ];
+    const barangays = getBarangays("031410");
+
+    const barangay = barangays.map((barangay) => barangay.brgyDesc);
+    barangay.sort((a, b) => a.localeCompare(b));
+
     /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id) */
     const wellnessSurvey = await WellnessSurvey.findOne({
       _id: req.params.id,

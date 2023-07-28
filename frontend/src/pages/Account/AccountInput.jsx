@@ -34,6 +34,7 @@ const AccountInput = ({ user, type }) => {
   const [lastname, setLastname] = useState("");
   const [gender, setGender] = useState("");
   const [birthdate, setBirthdate] = useState("");
+  const [dismissedRequestCount, setdismissedRequestCount] = useState("");
   const [contactNumber, setContactNumber] = useState("");
 
   const [attempt, setAttempt] = useState("");
@@ -71,6 +72,7 @@ const AccountInput = ({ user, type }) => {
           setAttempt(data.attempt);
           setIsArchived(data.isArchived);
           setIsBanned(data.isBanned);
+          setdismissedRequestCount(data.dismissedRequestCount);
         } catch (error) {
           console.error(error);
         }
@@ -85,6 +87,7 @@ const AccountInput = ({ user, type }) => {
     if (type === "add") {
       url = "/account/add";
       method = "POST";
+
       formData = {
         email,
         password,
@@ -108,11 +111,12 @@ const AccountInput = ({ user, type }) => {
         isArchived,
       };
     } else if (type === "update") {
-      url = `/account/update/${id}`;
+      url = `/account/info/update/${id}`;
       method = "PUT";
       formData = {
         id: id,
         email,
+        dismissedRequestCount,
         region,
         province,
         municipality,

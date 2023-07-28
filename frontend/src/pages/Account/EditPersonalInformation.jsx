@@ -112,7 +112,7 @@ const AccountInput = ({ type }) => {
       const options = { Authorization: `Bearer ${token}` };
       /*  const data = await request(url, method, options, formData); */
       const data = await request(
-        `/account/update/${user.id}`,
+        `/account/profile/update/${user.id}`,
         "PUT",
         options,
         formData,

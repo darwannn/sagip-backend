@@ -9,14 +9,15 @@ const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expir
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
 const { cloudinary } = require("../utils/config");
 const isEmpty = (value) => {
-  if (
-    value === "" ||
-    value === null ||
-    value === undefined ||
-    value.trim() === ""
-  ) {
+  if (value === "" || value === null || value === undefined) {
     return true;
   }
+
+  if (typeof value === "string" && value.trim() === "") {
+    return true;
+  }
+
+  return false;
 };
 
 const isImage = (file) => {

@@ -25,31 +25,38 @@ const userSchema = mongoose.Schema(
     },
     region: {
       type: String,
-      required: true,
+      /* required: true, */
+      default: "",
     },
     province: {
       type: String,
-      required: true,
+      /* required: true, */
+      default: "",
     },
     municipality: {
       type: String,
-      required: true,
+      /* required: true, */
+      default: "",
     },
     barangay: {
       type: String,
-      required: true,
+      /* required: true, */
+      default: "",
     },
     street: {
       type: String,
-      required: true,
+      /* required: true, */
+      default: "",
     },
     gender: {
       type: String,
-      required: true,
+      /* required: true, */
+      default: "",
     },
     birthdate: {
       type: Date,
-      required: true,
+      /* required: true, */
+      default: null,
     },
     password: {
       type: String,

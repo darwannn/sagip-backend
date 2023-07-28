@@ -377,8 +377,8 @@ teamController.put(
       console.log(head);
       console.log(members);
 
-      if (isEmpty(head)) error["head"] = "Required field";
-      if (members.length === 0) error["members"] = "Required field";
+      // if (isEmpty(head)) error["head"] = "Required field";
+      // if (members.length === 0) error["members"] = "Required field";
 
       if (Object.keys(error).length === 0) {
         const updateFields = { head, members };
