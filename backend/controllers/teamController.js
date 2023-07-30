@@ -343,7 +343,7 @@ teamController.put(
         } else if (action === "head") {
           reassignedTeam = await Team.findByIdAndUpdate(
             prevTeamId,
-            { head: "" },
+            { head: null },
             { new: true }
           );
           team = await Team.findByIdAndUpdate(
