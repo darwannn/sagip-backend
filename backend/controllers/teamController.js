@@ -505,8 +505,21 @@ teamController.put(
       const oldTeam = await Team.findById(req.params.id);
 
       // Update the team properties with the new values
-      if (isEmpty(head)) head = oldTeam.head;
+
+      if (isEmpty(head)) {
+        if (oldTeam.head !== null) {
+          head = oldTeam.head;
+        } else {
+          head = null;
+        }
+      }
+
+      if (!Array.isArray(members)) {
+        members = [];
+      }
       members = [...members, ...oldTeam.members];
+
+      /*   members = [...members, ...oldTeam.members]; */
 
       // Save the updated team object to the database
       const updatedTeam = await oldTeam.save();
@@ -524,20 +537,22 @@ teamController.put(
 
         if (team) {
           await createPusher("team", "reload", {});
-          await createNotification(
-            [head],
-            team._id,
-            `You have been assigned`,
-            `You have been assigned to ${team.name} as head`,
-            "info"
-          );
-          await createNotification(
-            members,
-            team._id,
-            `You have been assigned`,
-            `You have been assigned to ${team.name} as member`,
-            "info"
-          );
+          if (!isEmpty(head))
+            await createNotification(
+              [head],
+              team._id,
+              `You have been assigned`,
+              `You have been assigned to ${team.name} as head`,
+              "info"
+            );
+          if (!members.length === 0)
+            await createNotification(
+              members,
+              team._id,
+              `You have been assigned`,
+              `You have been assigned to ${team.name} as member`,
+              "info"
+            );
           /*  await createPusher("team", "reload", {}); */
           return res.status(200).json({
             success: true,
@@ -558,6 +573,9 @@ teamController.put(
         return res.status(400).json(error);
       }
     } catch (error) {
+      console.log("====================================");
+      console.log(error);
+      console.log("====================================");
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
