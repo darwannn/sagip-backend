@@ -743,6 +743,20 @@ accountController.put(
 );
 
 accountController.put(
+  "/myaccount/:action",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
+  async (req, res) => {
+    await handleArchive(req.params.action, req.user.id, res);
+  }
+);
+accountController.put(
   "/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
@@ -753,62 +767,65 @@ accountController.put(
   "super-admin",
 ]), */
   async (req, res) => {
-    try {
-      let updateFields = {};
-      let action = req.params.action.toLowerCase();
-      if (action === "unarchive" || action === "archive") {
-        console.log(action);
-        if (action === "archive") {
-          updateFields = {
-            isArchived: true,
-            archivedDate: Date.now(),
-          };
-        } else if (action === "unarchive") {
-          updateFields = {
-            isArchived: false,
-            $unset: { archivedDate: Date.now() },
-          };
-        }
-        const user = await User.findByIdAndUpdate(
-          req.params.id,
-          updateFields,
+    await handleArchive(req.params.action, req.params.id, res);
+  }
+);
 
-          { new: true }
-        );
-        if (user) {
-          /* await createPusher("user", "reload", {}); */
-          if (action === "archive") {
-            await createPusher(`${req.params.id}`, "reload", {});
-            return res.status(200).json({
-              success: true,
-              message: "Archived Successfully",
-            });
-          } else if (action === "unarchive") {
-            return res.status(200).json({
-              success: true,
-              message: "Unrchived Successfully",
-            });
-          }
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "not found",
+const handleArchive = async (action, id, res) => {
+  try {
+    let updateFields = {};
+    if (action === "unarchive" || action === "archive") {
+      console.log(action);
+      if (action === "archive") {
+        updateFields = {
+          isArchived: true,
+          archivedDate: Date.now(),
+        };
+      } else if (action === "unarchive") {
+        updateFields = {
+          isArchived: false,
+          $unset: { archivedDate: Date.now() },
+        };
+      }
+      const user = await User.findByIdAndUpdate(
+        id,
+        updateFields,
+
+        { new: true }
+      );
+      if (user) {
+        /* await createPusher("user", "reload", {}); */
+        if (action === "archive") {
+          await createPusher(`${id}`, "reload", {});
+          return res.status(200).json({
+            success: true,
+            message: "Archived Successfully",
+          });
+        } else if (action === "unarchive") {
+          return res.status(200).json({
+            success: true,
+            message: "Unrchived Successfully",
           });
         }
       } else {
         return res.status(500).json({
           success: false,
-          message: "Error 404: Not Found",
+          message: "not found",
         });
       }
-    } catch (error) {
+    } else {
       return res.status(500).json({
         success: false,
-        message: "Internal Server Error: " + error,
+        message: "Error 404: Not Found",
       });
     }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
   }
-);
+};
 
 accountController.put("/fcm", async (req, res) => {
   try {
