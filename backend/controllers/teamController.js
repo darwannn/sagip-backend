@@ -150,6 +150,7 @@ teamController.get("/responder", async (req, res) => {
               email: team.head.email,
               teamName: team.name,
               teamId: team._id,
+              profilePicture: team.profilePicture,
             });
           }
         }
@@ -164,6 +165,7 @@ teamController.get("/responder", async (req, res) => {
               email: member.email,
               teamName: team.name,
               teamId: team._id,
+              profilePicture: team.profilePicture,
             });
           }
         }
@@ -183,6 +185,7 @@ teamController.get("/responder", async (req, res) => {
         middlename: user.middlename,
         lastname: user.lastname,
         email: user.email,
+        profilePicture: user.profilePicture,
       }));
 
       return res.status(200).json({

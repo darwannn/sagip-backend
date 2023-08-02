@@ -528,10 +528,12 @@ accountController.put(
     "admin",
     "super-admin",
   ]), */
+
   multerMiddleware.single("image"),
   async (req, res) => {
     try {
       console.log("=================ss==================");
+
       console.log(req.params.action);
       console.log("====================================");
       const error = {};
@@ -563,25 +565,28 @@ accountController.put(
       //   status = status.toLowerCase();
       // }
       // if (isEmpty(status)) error["status"] = "Required field";
-      console.log("====================================");
-      /* console.log(email);
-      console.log(contactNumber); */
+      console.log("=======hasChanged=============================");
+
+      /*   console.log(req.file.originalname); */
+      console.log(hasChanged);
       console.log("====================================");
 
       /*  if (isEmpty(dismissedRequestCount))
         error["dismissedRequestCount"] = "Required field"; */
-      if (isEmpty(userType)) error["userType"] = "Required field";
-      if (isEmpty(email)) {
-        error["email"] = "Required field";
-      } else {
-        if (isEmail(email)) {
-          error["email"] = "Invalid email address";
+      if (req.params.action === "info") {
+        if (isEmpty(userType)) error["userType"] = "Required field";
+        if (isEmpty(email)) {
+          error["email"] = "Required field";
         } else {
-          if (await isEmailExists(email)) {
-            if (await isEmailOwner(req.params.id, email)) {
-              /*   error["email"] = "input a new email address"; */
-            } else {
-              error["email"] = "Email address already taken";
+          if (isEmail(email)) {
+            error["email"] = "Invalid email address";
+          } else {
+            if (await isEmailExists(email)) {
+              if (await isEmailOwner(req.params.id, email)) {
+                /*   error["email"] = "input a new email address"; */
+              } else {
+                error["email"] = "Email address already taken";
+              }
             }
           }
         }
@@ -625,13 +630,14 @@ accountController.put(
 
       if (hasChanged === "true") {
         if (!req.file) {
-          error["image"] = "Required field";
+          error["profilePicture"] = "Required field";
         } else {
           if (isImage(req.file.originalname)) {
-            error["image"] = "Only PNG, JPEG, and JPG files are allowed";
+            error["profilePicture"] =
+              "Only PNG, JPEG, and JPG files are allowed";
           } else {
             if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-              error["image"] = "File size should be less than 10MB";
+              error["profilePicture"] = "File size should be less than 10MB";
             }
           }
         }

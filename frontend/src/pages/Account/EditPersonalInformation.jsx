@@ -46,7 +46,9 @@ const AccountInput = ({ type }) => {
 
   useEffect(() => {
     console.log(user);
-
+    console.log("========image============================");
+    console.log(image);
+    console.log("====================================");
     const fetchAccountDetails = async () => {
       try {
         const options = {
