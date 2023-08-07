@@ -17,6 +17,7 @@ const {
   generateCode,
   updateVerificationCode,
   cloudinaryUploader,
+  handleArchive,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -368,6 +369,7 @@ accountController.put(
       const error = {};
       console.log("====================================");
       let action = req.params.action.toLowerCase();
+      console.log("action");
       console.log(action);
       let contactNumber;
       let email;
@@ -413,6 +415,7 @@ accountController.put(
         if (Object.keys(error).length == 0) {
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
+            console.log("send sms");
             /*     sendSMS(`Your SAGIP verification code is ${generatedCode}`,contactNumber) */
           }
           console.log("====================================");
@@ -420,6 +423,7 @@ accountController.put(
           console.log(user.verificationCode);
           console.log("====================================");
           if (action === "email") {
+            console.log("send email");
             sendEmail(
               email,
               "SAGIP verification code",
@@ -568,6 +572,10 @@ accountController.put(
       console.log("=======hasChanged=============================");
 
       /*   console.log(req.file.originalname); */
+      console.log(region);
+      console.log(province);
+      console.log(municipality);
+      console.log(barangay);
       console.log(hasChanged);
       console.log("====================================");
 
@@ -771,62 +779,6 @@ accountController.put(
   }
 );
 
-const handleArchive = async (action, id, res) => {
-  try {
-    let updateFields = {};
-    if (action === "unarchive" || action === "archive") {
-      console.log(action);
-      if (action === "archive") {
-        updateFields = {
-          isArchived: true,
-          archivedDate: Date.now(),
-        };
-      } else if (action === "unarchive") {
-        updateFields = {
-          isArchived: false,
-          $unset: { archivedDate: Date.now() },
-        };
-      }
-      const user = await User.findByIdAndUpdate(
-        id,
-        updateFields,
-
-        { new: true }
-      );
-      if (user) {
-        /* await createPusher("user", "reload", {}); */
-        if (action === "archive") {
-          await createPusher(`${id}`, "reload", {});
-          return res.status(200).json({
-            success: true,
-            message: "Archived Successfully",
-          });
-        } else if (action === "unarchive") {
-          return res.status(200).json({
-            success: true,
-            message: "Unrchived Successfully",
-          });
-        }
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "not found",
-        });
-      }
-    } else {
-      return res.status(500).json({
-        success: false,
-        message: "Error 404: Not Found",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error: " + error,
-    });
-  }
-};
-
 accountController.put("/fcm", async (req, res) => {
   try {
     const { identifier, fcmToken } = req.body;
@@ -883,10 +835,112 @@ accountController.put("/fcm", async (req, res) => {
   }
 });
 
-accountController.get(
-  "/:id",
-  /* tokenMiddleware, */ async (req, res) => {
+accountController.put(
+  "/new-password",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */ async (req, res) => {
     try {
+      const error = {};
+      const { password, confirmPassword, oldPassword } = req.body;
+      if (isEmpty(oldPassword)) {
+        error["oldPassword"] = "Required field";
+      } else {
+        /* if (verifyPassword(password)) {
+          error["password"] = "Password requirement not met";
+        } */
+        const user = await User.findOne({
+          _id: req.user.id,
+        });
+        if (!(user && (await bcrypt.compare(oldPassword, user.password)))) {
+          error["oldPassword"] = "Incorrect password";
+        }
+        console.log("====================================");
+        console.log(await bcrypt.compare(password, user.password));
+        console.log("====================================");
+      }
+      /* if (isEmpty(password)) {
+      error["password"] = "Required field";
+    } else {
+      if (verifyPassword(password)) {
+        error["password"] = "Password requirement not met";
+      }
+    } */
+
+      if (isEmpty(confirmPassword)) {
+        error["confirmPassword"] = "Required field";
+      } else {
+        if (!isEmpty(password)) {
+          if (password !== confirmPassword) {
+            error["confirmPassword"] = "Password did not match";
+          }
+        }
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      if (Object.keys(error).length == 0) {
+        console.log(req.user);
+        const user = await User.findByIdAndUpdate(req.user.id, {
+          verificationCode: 0,
+          password: hashedPassword,
+        });
+
+        if (user) {
+          if (req.body.for) {
+            return res.status(200).json({
+              success: true,
+              message:
+                "Password has been changed successfully. You can now login with your new password",
+            });
+          } else {
+            createNotification(
+              [req.user.id],
+              req.user.id,
+              "Password has been changed",
+              "Your password has been changed",
+              "info"
+            );
+            return res.status(200).json({
+              success: true,
+              message: "Password has been changed successfully",
+            });
+          }
+        } else {
+          /* error["message"] = "Database Error"; */
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length != 0) {
+        console.log("error");
+        error["message"] = "input error";
+        res.status(400).json(error);
+      }
+    } catch (error) {
+      // If an exception occurs, respond with an internal server error
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
+accountController.get("/myprofile", tokenMiddleware, async (req, res) => {
+  getUserInfo(req.user.id, res);
+});
+accountController.get("/:id", async (req, res) => {
+  /* try {
       const user = await User.findOne({
         _id: req.params.id,
         archivedDate: { $exists: false },
@@ -895,26 +949,26 @@ accountController.get(
       //const user = await User.findById(req.params.id);
 
       if (user) {
-        /* console.log("====================================");
-      console.log(user._doc._id);
-      console.log(req.user.id);
-      console.log(user._doc.archivedDate);
-      console.log("====================================");
-      if (
-        req.user.id === user._doc._id.toString() &&
-        user._doc.archivedDate !== null
-      ) {
-        return res.status(200).json({
-          success: false,
-          message: "account archived",
-        });
-      } else { */
+      //   console.log("====================================");
+      // console.log(user._doc._id);
+      // console.log(req.user.id);
+      // console.log(user._doc.archivedDate);
+      // console.log("====================================");
+      // if (
+      //   req.user.id === user._doc._id.toString() &&
+      //   user._doc.archivedDate !== null
+      // ) {
+      //   return res.status(200).json({
+      //     success: false,
+      //     message: "account archived",
+      //   });
+      // } else {
         return res.status(200).json({
           success: true,
           message: "found",
           ...user._doc,
         });
-        /*  } */
+         //}
       } else {
         return res.status(200).json({
           success: false,
@@ -926,8 +980,52 @@ accountController.get(
         success: false,
         message: "not found",
       });
+    }*/
+  getUserInfo(req.params.id, res);
+});
+
+const getUserInfo = async (id, res) => {
+  try {
+    const user = await User.findOne({
+      _id: id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    });
+    //const user = await User.findById(id);
+
+    if (user) {
+      /* console.log("====================================");
+    console.log(user._doc._id);
+    console.log(id);
+    console.log(user._doc.archivedDate);
+    console.log("====================================");
+    if (
+      id === user._doc._id.toString() &&
+      user._doc.archivedDate !== null
+    ) {
+      return res.status(200).json({
+        success: false,
+        message: "account archived",
+      });
+    } else { */
+      return res.status(200).json({
+        success: true,
+        message: "found",
+        ...user._doc,
+      });
+      /*  } */
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "not found",
+      });
     }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "not found",
+    });
   }
-);
+};
 
 module.exports = accountController;

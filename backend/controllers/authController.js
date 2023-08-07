@@ -21,6 +21,7 @@ const {
   cloudinaryUploader,
   calculateArchivedDate,
   getUsersId,
+  handleArchive,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -232,7 +233,7 @@ authController.put(
       const { code } = req.body;
       const userId = req.user.id;
       let action = req.params.action.toLowerCase();
-
+      console.log(code);
       if (
         action === "register" ||
         action === "forgot-password" ||
@@ -331,7 +332,7 @@ authController.put(
                     success: true,
                     message: "Contact number has been updated successfully",
                   }); */
-
+                  console.log("update contact");
                   let { contactNumber } = req.body;
                   console.log("====================================");
                   console.log(contactNumber);
@@ -363,6 +364,7 @@ authController.put(
                   }
                 }
                 if (action === "email") {
+                  console.log("email");
                   let { email } = req.body;
                   console.log("====================================");
                   console.log(email);
@@ -557,8 +559,9 @@ authController.put(
   }
 ); */
 
+/* check or archive */
 authController.post(
-  "/password-verification",
+  "/password-verification/:action",
   tokenMiddleware,
   /* userTypeMiddleware([
   "resident",
@@ -584,11 +587,15 @@ authController.post(
         });
 
         if (user && (await bcrypt.compare(password, user.password))) {
-          return res.status(200).json({
-            success: true,
-            message: "Password Matches",
-            for: "edit-password",
-          });
+          if (req.params.action === "check") {
+            return res.status(200).json({
+              success: true,
+              message: "Password Matches",
+              /*  for: "edit-password", */
+            });
+          } else {
+            handleArchive(req.params.action, req.user.id, res);
+          }
         } else {
           return res.status(200).json({
             success: false,
@@ -957,7 +964,9 @@ authController.put(
       // }
       // if (action === "email") {
       // }
-
+      console.log("====================================");
+      console.log(identifier);
+      console.log("====================================");
       const user = await updateVerificationCode(req.user.id);
 
       if (user) {
@@ -965,12 +974,15 @@ authController.put(
         let identifierType = await checkIdentifierType(identifier);
 
         if (identifierType === "email") {
+          console.log("send email");
+
           sendEmail(
             identifier,
             "SAGIP verification code",
             `Your SAGIP verification code is ${user.verificationCode}`
           );
         } else if (identifierType === "contactNumber") {
+          console.log("send sms");
           sendSMS(
             `Your SAGIP verification code is ${user.verificationCode}`,
             identifier

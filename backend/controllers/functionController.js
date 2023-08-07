@@ -4,8 +4,10 @@ const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Team = require("../models/Team");
-/* const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); */ // 1 day expiration
-const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expire after 15 minutes
+
+const { createPusher, sendSMS, sendEmail } = require("./apiController");
+const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // 1 day expiration
+/* const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expire after 15 minutes */
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
 const { cloudinary } = require("../utils/config");
 const isEmpty = (value) => {
@@ -299,6 +301,62 @@ const dismissedRequestCount = async (action, userId) => {
   user.save();
 };
 
+const handleArchive = async (action, id, res) => {
+  try {
+    let updateFields = {};
+    if (action === "unarchive" || action === "archive") {
+      console.log(action);
+      if (action === "archive") {
+        updateFields = {
+          isArchived: true,
+          archivedDate: Date.now(),
+        };
+      } else if (action === "unarchive") {
+        updateFields = {
+          isArchived: false,
+          $unset: { archivedDate: Date.now() },
+        };
+      }
+      const user = await User.findByIdAndUpdate(
+        id,
+        updateFields,
+
+        { new: true }
+      );
+      if (user) {
+        /* await createPusher("user", "reload", {}); */
+        if (action === "archive") {
+          await createPusher(`${id}`, "reload", {});
+          return res.status(200).json({
+            success: true,
+            message: "Archived Successfully",
+          });
+        } else if (action === "unarchive") {
+          return res.status(200).json({
+            success: true,
+            message: "Unrchived Successfully",
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Error 404: Not Found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+};
+
 module.exports = {
   isEmpty,
   isImage,
@@ -324,4 +382,5 @@ module.exports = {
   getTeamMembersId,
   checkIdentifierType,
   dismissedRequestCount,
+  handleArchive,
 };
