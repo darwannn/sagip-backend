@@ -154,10 +154,13 @@ const isEmailOwner = async (id, email) => {
   }
 };
 
-const generateToken = (id) => {
+const generateToken = (purpose, id, userType, status) => {
   return jwt.sign(
     {
+      for: purpose,
       id,
+      userType,
+      status,
     },
     process.env.JWT_SECRET,
     {

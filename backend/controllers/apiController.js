@@ -12,8 +12,8 @@ const {
   createPushNotificationTopic,
   createPushNotificationToken,
 } = require("./notificationController");
+
 const { firebase } = require("../utils/config");
-const { isEmpty } = require("./functionController");
 const pusher = new Pusher({
   appId: process.env.PUSHER_APP_ID,
   key: process.env.PUSHER_KEY,
@@ -220,8 +220,13 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   console.log(alertMessage);
   console.log(location);
   console.log("====================================");
-  if (isEmpty(alertTitle)) error["alertTitle"] = "Required field";
-  if (isEmpty(alertMessage)) error["alertMessage"] = "Required field";
+  if (alertTitle === "") {
+    error["alertTitle"] = "Required field";
+  }
+  if (alertMessage === "") {
+    error["alertMessage"] = "Required field";
+  }
+
   if (location.length === 0) error["location"] = "Required field";
 
   if (Object.keys(error).length == 0) {
@@ -426,6 +431,18 @@ async function sendEmail(to, subject, html) {
     console.log(error);
   }
 }
+
+/* const isEmpty = (value) => {
+  if (value === "" || value === null || value === undefined) {
+    return true;
+  }
+
+  if (typeof value === "string" && value.trim() === "") {
+    return true;
+  }
+
+  return false;
+}; */
 module.exports = {
   sendSMS,
   sendBulkSMS,

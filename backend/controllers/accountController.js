@@ -373,7 +373,11 @@ accountController.put(
       console.log(action);
       let contactNumber;
       let email;
-      if (action === "contact-number" || action === "email") {
+      if (
+        action === "contact-number" ||
+        action === "email" ||
+        action === "verify-email"
+      ) {
         if (action === "contact-number") {
           contactNumber = req.body.contactNumber;
 
@@ -393,7 +397,7 @@ accountController.put(
             }
           }
         }
-        if (action === "email") {
+        if (action === "email" || action === "verify-email") {
           email = req.body.email;
 
           if (isEmpty(email)) {
@@ -404,7 +408,8 @@ accountController.put(
             } else {
               if (await isEmailExists(email)) {
                 if (await isEmailOwner(req.user.id, email)) {
-                  error["email"] = "input a new email address";
+                  if (action !== "verify-email")
+                    error["email"] = "input a new email address";
                 } else {
                   error["email"] = "Email address already taken";
                 }
@@ -422,7 +427,7 @@ accountController.put(
           console.log(user._doc.email);
           console.log(user.verificationCode);
           console.log("====================================");
-          if (action === "email") {
+          if (action === "email" || action === "verify-email") {
             console.log("send email");
             sendEmail(
               email,
@@ -438,7 +443,7 @@ accountController.put(
                 message: `Verification code has been sent to ${contactNumber}`,
               });
             }
-            if (action === "email") {
+            if (action === "email" || action === "verify-email") {
               return res.status(200).json({
                 success: true,
                 message: `Verification code has been sent to ${email}`,
@@ -461,7 +466,7 @@ accountController.put(
       } else {
         return res.status(500).json({
           success: false,
-          message: "Error 404: Not Found",
+          message: "Error 404: Not Found" + error,
         });
       }
     } catch (error) {

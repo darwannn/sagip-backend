@@ -187,7 +187,12 @@ authController.post("/register", async (req, res) => {
             userType: user._doc.userType,
             status: user._doc.status,
           },
-          token: generateToken(user._id),
+          token: generateToken(
+            "register",
+            user._doc._id,
+            user._doc.userType,
+            user._doc.status
+          ),
         });
         /* } else {
           return res.status(200).json({
@@ -299,7 +304,12 @@ authController.put(
                       status: user._doc.status,
                       email: user._doc.email,
                     },
-                    token: generateToken(user._id),
+                    token: generateToken(
+                      "login",
+                      user._doc._id,
+                      user._doc.userType,
+                      user._doc.status
+                    ),
                   });
                 }
                 if (action === "forgot-password")
@@ -312,7 +322,12 @@ authController.put(
                       userType: user._doc.userType,
                       status: user._doc.status,
                     },
-                    token: generateToken(user._id),
+                    token: generateToken(
+                      "new-password",
+                      user._doc._id,
+                      user._doc.userType,
+                      user._doc.status
+                    ),
                   });
                 if (action === "login")
                   return res.status(200).json({
@@ -325,7 +340,12 @@ authController.put(
                       userType: user._doc.userType,
                       status: user._doc.status,
                     },
-                    token: generateToken(user._id),
+                    token: generateToken(
+                      "login",
+                      user._doc._id,
+                      user._doc.userType,
+                      user._doc.status
+                    ),
                   });
                 if (action === "contact") {
                   /*  return res.status(200).json({
@@ -668,7 +688,12 @@ authController.post("/login", async (req, res) => {
                   userType: user._doc.userType,
                   status: user._doc.status,
                 },
-                token: generateToken(user._id),
+                token: generateToken(
+                  "login",
+                  user._doc._id,
+                  user._doc.userType,
+                  user._doc.status
+                ),
               });
               /* } else {
               const data = calculateArchivedDate();
@@ -710,7 +735,12 @@ authController.post("/login", async (req, res) => {
                     userType: userVerificationCode._doc.userType,
                     status: userVerificationCode._doc.status,
                   },
-                  token: generateToken(userVerificationCode._id),
+                  token: generateToken(
+                    "register",
+                    user._doc._id,
+                    user._doc.userType,
+                    user._doc.status
+                  ),
                 });
               }
             }
@@ -795,7 +825,12 @@ authController.post("/forgot-password", async (req, res) => {
                 userType: user._doc.userType,
                 status: user._doc.status,
               },
-              token: generateToken(user._id),
+              token: generateToken(
+                "forgot-password",
+                user._doc._id,
+                user._doc.userType,
+                user._doc.status
+              ),
             });
           } else if (identifierType === "contactNumber") {
             return res.status(200).json({
@@ -807,7 +842,12 @@ authController.post("/forgot-password", async (req, res) => {
                 userType: user._doc.userType,
                 status: user._doc.status,
               },
-              token: generateToken(user._id),
+              token: generateToken(
+                "forgot-password",
+                user._doc._id,
+                user._doc.userType,
+                user._doc.status
+              ),
             });
           }
           /* } else {
