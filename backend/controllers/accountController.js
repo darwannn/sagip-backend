@@ -18,12 +18,13 @@ const {
   updateVerificationCode,
   cloudinaryUploader,
   handleArchive,
+  verifyPassword,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 const currentDate = new Date();
-const codeExpiration = new Date(currentDate.getTime() + 30 * 60000);
+const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
@@ -193,6 +194,8 @@ accountController.post(
           codeExpiration,
           userType,
           status: "verified",
+          isOnline: false,
+          lastOnlineDate: Date.now,
         });
 
         /* const notification = await Notification.create({
@@ -432,7 +435,8 @@ accountController.put(
             sendEmail(
               email,
               "SAGIP verification code",
-              `Your SAGIP verification code is ${user.verificationCode}`
+              user.verificationCode,
+              codeExpiration
             );
           }
           if (user) {
@@ -754,6 +758,109 @@ accountController.put(
     }
   }
 );
+accountController.put(
+  "/update/avatar/:id",
+  /*  userTypeMiddleware([
+    "resident",
+    "responder",
+    "dispatcher",
+    "admin",
+    "super-admin",
+  ]), */
+
+  multerMiddleware.single("image"),
+  async (req, res) => {
+    try {
+      const error = {};
+      let { profilePicture, hasChanged } = req.body;
+
+      if (hasChanged === "true") {
+        if (!req.file) {
+          error["profilePicture"] = "Required field";
+        } else {
+          if (isImage(req.file.originalname)) {
+            error["profilePicture"] =
+              "Only PNG, JPEG, and JPG files are allowed";
+          } else {
+            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+              error["profilePicture"] = "File size should be less than 10MB";
+            }
+          }
+        }
+      }
+
+      if (Object.keys(error).length == 0) {
+        const updateFields = {
+          profilePicture,
+          hasChanged,
+        };
+
+        if (hasChanged && req.file) {
+          const userImage = await User.findById(req.params.id);
+          if (!userImage.profilePicture.includes("default")) {
+            await cloudinaryUploader(
+              "destroy",
+              "",
+              "image",
+              folderPath,
+              userImage.profilePicture
+            );
+          }
+
+          const cloud = await cloudinaryUploader(
+            "upload",
+            req.file.path,
+            "image",
+            folderPath,
+            req.file.filename
+          );
+          updateFields.profilePicture = `${cloud.original_filename}.${cloud.format}`;
+          if (cloud !== "error") {
+            /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
+                cloud.format
+              }`; */
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
+        }
+
+        const user = await User.findByIdAndUpdate(req.params.id, updateFields, {
+          new: true,
+        });
+
+        if (user) {
+          await createPusher(`${req.params.id}`, "reload", {});
+          /* await createPusher("user", "reload", {});  */
+          return res.status(200).json({
+            success: true,
+            message: "Profile Picture Updated Successfully",
+            user,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length != 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 accountController.put(
   "/myaccount/:action",
@@ -769,6 +876,7 @@ accountController.put(
     await handleArchive(req.params.action, req.user.id, res);
   }
 );
+
 accountController.put(
   "/:action/:id",
   tokenMiddleware,
@@ -853,29 +961,40 @@ accountController.put(
     try {
       const error = {};
       const { password, confirmPassword, oldPassword } = req.body;
+      const oldUserPassword = await User.findOne({
+        _id: req.user.id,
+      });
       if (isEmpty(oldPassword)) {
         error["oldPassword"] = "Required field";
       } else {
         /* if (verifyPassword(password)) {
           error["password"] = "Password requirement not met";
         } */
-        const user = await User.findOne({
-          _id: req.user.id,
-        });
-        if (!(user && (await bcrypt.compare(oldPassword, user.password)))) {
+
+        if (
+          !(
+            oldUserPassword &&
+            (await bcrypt.compare(oldPassword, oldUserPassword.password))
+          )
+        ) {
           error["oldPassword"] = "Incorrect password";
         }
         console.log("====================================");
-        console.log(await bcrypt.compare(password, user.password));
+        console.log(await bcrypt.compare(password, oldUserPassword.password));
         console.log("====================================");
       }
-      /* if (isEmpty(password)) {
-      error["password"] = "Required field";
-    } else {
-      if (verifyPassword(password)) {
-        error["password"] = "Password requirement not met";
+      if (isEmpty(password)) {
+        error["password"] = "Required field";
+      } else {
+        if (verifyPassword(password)) {
+          error["password"] = "";
+        } else {
+          if (await bcrypt.compare(password, oldUserPassword.password)) {
+            error["password"] =
+              "Password must not be the same as the old password";
+          }
+        }
       }
-    } */
 
       if (isEmpty(confirmPassword)) {
         error["confirmPassword"] = "Required field";

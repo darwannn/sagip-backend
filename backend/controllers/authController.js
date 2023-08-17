@@ -22,13 +22,14 @@ const {
   calculateArchivedDate,
   getUsersId,
   handleArchive,
+  verifyPassword,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
 
 /* const currentDate = new Date(); */
-const codeExpiration = new Date(new Date().getTime() + 30 * 60000);
+const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
@@ -166,6 +167,8 @@ authController.post("/register", async (req, res) => {
 
         userType: "resident",
         status: "unverified",
+        isOnline: true,
+        lastOnlineDate: Date.now,
       });
 
       /* const notification = await Notification.create({
@@ -191,7 +194,9 @@ authController.post("/register", async (req, res) => {
             "register",
             user._doc._id,
             user._doc.userType,
-            user._doc.status
+            user._doc.status,
+            "7d",
+            ""
           ),
         });
         /* } else {
@@ -308,7 +313,9 @@ authController.put(
                       "login",
                       user._doc._id,
                       user._doc.userType,
-                      user._doc.status
+                      user._doc.status,
+                      "7d",
+                      ""
                     ),
                   });
                 }
@@ -326,7 +333,9 @@ authController.put(
                       "new-password",
                       user._doc._id,
                       user._doc.userType,
-                      user._doc.status
+                      user._doc.status,
+                      "7d",
+                      ""
                     ),
                   });
                 if (action === "login")
@@ -344,7 +353,9 @@ authController.put(
                       "login",
                       user._doc._id,
                       user._doc.userType,
-                      user._doc.status
+                      user._doc.status,
+                      "7d",
+                      ""
                     ),
                   });
                 if (action === "contact") {
@@ -677,6 +688,8 @@ authController.post("/login", async (req, res) => {
               // Reset the attempt number if the password is correct
               /* if (!user.archivedDate) { */
               user.attempt = 0;
+              user.isOnline = true;
+              user.lastOnlineDate = Date.now();
               await user.save();
 
               return res.status(200).json({
@@ -692,7 +705,9 @@ authController.post("/login", async (req, res) => {
                   "login",
                   user._doc._id,
                   user._doc.userType,
-                  user._doc.status
+                  user._doc.status,
+                  "7d",
+                  ""
                 ),
               });
               /* } else {
@@ -739,7 +754,9 @@ authController.post("/login", async (req, res) => {
                     "register",
                     user._doc._id,
                     user._doc.userType,
-                    user._doc.status
+                    user._doc.status,
+                    "7d",
+                    ""
                   ),
                 });
               }
@@ -800,7 +817,8 @@ authController.post("/forgot-password", async (req, res) => {
           sendEmail(
             user.email,
             "SAGIP verification code",
-            `Your SAGIP verification code is ${user.verificationCode}`
+            user.verificationCode,
+            codeExpiration
           );
         } else if (identifierType === "contactNumber") {
           /*     sendSMS(`Your SAGIP verification code is ${user.verificationCode}`,user.contactNumber) */
@@ -824,12 +842,16 @@ authController.post("/forgot-password", async (req, res) => {
                 id: user._doc._id,
                 userType: user._doc.userType,
                 status: user._doc.status,
+                identifier: identifier,
               },
               token: generateToken(
                 "forgot-password",
                 user._doc._id,
                 user._doc.userType,
-                user._doc.status
+                user._doc.status,
+                "7d",
+
+                identifier
               ),
             });
           } else if (identifierType === "contactNumber") {
@@ -846,7 +868,9 @@ authController.post("/forgot-password", async (req, res) => {
                 "forgot-password",
                 user._doc._id,
                 user._doc.userType,
-                user._doc.status
+                user._doc.status,
+                "7d",
+                ""
               ),
             });
           }
@@ -897,14 +921,25 @@ authController.put(
     try {
       const error = {};
       const { password, confirmPassword } = req.body;
-
-      /* if (isEmpty(password)) {
-      error["password"] = "Required field";
-    } else {
-      if (verifyPassword(password)) {
-        error["password"] = "Password requirement not met";
+      const oldUserPassword = await User.findOne({
+        _id: req.user.id,
+      });
+      if (isEmpty(password)) {
+        error["password"] = "Required field";
+      } else {
+        if (verifyPassword(password)) {
+          error["password"] = "";
+        } else {
+          console.log("====================================");
+          console.log(password);
+          console.log("====================================");
+          console.log(await bcrypt.compare(password, oldUserPassword.password));
+          if (await bcrypt.compare(password, oldUserPassword.password)) {
+            error["password"] =
+              "Password must not be the same as the old password";
+          }
+        }
       }
-    } */
 
       if (isEmpty(confirmPassword)) {
         error["confirmPassword"] = "Required field";
@@ -1050,6 +1085,42 @@ authController.put(
       // }
     } catch (error) {
       // If an exception occurs, respond with an internal server error
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+authController.post(
+  "/logout",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+  "resident",
+  "responder",
+  "dispatcher",
+  "admin",
+  "super-admin",
+]), */
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(req.user.id, {
+        isOnline: false,
+        lastOnlineDate: Date.now(),
+      });
+
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          message: "Logout Successfully",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,

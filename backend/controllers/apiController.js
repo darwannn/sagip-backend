@@ -30,6 +30,8 @@ const pusher = new Pusher({
   }),
 });
  */
+
+const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 apiController.get("/signal", async (req, res) => {
   try {
     const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
@@ -136,6 +138,7 @@ apiController.get("/signal", async (req, res) => {
 });
 
 apiController.get("/weather", async (req, res) => {
+  /*   sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration); */
   /*   createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
@@ -407,23 +410,91 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
     return "Internal Server Error: " + error;
   }
 };
-async function sendEmail(to, subject, html) {
+async function sendEmail(to, subject, code, expiration) {
+  // const html = ` `;
+  const html = `
+<body
+  style='font-family:Roboto, sans-serif; font-size: 18px;text-align: center; background-color:#5E72D2; margin: 0; padding: 0;'>
+  <table style='width: 100%;'>
+      <tr>
+          <td style='  vertical-align: middle;'>
+              <table style=' margin:0 auto; padding: 50px 20px 80px 20px;'>
+                  <tr>
+                      <td>
+                          <div style="font-size: 40px; font-weight:bold; color:white;">SAGIP</div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          <table
+                              style='background-color: white!important; border-radius: 20px; padding: 100px 40px; width: 500px;'>
+                              <tr>
+                                  <td style='color:black!important;'>
+                                      Here is your SAGIP verification code
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td>
+                                      <div style='font-size: 60px; color: #5E72D2; font-weight: bold; padding: 30px 0px;'>${code}</div>
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td style='color:black!important;'>
+                                     If you didn't request this, you can ignore this email or let us know.
+                                  </td>
+                              </tr>
+                     
+                          </table>
+                      </td>
+                  </tr>
+                  <tr >
+                      <td style='font-size:17px; color:white; padding-top:15px;'>
+                          The link will expire after a day, on ${moment(
+                            expiration
+                          ).format("MMM DD, YYYY | hh:MM A")}.
+                      </td>
+                  </tr>
+                  <tr>
+                      <td style='font-size:15px; color:white; padding-top:5px;'>
+                          Copyright © ${moment().format(
+                            "YYYY"
+                          )} SAGIP. All Rights Reserved.
+                      </td>
+                  </tr>
+                  <tr>
+                      <td style='opacity: 0;'>
+                          <script>
+                              ${moment()}
+                          </script>
+                          </div>
+                      </td>
+                  </tr>
+              </table>
+          </td>
+      </tr>
+  </table>
+</body>
+`;
   try {
     let transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
       auth: {
-        user: "snackwise.hagonoy@gmail.com",
-        pass: "gesjppxbvxkswodb",
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+        /*  user: "sagip.cityofmalolos.drrmo@gmail.com",
+        pass: "agehxjemnwwohrig", */
       },
     });
 
     let info = await transporter.sendMail({
-      from: "sagip.cityofmalolos.drrmo@gmail.com",
+      from: process.env.NODEMAILER_EMAIL,
       to,
       subject,
-      html,
+      html: `Your SAGIP verification code is ${code}. The link will expire after a day, on ${moment(
+        expiration
+      ).format("MMM DD, YYYY | hh:MM A")}.`,
     });
 
     console.log(info.messageId);

@@ -80,11 +80,14 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "resident",
     },
-    /*   isOnline: {
+    isOnline: {
       type: Boolean,
       default: false,
-    }, */
-
+    },
+    lastOnlineDate: {
+      type: Date,
+      dafault: Date.now,
+    },
     emailStatus: {
       type: String,
       default: "unverified",
