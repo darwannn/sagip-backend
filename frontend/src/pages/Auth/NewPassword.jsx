@@ -28,7 +28,7 @@ const NewPassword = () => {
       const data = await request("/auth/new-password", "PUT", options, {
         password,
         confirmPassword,
-        for: "new-password",
+        target: "new-password",
       });
       console.log(data);
 

@@ -276,10 +276,10 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
       }
     }
 
-    /*    console.log(contactNumbers);
+    console.log(contactNumbers);
     console.log(fcmTokens);
 
-    createPushNotificationToken(alertTitle, alertMessage, fcmTokens); */
+    createPushNotificationToken(alertTitle, alertMessage, fcmTokens);
 
     try {
       const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);

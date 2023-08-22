@@ -157,7 +157,7 @@ const isEmailOwner = async (id, email) => {
 const generateToken = (purpose, id, userType, status, days, identifier) => {
   return jwt.sign(
     {
-      for: purpose,
+      target: purpose,
       id,
       userType,
       status,

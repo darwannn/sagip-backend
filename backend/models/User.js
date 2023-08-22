@@ -86,8 +86,9 @@ const userSchema = mongoose.Schema(
     },
     lastOnlineDate: {
       type: Date,
-      dafault: Date.now,
+      default: Date.now,
     },
+
     emailStatus: {
       type: String,
       default: "unverified",

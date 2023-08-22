@@ -72,10 +72,10 @@ authController.post("/register", async (req, res) => {
       error["email"] = "Required field";
     } else {
       if (isEmail(email)) {
-        error["email"] = "not email";
+        error["email"] = "Invalid email address";
       } else {
         if (await isEmailExists(email)) {
-          error["email"] = "email already exists";
+          error["email"] = "Email address already taken";
         }
       }
     }
@@ -84,10 +84,10 @@ authController.post("/register", async (req, res) => {
       error["contactNumber"] = "Required field";
     } else {
       if (isContactNumber(contactNumber)) {
-        error["contactNumber"] = "Must be a number";
+        error["contactNumber"] = "Invalid contact number";
       } else {
         if (await isContactNumberExists(contactNumber)) {
-          error["contactNumber"] = "Contact Number already exists";
+          error["contactNumber"] = "Contact number already taken";
         }
       }
     }
@@ -110,15 +110,15 @@ authController.post("/register", async (req, res) => {
     if (isEmpty(barangay)) error["barangay"] = "Required field";
     if (isEmpty(street)) error["street"] = "Required field";
 
-    /* if (isEmpty(password)) {
+    if (isEmpty(password)) {
       error["password"] = "Required field";
     } else {
       if (verifyPassword(password)) {
         error["password"] = "Password requirement not met";
       }
-    } */
+    }
 
-    /* if (isEmpty(confirmPassword)) {
+    if (isEmpty(confirmPassword)) {
       error["confirmPassword"] = "Required field";
     } else {
       if (!isEmpty(password)) {
@@ -126,7 +126,7 @@ authController.post("/register", async (req, res) => {
           error["confirmPassword"] = "Password did not match";
         }
       }
-    } */
+    }
 
     if (Object.keys(error).length == 0) {
       profilePicture = "default.jpg";
@@ -168,7 +168,7 @@ authController.post("/register", async (req, res) => {
         userType: "resident",
         status: "unverified",
         isOnline: true,
-        lastOnlineDate: Date.now,
+        /*      lastOnlineDate: Date.now, */
       });
 
       /* const notification = await Notification.create({
@@ -185,7 +185,7 @@ authController.post("/register", async (req, res) => {
           success: true,
           message: "A verification has been sent to your contact number",
           user: {
-            for: "register",
+            target: "register",
             id: user._doc._id,
             userType: user._doc.userType,
             status: user._doc.status,
@@ -196,7 +196,7 @@ authController.post("/register", async (req, res) => {
             user._doc.userType,
             user._doc.status,
             "7d",
-            ""
+            user._doc.contactNumber
           ),
         });
         /* } else {
@@ -209,6 +209,95 @@ authController.post("/register", async (req, res) => {
         return res.status(500).json({
           success: false,
           message: "Internal Server Error",
+        });
+      }
+    }
+
+    if (Object.keys(error).length != 0) {
+      error["success"] = false;
+      error["message"] = "input error";
+
+      return res.status(400).json(error);
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
+authController.post("/validate/:action", async (req, res) => {
+  try {
+    const error = {};
+    let action = req.params.action.toLowerCase();
+
+    if (action === "email") {
+      let email = req.body.email;
+      if (isEmpty(email)) {
+        error["email"] = "Required field";
+      } else {
+        if (isEmail(email)) {
+          error["email"] = "Invalid email address";
+        } else {
+          if (await isEmailExists(email)) {
+            error["email"] = "Email address already taken";
+          }
+        }
+      }
+    }
+    if (action === "contact") {
+      let contactNumber = req.body.contactNumber;
+      if (isEmpty(contactNumber)) {
+        error["contactNumber"] = "Required field";
+      } else {
+        if (isContactNumber(contactNumber)) {
+          error["contactNumber"] = "Invalid contact number";
+        } else {
+          if (await isContactNumberExists(contactNumber)) {
+            error["contactNumber"] = "Contact number already taken";
+          }
+        }
+      }
+    }
+
+    if (action === "password") {
+      let { password, confirmPassword } = req.body;
+      if (isEmpty(password)) {
+        error["password"] = "Required field";
+      } else {
+        if (verifyPassword(password)) {
+          error["password"] = "Password requirement not met";
+        }
+      }
+
+      if (isEmpty(confirmPassword)) {
+        error["confirmPassword"] = "Required field";
+      } else {
+        if (!isEmpty(password)) {
+          if (password !== confirmPassword) {
+            error["confirmPassword"] = "Password did not match";
+          }
+        }
+      }
+    }
+
+    if (Object.keys(error).length == 0) {
+      if (action === "email") {
+        return res.status(200).json({
+          success: true,
+          message: "valid email address",
+        });
+      }
+      if (action === "contact") {
+        return res.status(200).json({
+          success: true,
+          message: "valid contact",
+        });
+      }
+      if (action === "password") {
+        return res.status(200).json({
+          success: true,
+          message: "valid password",
         });
       }
     }
@@ -252,9 +341,9 @@ authController.put(
         action === "email"
       ) {
         if (isEmpty(code)) {
-          error["code"] = "Required field";
+          error["verificationCode"] = "Required field";
         } else if (isNumber(code)) {
-          error["code"] = "Invalid code";
+          error["verificationCode"] = "Invalid code";
         }
 
         if (Object.keys(error).length == 0) {
@@ -303,11 +392,11 @@ authController.put(
                     message:
                       "Verified successfully. You can now use your account!",
                     user: {
-                      for: "login",
+                      target: "login",
                       id: user._doc._id,
                       userType: user._doc.userType,
                       status: user._doc.status,
-                      email: user._doc.email,
+                      /* email: user._doc.email, */
                     },
                     token: generateToken(
                       "login",
@@ -324,7 +413,7 @@ authController.put(
                     success: true,
                     message: "Enter your new password",
                     user: {
-                      for: "new-password",
+                      target: "new-password",
                       id: user._doc._id,
                       userType: user._doc.userType,
                       status: user._doc.status,
@@ -344,7 +433,7 @@ authController.put(
                     message:
                       "Verified successfully. You can now use your account!",
                     user: {
-                      for: "login",
+                      target: "login",
                       id: user._doc._id,
                       userType: user._doc.userType,
                       status: user._doc.status,
@@ -386,6 +475,21 @@ authController.put(
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
+                      user: {
+                        target: "login",
+                        id: user._doc._id,
+                        userType: user._doc.userType,
+                        status: user._doc.status,
+                        /*     email: user._doc.email, */
+                      },
+                      token: generateToken(
+                        "login",
+                        user._doc._id,
+                        user._doc.userType,
+                        user._doc.status,
+                        "7d",
+                        ""
+                      ),
                     });
                   } else {
                     return res.status(500).json({
@@ -418,6 +522,21 @@ authController.put(
                     return res.status(200).json({
                       success: true,
                       message: "Email Updated Successfully",
+                      user: {
+                        target: "login",
+                        id: user._doc._id,
+                        userType: user._doc.userType,
+                        status: user._doc.status,
+                        /*     email: user._doc.email, */
+                      },
+                      token: generateToken(
+                        "login",
+                        user._doc._id,
+                        user._doc.userType,
+                        user._doc.status,
+                        "7d",
+                        ""
+                      ),
                     });
                   } else {
                     return res.status(500).json({
@@ -427,7 +546,7 @@ authController.put(
                   }
                 }
               } else {
-                error["code"] = "Incorrect verification code";
+                error["verificationCode"] = "Incorrect verification code";
                 user.attempt += 1;
                 await user.save();
               }
@@ -477,9 +596,9 @@ authController.put(
       const userId = req.user.id;
 
       if (isEmpty(code)) {
-        error["code"] = "Required field";
+        error["verificationCode"] = "Required field";
       } else if (isNumber(code)) {
-        error["code"] = "Invalid code";
+        error["verificationCode"] = "Invalid code";
       }
 
       if (Object.keys(error).length == 0) {
@@ -520,7 +639,7 @@ authController.put(
                   message:
                     "Verified successfully. You can now use your account!",
                   user: {
-                    for: "login",
+                    target: "login",
                     id: user._doc._id,
                     userType: user._doc.userType,
                     status: user._doc.status,
@@ -534,7 +653,7 @@ authController.put(
                   success: true,
                   message: "Enter your new password",
                   user: {
-                    for: "new-password",
+                    target: "new-password",
                     id: user._doc._id,
                     userType: user._doc.userType,
                     status: user._doc.status,
@@ -547,7 +666,7 @@ authController.put(
                   message:
                     "Verified successfully. You can now use your account!",
                   user: {
-                    for: "login",
+                    target: "login",
                     id: user._doc._id,
                     userType: user._doc.userType,
                     status: user._doc.status,
@@ -560,7 +679,7 @@ authController.put(
                   message: "Contact number has been updated successfully",
                 });
             } else {
-              error["code"] = "Incorrect verification code";
+              error["verificationCode"] = "Incorrect verification code";
               user.attempt += 1;
               await user.save();
             }
@@ -622,13 +741,13 @@ authController.post(
             return res.status(200).json({
               success: true,
               message: "Password Matches",
-              /*  for: "edit-password", */
+              /*  target: "edit-password", */
             });
           } else {
             handleArchive(req.params.action, req.user.id, res);
           }
         } else {
-          return res.status(200).json({
+          return res.status(500).json({
             success: false,
             message: "input error",
             password: "Incorrect Password",
@@ -664,11 +783,47 @@ authController.post("/login", async (req, res) => {
         let generatedCode = await generateCode();
         user.verificationCode = generatedCode;
         await user.save();
+        let identifierType = await checkIdentifierType(identifier);
+        // let generatedCode = await generateCode();
+        // console.log(accountExists.id);
 
+        // const user = await User.findByIdAndUpdate(accountExists.id, {
+        //   verificationCode: generatedCode,
+        //   codeExpiration: codeExpiration,
+        // });
+
+        if (user) {
+          if (identifierType === "email") {
+            sendEmail(
+              user.email,
+              "SAGIP verification code",
+              generatedCode,
+              codeExpiration
+            );
+          } else if (identifierType === "contactNumber") {
+            sendSMS(
+              `Your SAGIP verification code is ${generatedCode}`,
+              user.contactNumber
+            );
+          }
+        }
         return res.status(500).json({
           success: false,
           message: "Maximum login attempts exceeded",
-          attempt: true,
+          user: {
+            target: "attempt",
+            id: user._doc._id,
+            userType: user._doc.userType,
+            status: user._doc.status,
+          },
+          token: generateToken(
+            "attempt",
+            user._doc._id,
+            user._doc.userType,
+            user._doc.status,
+            "7d",
+            identifier
+          ),
         });
       } else {
         if (user && (await bcrypt.compare(password, user.password))) {
@@ -696,7 +851,7 @@ authController.post("/login", async (req, res) => {
                 success: true,
                 message: "Login Successfully",
                 user: {
-                  for: "login",
+                  target: "login",
                   id: user._doc._id,
                   userType: user._doc.userType,
                   status: user._doc.status,
@@ -745,7 +900,7 @@ authController.post("/login", async (req, res) => {
                   success: false,
                   message: `Please verify your contact number.Verification code has been send to ${userVerificationCode.contactNumber}`,
                   user: {
-                    for: "register",
+                    target: "register",
                     id: userVerificationCode._doc._id,
                     userType: userVerificationCode._doc.userType,
                     status: userVerificationCode._doc.status,
@@ -756,7 +911,7 @@ authController.post("/login", async (req, res) => {
                     user._doc.userType,
                     user._doc.status,
                     "7d",
-                    ""
+                    identifier
                   ),
                 });
               }
@@ -821,7 +976,10 @@ authController.post("/forgot-password", async (req, res) => {
             codeExpiration
           );
         } else if (identifierType === "contactNumber") {
-          /*     sendSMS(`Your SAGIP verification code is ${user.verificationCode}`,user.contactNumber) */
+          sendSMS(
+            `Your SAGIP verification code is ${user.verificationCode}`,
+            user.contactNumber
+          );
         }
         if (user.isBanned) {
           return res.status(500).json({
@@ -838,7 +996,7 @@ authController.post("/forgot-password", async (req, res) => {
               success: true,
               message: `Verification code has been sent to ${user._doc.email}`,
               user: {
-                for: "forgot-password",
+                target: "forgot-password",
                 id: user._doc._id,
                 userType: user._doc.userType,
                 status: user._doc.status,
@@ -859,7 +1017,7 @@ authController.post("/forgot-password", async (req, res) => {
               success: true,
               message: `Verification code has been sent to ${user._doc.contactNumber}`,
               user: {
-                for: "forgot-password",
+                target: "forgot-password",
                 id: user._doc._id,
                 userType: user._doc.userType,
                 status: user._doc.status,
@@ -870,7 +1028,7 @@ authController.post("/forgot-password", async (req, res) => {
                 user._doc.userType,
                 user._doc.status,
                 "7d",
-                ""
+                identifier
               ),
             });
           }
@@ -1148,21 +1306,21 @@ authController.put(
       if (!req.file) {
         return res.status(500).json({
           success: false,
-          image: "Required field",
+          verificationPicture: "Required field",
           message: "input error",
         });
       } else {
         if (isImage(req.file.originalname)) {
           return res.status(500).json({
             success: false,
-            image: "Only PNG, JPEG, and JPG files are allowed",
+            verificationPicture: "Only PNG, JPEG, and JPG files are allowed",
             message: "input error",
           });
         } else {
           if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
             return res.status(500).json({
               success: false,
-              image: "File size should be less than 10MB",
+              verificationPicture: "File size should be less than 10MB",
               message: "input error",
             });
           }
@@ -1278,7 +1436,7 @@ authController.get(
 );
 
 authController.get(
-  "/verify-identity/request/:id",
+  "/verify-identity/request/",
   tokenMiddleware,
   /* userTypeMiddleware([
   "resident",
@@ -1291,9 +1449,9 @@ authController.get(
   async (req, res) => {
     try {
       /*       console.log("====================================");
-      console.log(req.params.id);
+      console.log(req.user.id);
       console.log("===================================="); */
-      const user = await User.findById(req.params.id);
+      const user = await User.findById(req.user.id);
       if (user.verificationRequestDate === undefined) {
         if (
           /* (user.verificationRequestDate === undefined &&
@@ -1301,7 +1459,7 @@ authController.get(
           user.status === "verified" ||
           user.userType !== "resident"
         ) {
-          return res.status(500).json({
+          return res.status(200).json({
             success: false,
             message: "not found",
           });
@@ -1309,7 +1467,7 @@ authController.get(
           return res.status(200).json({ success: true, ...user._doc });
         }
       } else {
-        return res.status(500).json({
+        return res.status(200).json({
           success: false,
           message: "pending request",
         });

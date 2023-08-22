@@ -458,12 +458,16 @@ wellnessSurveyController.put(
       } */
 
       if (Object.keys(error).length === 0) {
+        console.log(req.params.id);
+        console.log(activeWellnessSurvey[0]._id);
+        console.log(activeWellnessSurvey[0]._id.equals(req.params.id));
         if (
           !(
             activeWellnessSurvey.length !== 0 &&
             activeWellnessSurvey._id !== req.params.id &&
             status === "active"
-          )
+          ) ||
+          activeWellnessSurvey[0]._id.equals(req.params.id)
         ) {
           const updateFields = { title, status, category, endDate };
 
@@ -474,7 +478,10 @@ wellnessSurveyController.put(
           );
 
           if (wellnessSurvey) {
-            if (status === "active") {
+            if (
+              status === "active" &&
+              !activeWellnessSurvey[0]._id.equals(req.params.id)
+            ) {
               await createPusher("wellness-survey", "reload", {});
               createNotificationAll(
                 wellnessSurvey._id,

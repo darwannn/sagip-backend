@@ -19,6 +19,7 @@ const {
   cloudinaryUploader,
   handleArchive,
   verifyPassword,
+  generateToken,
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
@@ -117,7 +118,7 @@ accountController.post(
         error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contactNumber"] = "Invalid Contact Number";
+          error["contactNumber"] = "Invalid contact number";
         } else {
           if (await isContactNumberExists(contactNumber)) {
             error["contactNumber"] = "Contact number already taken";
@@ -195,7 +196,7 @@ accountController.post(
           userType,
           status: "verified",
           isOnline: false,
-          lastOnlineDate: Date.now,
+          /*  lastOnlineDate: Date.now, */
         });
 
         /* const notification = await Notification.create({
@@ -442,15 +443,51 @@ accountController.put(
           if (user) {
             //console.log("Current COde: " + generatedCode);
             if (action === "contact-number") {
+              /* return res.status(200).json({
+                success: true,
+                message: `Verification code has been sent to ${contactNumber}`,
+              }); */
               return res.status(200).json({
                 success: true,
                 message: `Verification code has been sent to ${contactNumber}`,
+                user: {
+                  target: "login",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(
+                  "new-password",
+                  user._doc._id,
+                  user._doc.userType,
+                  user._doc.status,
+                  "7d",
+                  contactNumber
+                ),
               });
             }
             if (action === "email" || action === "verify-email") {
+              /*  return res.status(200).json({
+                success: true,
+                message: `Verification code has been sent to ${email}`,
+              }); */
               return res.status(200).json({
                 success: true,
                 message: `Verification code has been sent to ${email}`,
+                user: {
+                  target: "login",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(
+                  "new-password",
+                  user._doc._id,
+                  user._doc.userType,
+                  user._doc.status,
+                  "7d",
+                  email
+                ),
               });
             }
           } else {
@@ -612,7 +649,7 @@ accountController.put(
         error["contactNumber"] = "Required field";
       } else {
         if (isContactNumber(contactNumber)) {
-          error["contactNumber"] = "Invalid Contact Number";
+          error["contactNumber"] = "Invalid contact number";
         } else {
           if (await isContactNumberExists(contactNumber)) {
             if (await isContactNumberOwner(req.params.id, contactNumber)) {
@@ -759,7 +796,8 @@ accountController.put(
   }
 );
 accountController.put(
-  "/update/avatar/:id",
+  "/update/profile-picture/",
+
   /*  userTypeMiddleware([
     "resident",
     "responder",
@@ -767,37 +805,33 @@ accountController.put(
     "admin",
     "super-admin",
   ]), */
-
+  tokenMiddleware,
   multerMiddleware.single("image"),
   async (req, res) => {
     try {
       const error = {};
-      let { profilePicture, hasChanged } = req.body;
+      /*  let { profilePicture } = req.body; */
 
-      if (hasChanged === "true") {
-        if (!req.file) {
-          error["profilePicture"] = "Required field";
+      if (!req.file) {
+        error["profilePicture"] = "Required field";
+      } else {
+        if (isImage(req.file.originalname)) {
+          error["profilePicture"] = "Only PNG, JPEG, and JPG files are allowed";
         } else {
-          if (isImage(req.file.originalname)) {
-            error["profilePicture"] =
-              "Only PNG, JPEG, and JPG files are allowed";
-          } else {
-            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-              error["profilePicture"] = "File size should be less than 10MB";
-            }
+          if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+            error["profilePicture"] = "File size should be less than 10MB";
           }
         }
       }
 
       if (Object.keys(error).length == 0) {
-        const updateFields = {
-          profilePicture,
-          hasChanged,
-        };
+        const updateFields = {};
 
-        if (hasChanged && req.file) {
-          const userImage = await User.findById(req.params.id);
+        if (req.file) {
+          console.log("1");
+          const userImage = await User.findById(req.user.id);
           if (!userImage.profilePicture.includes("default")) {
+            console.log("2");
             await cloudinaryUploader(
               "destroy",
               "",
@@ -816,6 +850,7 @@ accountController.put(
           );
           updateFields.profilePicture = `${cloud.original_filename}.${cloud.format}`;
           if (cloud !== "error") {
+            console.log("3");
             /*  safetyTip.image = `${cloud.public_id.split("/").pop()}.${
                 cloud.format
               }`; */
@@ -827,12 +862,12 @@ accountController.put(
           }
         }
 
-        const user = await User.findByIdAndUpdate(req.params.id, updateFields, {
+        const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
           new: true,
         });
 
         if (user) {
-          await createPusher(`${req.params.id}`, "reload", {});
+          await createPusher(`${req.user.id}`, "reload", {});
           /* await createPusher("user", "reload", {});  */
           return res.status(200).json({
             success: true,
@@ -964,6 +999,10 @@ accountController.put(
       const oldUserPassword = await User.findOne({
         _id: req.user.id,
       });
+      console.log(password);
+      console.log(confirmPassword);
+      console.log(oldPassword);
+
       if (isEmpty(oldPassword)) {
         error["oldPassword"] = "Required field";
       } else {

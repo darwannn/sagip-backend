@@ -15,18 +15,15 @@ function VerifyIdentity() {
 
     const fetchAccountDetails = async () => {
       try {
-        const data = await request(
-          `/auth/verify-identity/request/${user.id}`,
-          "GET",
-          {
-            Authorization: `Bearer ${token}`,
-          }
-        );
+        const data = await request(`/auth/verify-identity/request/`, "GET", {
+          Authorization: `Bearer ${token}`,
+        });
 
         console.log(data);
 
         if (data.success) {
         } else {
+          console.log(data.message);
           if (data.message.includes("not found")) {
             navigate("/");
           }
@@ -36,9 +33,9 @@ function VerifyIdentity() {
           }
         }
 
-        if (data.status === "verified") {
+        /* if (data.status === "verified") {
           navigate("/");
-        }
+        } */
       } catch (error) {
         console.error(error);
       }
