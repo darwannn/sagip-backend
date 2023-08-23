@@ -339,15 +339,19 @@ function Home() {
         <button onClick={stopSound}>Stop Sound</button>
       </div>
       <br />
-      <a href="tel:09999999999">ssssssssPHONE_NUMMn</a>
+      <a href="tel:09999999999">PHONE_NUMMn</a>
       <input
         type="file"
-        accept="image/*;capture=camera"
+        accept="image/*"
+        capture="camera"
+        /*    accept="image/*;capture=camera" */
         onClick={() => window.AndroidInterface?.setMediaChooser("camera")}
       ></input>
       <input
         type="file"
-        accept="video/*;capture=camcorder"
+        accept="video/*"
+        capture="camcorder"
+        /* accept="video/*;capture=camcorder" */
         onClick={() => window.AndroidInterface?.setMediaChooser("camcorder")}
       ></input>
       <input
