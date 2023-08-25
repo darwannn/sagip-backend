@@ -154,11 +154,11 @@ const HazardReport = ({ type = "add" }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const locationName = await new Promise((resolve, reject) => {
+/*       const locationName = await new Promise((resolve, reject) => {
         reverseGeoCoding(latitude, longitude).then(resolve).catch(reject);
       });
 
-      const { street, municipality } = locationName;
+      const { street, municipality } = locationName; */
       /*    if (municipality === "Malolos") { */
       const formData = new FormData();
       formData.append("title", title);
@@ -168,11 +168,11 @@ const HazardReport = ({ type = "add" }) => {
       formData.append("category", category);
       //formData.append("hasChanged", hasChanged);
       formData.append("proof", proof);
-      formData.append("street", street);
-      formData.append("municipality", municipality);
+ /*      formData.append("street", street); */
+     /*  formData.append("municipality", municipality); */
 
-      console.log(street);
-      console.log(municipality);
+  /*     console.log(street); */
+    /*   console.log(municipality); */
 
       let url, method;
       if (isVerifying === false) {

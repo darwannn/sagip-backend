@@ -31,11 +31,11 @@ const HazardReportSchema = new mongoose.Schema(
     },
     street: {
       type: String,
-      required: true,
+      default: "",
     },
     municipality: {
       type: String,
-      required: true,
+      default: "",
     },
     status: {
       type: String,

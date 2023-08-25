@@ -35,11 +35,11 @@ const AssistanceRequestSchema = new mongoose.Schema(
     },
     street: {
       type: String,
-      required: true,
+      default: "",
     },
     municipality: {
       type: String,
-      required: true,
+      default: "",
     },
     /*  situation: {
       question: {
