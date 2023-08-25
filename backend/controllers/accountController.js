@@ -40,11 +40,11 @@ const {
 } = require("./notificationController");
 accountController.get("/", async (req, res) => {
   try {
-    /* const user = await User.find({}); */
-    const user = await User.find({
+    const user = await User.find({});
+    /* const user = await User.find({
       archivedDate: { $exists: false },
       isArchived: false,
-    });
+    }); */
 
     if (user) {
       return res.status(200).json(user);
@@ -1149,12 +1149,12 @@ accountController.get("/:id", async (req, res) => {
 
 const getUserInfo = async (id, res) => {
   try {
-    const user = await User.findOne({
+    /* const user = await User.findOne({
       _id: id,
       archivedDate: { $exists: false },
       isArchived: false,
-    });
-    //const user = await User.findById(id);
+    }); */
+    const user = await User.findById(id);
 
     if (user) {
       /* console.log("====================================");

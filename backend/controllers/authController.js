@@ -807,7 +807,7 @@ authController.post("/login", async (req, res) => {
             );
           }
         }
-        return res.status(500).json({
+        return res.status(200).json({
           success: false,
           message: "Maximum login attempts exceeded",
           user: {
