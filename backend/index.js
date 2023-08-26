@@ -4,6 +4,7 @@ const dotenv = require("dotenv").config();
 const cors = require("cors");
 const authController = require("./controllers/authController");
 const accountController = require("./controllers/accountController");
+const alertController = require("./controllers/alertController");
 const { apiController } = require("./controllers/apiController");
 const safetyTipController = require("./controllers/safetyTipController");
 const emergencyFacilityController = require("./controllers/emergencyFacilityController");
@@ -20,6 +21,7 @@ const wellnessSurveyController = require("./controllers/wellnessSurveyController
 const app = express();
 
 const bodyParser = require("body-parser");
+const statisticsController = require("./controllers/statisticsController");
 
 mongoose.set("strictQuery", false);
 mongoose.connect(process.env.MONGO_URL, () =>
@@ -39,10 +41,12 @@ app.use("/account", accountController);
 app.use("/safety-tips", safetyTipController);
 app.use("/emergency-facility", emergencyFacilityController);
 app.use("/api", apiController);
+app.use("/alert", alertController);
 app.use("/team", teamController);
 app.use("/hazard-report", hazardReportController);
 app.use("/assistance-request", assistanceRequestController);
 app.use("/notification", notificationController);
+app.use("/statistics", statisticsController);
 app.use("/wellness-survey", wellnessSurveyController);
 
 app.use(bodyParser.json());
