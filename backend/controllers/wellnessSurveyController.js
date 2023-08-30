@@ -525,7 +525,7 @@ wellnessSurveyController.put(
 );
 
 wellnessSurveyController.put(
-  "/answer",
+  "/answer/",
   tokenMiddleware,
   /* userTypeMiddleware([
   "resident",
@@ -535,13 +535,16 @@ wellnessSurveyController.put(
   "super-admin",
 ]), */ async (req, res) => {
     try {
-      const { surveyId, answer } = req.body;
-      console.log(surveyId);
+      const { answer } = req.body;
+      const activeWellnessSurvey = await WellnessSurvey.findOne({
+        status: "active",
+      });
+      console.log(activeWellnessSurvey._id);
       const update = {};
       update[answer] = req.user.id;
 
       const wellnessSurvey = await WellnessSurvey.findOneAndUpdate(
-        { _id: surveyId },
+        { _id: activeWellnessSurvey._id },
         { $push: update },
         { new: true }
       );

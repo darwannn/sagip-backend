@@ -195,6 +195,45 @@ safetyTipController.get("/published/:id", async (req, res) => {
   }
 });
 
+safetyTipController.get(
+  "/saved",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "resident",
+    "responder",
+    "dispatcher",
+    "admin",
+    "super-admin",
+  ]), */
+  async (req, res) => {
+    try {
+      console.log("im here");
+      const safetyTip = await SafetyTip.find({
+        saves: req.user.id,
+      });
+      if (safetyTip) {
+        return res.status(200).json(safetyTip);
+        return res.status(200).json({
+          /* success: true,
+      message: "Record found", 
+      safetyTips,*/
+          ...safetyTip,
+        });
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
 safetyTipController.get("/:id", async (req, res) => {
   try {
     const safetyTip = await SafetyTip.findById(req.params.id);
@@ -399,44 +438,6 @@ safetyTipController.put(
         return res.status(200).json({
           success: true,
           message: "Saved Successfully",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-);
-
-safetyTipController.get(
-  "/saved/:id",
-  /* tokenMiddleware,
-  userTypeMiddleware([
-    "resident",
-    "responder",
-    "dispatcher",
-    "admin",
-    "super-admin",
-  ]), */
-  async (req, res) => {
-    try {
-      const safetyTip = await SafetyTip.find({
-        saves: req.params.id,
-      });
-      if (safetyTip) {
-        return res.status(200).json(safetyTip);
-        return res.status(200).json({
-          /* success: true,
-      message: "Record found", 
-      safetyTips,*/
-          ...safetyTip,
-        });
-      } else {
-        return res.status(200).json({
-          success: false,
-          message: "not found",
         });
       }
     } catch (error) {

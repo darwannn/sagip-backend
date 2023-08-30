@@ -32,140 +32,6 @@ const pusher = new Pusher({
  */
 
 const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-apiController.get("/signal", async (req, res) => {
-  try {
-    const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
-    const response = await axios.get(url);
-    const data = response.data;
-    const bulletins = data.bulletins;
-
-    let maxCount = 0;
-    let maxIndex = 0;
-
-    bulletins.forEach((bulletin, index) => {
-      if (bulletin.count > maxCount) {
-        maxCount = bulletin.count;
-        maxIndex = index;
-      }
-    });
-
-    /*   const name = bulletins[maxIndex].name;
-    const count = bulletins[maxIndex].count;
-    const final = bulletins[maxIndex].final;
-    const file = bulletins[maxIndex].file; */
-    const link = bulletins[maxIndex].link;
-    const filename = link.substring(link.lastIndexOf("/") + 1);
-    let counter = 0;
-    let looping = true;
-    console.log("====================================");
-    console.log(filename);
-    console.log("====================================");
-
-    const filenamParts = filename.split("_");
-    const typhoonName = filenamParts[filenamParts.length - 1].split(".")[0];
-    do {
-      const parseUrl = `https://pagasa.chlod.net/api/v1/bulletin/parse/${filename}`;
-      let parseResponse;
-
-      try {
-        parseResponse = await axios.head(parseUrl);
-      } catch (error) {
-        console.log("Error: Unable to retrieve data from URL.");
-        const downloadUrl = `https://pagasa.chlod.net/api/v1/bulletin/download/${filename}`;
-        const downloadResponse = await axios.get(downloadUrl);
-        const datas = downloadResponse.data;
-        counter++;
-
-        if (counter > 1) {
-          break;
-        }
-      }
-      if (parseResponse && parseResponse.status === 200) {
-        looping = false;
-        const parseData = await axios.get(parseUrl).then((res) => res.data);
-        /* all data */
-        /* const sampleExpirationDate = "2023-06-12T12:00:00.000Z"; */
-        const targetDate = moment(parseData.bulletin.info.expires);
-        const currentDate = moment();
-
-        if (currentDate > targetDate) {
-          return res
-            .status(200)
-            .json({ success: true, message: "no typhoon", signal: 0 });
-        } else {
-          let hasSignal = false;
-
-          Object.entries(parseData.bulletin.signals).forEach(
-            ([signal, signalData]) => {
-              if (signalData !== null && !hasSignal) {
-                const areas = Object.values(signalData.areas);
-                areas.forEach((area) => {
-                  area.forEach((location) => {
-                    if (
-                      (location.includes &&
-                        location.includes.objects &&
-                        location.includes.objects.includes(municipality)) ||
-                      location.name === "Bulacan"
-                    ) {
-                      console.log("1");
-                      hasSignal = true;
-                      return res.status(200).json({
-                        success: true,
-                        signal: `${signal}`,
-                        message: `Malolos is under Signal No.${signal}`,
-                        track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_${typhoonName}.png`,
-                      });
-                    }
-                  });
-                });
-              }
-            }
-          );
-
-          if (!hasSignal) {
-            return res
-              .status(200)
-              .json({ success: true, message: "no signal", signal: 0 });
-          }
-        }
-      }
-    } while (looping);
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "An error occurred" });
-  }
-});
-
-apiController.get("/weather", async (req, res) => {
-  /*   sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration); */
-  /*   createPushNotificationToken("title", "body", [
-    "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
-  ]);
-  createPushNotificationTopic("Topic", "body", "sagip"); */
-  /*   sendEmail(
-    "darwinsanluis.ramos14@gmail.com",
-    "SAGIP verification code",
-    `Your SAGIP verification code is`
-  ); */
-  console.log("====================================");
-  console.log("localhost");
-  console.log("====================================");
-  axios
-    .get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
-    )
-    .then((response) => response.data)
-    .then((data) => {
-      const weatherDescription = data.weather[0].description;
-      res.json({ weather: weatherDescription });
-    })
-    .catch((error) => {
-      res.status(500).json({ message: "An error occurred" });
-    });
-
-  getAllFcmTokensInBarangays("Malolos", ["Guinhawa", "Dakila"]);
-});
 
 apiController.put("/pusher", tokenMiddleware, async (req, res) => {
   /*  await createNotification(
@@ -213,7 +79,7 @@ const createPusher = async (channel, event, data) => {
   }
 };
 
-apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
+/* apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
   const error = {};
   let { alertTitle, alertMessage, location } = req.body;
 
@@ -289,9 +155,9 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
         return res
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });
-        /*     return res
+            return res
           .status(200)
-          .json({ success: true, message: smsResponse.message }); */
+          .json({ success: true, message: smsResponse.message });
       } else {
         return res
           .status(400)
@@ -310,7 +176,7 @@ apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
     return res.status(400).json(error);
   }
 });
-
+ */
 const sendSMS = async (message, contactNumber) => {
   // const smsData = {
   //   token: process.env.SMS_API,
@@ -362,7 +228,7 @@ const sendBulkSMS = async (message, contactNumbers) => {
   console.log("send bulk sms");
   return { error: 0, message: "testing" };
 };
-
+/* 
 const getAllContactNumbersInMunicipality = async (municipality) => {
   try {
     const users = await User.find({ municipality: municipality });
@@ -409,7 +275,8 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   } catch (error) {
     return "Internal Server Error: " + error;
   }
-};
+}; */
+
 async function sendEmail(to, subject, code, expiration) {
   // const html = ` `;
   const html = `
@@ -514,6 +381,7 @@ async function sendEmail(to, subject, code, expiration) {
 
   return false;
 }; */
+
 module.exports = {
   sendSMS,
   sendBulkSMS,

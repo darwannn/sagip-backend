@@ -55,9 +55,9 @@ function Home() {
         dispatch(getServerResponse());
       }
       try {
-        const signalResponse = await request("/api/signal", "GET");
+        const signalResponse = await request("/alert/signal", "GET");
         setSignal(signalResponse.signal);
-        const weatherResponse = await request("/api/weather", "GET");
+        const weatherResponse = await request("/alert/weather", "GET");
         const weatherResponse1 = await request(
           "/account/fcm",
           "PUT",
@@ -77,7 +77,7 @@ function Home() {
   useEffect(() => {
     const fetchWellnessSurveys = async () => {
       try {
-        const data = await request("/wellness-survey/active", "GET", {
+        const data = await request("/wellness-survey/myresponse", "GET", {
           Authorization: `Bearer ${token}`,
         });
 
@@ -268,13 +268,12 @@ function Home() {
   const answerSurvey = async (surveyId, answer) => {
     try {
       const data = await request(
-        "/wellness-survey/answer",
+        `/wellness-survey/answer/${surveyId}`,
         "PUT",
         {
           Authorization: `Bearer ${token}`,
         },
         {
-          surveyId: surveyId,
           answer: answer,
         }
       );

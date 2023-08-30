@@ -3,11 +3,11 @@ mongoose.pluralize(null);
 
 const AlertSchema = new mongoose.Schema(
   {
-    title: {
+    alertTitle: {
       type: String,
       required: true,
     },
-    message: {
+    alertMessage: {
       type: String,
       required: true,
     },

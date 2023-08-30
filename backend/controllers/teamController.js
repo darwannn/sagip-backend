@@ -87,6 +87,35 @@ teamController.get("/", async (req, res) => {
     });
   }
 });
+teamController.get("/myteam", tokenMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const team = await Team.findOne({
+      $or: [{ members: userId }, { head: userId }],
+    })
+      .populate("head", "-password")
+      .populate("members", "-password");
+
+    if (team) {
+      return res.status(200).json({
+        success: true,
+        message: "Team found",
+        name: team.name,
+        position: team.head._id === userId ? "head" : "member",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
 teamController.get("/active", async (req, res) => {
   try {
     const assignedTeams = await AssistanceRequest.find(
