@@ -178,7 +178,10 @@ authController.post("/register", async (req, res) => {
       if (user) {
         console.log("success");
 
-        /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
+        sendSMS(
+          `Your SAGIP verification code is ${verificationCode}`,
+          user.contactNumber
+        );
 
         /*  if (verificationCode !== 0) { */
         return res.status(200).json({

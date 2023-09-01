@@ -4,7 +4,7 @@ const Alert = require("../models/Alert");
 const User = require("../models/User");
 const axios = require("axios");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-const municipality = "Malolos";
+
 const {
   isEmpty,
   isImage,
@@ -210,28 +210,30 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
     let fcmTokens = [];
 
     if (location.includes("All")) {
-      contactNumbers = await getAllContactNumbersInMunicipality("Malolos");
-      if (!Array.isArray(contactNumbers)) {
+      const users = await getInfoByMunicipality("City Of Malolos (Capital)");
+
+      if (
+        !Array.isArray(users.contactNumbers) ||
+        !Array.isArray(users.fcmTokens)
+      ) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error: " + contactNumbers,
+          message: "Internal Server Error",
         });
       }
-      console.log(contactNumbers);
-      fcmTokens = await getAllFcmTokensInMunicipality("Malolos");
-      console.log(fcmTokens);
-      if (!Array.isArray(fcmTokens)) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error:2 " + contactNumbers,
-        });
-      }
+      contactNumbers = users.contactNumbers;
+      fcmTokens = users.fcmTokens;
+      /*    console.log(contactNumbers); */
+      /*  fcmTokens = await getAllFcmTokensInMunicipality(
+        "City Of Malolos (Capital)"
+      ); */
+      /* console.log(fcmTokens); */
     } else {
-      contactNumbers = await getAllContactNumbersInBarangays(
-        "Malolos",
+      const users = await getInfoByBarangay(
+        "City Of Malolos (Capital)",
         location
       );
-
+      /* 
       console.log(contactNumbers);
 
       if (!Array.isArray(contactNumbers)) {
@@ -239,26 +241,34 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
           success: false,
           message: "Internal Server Error:3 " + contactNumbers,
         });
-      }
-      fcmTokens = await getAllFcmTokensInBarangays("Malolos", location);
-      if (!Array.isArray(fcmTokens)) {
+      } */
+      /* fcmTokens = await getAllFcmTokensInBarangays(
+        "City Of Malolos (Capital)",
+        location
+      ); */
+      if (
+        !Array.isArray(users.contactNumbers) ||
+        !Array.isArray(users.fcmTokens)
+      ) {
         return res.status(500).json({
           success: false,
-          message: "Internal Server Error:4 " + contactNumbers,
+          message: "Internal Server Error",
         });
       }
+      contactNumbers = users.contactNumbers;
+      fcmTokens = users.fcmTokens;
     }
 
+    createPushNotificationToken(alertTitle, alertMessage, fcmTokens);
     console.log(contactNumbers);
     console.log(fcmTokens);
 
-    createPushNotificationToken(alertTitle, alertMessage, fcmTokens);
-
     try {
-      const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
+      const smsResponse = true;
       console.log(smsResponse);
-
-      if (smsResponse.error === 0) {
+      const smsRes = await sendBulkSMS(alertMessage, contactNumbers);
+      console.log(smsRes);
+      if (smsResponse) {
         return res
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });
@@ -356,7 +366,7 @@ alertController.get("/signal", async (req, res) => {
                     if (
                       (location.includes &&
                         location.includes.objects &&
-                        location.includes.objects.includes(municipality)) ||
+                        location.includes.objects.includes("Malolos")) ||
                       location.name === "Bulacan"
                     ) {
                       console.log("1");
@@ -408,7 +418,7 @@ alertController.get("/weather", async (req, res) => {
   console.log("====================================");
   axios
     .get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${municipality}&appid=${process.env.WEATHER_API}`
+      `https://api.openweathermap.org/data/2.5/weather?q=Malolos&appid=${process.env.WEATHER_API}`
     )
     .then((response) => response.data)
     .then((data) => {
@@ -423,41 +433,65 @@ alertController.get("/weather", async (req, res) => {
       res.status(500).json({ success: false, message: "An error occurred" });
     });
 });
-
-const getAllContactNumbersInMunicipality = async (municipality) => {
+const getInfoByMunicipality = async (municipality) => {
   try {
+    /*    console.log(municipality); */
     const users = await User.find({ municipality: municipality });
-    const contactNumbers = users.map((user) => user.contactNumber);
-    return contactNumbers;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-};
 
-const getAllContactNumbersInBarangays = async (municipality, location) => {
-  try {
-    const users = await User.find({
-      barangay: { $in: location },
-      municipality,
-    });
     const contactNumbers = users.map((user) => user.contactNumber);
-    return contactNumbers;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-};
-
-const getAllFcmTokensInMunicipality = async (municipality) => {
-  try {
-    const users = await User.find({ municipality: municipality });
     const fcmTokens = users.flatMap((user) => user.fcmToken);
-    return fcmTokens;
+
+    return { contactNumbers, fcmTokens };
   } catch (error) {
     return "Internal Server Error: " + error;
   }
+  /*  try {
+    console.log(municipality);
+    const allUsers = await User.find({});
+    const matchingUsers = allUsers.filter((user) =>
+      user.municipality.includes(municipality)
+    );
+    const contactNumbers = matchingUsers.map((user) => user.contactNumber);
+    const fcmTokens = matchingUsers.flatMap((user) => user.fcmToken);
+
+    return { contactNumbers, fcmTokens };
+  } catch (error) {
+    return "Internal Server Error: " + error;
+  } */
 };
 
-const getAllFcmTokensInBarangays = async (municipality, location) => {
+const getInfoByBarangay = async (municipality, location) => {
+  try {
+    console.log(municipality);
+    const users = await User.find({
+      municipality: municipality,
+      barangay: { $in: location },
+    });
+
+    const contactNumbers = users.map((user) => user.contactNumber);
+    const fcmTokens = users.flatMap((user) => user.fcmToken);
+    console.log(contactNumbers, fcmTokens);
+    return { contactNumbers, fcmTokens };
+  } catch (error) {
+    return "Internal Server Error: " + error;
+  }
+  /*  try {
+    console.log(municipality);
+    const allUsers = await User.find({ barangay: { $in: location } });
+    const matchingUsers = allUsers.filter(
+      (user) => user.municipality.includes(municipality) 
+    );
+    const contactNumbers = matchingUsers.map((user) => user.contactNumber);
+    const fcmTokens = matchingUsers.flatMap((user) => user.fcmToken);
+    console.log(contactNumbers, fcmTokens);
+    return { contactNumbers, fcmTokens };
+  } catch (error) {
+    return "Internal Server Error: " + error;
+  }
+   */
+};
+
+/* const getAllFcmTokensInBarangays = async (municipality, location) => {
   try {
     const users = await User.find({
       barangay: { $in: location },
@@ -470,5 +504,5 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   } catch (error) {
     return "Internal Server Error: " + error;
   }
-};
+}; */
 module.exports = alertController;

@@ -47,6 +47,13 @@ apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
     console.log("====================================");
     console.log("push");
     console.log("====================================");
+    const contactNumbers = ["09395372592"];
+    const message = "Hello";
+
+    /* await sendSMS(message, "09395372592"); */
+
+    /*  await sendBulkSMS(message, contactNumbers); */
+
     const { receiver, content, event } = req.body;
 
     const data = {
@@ -112,7 +119,7 @@ const createPusher = async (io, channel, event, data) => {
     let fcmTokens = [];
 
     if (location.includes("All")) {
-      contactNumbers = await getAllContactNumbersInMunicipality("Malolos");
+      contactNumbers = await getInfoByMunicipality("Malolos");
       if (!Array.isArray(contactNumbers)) {
         return res.status(500).json({
           success: false,
@@ -129,7 +136,7 @@ const createPusher = async (io, channel, event, data) => {
         });
       }
     } else {
-      contactNumbers = await getAllContactNumbersInBarangays(
+      contactNumbers = await getInfoByBarangay(
         "Malolos",
         location
       );
@@ -160,7 +167,7 @@ const createPusher = async (io, channel, event, data) => {
       const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
       console.log(smsResponse);
 
-      if (smsResponse.error === 0) {
+      if (smsResponse) {
         return res
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });
@@ -186,7 +193,7 @@ const createPusher = async (io, channel, event, data) => {
   }
 });
  */
-const sendSMS = async (message, contactNumber) => {
+/* const sendSMS = async (message, contactNumber) => {
   // const smsData = {
   //   token: process.env.SMS_API,
   //   sendto: contactNumber,
@@ -206,11 +213,17 @@ const sendSMS = async (message, contactNumber) => {
   //   .catch(function (error) {
   //     throw error;
   //   });
-  console.log("send sms");
-  return { error: 0, message: "testing" };
-};
+  // console.log("send sms");
+  // return { error: 0, message: "testing" };
+
+  return await send(contactNumber, message);
+}; */
 
 const sendBulkSMS = async (message, contactNumbers) => {
+  console.log("=========contactNumbers===========================");
+  console.log(contactNumbers);
+  console.log("====================================");
+  /* SMS GATE WAY */
   // console.log(process.env.DEVICE_ID);
   // const smsData = contactNumbers.map((contactNumber) => ({
   //   sendto: contactNumber,
@@ -219,26 +232,75 @@ const sendBulkSMS = async (message, contactNumbers) => {
   //   device_id: process.env.DEVICE_ID,
   //   urgent: "1",
   // }));
-
   // const params = {
   //   token: process.env.SMS_API,
   //   smsdata: smsData,
   // };
-
   // return axios
   //   .post("https://smsgateway24.com/getdata/addalotofsms", params)
-
   //   .then(function (response) {
   //     return response.data;
   //   })
   //   .catch(function (error) {
   //     throw error;
   //   });
-  console.log("send bulk sms");
-  return { error: 0, message: "testing" };
+  /* ------------------------- */
+  /* console.log("send bulk sms");
+  return { error: 0, message: "testing" }; */
+  /* QUICK SMS */
+
+  /* 
+    function send($ip, $phone, $message) {
+      $send = json_decode(file_get_contents("http://{$ip}:8080/?phone={$phone}&message={$message}"));
+      return $send->status == 200?true:false;
+    } */
+  const results = [];
+
+  for (const contactNumber of contactNumbers) {
+    console.log("send bulk sms");
+    try {
+      console.log("====================================");
+      console.log("testing lang");
+      console.log("====================================");
+      const success = await sendSMS(contactNumber, message);
+
+      results.push({ success: success });
+    } catch (error) {
+      console.error("Error sending SMS:", error);
+      results.push({ success: false, message: "Internal Server Error" });
+    }
+  }
+
+  const allSuccessful = results.every((result) => result.success);
+
+  if (allSuccessful) {
+    /*  return { success: true, message: "SMS Sent Successfully" }; */
+    return true;
+  } else {
+    /* return { success: false, message: "Some SMS failed to send" }; */
+    return false;
+  }
+};
+
+const sendSMS = async (phone, message) => {
+  /*   .post(`http://${process.env.SMS_API_ADDRESS}:8080`, { phone, message }) */
+  return axios
+    .get(
+      `http://${process.env.SMS_API_ADDRESS}:8080?phone=${phone}&message=${message}`
+    )
+    .then((response) => {
+      console.log("sred", response);
+      console.log("sred", response.status);
+      console.log("sred", response.message);
+      return response.status === 200 ? true : false;
+    })
+    .catch((error) => {
+      console.error("Error sending SMS:", error);
+      return false;
+    });
 };
 /* 
-const getAllContactNumbersInMunicipality = async (municipality) => {
+const getInfoByMunicipality = async (municipality) => {
   try {
     const users = await User.find({ municipality: municipality });
     const contactNumbers = users.map((user) => user.contactNumber);
@@ -248,7 +310,7 @@ const getAllContactNumbersInMunicipality = async (municipality) => {
   }
 };
 
-const getAllContactNumbersInBarangays = async (municipality, location) => {
+const getInfoByBarangay = async (municipality, location) => {
   try {
     const users = await User.find({
       barangay: { $in: location },

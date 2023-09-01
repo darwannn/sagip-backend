@@ -205,7 +205,6 @@ accountController.post(
       }); */
 
         if (user) {
-          /*   sendSMS(`Your SAGIP verification code is ${verificationCode}`,user.contactNumber) */
           return res.status(200).json({
             success: true,
             message: "Created Successfully",
@@ -429,7 +428,6 @@ accountController.put(
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
             console.log("send sms");
-            /*     sendSMS(`Your SAGIP verification code is ${generatedCode}`,contactNumber) */
           }
           console.log("====================================");
           console.log(user._doc.email);
