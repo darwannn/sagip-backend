@@ -33,6 +33,8 @@ teamController.post(
 
         if (team) {
           /*  await createPusher("team", "reload", {}); */
+          /*  req.io.emit("reload", { receiver: "team" }); */
+          /* req.io.emit("team"); */
           return res.status(200).json({
             success: true,
             message: "Added Successfully",
@@ -289,7 +291,9 @@ teamController.delete(
             "Your team has been removed",
             "info"
           );
-          await createPusher("team", "reload", {});
+          /* await createPusher("team", "reload", {}); */
+          /* req.io.emit("reload", { receiver: "team" }); */
+          req.io.emit("team");
         }
         return res.status(200).json({
           success: true,
@@ -417,6 +421,8 @@ teamController.put(
           );
         }
         /* await createPusher("team", "reload", {}); */
+        /* req.io.emit("reload", { receiver: "team" }); */
+        /* req.io.emit("team"); */
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -505,6 +511,8 @@ teamController.put(
           );
         }
         /* await createPusher("team", "reload", {}); */
+        /* req.io.emit("reload", { receiver: "team" }); */
+        /* req.io.emit("team"); */
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -568,7 +576,9 @@ teamController.put(
         });
 
         if (team) {
-          await createPusher("team", "reload", {});
+          /* await createPusher("team", "reload", {}); */
+          /* req.io.emit("reload", { receiver: "team" }); */
+          req.io.emit("team");
           if (!isEmpty(head))
             await createNotification(
               [head],
@@ -585,7 +595,7 @@ teamController.put(
               `You have been assigned to ${team.name} as member`,
               "info"
             );
-          /*  await createPusher("team", "reload", {}); */
+
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",

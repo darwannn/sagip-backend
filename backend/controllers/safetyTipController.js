@@ -78,7 +78,8 @@ safetyTipController.post(
             image: `${cloud.original_filename}.${cloud.format}`,
           });
           if (safetyTip) {
-            await createPusher("safety-tips", "reload", {});
+            /*  await createPusher("safety-tips", "reload", {}); */
+            req.io.emit("safety-tips");
             createNotificationAll(
               safetyTip._id,
               "Discover the Latest Safety Tip",
@@ -334,7 +335,8 @@ safetyTipController.put(
         );
 
         if (safetyTip) {
-          await createPusher("safety-tips", "reload", {});
+          /*  await createPusher("safety-tips", "reload", {}); */
+          req.io.emit("safety-tips");
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -383,7 +385,8 @@ safetyTipController.delete(
         console.log("safetyTip");
         console.log(safetyTip.title);
         if (safetyTip) {
-          await createPusher("safety-tips", "reload", {});
+          /* await createPusher("safety-tips", "reload", {}); */
+          req.io.emit("safety-tips");
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",

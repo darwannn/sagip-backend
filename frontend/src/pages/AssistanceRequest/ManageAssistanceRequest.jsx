@@ -542,7 +542,14 @@ const ManageEmergencyFacility = () => {
                     handleDismiss();
                   }}
                 >
-                  Dismiss
+                  Dismissss
+                </button>
+                <button
+                  onClick={() => {
+                    handleSubmit();
+                  }}
+                >
+                  Sumitttt
                 </button>
               </div>
             )}

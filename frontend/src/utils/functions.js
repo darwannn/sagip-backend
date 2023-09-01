@@ -1,5 +1,6 @@
 import Pusher from "pusher-js";
-
+import io from "socket.io-client";
+const socket = io.connect("http://localhost:5000");
 export const reverseGeoCoding = (latitude, longitude) => {
   return new Promise((resolve, reject) => {
     const geocoder = new window.google.maps.Geocoder();
@@ -67,7 +68,18 @@ export const reverseGeoCoding = (latitude, longitude) => {
 //channel name either location, notification or reload
 // event name sino mag rereceive
 
-export const receivePusher = (channelName, eventName, callback) => {
+export const receivePusher = (eventName, callback) => {
+  socket.on(eventName, (data) => {
+    callback(data);
+    // Update your component's state or perform other actions with the received data
+  });
+
+  // Clean up the socket connection on unmount
+  return () => {
+    socket.disconnect();
+  };
+};
+/* export const receivePusher = (channelName, eventName, callback) => {
   const pusher = new Pusher(process.env.REACT_APP_KEY, {
     cluster: process.env.REACT_APP_CLUSTER,
   });
@@ -90,3 +102,4 @@ export const receivePusher = (channelName, eventName, callback) => {
     },
   };
 };
+ */

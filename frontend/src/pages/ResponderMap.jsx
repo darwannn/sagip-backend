@@ -233,7 +233,7 @@ function EmergencyFacility() {
 
           // Make the API request here
           await request(
-            "/api/pusher",
+            "/api/web-socket",
             "PUT",
             {
               Authorization: `Bearer ${token}`,

@@ -271,7 +271,9 @@ accountController.delete(
             picture
           );
         });
-        await createPusher(`${user._id}`, "reload", {});
+        /*  await createPusher(`${user._id}`, "reload", {}); */
+
+        req.io.emit(`${user._id}`);
         /*  createNotification(
             req.params.id,
             req.params.id,
@@ -329,7 +331,9 @@ accountController.delete(
       });
 
       if (user) {
-        await createPusher("account", "reload", {});
+        
+        req.io.emit("account");
+        //await createPusher("account", "reload", {});
         //  createNotification(
         //     req.params.id,
         //     req.params.id,
@@ -766,7 +770,9 @@ accountController.put(
         });
 
         if (user) {
-          await createPusher(`${req.params.id}`, "reload", {});
+          /* await createPusher(`${req.params.id}`, "reload", {}); */
+
+          req.io.emit(`${req.params.id}`);
           /* await createPusher("user", "reload", {});  */
           return res.status(200).json({
             success: true,
@@ -867,7 +873,8 @@ accountController.put(
         });
 
         if (user) {
-          await createPusher(`${req.user.id}`, "reload", {});
+          /* await createPusher(`${req.user.id}`, "reload", {}); */
+          req.io.emit(`${req.user.id}`);
           /* await createPusher("user", "reload", {});  */
           return res.status(200).json({
             success: true,
@@ -908,7 +915,7 @@ accountController.put(
   "super-admin",
 ]), */
   async (req, res) => {
-    await handleArchive(req.params.action, req.user.id, res);
+    await handleArchive(req.params.action, req.user.id, req, res);
   }
 );
 
@@ -923,7 +930,7 @@ accountController.put(
   "super-admin",
 ]), */
   async (req, res) => {
-    await handleArchive(req.params.action, req.params.id, res);
+    await handleArchive(req.params.action, req.params.id, req, res);
   }
 );
 

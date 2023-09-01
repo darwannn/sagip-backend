@@ -83,7 +83,9 @@ emergencyFacilityController.post(
               `Checkout the new ${category}: ${name} `,
               "info"
             );
-            await createPusher("emergency-facility", "reload", {});
+            /* await createPusher("emergency-facility", "reload", {}); */
+            req.io.emit("emergency-facility");
+
             return res.status(200).json({
               success: true,
               message: "Added successfully",
@@ -294,7 +296,8 @@ emergencyFacilityController.put(
         );
 
         if (emergencyFacility) {
-          await createPusher("emergency-facility", "reload", {});
+          /* await createPusher("emergency-facility", "reload", {}); */
+          req.io.emit("emergency-facility");
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -347,7 +350,8 @@ emergencyFacilityController.delete(
         );
 
         if (emergencyFacility) {
-          await createPusher("emergency-facility", "reload", {});
+          /*  await createPusher("emergency-facility", "reload", {}); */
+          req.io.emit("emergency-facility");
           return res.status(200).json({
             success: true,
             message: "Deleted Successfully",

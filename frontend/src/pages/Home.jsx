@@ -10,6 +10,7 @@ import { receivePusher } from "../utils/functions";
 
 import warningSound from "../assets/warning.mp3";
 import image from "../assets/hospital_icon.png";
+import io from "socket.io-client";
 
 function Home() {
   const location = useLocation();
@@ -173,19 +174,59 @@ function Home() {
     });
   }, []); */
 
-  useEffect(() => {
-    const pusherSubscription = receivePusher(
-      "64788dfd295e2f184e55d20f",
-      "notification",
-      (data) => {
-        if (data.content) {
-          console.log(data.content);
-          toast.success("I received a notification" + location.pathname);
-        }
-      }
-    );
+  // useEffect(() => {
+  //   const pusherSubscription = receivePusher(
+  //     "64788dfd295e2f184e55d20f",
+  //     "notification",
+  //     (data) => {
+  //       if (data.content) {
+  //         console.log(data.content);
+  //         toast.success("I received a notification" + location.pathname);
+  //       }
+  //     }
+  //   );
 
-    return pusherSubscription.unsubscribe;
+  //   return pusherSubscription.unsubscribe;
+  // }, []);
+  /*   receivePusher("hazard-report-mobile", "reload", (data) => {
+    toast.success("hazard-report-mobile");
+  }); */
+  const socket = io(); // Replace with your actual backend URL
+
+  /* useEffect(() => {
+    // Listen for the WebSocket event
+  
+
+    // Listen for the "notification" event from the server
+    socket.on("notification", (data) => {
+      console.log("Received data from WebSocket:", data);
+      // Update your component's state or perform other actions with the received data
+    });
+
+    // Clean up the socket connection on unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
+ */
+  useEffect(() => {
+    receivePusher("notification", (data) => {
+      console.log("new", data);
+    });
+    receivePusher("reload", (data) => {
+      console.log("wellness survey inside");
+      console.log(data);
+
+      if (data.receiver === "wellness-survey") {
+        toast.success("wellness-survey reload");
+      }
+    });
+    receivePusher("wellness-survey", (data) => {
+      toast.success("wellness-survey reload2");
+    });
+    receivePusher(user.id, (data) => {
+      toast.success(user.id);
+    });
   }, []);
 
   const triggerPusher = async () => {
@@ -194,7 +235,7 @@ function Home() {
     console.log("triggerPusher");
 
     const data = await request(
-      "/api/pusher",
+      "/api/web-socket",
       "PUT",
       {
         Authorization: `Bearer ${token}`,

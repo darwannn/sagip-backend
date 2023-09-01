@@ -81,7 +81,20 @@ function EmergencyFacility() {
 
   /* pusher */
   useEffect(() => {
-    receivePusher("64788dfd295e2f184e55d20f", "location", (data) => {
+    /* receivePusher("64788dfd295e2f184e55d20f", "location", (data) => {
+      console.log(data);
+      if (data.content) {
+        setResponderLatitude(data.content.latitude);
+        setResponderLongitude(data.content.longitude);
+        getResponderRoute(
+          "DRIVING",
+          `${data.content.latitude},${data.content.longitude}`
+        );
+      }
+    }); */
+
+    receivePusher("location", (data) => {
+      toast.success("wellness-survey reload2");
       console.log(data);
       if (data.content) {
         setResponderLatitude(data.content.latitude);
@@ -458,7 +471,7 @@ function EmergencyFacility() {
       >
         <input type="text" placeholder="Destination" ref={destiantionRef} />
       </Autocomplete> */}
-      <div style={{ height: "50%", width: "100%" }}>
+      <div style={{ height: "100%", width: "100%" }}>
         <GoogleMap
           center={defaultCenter}
           zoom={15}

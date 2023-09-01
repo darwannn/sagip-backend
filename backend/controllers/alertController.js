@@ -44,6 +44,7 @@ alertController.post(
         const alert = await Alert.create({ alertTitle, alertMessage });
 
         if (alert) {
+          req.io.emit("alert");
           return res.status(200).json({
             success: true,
             message: "Added Successfully",
@@ -130,6 +131,7 @@ alertController.put(
         );
 
         if (alert) {
+          req.io.emit("alert");
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -164,6 +166,7 @@ alertController.delete(
     try {
       const alert = await Alert.findByIdAndDelete(req.params.id);
       if (alert) {
+        req.io.emit("alert");
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",

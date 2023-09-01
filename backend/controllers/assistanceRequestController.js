@@ -103,7 +103,8 @@ assistanceRequestController.post(
             userId: req.user.id,
           });
           if (assistanceRequest) {
-            await createPusher("assistance-request-web", "reload", {});
+            /* await createPusher("assistance-request-web", "reload", {}); */
+            req.io.emit("assistance-request");
             const userIds = await getUsersId("dispatcher");
             createNotification(
               userIds,
@@ -561,7 +562,8 @@ assistanceRequestController.put(
           { new: true }
         );
         if (assistanceRequest) {
-          await createPusher("assistance-request-web", "reload", {});
+          /*  await createPusher("assistance-request-web", "reload", {}); */
+          req.io.emit("assistance-request");
           const userIds = await getUsersId("dispatcher");
           createNotification(
             userIds,
@@ -641,8 +643,12 @@ assistanceRequestController.put(
           console.log(assistanceRequest.userId._id);
           console.log("====================================");
           /* await createPusher("assistance-request", "reload", {}); */
-          await createPusher(`${assistanceRequest.userId._id}`, "reload", {});
-          await createPusher("assistance-request-mobile", "reload", {});
+          /*         await createPusher(`${assistanceRequest.userId._id}`, "reload", {});
+          await createPusher("assistance-request-mobile", "reload", {}); */
+
+          req.io.emit("assistance-request");
+          req.io.emit(`${assistanceRequest.userId}`);
+
           if (action === "verify") {
             sendSMS(
               `${assistanceRequest.assignedTeam.name} is on the way`,
@@ -718,6 +724,8 @@ assistanceRequestController.put(
         if (assistanceRequest) {
           //sendSMS(`${assistanceRequest.teamId} is on the way`, assistanceRequest.userId.contactNumber);
           //await createPusher("assistance-request", "reload", {});
+           //req.io.emit("assistance-request");
+        
           return res.status(200).json({
             success: true,
             message: "Assistance Request Resolved",
@@ -815,8 +823,10 @@ assistanceRequestController.put(
               assistanceRequest.userId.contactNumber
             );
 
-            await createPusher(`${assistanceRequest.userId}`, "reload", {});
-            await createPusher("assistance-request-mobile", "reload", {});
+            /* await createPusher(`${assistanceRequest.userId}`, "reload", {});
+            await createPusher("assistance-request-mobile", "reload", {}); */
+            req.io.emit("assistance-request");
+            req.io.emit(`${assistanceRequest.userId}`);
             createNotification(
               [assistanceRequest.userId],
               assistanceRequest.userId,
@@ -824,7 +834,7 @@ assistanceRequestController.put(
               `${reason}`,
               "error"
             );
-            /* await createPusher("assistance-request", "reload", {}); */
+
             return res.status(200).json({
               success: true,
               message: "Deleted successfully",
@@ -917,7 +927,8 @@ assistanceRequestController.put(
               console.log("=======jjj=============================");
               console.log(assistanceRequest.userId);
               console.log("====================================");
-              await createPusher(`${assistanceRequest.userId}`, "reload", {});
+              /*  await createPusher(`${assistanceRequest.userId}`, "reload", {}); */
+              req.io.emit(`${assistanceRequest.userId}`);
               createNotification(
                 [assistanceRequest.userId],
                 assistanceRequest.userId,

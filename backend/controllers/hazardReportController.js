@@ -102,8 +102,9 @@ hazardReportController.post(
           });
           if (hazardReport) {
             /*     await createPusher("hazard-report", "reload", {}); */
-            await createPusher("hazard-report-web", "reload", {});
-
+            /* await createPusher("hazard-report-web", "reload", {});
+             */
+            req.io.emit("hazard-report");
             const userIds = await getUsersId("dispatcher");
             createNotification(
               userIds,
@@ -411,7 +412,8 @@ hazardReportController.put(
           { new: true }
         );
         if (hazardReport) {
-          await createPusher("assistance-request-web", "reload", {});
+          /*    await createPusher("assistance-request-web", "reload", {}); */
+          req.io.emit("hazard-report");
           const userIds = await getUsersId("dispatcher");
           createNotification(
             userIds,
@@ -481,8 +483,10 @@ hazardReportController.put(
           { new: true }
         );
         if (hazardReport) {
-          await createPusher("hazard-report-mobile", "reload", {});
-          await createPusher(`${hazardReport.userId}`, "reload", {});
+          /* await createPusher("hazard-report-mobile", "reload", {}); */
+          /* await createPusher(`${hazardReport.userId}`, "reload", {}); */
+          req.io.emit("hazard-report");
+          req.io.emit(`${hazardReport.userId}`);
 
           if (action === "verify") {
             createNotification(
@@ -569,8 +573,11 @@ hazardReportController.delete(
         );
 
         if (hazardReport) {
-          await createPusher(`${hazardReport.userId}`, "reload", {});
-          await createPusher("hazard-report-mobile", "reload", {});
+          /* await createPusher(`${hazardReport.userId}`, "reload", {});
+          await createPusher("hazard-report-mobile", "reload", {}); */
+
+          req.io.emit("hazard-report");
+          req.io.emit(`${hazardReport.userId}`);
           createNotification(
             [hazardReport.userId],
             hazardReport.userId,
@@ -578,7 +585,7 @@ hazardReportController.delete(
             `Your hazard report has been deleted`,
             "error"
           );
-          /*       await createPusher("hazard-report", "reload", {}); */
+
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",
@@ -641,8 +648,10 @@ hazardReportController.put(
           /*   await createPusher("hazard-report", "reload", {}); */
           if (action === "archive") {
             dismissedRequestCount("archive", hazardReport.userId);
-            await createPusher(`${hazardReport.userId}`, "reload", {});
-            await createPusher("hazard-report-mobile", "reload", {});
+            /*  await createPusher(`${hazardReport.userId}`, "reload", {});
+            await createPusher("hazard-report-mobile", "reload", {}); */
+            req.io.emit("hazard-report");
+            req.io.emit(`${hazardReport.userId}`);
             createNotification(
               [hazardReport.userId],
               hazardReport.userId,

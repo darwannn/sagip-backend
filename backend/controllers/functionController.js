@@ -305,7 +305,7 @@ const dismissedRequestCount = async (action, userId) => {
   user.save();
 };
 
-const handleArchive = async (action, id, res) => {
+const handleArchive = async (action, id, req, res) => {
   try {
     let updateFields = {};
     if (action === "unarchive" || action === "archive") {
@@ -330,7 +330,8 @@ const handleArchive = async (action, id, res) => {
       if (user) {
         /* await createPusher("user", "reload", {}); */
         if (action === "archive") {
-          await createPusher(`${id}`, "reload", {});
+          /* await createPusher(`${id}`, "reload", {}); */
+          req.io.emit(`${id}`);
           return res.status(200).json({
             success: true,
             message: "Archived Successfully",

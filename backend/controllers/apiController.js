@@ -6,6 +6,7 @@ const Pusher = require("pusher");
 const municipality = "Malolos";
 const nodemailer = require("nodemailer");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+
 const {
   createNotification,
   createNotificationAll,
@@ -33,8 +34,9 @@ const pusher = new Pusher({
 
 const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 
-apiController.put("/pusher", tokenMiddleware, async (req, res) => {
-  /*  await createNotification(
+apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
+  try {
+    /*  await createNotification(
     [req.user.id],
     req.user.id,
     "title1",
@@ -42,41 +44,48 @@ apiController.put("/pusher", tokenMiddleware, async (req, res) => {
     "category1"
   );
   await createNotificationAll(req.user.id, "title2", "message2", "category2"); */
-  console.log("====================================");
-  console.log("push");
-  console.log("====================================");
-  const { purpose, content, channel, event } = req.body;
+    console.log("====================================");
+    console.log("push");
+    console.log("====================================");
+    const { receiver, content, event } = req.body;
 
-  const data = {
-    from: req.user.id,
-    purpose,
-    content,
-  };
+    const data = {
+      sender: req.user.id,
+      receiver,
+      content, // long lat
+    };
 
-  if (await createPusher(channel, event, data)) {
-    console.log("true");
-    return res.status(200).json({
-      success: true,
-      message: "Pusher sent successfully",
+    if (req.io.emit(event, data)) {
+      console.log("true");
+      return res.status(200).json({
+        success: true,
+        message: "Web socket sent successfully",
+      });
+    } else {
+      console.log("false");
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
     });
-  } else {
-    console.log("false");
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal Server Error" });
   }
 });
 
-const createPusher = async (channel, event, data) => {
-  console.log("====================================");
+const createPusher = async (io, channel, event, data) => {
+  /*   console.log("====================================");
   console.log("new push");
   console.log("====================================");
   try {
-    pusher.trigger(channel, event, data);
+    io.emit(event, data); 
     return true;
   } catch (error) {
+    console.log(error);
     return false;
-  }
+  } */
 };
 
 /* apiController.post("/send-alert", tokenMiddleware, async (req, res) => {

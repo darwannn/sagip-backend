@@ -47,7 +47,9 @@ wellnessSurveyController.post(
 
           if (wellnessSurvey) {
             if (status === "active") {
-              await createPusher("wellness-survey", "reload", {});
+              /*   req.io.emit("reload", { receiver: "wellness-survey" }); */
+              req.io.emit("wellness-survey");
+              /*  await createPusher("wellness-survey", "reload", {}); */
               createNotificationAll(
                 wellnessSurvey._id,
                 "A new ",
@@ -482,7 +484,9 @@ wellnessSurveyController.put(
               status === "active" &&
               !activeWellnessSurvey[0]._id.equals(req.params.id)
             ) {
-              await createPusher("wellness-survey", "reload", {});
+              /* await createPusher("wellness-survey", "reload", {}); */
+              /* req.io.emit("reload", { receiver: "wellness-survey" }); */
+              req.io.emit("wellness-survey");
               createNotificationAll(
                 wellnessSurvey._id,
                 "A new ",
@@ -490,7 +494,7 @@ wellnessSurveyController.put(
                 "info"
               );
             }
-            /* await createPusher("wellness-survey", "reload", {}); */
+
             return res.status(200).json({
               success: true,
               message: "Updated successfully",
@@ -551,6 +555,8 @@ wellnessSurveyController.put(
 
       if (wellnessSurvey) {
         /*  await createPusher("wellness-survey", "reload", {}); */
+        /* req.io.emit("reload", { receiver: "wellness-survey" }); */
+        /* req.io.emit("wellness-survey"); */
         return res.json({
           success: true,
           message: "Answered Submitted Successfully",
@@ -586,7 +592,9 @@ wellnessSurveyController.delete(
       );
       if (wellnessSurvey) {
         if (wellnessSurvey.status === "active") {
-          await createPusher("wellness-survey", "reload", {});
+          /*   await createPusher("wellness-survey", "reload", {}); */
+          /* req.io.emit("reload", { receiver: "wellness-survey" }); */
+          req.io.emit("wellness-survey");
         }
         return res.status(200).json({
           success: true,
@@ -640,7 +648,9 @@ wellnessSurveyController.put(
 
         if (wellnessSurvey) {
           if (wellnessSurvey.status === "active") {
-            await createPusher("wellness-survey", "reload", {});
+            /* await createPusher("wellness-survey", "reload", {}); */
+            /* req.io.emit("reload", { receiver: "wellness-survey" }); */
+            req.io.emit("wellness-survey");
           }
           if (action === "archive") {
             return res.status(200).json({

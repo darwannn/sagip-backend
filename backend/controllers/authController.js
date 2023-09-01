@@ -744,7 +744,7 @@ authController.post(
               /*  target: "edit-password", */
             });
           } else {
-            handleArchive(req.params.action, req.user.id, res);
+            handleArchive(req.params.action, req.user.id, req, res);
           }
         } else {
           return res.status(500).json({
@@ -1350,7 +1350,8 @@ authController.put(
 
         if (user) {
           const userIds = await getUsersId("super-admin");
-          await createPusher("verification-request-web", "reload", {});
+          /* await createPusher("verification-request-web", "reload", {}); */
+          req.io.emit("verification-request");
           createNotification(
             userIds,
             req.user.id,
@@ -1583,7 +1584,8 @@ authController.put(
         if (user) {
           if (action === "reject") {
             sendSMS(`Verification Request Rejected`, user.contactNumber);
-            await createPusher("verification-request-mobile", "reload", {});
+            /*  await createPusher("verification-request-mobile", "reload", {}); */
+            req.io.emit("verification-request");
             createNotification(
               [user._id],
               user._id,
@@ -1597,7 +1599,8 @@ authController.put(
             });
           } else if (action === "approve") {
             sendSMS(`Verification Request Approved`, user.contactNumber);
-            await createPusher("verification-request-mobile", "reload", {});
+            /* await createPusher("verification-request-mobile", "reload", {}); */
+            req.io.emit("verification-request");
             createNotification(
               [user._id],
               user._id,

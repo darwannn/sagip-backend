@@ -2,6 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv").config();
 const cors = require("cors");
+const http = require("http");
+const socketIO = require("socket.io");
+
 const authController = require("./controllers/authController");
 const accountController = require("./controllers/accountController");
 const alertController = require("./controllers/alertController");
@@ -16,20 +19,27 @@ const {
 } = require("./controllers/notificationController");
 const { cronJobController } = require("./controllers/cronJobController");
 const wellnessSurveyController = require("./controllers/wellnessSurveyController");
-
-/* const multer = require("multer"); */
-const app = express();
-
-const bodyParser = require("body-parser");
 const statisticsController = require("./controllers/statisticsController");
+
+const app = express();
+const server = http.createServer(app); // Create an HTTP server
+const io = socketIO(server, {
+  cors: {
+    origin: ["http://localhost:3000", "http://localhost:5173"],
+    /*     methods: ["GET", "POST", "PUT", "DELETE"], */
+  },
+}); // Initialize Socket.IO on the server
 
 mongoose.set("strictQuery", false);
 mongoose.connect(process.env.MONGO_URL, () =>
   console.log("MongoDB has been started successfully")
 );
-//test
-app.use(express.static("assets"));
 
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+app.use(express.static("assets"));
 app.use(cors());
 app.use("/images", express.static("assets/images"));
 app.use(express.json());
@@ -49,8 +59,14 @@ app.use("/notification", notificationController);
 app.use("/statistics", statisticsController);
 app.use("/wellness-survey", wellnessSurveyController);
 
-app.use(bodyParser.json());
+io.on("connection", (socket) => {
+  console.log("A user connected");
 
-app.listen(process.env.PORT, () =>
+  socket.on("disconnect", () => {
+    console.log("A user disconnected");
+  });
+});
+
+server.listen(process.env.PORT, () =>
   console.log("Server has been started successfully")
 );
