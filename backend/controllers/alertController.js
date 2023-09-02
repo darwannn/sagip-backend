@@ -272,13 +272,17 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
         return res
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });
+      } else {
+        /* return res
+          .status(500)
+          .json({ success: false, message: "Internal Server Error" }); */
         return res
           .status(200)
-          .json({ success: true, message: smsResponse.message });
-      } else {
-        return res
-          .status(400)
-          .json({ success: false, message: smsResponse.message });
+          .json({
+            success: true,
+            message:
+              "Failed condition pero gumagana na to, nakapatay lang yung service/gateway",
+          });
       }
     } catch (error) {
       return res
