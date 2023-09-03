@@ -73,7 +73,7 @@ alertController.post(
 );
 
 alertController.get(
-  "sms/",
+  "/sms",
   tokenMiddleware,
   /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
     try {
@@ -276,13 +276,11 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
         /* return res
           .status(500)
           .json({ success: false, message: "Internal Server Error" }); */
-        return res
-          .status(200)
-          .json({
-            success: true,
-            message:
-              "Failed condition pero gumagana na to, nakapatay lang yung service/gateway",
-          });
+        return res.status(200).json({
+          success: true,
+          message:
+            "Failed condition pero gumagana na to, nakapatay lang yung service/gateway",
+        });
       }
     } catch (error) {
       return res
@@ -402,7 +400,7 @@ alertController.get("/signal", async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ success: false, message: "An error occurred" });
+      .json({ success: false, message: "Internal Server Error: " + error });
   }
 });
 
