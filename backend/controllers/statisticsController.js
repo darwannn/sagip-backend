@@ -22,6 +22,44 @@ statisticsController.get(
       const emergencyFacilities = await EmergencyFacility.find({});
       const teams = await Team.find({});
 
+      const newAssistanceRequest = assistanceRequests.filter(
+        (request) => request.status === "unverified"
+      ).length;
+      const ongoingAssistanceRequest = assistanceRequests.filter(
+        (request) => request.status === "ongoing"
+      ).length;
+      const resolvedAssistanceRequest = assistanceRequests.filter(
+        (request) => request.status === "resolved"
+      ).length;
+
+      const newHazardReport = hazardReports.filter(
+        (report) => report.status === "unverified"
+      ).length;
+
+      const ongoingHazardReport = hazardReports.filter(
+        (report) => report.status === "ongoing"
+      ).length;
+
+      const resolvedHazardReport = hazardReports.filter(
+        (report) => report.status === "resolved"
+      ).length;
+
+      const hospital = emergencyFacilities.filter(
+        (facility) => facility.category === "Hospital"
+      ).length;
+
+      const fireStation = emergencyFacilities.filter(
+        (facility) => facility.category === "Fire Station"
+      ).length;
+
+      const policeStation = emergencyFacilities.filter(
+        (facility) => facility.category === "Police Station"
+      ).length;
+
+      const evacuatiionCenter = emergencyFacilities.filter(
+        (facility) => facility.category === "Evacuation Center"
+      ).length;
+
       if (users) {
         /* assistanceRequest */
         const pendingAssistanceRequests = assistanceRequests.filter(
@@ -100,7 +138,18 @@ statisticsController.get(
           responders,
           admins,
           superAdmins,
-          assistanceRequests: hazardReports,
+          assistanceRequests: assistanceRequests,
+
+          newAssistanceRequest,
+          ongoingAssistanceRequest,
+          resolvedAssistanceRequest,
+          newHazardReport,
+          ongoingHazardReport,
+          resolvedHazardReport,
+          hospital,
+          fireStation,
+          policeStation,
+          evacuatiionCenter,
         });
       } else {
         return res.status(500).json({

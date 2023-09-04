@@ -426,8 +426,10 @@ alertController.get("/weather", async (req, res) => {
     .then((response) => response.data)
     .then((data) => {
       const weatherDescription = data.weather[0].description;
+      const weatherIcon = data.weather[0].icon;
       res.json({
         weather: weatherDescription,
+        icon: `https://openweathermap.org/img/wn/${weatherIcon}@2x.png`,
         success: true,
         message: weatherDescription,
       });
@@ -439,7 +441,7 @@ alertController.get("/weather", async (req, res) => {
 const getInfoByMunicipality = async (municipality) => {
   try {
     /*    console.log(municipality); */
-    const users = await User.find({ municipality: municipality });
+    const users = await User.find(/* { municipality: municipality } */);
 
     const contactNumbers = users.map((user) => user.contactNumber);
     const fcmTokens = users.flatMap((user) => user.fcmToken);
