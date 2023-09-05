@@ -350,7 +350,7 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
 
 async function sendEmail(to, subject, code, expiration) {
   // const html = ` `;
-  const html = `
+  /* const html = `
 <body
   style='font-family:Roboto, sans-serif; font-size: 18px;text-align: center; background-color:#5E72D2; margin: 0; padding: 0;'>
   <table style='width: 100%;'>
@@ -412,6 +412,96 @@ async function sendEmail(to, subject, code, expiration) {
       </tr>
   </table>
 </body>
+`; */
+  const html = `
+  <body style='font-family:Roboto, sans-serif; font-size: 18px; text-align: center; background-image:url(https://res.cloudinary.com/dantwvqrv/image/upload/v1693923120/sagip/media/others/malolos_city_hall_gradient.jpg);
+
+  background-position: center;  background-size: cover; background-size: cover; 
+    
+  height:100%; margin: 0; padding: 0;'>
+     <table style='width: 100%;'>
+          <tr>
+              <td style='vertical-align: middle;'>
+                  <table style='padding: 0px 40px; width: 500px; margin: 0 auto;'>
+                      <tr>
+                          <td style='vertical-align: middle;'>
+                              <table
+              style='background-color:#f2f3f8!important; border-radius: 8px; margin:50px auto; padding: 30px 30px; width: 500px;'>
+                  <tr>
+                      <td>
+                        <img src="https://res.cloudinary.com/dantwvqrv/image/upload/v1693923119/sagip/media/others/sagip_icon_gradient.png" style="width:3em; margin: 0 auto;" alt="Sagip Logo">
+                      </td>
+                  </tr>
+                  <tr>
+                      <td style='vertical-align: middle;'>
+                          <table
+                              style='background-color: white!important; border-radius: 8px; padding: 40px 40px; width: 500px; margin-top: 30px;'>
+                              <tr>
+                                  <td>
+                                    <img src="https://res.cloudinary.com/dantwvqrv/image/upload/v1693923119/sagip/media/others/email_address_verification.png" style="width:28em; margin: 0 auto; border-radius: 8px;" alt="Sagip Logo">
+                                  </td>
+                              </tr>
+                              <tr>
+                                <td style='color:#292929!important; font-size: 25px; font-weight: bold; padding: 5px 0px;'>
+                                    Confirm your email address
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='color:#292929!important; padding: 5px 0px;'>
+                                    There’s one quick step you need to complete before creating your SAGIP account. Let’s make sure this is the right email address for you — please confirm this is the right address to use for your new account.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='color:#292929!important; font-weight: bold; padding: 5px 0px;'>
+                                    Please enter this verification code:
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                      <div style='color:#292929; font-size: 60px; font-weight: bold; padding: 10px 0px;'>${code}</div>
+                                </td>
+                            </tr>
+                              <tr>
+                                  <td style='color:#292929!important;'>
+                                  The verification code will expire after a day, on ${moment(
+                                    expiration
+                                  ).format("MMMM DD, YYYY | hh:MM A")}.
+                                  </td>
+                              </tr>
+                          </table>
+                      </td>
+                  </tr>
+                  <tr >
+                      <td style='padding-top:15px;'>
+                      <a href='https://www.facebook.com/maloloscdrrmo' target="_blank">
+                            <img src="https://res.cloudinary.com/dantwvqrv/image/upload/v1693923119/sagip/media/others/facebook_icon.png" style="width:30px; margin: 0 auto;" alt="Facebook Logo">
+                        </a>
+                        </td>
+                  </tr>
+                  <tr>
+                      <td style='color:#292929; font-size:15px; padding-top:5px;'>
+                          Copyright © ${moment().format(
+                            "YYYY"
+                          )} SAGIP. All Rights Reserved.
+                      </td>
+                  </tr>
+                  <tr>
+                      <td style='opacity: 0;'>
+                          <script>
+                              ${moment()}
+                              </script>
+                             
+                          </td>
+                      </tr>
+                  </table>
+              </td>
+          </tr>
+      </table>
+  </td>
+</tr>
+</table>
+</body>
+
 `;
   try {
     let transporter = nodemailer.createTransport({
@@ -430,9 +520,10 @@ async function sendEmail(to, subject, code, expiration) {
       from: process.env.NODEMAILER_EMAIL,
       to,
       subject,
-      html: `Your SAGIP verification code is ${code}. The link will expire after a day, on ${moment(
+      /*  html: `Your SAGIP verification code is ${code}. The link will expire after a day, on ${moment(
         expiration
-      ).format("MMM DD, YYYY | hh:MM A")}.`,
+      ).format("MMM DD, YYYY | hh:MM A")}.`, */
+      html,
     });
 
     console.log(info.messageId);

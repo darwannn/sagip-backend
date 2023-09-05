@@ -406,7 +406,8 @@ alertController.get("/signal", async (req, res) => {
 });
 
 alertController.get("/weather", async (req, res) => {
-  /*   sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration); */
+  const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+  sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration);
   /*   createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
