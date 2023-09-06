@@ -461,8 +461,7 @@ wellnessSurveyController.put(
 
       if (Object.keys(error).length === 0) {
         console.log(req.params.id);
-        console.log(activeWellnessSurvey[0]._id);
-        console.log(activeWellnessSurvey[0]._id.equals(req.params.id));
+
         if (
           !(
             activeWellnessSurvey.length !== 0 &&
@@ -481,6 +480,7 @@ wellnessSurveyController.put(
 
           if (wellnessSurvey) {
             if (
+              activeWellnessSurvey.length !== 0 &&
               status === "active" &&
               !activeWellnessSurvey[0]._id.equals(req.params.id)
             ) {

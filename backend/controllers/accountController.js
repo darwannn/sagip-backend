@@ -428,6 +428,7 @@ accountController.put(
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
             console.log("send sms");
+            sendSMS(contactNumber, "sms-verification", user.verificationCode);
           }
           console.log("====================================");
           console.log(user._doc.email);
@@ -437,7 +438,7 @@ accountController.put(
             console.log("send email");
             sendEmail(
               email,
-              "SAGIP verification code",
+              "email-verification",
               user.verificationCode,
               codeExpiration
             );

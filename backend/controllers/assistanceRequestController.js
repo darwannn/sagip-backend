@@ -651,8 +651,9 @@ assistanceRequestController.put(
 
           if (action === "verify") {
             sendSMS(
-              `${assistanceRequest.assignedTeam.name} is on the way`,
-              assistanceRequest.userId.contactNumber
+              assistanceRequest.userId.contactNumber,
+              "notification",
+              `${assistanceRequest.assignedTeam.name} is on the way.`
             );
 
             createNotification(
@@ -819,8 +820,9 @@ assistanceRequestController.put(
             console.log(assistanceRequest.userId.contactNumber);
             console.log("====================================");
             sendSMS(
-              `Your request has deleted. ${reason}`,
-              assistanceRequest.userId.contactNumber
+              assistanceRequest.userId.contactNumber,
+              "notification",
+              `Your request has been denied. ${reason}`
             );
 
             /* await createPusher(`${assistanceRequest.userId}`, "reload", {});

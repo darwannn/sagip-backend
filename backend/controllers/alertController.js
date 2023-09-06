@@ -267,7 +267,11 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
     try {
       const smsResponse = true;
       console.log(smsResponse);
-      const smsRes = await sendBulkSMS(alertMessage, contactNumbers);
+      const smsRes = await sendBulkSMS(
+        `${alertTitle}: ${alertMessage}`,
+        "alert",
+        contactNumbers
+      );
       console.log(smsRes);
       if (smsResponse) {
         return res
@@ -412,11 +416,7 @@ alertController.get("/weather", async (req, res) => {
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
   createPushNotificationTopic("Topic", "body", "sagip"); */
-  /*   sendEmail(
-    "darwinsanluis.ramos14@gmail.com",
-    "SAGIP verification code",
-    `Your SAGIP verification code is`
-  ); */
+
   console.log("====================================");
   console.log("localhost");
   console.log("====================================");

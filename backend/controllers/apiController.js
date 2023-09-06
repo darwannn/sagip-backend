@@ -33,6 +33,9 @@ const pusher = new Pusher({
  */
 
 const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+const formattedCodeExpiration = moment(codeExpiration).format(
+  "MMMM DD, YYYY | hh:MM A"
+);
 
 apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
   try {
@@ -49,10 +52,6 @@ apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
     console.log("====================================");
     const contactNumbers = ["09395372592"];
     const message = "Hello";
-
-    /* await sendSMS(message, "09395372592"); */
-
-    /*  await sendBulkSMS(message, contactNumbers); */
 
     const { receiver, content, event } = req.body;
 
@@ -219,7 +218,7 @@ const createPusher = async (io, channel, event, data) => {
   return await send(contactNumber, message);
 }; */
 
-const sendBulkSMS = async (message, contactNumbers) => {
+const sendBulkSMS = async (message, target, contactNumbers) => {
   console.log("=========contactNumbers===========================");
   console.log(contactNumbers);
   console.log("====================================");
@@ -262,7 +261,7 @@ const sendBulkSMS = async (message, contactNumbers) => {
       console.log("====================================");
       console.log("testing lang");
       console.log("====================================");
-      const success = await sendSMS(contactNumber, message);
+      const success = await sendSMS(contactNumber, target, message);
 
       results.push({ success: success });
     } catch (error) {
@@ -282,8 +281,27 @@ const sendBulkSMS = async (message, contactNumbers) => {
   }
 };
 
-const sendSMS = async (phone, message) => {
+const sendSMS = async (phone, target, content) => {
   /*   .post(`http://${process.env.SMS_API_ADDRESS}:8080`, { phone, message }) */
+  let message = "";
+  if (
+    target === "notification" ||
+    target === "verification-request" ||
+    target === "alert"
+  ) {
+    message = content;
+  } else if (target === "register") {
+    message = `Thank you for registering to SAGIP! Your verification code is ${content}. The link will expire after 15 minutes.`;
+  } else if (target === "attempt") {
+    message = `We detected a suspicious activity on your SAGIP account. If this was you, please use the following code to verify your identity: ${content}. The link will expire after 15 minutes.`;
+  } else if (target === "forgot-password") {
+    message = `We heard that you lost your SAGIP password. Sorry about that! But don’t worry! You can use the following code to reset your password: ${content}. The link will expire after 15 minutes.`;
+  } else if (target === "sms-verification") {
+    message = `To verify your phone number, please use the following code: ${content}. The link will expire after 15 minutes.`;
+  } else {
+    message = `Your SAGIP verification code is ${content}. The link will expire after 15 minutes.`;
+  }
+
   return axios
     .get(
       `http://${process.env.SMS_API_ADDRESS}:8080?phone=${phone}&message=${message}`
@@ -348,71 +366,20 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   }
 }; */
 
-async function sendEmail(to, subject, code, expiration) {
-  // const html = ` `;
-  /* const html = `
-<body
-  style='font-family:Roboto, sans-serif; font-size: 18px;text-align: center; background-color:#5E72D2; margin: 0; padding: 0;'>
-  <table style='width: 100%;'>
-      <tr>
-          <td style='  vertical-align: middle;'>
-              <table style=' margin:0 auto; padding: 50px 20px 80px 20px;'>
-                  <tr>
-                      <td>
-                          <div style="font-size: 40px; font-weight:bold; color:white;">SAGIP</div>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>
-                          <table
-                              style='background-color: white!important; border-radius: 20px; padding: 100px 40px; width: 500px;'>
-                              <tr>
-                                  <td style='color:black!important;'>
-                                      Here is your SAGIP verification code
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                      <div style='font-size: 60px; color: #5E72D2; font-weight: bold; padding: 30px 0px;'>${code}</div>
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td style='color:black!important;'>
-                                     If you didn't request this, you can ignore this email or let us know.
-                                  </td>
-                              </tr>
-                     
-                          </table>
-                      </td>
-                  </tr>
-                  <tr >
-                      <td style='font-size:17px; color:white; padding-top:15px;'>
-                          The link will expire after a day, on ${moment(
-                            expiration
-                          ).format("MMM DD, YYYY | hh:MM A")}.
-                      </td>
-                  </tr>
-                  <tr>
-                      <td style='font-size:15px; color:white; padding-top:5px;'>
-                          Copyright © ${moment().format(
-                            "YYYY"
-                          )} SAGIP. All Rights Reserved.
-                      </td>
-                  </tr>
-                  <tr>
-                      <td style='opacity: 0;'>
-                          <script>
-                              ${moment()}
-                          </script>
-                          </div>
-                      </td>
-                  </tr>
-              </table>
-          </td>
-      </tr>
-  </table>
-</body>
-`; */
+async function sendEmail(to, target, code, expiration) {
+  let subject = "";
+  let content = "";
+  if (target === "change-email") {
+    subject = "Change or verify your email address";
+    content = `To change or verify your email address, please use the following code:`;
+  } else if (target === "forgot-password") {
+    subject = "Reset your password";
+    content = `We heard that you lost your SAGIP password. Sorry about that! But don’t worry! You can use the following code to reset your password:`;
+  } else if (target === "attempt") {
+    subject = "Suspicious activity detected";
+    content = `We detected a suspicious activity on your SAGIP account. If this was you, please use the following code to verify your identity:`;
+  }
+
   const html = `
   <body style='font-family:Roboto, sans-serif; font-size: 18px; text-align: center; background-image:url(https://res.cloudinary.com/dantwvqrv/image/upload/v1693923120/sagip/media/others/malolos_city_hall_gradient.jpg);
 
@@ -448,7 +415,7 @@ async function sendEmail(to, subject, code, expiration) {
                             </tr>
                             <tr>
                                 <td style='color:#292929!important; padding: 5px 0px;'>
-                                    There’s one quick step you need to complete before creating your SAGIP account. Let’s make sure this is the right email address for you — please confirm this is the right address to use for your new account.
+                                    ${content}
                                 </td>
                             </tr>
                             <tr>
@@ -463,9 +430,7 @@ async function sendEmail(to, subject, code, expiration) {
                             </tr>
                               <tr>
                                   <td style='color:#292929!important;'>
-                                  The verification code will expire after a day, on ${moment(
-                                    expiration
-                                  ).format("MMMM DD, YYYY | hh:MM A")}.
+                                  The verification code will expire after 15 minutes.
                                   </td>
                               </tr>
                           </table>
@@ -520,9 +485,7 @@ async function sendEmail(to, subject, code, expiration) {
       from: process.env.NODEMAILER_EMAIL,
       to,
       subject,
-      /*  html: `Your SAGIP verification code is ${code}. The link will expire after a day, on ${moment(
-        expiration
-      ).format("MMM DD, YYYY | hh:MM A")}.`, */
+
       html,
     });
 
