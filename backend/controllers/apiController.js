@@ -223,37 +223,33 @@ const sendBulkSMS = async (message, target, contactNumbers) => {
   console.log(contactNumbers);
   console.log("====================================");
   /* SMS GATE WAY */
-  // console.log(process.env.DEVICE_ID);
-  // const smsData = contactNumbers.map((contactNumber) => ({
-  //   sendto: contactNumber,
-  //   body: message,
-  //   sim: "0",
-  //   device_id: process.env.DEVICE_ID,
-  //   urgent: "1",
-  // }));
-  // const params = {
-  //   token: process.env.SMS_API,
-  //   smsdata: smsData,
-  // };
-  // return axios
-  //   .post("https://smsgateway24.com/getdata/addalotofsms", params)
-  //   .then(function (response) {
-  //     return response.data;
-  //   })
-  //   .catch(function (error) {
-  //     throw error;
-  //   });
+  console.log(process.env.DEVICE_ID);
+  const smsData = contactNumbers.map((contactNumber) => ({
+    sendto: contactNumber,
+    body: message,
+    sim: "0",
+    device_id: process.env.DEVICE_ID,
+    urgent: "1",
+  }));
+  const params = {
+    token: process.env.SMS_API,
+    smsdata: smsData,
+  };
+  return axios
+    .post("https://smsgateway24.com/getdata/addalotofsms", params)
+    .then(function (response) {
+      return response.data.error === 0 ? true : false;
+    })
+    .catch(function (error) {
+      throw error;
+    });
   /* ------------------------- */
   /* console.log("send bulk sms");
   return { error: 0, message: "testing" }; */
+
   /* QUICK SMS */
 
-  /* 
-    function send($ip, $phone, $message) {
-      $send = json_decode(file_get_contents("http://{$ip}:8080/?phone={$phone}&message={$message}"));
-      return $send->status == 200?true:false;
-    } */
-  const results = [];
+  /* const results = [];
 
   for (const contactNumber of contactNumbers) {
     console.log("send bulk sms");
@@ -273,16 +269,15 @@ const sendBulkSMS = async (message, target, contactNumbers) => {
   const allSuccessful = results.every((result) => result.success);
 
   if (allSuccessful) {
-    /*  return { success: true, message: "SMS Sent Successfully" }; */
+    //  return { success: true, message: "SMS Sent Successfully" };
     return true;
   } else {
-    /* return { success: false, message: "Some SMS failed to send" }; */
+    // return { success: false, message: "Some SMS failed to send" };
     return false;
-  }
+  } */
 };
 
 const sendSMS = async (phone, target, content) => {
-  /*   .post(`http://${process.env.SMS_API_ADDRESS}:8080`, { phone, message }) */
   let message = "";
   if (
     target === "notification" ||
@@ -302,10 +297,28 @@ const sendSMS = async (phone, target, content) => {
     message = `Your SAGIP verification code is ${content}. The link will expire after 15 minutes.`;
   }
 
-  return axios
+  const encodedMessage = message;
+
+  /* return axios
     .get(
-      `http://${process.env.SMS_API_ADDRESS}:8080?phone=${phone}&message=${message}`
+      `http://${process.env.SMS_API_ADDRESS}:8080?phone=${encodeURIComponent(
+        phone
+      )}&message=${encodeURIComponent(message)}` 
+    //   , {
+    //   params: {
+    //     phone,
+    //     message: encodedMessage,
+    //   },
+    //   paramsSerializer: (params) => {
+    //     let result = "";
+    //     Object.keys(params).forEach((key) => {
+    //       result += `${key}=${encodeURIComponent(params[key])}&`;
+    //     });
+    //     return result.substring(0, result.length - 1);
+    //   },
+    // }
     )
+
     .then((response) => {
       console.log("sred", response);
       console.log("sred", response.status);
@@ -315,8 +328,34 @@ const sendSMS = async (phone, target, content) => {
     .catch((error) => {
       console.error("Error sending SMS:", error);
       return false;
+    }); */
+
+  const smsData = {
+    token: process.env.SMS_API,
+    sendto: phone,
+    body: message,
+    sim: "0",
+    device_id: process.env.DEVICE_ID,
+    urgent: "1",
+  };
+
+  return axios
+    .post("https://smsgateway24.com/getdata/addsms", null, {
+      params: smsData,
+    })
+    .then(function (response) {
+      console.log(response);
+      return response.data.error === 0 ? true : false;
+    })
+    .catch(function (error) {
+      throw error;
     });
+  console.log("send sms");
+  return { error: 0, message: "testing" };
+
+  return await send(contactNumber, message);
 };
+
 /* 
 const getInfoByMunicipality = async (municipality) => {
   try {

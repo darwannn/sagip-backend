@@ -268,7 +268,7 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       const smsResponse = true;
       console.log(smsResponse);
       const smsRes = await sendBulkSMS(
-        `${alertTitle}: ${alertMessage}`,
+        `${alertTitle}\n\n${alertMessage}`,
         "alert",
         contactNumbers
       );
@@ -412,6 +412,7 @@ alertController.get("/signal", async (req, res) => {
 alertController.get("/weather", async (req, res) => {
   const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
   sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration);
+  sendSMS("09395372592", "sms-verification", "22222");
   /*   createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);

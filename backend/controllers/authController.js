@@ -30,9 +30,7 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 /* const currentDate = new Date(); */
 const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-
 const multerMiddleware = require("../middlewares/multerMiddleware");
-
 const folderPath = "sagip/media/verification-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
@@ -1173,7 +1171,7 @@ authController.put(
       //   action === "contact" ||
       //   action === "email"
       // ) {
-      const identifier = req.body.identifier;
+      const { identifier, action } = req.body;
 
       // if (action === "register") {
       // }
@@ -1201,12 +1199,12 @@ authController.put(
 
           sendEmail(
             identifier,
-            "resend",
+            action,
             `Your SAGIP verification code is ${user.verificationCode}`
           );
         } else if (identifierType === "contactNumber") {
           console.log("send sms");
-          sendSMS(identifier, "resend", user.verificationCode);
+          sendSMS(identifier, action, user.verificationCode);
           /*  return res.status(200).json({
             success: true,
             message: `Verification code has been resent to ${identifier}`,
