@@ -32,7 +32,7 @@ const ContactVerification = ({ type }) => {
         if (type === "register") {
           navigate("/");
           dispatch(contactVerification(data));
-          window.AndroidInterface?.updateFcmToken(data.user.email);
+          window.AndroidInterface?.(data.user.email);
           toast.success(message);
         } else if (type === "forgot-password") {
           navigate("/new-password");

@@ -76,6 +76,7 @@ safetyTipController.post(
             category,
             status,
             image: `${cloud.original_filename}.${cloud.format}`,
+            authorId: req.user.id,
           });
           if (safetyTip) {
             /*  await createPusher("safety-tips", "reload", {}); */
@@ -121,7 +122,10 @@ safetyTipController.post(
 
 safetyTipController.get("/", async (req, res) => {
   try {
-    const safetyTips = await SafetyTip.find({});
+    const safetyTips = await SafetyTip.find({}).populate(
+      "authorId",
+      "-password"
+    );
     if (safetyTips) {
       return res.status(200).json(safetyTips);
       return res.status(200).json({
@@ -146,7 +150,10 @@ safetyTipController.get("/", async (req, res) => {
 
 safetyTipController.get("/published", async (req, res) => {
   try {
-    const safetyTips = await SafetyTip.find({ status: "published" });
+    const safetyTips = await SafetyTip.find({ status: "published" }).populate(
+      "authorId",
+      "-password"
+    );
     if (safetyTips) {
       return res.status(200).json(safetyTips);
       return res.status(200).json({
@@ -174,7 +181,7 @@ safetyTipController.get("/published/:id", async (req, res) => {
     const safetyTip = await SafetyTip.findOne({
       _id: req.params.id,
       status: "published",
-    });
+    }).populate("authorId", "-password");
     if (safetyTip) {
       /*      return res.status(200).json(safetyTip); */
       return res.status(200).json({
@@ -237,7 +244,10 @@ safetyTipController.get(
 
 safetyTipController.get("/:id", async (req, res) => {
   try {
-    const safetyTip = await SafetyTip.findById(req.params.id);
+    const safetyTip = await SafetyTip.findById(req.params.id).populate(
+      "authorId",
+      "-password"
+    );
 
     if (safetyTip) {
       /*      return res.status(200).json(safetyTip); */
@@ -263,6 +273,7 @@ safetyTipController.get("/:id", async (req, res) => {
 safetyTipController.put(
   "/update/:id",
   /*  userTypeMiddleware(["admin", "super-admin"]), */
+  tokenMiddleware,
   multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
@@ -298,6 +309,7 @@ safetyTipController.put(
           content,
           category,
           status,
+          authorId: req.user.id,
         };
 
         if (hasChanged && req.file) {

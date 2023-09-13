@@ -23,6 +23,11 @@ const SafetyTipSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    authorId: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     /* views: {
       type: Number,
       default: 0,

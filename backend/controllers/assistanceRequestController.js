@@ -229,6 +229,60 @@ assistanceRequestController.get("/ongoing", async (req, res) => {
     });
   }
 });
+assistanceRequestController.get(
+  "/torespond",
+  tokenMiddleware,
+  async (req, res) => {
+    try {
+      const myTeam = await Team.findOne({
+        $or: [{ members: req.user.id }, { head: req.user.id }],
+        /*      assignedTeam: { $ne: null }, */
+      })
+        .populate("head", "-password")
+        .populate("members", "-password");
+      console.log("====================================");
+      console.log(req.user.id);
+      console.log(myTeam);
+      console.log("====================================");
+      if (myTeam) {
+        const assistanceRequest = await AssistanceRequest.find({
+          status: "ongoing",
+          archivedDate: { $exists: false },
+          isArchived: false,
+          assignedTeam: myTeam._id,
+        })
+          .populate({
+            path: "assignedTeam",
+            populate: [
+              { path: "members", select: "-password" },
+              { path: "head", select: "-password" },
+            ],
+          })
+          .populate("userId", "-password");
+
+        if (assistanceRequest) {
+          return res.status(200).json(assistanceRequest);
+          return res.status(200).json({});
+        } else {
+          return res.status(200).json({
+            success: false,
+            message: "not found",
+          });
+        }
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "not found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 assistanceRequestController.get(
   "/response",
