@@ -277,7 +277,7 @@ const sendBulkSMS = async (message, target, contactNumbers) => {
   } */
 };
 
-const sendSMS = async (phone, target, content) => {
+const sendSMS = async (phone, target, content, expiration) => {
   let message = "";
   if (
     target === "notification" ||

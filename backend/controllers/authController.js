@@ -176,7 +176,12 @@ authController.post("/register", async (req, res) => {
       if (user) {
         console.log("success");
 
-        sendSMS(user.contactNumber, "register", verificationCode);
+        sendSMS(
+          user.contactNumber,
+          "register",
+          verificationCode,
+          codeExpiration
+        );
 
         /*  if (verificationCode !== 0) { */
         return res.status(200).json({
@@ -794,7 +799,12 @@ authController.post("/login", async (req, res) => {
           if (identifierType === "email") {
             sendEmail(user.email, "attempt", generatedCode, codeExpiration);
           } else if (identifierType === "contactNumber") {
-            sendSMS(user.contactNumber, "attempt", generatedCode);
+            sendSMS(
+              user.contactNumber,
+              "attempt",
+              generatedCode,
+              codeExpiration
+            );
           }
         }
         return res.status(200).json({
@@ -880,7 +890,8 @@ authController.post("/login", async (req, res) => {
               sendSMS(
                 userVerificationCode.contactNumber,
                 "register",
-                userVerificationCode.verificationCode
+                userVerificationCode.verificationCode,
+                codeExpiration
               );
 
               if (userVerificationCode) {
@@ -967,7 +978,12 @@ authController.post("/forgot-password", async (req, res) => {
             codeExpiration
           );
         } else if (identifierType === "contactNumber") {
-          sendSMS(user.contactNumber, "forgot-password", user.verificationCode);
+          sendSMS(
+            user.contactNumber,
+            "forgot-password",
+            user.verificationCode,
+            codeExpiration
+          );
         }
         if (user.isBanned) {
           return res.status(500).json({
@@ -1197,14 +1213,10 @@ authController.put(
         if (identifierType === "email") {
           console.log("send email");
 
-          sendEmail(
-            identifier,
-            action,
-            `Your SAGIP verification code is ${user.verificationCode}`
-          );
+          sendEmail(identifier, action, user.verificationCode);
         } else if (identifierType === "contactNumber") {
           console.log("send sms");
-          sendSMS(identifier, action, user.verificationCode);
+          sendSMS(identifier, action, user.verificationCode, codeExpiration);
           /*  return res.status(200).json({
             success: true,
             message: `Verification code has been resent to ${identifier}`,
@@ -1571,7 +1583,8 @@ authController.put(
             sendSMS(
               user.contactNumber,
               "verification-request",
-              `Verification Request Rejected`
+              `Verification Request Rejected`,
+              ""
             );
             /*  await createPusher("verification-request-mobile", "reload", {}); */
             req.io.emit("verification-request");
@@ -1590,7 +1603,8 @@ authController.put(
             sendSMS(
               user.contactNumber,
               "verification-request",
-              `Verification Request Approved`
+              `Verification Request Approved`,
+              ""
             );
             /* await createPusher("verification-request-mobile", "reload", {}); */
             req.io.emit("verification-request");
@@ -1671,7 +1685,7 @@ authController.put(
 
       if (user) {
         if (req.body.action === "reject") {
-          //sendSMS(`Verification Request Rejected`, user.contactNumber);
+          //sendSMS(`Verification Request Rejected`, user.contactNumber,"");
 
           await createNotification(
             req.params.id,
@@ -1691,7 +1705,7 @@ authController.put(
             "message",
             "category"
           );
-          //sendSMS(`Verification Request Approved`, user.contactNumber);
+          //sendSMS(`Verification Request Approved`, user.contactNumber,"");
 
           return res.status(200).json({
             success: true,

@@ -707,7 +707,8 @@ assistanceRequestController.put(
             sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
-              `${assistanceRequest.assignedTeam.name} is on the way.`
+              `${assistanceRequest.assignedTeam.name} is on the way.`,
+              ""
             );
 
             createNotification(
@@ -876,7 +877,8 @@ assistanceRequestController.put(
             sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
-              `Your request has been denied. ${reason}`
+              `Your request has been denied. ${reason}`,
+              ""
             );
 
             /* await createPusher(`${assistanceRequest.userId}`, "reload", {});

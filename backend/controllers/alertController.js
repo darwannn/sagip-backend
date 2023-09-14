@@ -36,13 +36,18 @@ alertController.post(
   async (req, res) => {
     const error = {};
     try {
-      let { alertTitle, alertMessage } = req.body;
+      let { alertTitle, alertMessage, category } = req.body;
 
       if (isEmpty(alertTitle)) error["alertTitle"] = "Required field";
       if (isEmpty(alertMessage)) error["alertMessage"] = "Required field";
+      if (isEmpty(category)) error["category"] = "Required field";
 
       if (Object.keys(error).length === 0) {
-        const alert = await Alert.create({ alertTitle, alertMessage });
+        const alert = await Alert.create({
+          alertTitle,
+          alertMessage,
+          category,
+        });
 
         if (alert) {
           req.io.emit("alert");
@@ -114,15 +119,17 @@ alertController.put(
   async (req, res) => {
     const error = {};
     try {
-      let { alertTitle, alertMessage } = req.body;
+      let { alertTitle, alertMessage, category } = req.body;
 
       if (isEmpty(alertTitle)) error["alertTitle"] = "Required field";
       if (isEmpty(alertMessage)) error["alertMessage"] = "Required field";
+      if (isEmpty(category)) error["category"] = "Required field";
 
       if (Object.keys(error).length === 0) {
         const updateFields = {
           alertTitle,
           alertMessage,
+          category,
         };
 
         const alert = await Alert.findByIdAndUpdate(
@@ -411,8 +418,8 @@ alertController.get("/signal", async (req, res) => {
 
 alertController.get("/weather", async (req, res) => {
   const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-  sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration);
-  sendSMS("09395372592", "sms-verification", "22222");
+  /* sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration);
+  sendSMS("09395372592", "sms-verification", "22222",codeExpiration); */
   /*   createPushNotificationToken("title", "body", [
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);

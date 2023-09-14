@@ -428,7 +428,7 @@ accountController.put(
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
             console.log("send sms");
-            sendSMS(contactNumber, "sms-verification", user.verificationCode);
+            sendSMS(contactNumber, "sms-verification", user.verificationCode,codeExpiration);
           }
           console.log("====================================");
           console.log(user._doc.email);
