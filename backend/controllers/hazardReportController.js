@@ -42,7 +42,7 @@ hazardReportController.post(
         category,
         latitude,
         longitude,
-
+        hasChanged,
         street,
         municipality,
       } = req.body;
@@ -53,6 +53,8 @@ hazardReportController.post(
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["longitude"] = "Mark a location";
       console.log("=====req.file===============================");
+      console.log(hasChanged);
+      console.log("hasChanged");
       console.log(req.file);
       console.log("====================================");
       if (!req.file) {
@@ -221,9 +223,9 @@ hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     }).populate("userId", "-password"); */
-    const hazardReport = await HazardReport.findOne({
+    const hazardReport = await HazardReport.find({
       userId: req.user.id,
-      status: { $in: ["ongoing", "unverified"] },
+      status: { $in: "unverified" },
       archivedDate: { $exists: false },
       isArchived: false,
     }).populate("userId", "-password");

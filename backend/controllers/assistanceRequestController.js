@@ -47,16 +47,19 @@ assistanceRequestController.post(
         street,
         municipality,
         answers,
+        hasChanged,
       } = req.body;
-
+      /*  console.log(proof); */
       if (isEmpty(answers)) error["answers"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["longitude"] = "Mark a location";
-      console.log("=====req.file===============================");
+      /*   console.log("=====req.file===============================");
+      console.log(hasChanged);
+      console.log("hasChanged");
       console.log(req.file);
-      console.log("====================================");
+      console.log("===================================="); */
       if (!req.file) {
         error["proof"] = "Required field";
       } else {
