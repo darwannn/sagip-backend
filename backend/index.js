@@ -23,12 +23,14 @@ const statisticsController = require("./controllers/statisticsController");
 
 const app = express();
 const server = http.createServer(app); // Create an HTTP server
-const io = socketIO(server, {
+/* const io = socketIO(server, {
   cors: {
     origin: ["http://localhost:3000", "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
   },
-}); // Initialize Socket.IO on the server
+});  */
+
+const io = require("socket.io")(server, { cors: { origin: "*" } });
 
 mongoose.set("strictQuery", false);
 mongoose.connect(process.env.MONGO_URL, () =>
