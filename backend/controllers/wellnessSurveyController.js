@@ -52,8 +52,8 @@ wellnessSurveyController.post(
               /*  await createPusher("wellness-survey", "reload", {}); */
               createNotificationAll(
                 wellnessSurvey._id,
-                "A new ",
-                `Explore the recently added safety tip: ${title}`,
+                "New Wellness Check Survey",
+                `Recent events have not been good. Please tell us how you are doing after the ${title}`,
                 "info"
               );
             }
@@ -489,8 +489,8 @@ wellnessSurveyController.put(
               req.io.emit("wellness-survey");
               createNotificationAll(
                 wellnessSurvey._id,
-                "A new ",
-                `Explore the recently added safety tip: ${title}`,
+                "New Wellness Check Survey",
+                `Recent events have not been good. Please tell us how you are doing after the ${title}`,
                 "info"
               );
             }

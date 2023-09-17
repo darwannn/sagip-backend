@@ -622,13 +622,13 @@ assistanceRequestController.put(
           /*  await createPusher("assistance-request-web", "reload", {}); */
           req.io.emit("assistance-request");
           const userIds = await getUsersId("dispatcher");
-          createNotification(
+          /* createNotification(
             userIds,
             req.user.id,
-            " assistance request updated",
+            "Assistance Request Updated",
             `${category} on ${street} ${municipality}`,
             "info"
-          );
+          ); */
 
           return res.status(200).json({
             success: true,
@@ -717,10 +717,17 @@ assistanceRequestController.put(
             createNotification(
               [assistanceRequest.userId],
               assistanceRequest.userId,
-              "Request Approved",
-              `Your request has been approved. ${assistanceRequest.assignedTeam.name} is on the way`,
+              "Assistance Request Verified",
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been verified. Please wait as ${
+                assistanceRequest.assignedTeam.name
+              } is on their way to assist you.`,
               "success"
             );
+
             return res.status(200).json({
               success: true,
               message: "Assistance Request Verified",
@@ -730,10 +737,15 @@ assistanceRequestController.put(
             createNotification(
               [assistanceRequest.userId],
               assistanceRequest.userId,
-              "Request Resolved",
-              "Your request has resolved.",
+              "Assistance Request Resolved",
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been resolved. If you need any further assistance, feel free to reach out.`,
               "success"
             );
+
             return res.status(200).json({
               success: true,
               message: "Assistance Request Resolved",
@@ -891,11 +903,14 @@ assistanceRequestController.put(
             createNotification(
               [assistanceRequest.userId],
               assistanceRequest.userId,
-              "Request Delete",
-              `${reason}`,
+              "Assistance Request Closed",
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been closed due to: \n\n ${reason}\n ${note}.`,
               "error"
             );
-
             return res.status(200).json({
               success: true,
               message: "Deleted successfully",
@@ -993,8 +1008,12 @@ assistanceRequestController.put(
               createNotification(
                 [assistanceRequest.userId],
                 assistanceRequest.userId,
-                "Request Deleted",
-                `Your request has been deleted`,
+                "Assistance Request Closed",
+                `Your request regarding ${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                } has been closed due to: \n\n ${reason}\n ${note}.`,
                 "error"
               );
               return res.status(200).json({

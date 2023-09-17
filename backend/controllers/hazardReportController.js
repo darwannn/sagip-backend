@@ -111,7 +111,7 @@ hazardReportController.post(
             createNotification(
               userIds,
               req.user.id,
-              "New hazport report",
+              "New Hazport Report",
               `${category} on ${street} ${municipality}`,
               "info"
             );
@@ -417,13 +417,13 @@ hazardReportController.put(
           /*    await createPusher("assistance-request-web", "reload", {}); */
           req.io.emit("hazard-report");
           const userIds = await getUsersId("dispatcher");
-          createNotification(
+          /* createNotification(
             userIds,
             req.user.id,
-            " assistance request updated",
+            "Hazard report Updated",
             `${category} on ${street} ${municipality}`,
             "info"
-          );
+          ); */
 
           return res.status(200).json({
             success: true,
@@ -493,9 +493,11 @@ hazardReportController.put(
           if (action === "verify") {
             createNotification(
               [hazardReport.userId],
-              hazardReport.userId,
+              hazardReport._id,
               "Hazard Report Verified",
-              `Your hazard report has been verified`,
+              `Your report regarding ${hazardReport.category} ${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }, has been carefully reviewed, and we confirm the existence of the reported hazard. Thank you for bringing this to our attention.`,
               "success"
             );
 
@@ -509,9 +511,12 @@ hazardReportController.put(
               [hazardReport.userId],
               hazardReport.userId,
               "Hazard Report Resolved",
-              `Your hazard report has been resolved`,
+              `Your report regarding ${hazardReport.category} ${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }, has been resolved. Thank you for bringing this to our attention and helping to maintain safety in our community.`,
               "success"
             );
+
             return res.status(200).json({
               success: true,
               message: "Hazard Report Resolved",
@@ -583,8 +588,10 @@ hazardReportController.delete(
           createNotification(
             [hazardReport.userId],
             hazardReport.userId,
-            "Hazard Report Deleted",
-            `Your hazard report has been deleted`,
+            "Hazard Report Closed",
+            `Your report regarding  ${hazardReport.category} ${
+              hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+            }, has been carefully reviewed, and we have determined that the reported hazard is not substantiated. Your hazard report has been closed.`,
             "error"
           );
 
@@ -657,8 +664,10 @@ hazardReportController.put(
             createNotification(
               [hazardReport.userId],
               hazardReport.userId,
-              "Hazard Report Deleted",
-              `Your hazard report has been deleted`,
+              "Hazard Report Closed",
+              `Your report regarding  ${hazardReport.category} ${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }, has been carefully reviewed, and we have determined that the reported hazard is not substantiated. Your hazard report has been closed.`,
               "error"
             );
             return res.status(200).json({

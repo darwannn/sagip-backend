@@ -386,7 +386,7 @@ authController.put(
                     [req.user.id],
                     req.user.id,
                     "Welcome to SAGIP",
-                    "Get to know more about us",
+                    "Feel free to explore and reach out if you have any questions.",
                     "info"
                   );
 
@@ -468,13 +468,13 @@ authController.put(
                     }
                   );
                   if (userContactNumber) {
-                    createNotification(
+                    /* createNotification(
                       [req.user.id],
                       req.user.id,
                       "Contact Number Updated",
                       "Your contact number has been updated",
                       "info"
-                    );
+                    ); */
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
@@ -515,13 +515,13 @@ authController.put(
                     }
                   );
                   if (userEmail) {
-                    createNotification(
+                    /* createNotification(
                       [req.user.id],
                       req.user.id,
                       "Email Updated",
                       "Your email has been updated",
                       "info"
-                    );
+                    ); */
                     return res.status(200).json({
                       success: true,
                       message: "Email Updated Successfully",
@@ -1131,13 +1131,13 @@ authController.put(
                 "Password has been changed successfully. You can now login with your new password",
             });
           } else {
-            createNotification(
+            /* createNotification(
               [req.user.id],
               req.user.id,
               "Password has been changed",
               "Your password has been changed",
               "info"
-            );
+            ); */
             return res.status(200).json({
               success: true,
               message: "Password has been changed successfully",
@@ -1352,8 +1352,8 @@ authController.put(
           createNotification(
             userIds,
             req.user.id,
-            "New verification request",
-            `${user.firstname} ${user.firstname} sends a verification request`,
+            "New Verification Request",
+            `${user.firstname} ${user.lastname} has sent a verification request`,
             "info"
           );
           console.log("====================================");
@@ -1583,7 +1583,7 @@ authController.put(
             sendSMS(
               user.contactNumber,
               "verification-request",
-              `Verification Request Rejected`,
+              `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
               ""
             );
             /*  await createPusher("verification-request-mobile", "reload", {}); */
@@ -1592,9 +1592,10 @@ authController.put(
               [user._id],
               user._id,
               "Verification Request Rejected",
-              `Your verification request has been rejected`,
+              `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
               "error"
             );
+
             return res.status(200).json({
               success: true,
               message: "Verification Request Rejected",
@@ -1603,16 +1604,17 @@ authController.put(
             sendSMS(
               user.contactNumber,
               "verification-request",
-              `Verification Request Approved`,
+              "Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.",
               ""
             );
+
             /* await createPusher("verification-request-mobile", "reload", {}); */
             req.io.emit("verification-request");
             createNotification(
               [user._id],
               user._id,
               "Verification Request Approved",
-              `Your account is now verified`,
+              `Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.`,
               "success"
             );
 

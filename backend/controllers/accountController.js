@@ -428,7 +428,12 @@ accountController.put(
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
             console.log("send sms");
-            sendSMS(contactNumber, "sms-verification", user.verificationCode,codeExpiration);
+            sendSMS(
+              contactNumber,
+              "sms-verification",
+              user.verificationCode,
+              codeExpiration
+            );
           }
           console.log("====================================");
           console.log(user._doc.email);
@@ -1066,19 +1071,19 @@ accountController.put(
             return res.status(200).json({
               success: true,
               message:
-                "Password has been changed successfully. You can now login with your new password",
+                "Your password has been changed successfully. You can now login with your new password",
             });
           } else {
             createNotification(
               [req.user.id],
               req.user.id,
-              "Password has been changed",
-              "Your password has been changed",
+              "Password Changed!",
+              "Your password has been changed successfully",
               "info"
             );
             return res.status(200).json({
               success: true,
-              message: "Password has been changed successfully",
+              message: "Your password has been changed successfully",
             });
           }
         } else {

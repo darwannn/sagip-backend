@@ -106,7 +106,9 @@ const createNotification = async (ids, linkId, title, message, type) => {
 
 const createNotificationAll = async (linkId, title, message, type) => {
   /*  createPushNotificationTopic(title, message, "sagip"); */
-  const users = await User.find({});
+  const users = await User.find({
+    userType: "resident",
+  });
   if (users) {
     users.map(async (user) => {
       const notification = new Notification({

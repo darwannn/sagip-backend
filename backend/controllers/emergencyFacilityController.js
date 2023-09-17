@@ -79,10 +79,11 @@ emergencyFacilityController.post(
           if (emergencyFacility) {
             createNotificationAll(
               emergencyFacility._id,
-              `A ${category} is added`,
-              `Checkout the new ${category}: ${name} `,
+              `New Emergency Facility`,
+              `Checkout the recently added ${category}: ${name}`,
               "info"
             );
+
             /* await createPusher("emergency-facility", "reload", {}); */
             req.io.emit("emergency-facility");
 

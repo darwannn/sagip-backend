@@ -287,8 +287,8 @@ teamController.delete(
           await createNotification(
             teamMembers,
             team._id,
-            `${team.name} Removed`,
-            "Your team has been removed",
+            `Team Assignment`,
+            `Your current team, ${team.name} has been disbanded`,
             "info"
           );
           /* await createPusher("team", "reload", {}); */
@@ -398,7 +398,7 @@ teamController.put(
           await createNotification(
             [userId],
             userId,
-            `You have been unassigned`,
+            `Team Assignment`,
             `You have been remove from ${removedTeam.name}`,
             "info"
           );
@@ -407,7 +407,7 @@ teamController.put(
           await createNotification(
             [userId],
             userId,
-            `You have been assigned`,
+            `Team Assignment`,
             `You have been assigned to ${team.name} `,
             "info"
           );
@@ -415,7 +415,7 @@ teamController.put(
           await createNotification(
             [userId],
             userId,
-            `You have been reassigned`,
+            `Team Assignment`,
             `You have been assigned to ${team.name} `,
             "info"
           );
@@ -488,8 +488,8 @@ teamController.put(
           await createNotification(
             [userId],
             userId,
-            `You have been unassigned`,
-            `You have been remove from ${removedTeam.name}`,
+            `Team Assignment`,
+            `You have been removed from ${removedTeam.name}`,
             "info"
           );
         } else if (prevTeamId === "") {
@@ -497,7 +497,7 @@ teamController.put(
           await createNotification(
             [userId],
             userId,
-            `You have been assigned`,
+            `Team Assignment`,
             `You have been assigned to ${team.name} as member`,
             "info"
           );
@@ -505,7 +505,7 @@ teamController.put(
           await createNotification(
             [userId],
             userId,
-            `You have been reassigned`,
+            `Team Assignment`,
             `You have been assigned to ${team.name} as member`,
             "info"
           );
@@ -583,7 +583,7 @@ teamController.put(
             await createNotification(
               [head],
               team._id,
-              `You have been assigned`,
+              `Team Assignment`,
               `You have been assigned to ${team.name} as head`,
               "info"
             );
@@ -591,7 +591,7 @@ teamController.put(
             await createNotification(
               members,
               team._id,
-              `You have been assigned`,
+              `Team Assignment `,
               `You have been assigned to ${team.name} as member`,
               "info"
             );
