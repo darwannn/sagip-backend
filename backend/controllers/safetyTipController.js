@@ -83,7 +83,7 @@ safetyTipController.post(
             req.io.emit("safety-tips");
             createNotificationAll(
               safetyTip._id,
-              "New safety tip",
+              "New Safety Tip",
               `Read the recently added safety tip: ${title}`,
               "info"
             );

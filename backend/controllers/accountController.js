@@ -307,59 +307,6 @@ accountController.delete(
   }
 );
 
-/* accountController.put(
-  "/update/contact-number",
-  tokenMiddleware,
-  //  userTypeMiddleware([
-  //   "resident",
-  //   "responder",
-  //   "dispatcher",
-  //   "admin",
-  //   "super-admin",
-  // ]),
-  async (req, res) => {
-    try {
-      let { contactNumber } = req.body;
-
-      const updateFields = {
-        contactNumber,
-      };
-
-      const user = await User.findByIdAndUpdate(req.user.id, updateFields, {
-        new: true,
-      });
-
-      if (user) {
-        
-        req.io.emit("account");
-        //await createPusher("account", "reload", {});
-        //  createNotification(
-        //     req.params.id,
-        //     req.params.id,
-        //     "Account Deleted",
-        //     `Your account has been deleted`,
-        //     "info"
-        //   );
-
-        return res.status(200).json({
-          success: true,
-          message: "Contact Number Updated Successfully",
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-); */
-
 //ito yung endpoint para magsend ng verification code sa contact number, para mavalidate din yung contact number
 accountController.put(
   "/update/:action/send-code",
