@@ -113,7 +113,7 @@ assistanceRequestController.post(
               userIds,
               req.user.id,
               "New assistance request",
-              `${category} on ${street} ${municipality}`,
+              `${category} on ${street} ${municipality}.`,
               "info"
             );
 
@@ -710,7 +710,13 @@ assistanceRequestController.put(
             sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
-              `${assistanceRequest.assignedTeam.name} is on the way.`,
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been verified. Please wait as ${
+                assistanceRequest.assignedTeam.name
+              } is on their way to assist you.`,
               ""
             );
 
@@ -892,7 +898,11 @@ assistanceRequestController.put(
             sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
-              `Your request has been denied. ${reason}`,
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been closed due to: \n\n ${reason}\n ${note}.`,
               ""
             );
 

@@ -212,6 +212,7 @@ function Home() {
   useEffect(() => {
     receivePusher("notification", (data) => {
       console.log("new", data);
+      toast("pusher");
     });
     receivePusher("reload", (data) => {
       console.log("wellness survey inside");

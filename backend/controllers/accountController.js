@@ -277,7 +277,7 @@ accountController.delete(
             req.params.id,
             req.params.id,
             "Account Deleted",
-            `Your account has been deleted`,
+            `Your account has been deleted.`,
             "info"
           ); */
 
@@ -1025,7 +1025,7 @@ accountController.put(
               [req.user.id],
               req.user.id,
               "Password Changed!",
-              "Your password has been changed successfully",
+              "Your password has been changed successfully.",
               "info"
             );
             return res.status(200).json({

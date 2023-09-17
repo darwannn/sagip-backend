@@ -287,8 +287,8 @@ teamController.delete(
           await createNotification(
             teamMembers,
             team._id,
-            `Team Assignment`,
-            `Your current team, ${team.name} has been disbanded`,
+            `Team Deleted`,
+            `Your current team, ${team.name} has been deleted.`,
             "info"
           );
           /* await createPusher("team", "reload", {}); */
@@ -399,7 +399,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been remove from ${removedTeam.name}`,
+            `You have been remove from ${removedTeam.name}.`,
             "info"
           );
         } else if (prevTeamId === "") {
@@ -408,7 +408,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name} `,
+            `You have been assigned to ${team.name}.`,
             "info"
           );
         } else {
@@ -416,7 +416,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name} `,
+            `You have been assigned to ${team.name}.`,
             "info"
           );
         }
@@ -489,7 +489,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been removed from ${removedTeam.name}`,
+            `You have been removed from ${removedTeam.name}.`,
             "info"
           );
         } else if (prevTeamId === "") {
@@ -498,7 +498,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name} as member`,
+            `You have been assigned to ${team.name} as member.`,
             "info"
           );
         } else {
@@ -506,7 +506,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name} as member`,
+            `You have been assigned to ${team.name} as member.`,
             "info"
           );
         }
@@ -584,7 +584,7 @@ teamController.put(
               [head],
               team._id,
               `Team Assignment`,
-              `You have been assigned to ${team.name} as head`,
+              `You have been assigned to ${team.name} as head.`,
               "info"
             );
           if (!members.length === 0)
@@ -592,7 +592,7 @@ teamController.put(
               members,
               team._id,
               `Team Assignment `,
-              `You have been assigned to ${team.name} as member`,
+              `You have been assigned to ${team.name} as member.`,
               "info"
             );
 

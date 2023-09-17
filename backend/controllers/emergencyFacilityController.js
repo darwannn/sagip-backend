@@ -80,7 +80,7 @@ emergencyFacilityController.post(
             createNotificationAll(
               emergencyFacility._id,
               `New Emergency Facility`,
-              `Checkout the recently added ${category}: ${name}`,
+              `Checkout the recently added ${category}: ${name}.`,
               "info"
             );
 

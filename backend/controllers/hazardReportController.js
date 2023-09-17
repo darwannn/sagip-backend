@@ -112,7 +112,7 @@ hazardReportController.post(
               userIds,
               req.user.id,
               "New Hazport Report",
-              `${category} on ${street} ${municipality}`,
+              `${category} on ${street} ${municipality}.`,
               "info"
             );
             return res.status(200).json({

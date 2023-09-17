@@ -53,7 +53,7 @@ wellnessSurveyController.post(
               createNotificationAll(
                 wellnessSurvey._id,
                 "New Wellness Check Survey",
-                `Recent events have not been good. Please tell us how you are doing after the ${title}`,
+                `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
                 "info"
               );
             }
@@ -490,7 +490,7 @@ wellnessSurveyController.put(
               createNotificationAll(
                 wellnessSurvey._id,
                 "New Wellness Check Survey",
-                `Recent events have not been good. Please tell us how you are doing after the ${title}`,
+                `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
                 "info"
               );
             }

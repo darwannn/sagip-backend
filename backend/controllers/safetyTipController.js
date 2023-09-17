@@ -84,7 +84,7 @@ safetyTipController.post(
             createNotificationAll(
               safetyTip._id,
               "New Safety Tip",
-              `Read the recently added safety tip: ${title}`,
+              `Read the recently added safety tip: ${title}.`,
               "info"
             );
             return res.status(200).json({

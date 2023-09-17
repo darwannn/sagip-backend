@@ -472,7 +472,7 @@ authController.put(
                       [req.user.id],
                       req.user.id,
                       "Contact Number Updated",
-                      "Your contact number has been updated",
+                      "Your contact number has been updated.",
                       "info"
                     ); */
                     return res.status(200).json({
@@ -519,7 +519,7 @@ authController.put(
                       [req.user.id],
                       req.user.id,
                       "Email Updated",
-                      "Your email has been updated",
+                      "Your email has been updated.",
                       "info"
                     ); */
                     return res.status(200).json({
@@ -1135,7 +1135,7 @@ authController.put(
               [req.user.id],
               req.user.id,
               "Password has been changed",
-              "Your password has been changed",
+              "Your password has been changed.",
               "info"
             ); */
             return res.status(200).json({
@@ -1353,7 +1353,7 @@ authController.put(
             userIds,
             req.user.id,
             "New Verification Request",
-            `${user.firstname} ${user.lastname} has sent a verification request`,
+            `${user.firstname} ${user.lastname} has sent a verification request.`,
             "info"
           );
           console.log("====================================");
