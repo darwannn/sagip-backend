@@ -61,7 +61,7 @@ app.use("/notification", notificationController);
 app.use("/statistics", statisticsController);
 app.use("/wellness-survey", wellnessSurveyController);
 
-io.on("connection", (socket) => {
+/* io.on("connection", (socket) => {
   socket.on("new-user-add", (newUserId) => {
     if (!onlineUsers.some((user) => user.userId === newUserId)) {
       onlineUsers.push({ userId: newUserId, socketId: socket.id });
@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
     io.emit("get-users", onlineUsers);
   });
 });
-
+ */
 server.listen(process.env.PORT, () =>
   console.log("Server has been started successfully")
 );
