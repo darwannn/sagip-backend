@@ -188,7 +188,7 @@ const HazardReport = ({ type = "add" }) => {
       formData.append("proof", proof);
       formData.append("street", street);
       formData.append("municipality", municipality);
-      formData.append("answers", ["1", "2"]);
+      formData.append("answers", ["1"]);
 
       console.log(street);
       console.log(municipality);

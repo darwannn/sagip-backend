@@ -218,12 +218,16 @@ const createPusher = async (io, channel, event, data) => {
   return await send(contactNumber, message);
 }; */
 
-const sendBulkSMS = async (message, target, contactNumbers) => {
+const sendBulkSMS = async (content, target, contactNumbers) => {
   console.log("=========contactNumbers===========================");
   console.log(contactNumbers);
   console.log("====================================");
   /* SMS GATE WAY */
-  console.log(process.env.DEVICE_ID);
+  let message = "";
+  const from = "SAGIP - Malolos CDRRMO:\n\n";
+  if (target === "alert") {
+    message = `${from} ${content}`;
+  }
   const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,

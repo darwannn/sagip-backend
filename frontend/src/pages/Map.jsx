@@ -183,7 +183,7 @@ function EmergencyFacility() {
           : ""
       );
       setProof(
-        `https://sagip.onrender.com/images/Hazard Report/${emergencyFacility.proof}`
+        `http://localhost:5000/images/Hazard Report/${emergencyFacility.proof}`
       );
       setDescription(emergencyFacility.description);
       setReportedOn(emergencyFacility.createdAt);

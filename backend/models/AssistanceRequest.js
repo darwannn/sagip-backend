@@ -15,23 +15,23 @@ const AssistanceRequestSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
+      default: "",
     },
     proof: {
       type: String,
-      required: true,
+      default: "",
     },
     category: {
       type: String,
-      required: true,
+      default: "",
     },
     latitude: {
       type: Number,
-      required: true,
+      default: null,
     },
     longitude: {
       type: Number,
-      required: true,
+      default: null,
     },
     street: {
       type: String,
@@ -56,7 +56,7 @@ const AssistanceRequestSchema = new mongoose.Schema(
     answers: [
       {
         type: String,
-        required: true,
+        default: "",
       },
     ],
     status: {

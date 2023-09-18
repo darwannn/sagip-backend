@@ -24,7 +24,7 @@ const {
   createNotificationAll,
 } = require("./notificationController");
 assistanceRequestController.post(
-  "/add",
+  "/:action",
   tokenMiddleware,
   /* userTypeMiddleware([
   "resident",
@@ -46,100 +46,121 @@ assistanceRequestController.post(
         longitude,
         street,
         municipality,
-        answers,
+
         hasChanged,
       } = req.body;
-      /*  console.log(proof); */
-      if (isEmpty(answers)) error["answers"] = "Required field";
-      if (isEmpty(category)) error["category"] = "Required field";
-      if (isEmpty(description)) error["description"] = "Required field";
-      if (isEmpty(latitude)) error["latitude"] = "Mark a location";
-      if (isEmpty(longitude)) error["longitude"] = "Mark a location";
-      /*   console.log("=====req.file===============================");
+      let { answers } = req.body;
+      const action = req.params.action.toLowerCase();
+      if (action === "add" || action === "auto-add") {
+        /*  console.log(proof); */
+        if (action === "add") {
+          if (isEmpty(answers)) error["answers"] = "Required field";
+          if (isEmpty(category)) error["category"] = "Required field";
+          if (isEmpty(description)) error["description"] = "Required field";
+          if (isEmpty(latitude)) error["latitude"] = "Mark a location";
+          if (isEmpty(longitude)) error["longitude"] = "Mark a location";
+          /*   console.log("=====req.file===============================");
       console.log(hasChanged);
       console.log("hasChanged");
       console.log(req.file);
       console.log("===================================="); */
-      if (!req.file) {
-        error["proof"] = "Required field";
-      } else {
-        if (
-          !isVideo(req.file.originalname) &&
-          !isImage(req.file.originalname)
-        ) {
-          error["proof"] = "Only PNG, JPEG, JPG, and MP4 files are allowed";
-        } else {
-          if (!isImage(req.file.originalname)) {
-            if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
-              error["proof"] = "File size should be less than 10MB";
-            }
-          }
-          if (!isVideo(req.file.originalname)) {
-            resource_type = "video";
-            if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
-              error["proof"] = "File size should be less than 50MB";
+          if (!req.file) {
+            error["proof"] = "Required field";
+          } else {
+            if (
+              !isVideo(req.file.originalname) &&
+              !isImage(req.file.originalname)
+            ) {
+              error["proof"] = "Only PNG, JPEG, JPG, and MP4 files are allowed";
+            } else {
+              if (!isImage(req.file.originalname)) {
+                if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
+                  error["proof"] = "File size should be less than 10MB";
+                }
+              }
+              if (!isVideo(req.file.originalname)) {
+                resource_type = "video";
+                if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
+                  error["proof"] = "File size should be less than 50MB";
+                }
+              }
             }
           }
         }
-      }
 
-      if (Object.keys(error).length === 0) {
-        const cloud = await cloudinaryUploader(
-          "upload",
-          req.file.path,
-          resource_type,
-          folderPath,
-          req.file.filename
-        );
-
-        if (cloud !== "error") {
-          console.log("File uploaded successfully:", cloud.secure_url);
-          const assistanceRequest = await AssistanceRequest.create({
-            description,
-            category,
-            latitude,
-            longitude,
-            street,
-            municipality,
-            answers: answers.split(","),
-            proof: `${cloud.original_filename}.${cloud.format}`,
-            userId: req.user.id,
-          });
-          if (assistanceRequest) {
-            /* await createPusher("assistance-request-web", "reload", {}); */
-            req.io.emit("assistance-request");
-            const userIds = await getUsersId("dispatcher");
-            createNotification(
-              userIds,
-              req.user.id,
-              "New assistance request",
-              `${category} on ${street} ${municipality}.`,
-              "info"
+        if (Object.keys(error).length === 0) {
+          let cloud = "";
+          if (req.file) {
+            cloud = await cloudinaryUploader(
+              "upload",
+              req.file.path,
+              resource_type,
+              folderPath,
+              req.file.filename
             );
+          }
 
-            return res.status(200).json({
-              success: true,
-              message: "Added Successfully",
-              assistanceRequest,
+          if (cloud !== "error" || req.file) {
+            if (req.file)
+              console.log("File uploaded successfully:", cloud.secure_url);
+            const proof = req.file
+              ? `${cloud.original_filename}.${cloud.format}`
+              : "";
+            answers = answers && answers.length !== 0 ? answers.split(",") : [];
+
+            const assistanceRequest = await AssistanceRequest.create({
+              description,
+              category,
+              latitude,
+              longitude,
+              street,
+              municipality,
+              answers,
+              proof,
+              userId: req.user.id,
             });
+
+            if (assistanceRequest) {
+              /* await createPusher("assistance-request-web", "reload", {}); */
+              req.io.emit("assistance-request");
+              const userIds = await getUsersId("dispatcher");
+              createNotification(
+                userIds,
+                req.user.id,
+                "New assistance request",
+                `${category} on ${street} ${municipality}.`,
+                "info"
+              );
+
+              return res.status(200).json({
+                success: true,
+                message: "Added Successfully",
+                assistanceRequest,
+              });
+            } else {
+              return res.status(500).json({
+                success: false,
+                message: "Internal Server Error",
+              });
+            }
           } else {
             return res.status(500).json({
               success: false,
               message: "Internal Server Error",
             });
           }
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
         }
-      }
 
-      if (Object.keys(error).length !== 0) {
-        error["success"] = false;
-        error["message"] = "input error";
-        return res.status(400).json(error);
+        if (Object.keys(error).length !== 0) {
+          error["success"] = false;
+          error["message"] = "input error";
+          return res.status(400).json(error);
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found" + error,
+        });
       }
     } catch (error) {
       return res.status(500).json({
