@@ -57,8 +57,8 @@ const isInMalolos = async (req, res, next) => {
         if (municipalityName !== "Malolos") {
           return res.status(400).json({
             success: false,
-            latitude: "Unfortunately, the selected area is outside Malolos!",
-            longitude: "Unfortunately, the selected area is outside Malolos!",
+            latitude: "Unfortunately, the selected area is outside Malolos",
+            longitude: "Unfortunately, the selected area is outside Malolos",
             message: "input error",
           });
         } else {
@@ -75,8 +75,8 @@ const isInMalolos = async (req, res, next) => {
       } else {
         return res.status(400).json({
           success: false,
-          latitude: "No results found for the provided coordinates.",
-          longitude: "No results found for the provided coordinates.",
+          latitude: "No results found for the provided location",
+          longitude: "No results found for the provided location",
           message: "input error",
         });
       }
