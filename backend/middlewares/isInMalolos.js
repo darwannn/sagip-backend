@@ -15,7 +15,9 @@ const isInMalolos = async (req, res, next) => {
       const response = await axios.get(geocodeUrl);
 
       const results = response.data.results;
-
+      console.log("geocodeUrl");
+      console.log(geocodeUrl);
+      console.log(results);
       if (results && results.length > 0) {
         const addressComponents = results[0].address_components;
         let streetCode = addressComponents.find((component) =>
