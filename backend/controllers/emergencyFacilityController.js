@@ -12,6 +12,7 @@ const {
   isLessThanSize,
   isContactNumber,
   cloudinaryUploader,
+  isContactOrTeleNumber,
 } = require("./functionController");
 const {
   createNotification,
@@ -40,7 +41,7 @@ emergencyFacilityController.post(
       if (isEmpty(contactNumber)) {
         error["contactNumber"] = "Required field";
       } else {
-        if (isContactNumber(contactNumber)) {
+        if (isContactOrTeleNumber(contactNumber)) {
           error["contactNumber"] = "Invalid contact number";
         }
       }
@@ -123,7 +124,7 @@ emergencyFacilityController.post(
 emergencyFacilityController.get("/", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({});
-    console.log(emergencyFacility);
+    /* console.log(emergencyFacility); */
     if (emergencyFacility) {
       return res.status(200).json(emergencyFacility);
       return res.status(200).json({
@@ -151,7 +152,7 @@ emergencyFacilityController.get("/operational", async (req, res) => {
     const emergencyFacility = await EmergencyFacility.find({
       $or: [{ status: "operational" }, { status: "full" }],
     });
-    console.log(emergencyFacility);
+    /* console.log(emergencyFacility); */
     if (emergencyFacility) {
       return res.status(200).json(emergencyFacility);
       return res.status(200).json({
@@ -178,7 +179,7 @@ emergencyFacilityController.get("/:id", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.findById(req.params.id);
 
-    console.log(emergencyFacility);
+    /* console.log(emergencyFacility); */
 
     if (emergencyFacility) {
       /*      return res.status(200).json(emergencyFacility); */
@@ -232,9 +233,8 @@ emergencyFacilityController.put(
       if (isEmpty(contactNumber)) {
         error["contactNumber"] = "Required field";
       } else {
-        if (isContactNumber(contactNumber)) {
-          error["contactNumber"] = "Invalid contact number";
-        }
+        if (isContactOrTeleNumber(contactNumber))
+          error["contactNumber"] = "Invalid contact number1";
       }
 
       if (hasChanged === true) {
@@ -252,12 +252,14 @@ emergencyFacilityController.put(
       }
 
       if (Object.keys(error).length === 0) {
+        console.log("no error");
         const updateFields = {
           name,
           latitude,
           longitude,
           category,
           status,
+          contactNumber,
         };
 
         if (hasChanged && req.file) {
@@ -298,6 +300,7 @@ emergencyFacilityController.put(
 
         if (emergencyFacility) {
           /* await createPusher("emergency-facility", "reload", {}); */
+          console.log("res");
           req.io.emit("emergency-facility");
           return res.status(200).json({
             success: true,

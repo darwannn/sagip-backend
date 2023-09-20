@@ -80,15 +80,44 @@ const isNumber = (value) => {
   }
 };
 const isContactNumber = (value) => {
-  if (!/^09\d{9}$/.test(value)) {
+  const trimmedValue = value.replace(/\s+/g, "");
+  if (!/^09\d{9}$/.test(trimmedValue)) {
     return true;
   }
 };
+const isContactOrTeleNumber = (value) => {
+  const trimmedValue = value.replace(/\s+/g, "");
+  if (trimmedValue.length === 11) {
+    if (!trimmedValue.startsWith("09")) return true;
+  } else if (trimmedValue.length === 10) {
+    console.log("error2");
+    if (!trimmedValue.startsWith("04479")) return true;
+  } else if (trimmedValue.length === 7 && !trimmedValue.startsWith("0")) {
+    console.log("error3");
+    if (!trimmedValue.startsWith("79")) return true;
+  }
+};
 
-const isEmail = (value) => {
-  if (!value.includes("@")) {
+/* const isContactOrTeleNumber = (value) => {
+  const trimmedValue = value.replace(/\s+/g, ""); // Remove spaces
+  console.log(trimmedValue);
+  if (trimmedValue.length === 11 && trimmedValue.startsWith("09")) {
+    console.log("error1");
+    return true;
+  } else if (trimmedValue.length === 10 && trimmedValue.startsWith("04479")) {
+    console.log("error2");
+    return true;
+  } else if (trimmedValue.length === 7 && !trimmedValue.startsWith("0")) {
+    console.log("error3");
     return true;
   }
+
+  return false; // Invalid number
+}; */
+const isEmail = (value) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return !emailRegex.test(value);
 };
 
 const checkIdentifierType = async (identifier) => {
@@ -388,4 +417,5 @@ module.exports = {
   checkIdentifierType,
   dismissedRequestCount,
   handleArchive,
+  isContactOrTeleNumber,
 };

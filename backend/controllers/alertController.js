@@ -424,7 +424,7 @@ alertController.get("/weather", async (req, res) => {
     "fgmqtj5qS1KbZldJHq6Hm1:APA91bE9Z4Q8u0rZYtqkS4habfNGaSdZvJNwvANWJg0pO_ZVo3SHSK8Bm-8rteFHe9ec9YvzBHoa7zYM5esenHeLw-QXTSZj8Ief88W7_YidTytICqRIgkw0-rXtanfUBkk30NZfvA7Q",
   ]);
   createPushNotificationTopic("Topic", "body", "sagip"); */
-
+  /*   createPushNotificationTopic("Topic", "body", "sagip"); */
   console.log("====================================");
   console.log("localhost");
   console.log("====================================");
