@@ -209,8 +209,8 @@ const ManageEmergencyFacility = () => {
 
   const handleSubmit = async (assignedTeam) => {
     try {
-      assignedTeam = "64a6d2deea160b889a498dc5";
-      const type = "resolve";
+      assignedTeam = "64cb4997aefb86308f2888a8";
+      const type = "verify";
       const data = await request(
         `/assistance-request/update/${type}/${id}`,
         "PUT",
@@ -515,44 +515,44 @@ const ManageEmergencyFacility = () => {
                 <video src={proof} controls />
               )}
             </div>
-            {hazardStatus !== "resolved" && (
-              <div>
-                <>
-                  {/*  Verify */}
-                  <div>
-                    <label>Team: </label>
-                    <select
-                      value={assignedTeam}
-                      onChange={(e) => handleSubmit(e.target.value)}
-                    >
-                      <option value="" hidden>
-                        Select a category
+            {/* {hazardStatus !== "resolved" && ( */}
+            <div>
+              <>
+                {/*  Verify */}
+                <div>
+                  <label>Team: </label>
+                  <select
+                    value={assignedTeam}
+                    onChange={(e) => handleSubmit(e.target.value)}
+                  >
+                    <option value="" hidden>
+                      Select a category
+                    </option>
+                    {responder.map((category, index) => (
+                      <option key={index} value={category._id}>
+                        {category.name}
                       </option>
-                      {responder.map((category, index) => (
-                        <option key={index} value={category._id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
+                    ))}
+                  </select>
+                </div>
+              </>
 
-                <button
-                  onClick={() => {
-                    handleDismiss();
-                  }}
-                >
-                  Dismissss
-                </button>
-                <button
-                  onClick={() => {
-                    handleSubmit();
-                  }}
-                >
-                  Sumitttt
-                </button>
-              </div>
-            )}
+              <button
+                onClick={() => {
+                  handleDismiss();
+                }}
+              >
+                Dismissss
+              </button>
+              <button
+                onClick={() => {
+                  handleSubmit();
+                }}
+              >
+                Sumitttt
+              </button>
+            </div>
+            {/*  )} */}
           </div>
 
           <>

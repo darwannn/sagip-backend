@@ -492,7 +492,7 @@ hazardReportController.put(
 
           if (action === "verify") {
             createNotification(
-              [hazardReport.userId],
+              [hazardReport.userId._id],
               hazardReport._id,
               "Hazard Report Verified",
               `Your report regarding ${hazardReport.category} ${
@@ -508,8 +508,8 @@ hazardReportController.put(
             });
           } else if (action === "resolve") {
             createNotification(
-              [hazardReport.userId],
-              hazardReport.userId,
+              [hazardReport.userId._id],
+              hazardReport.userId._id,
               "Hazard Report Resolved",
               `Your report regarding ${hazardReport.category} ${
                 hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
@@ -586,8 +586,8 @@ hazardReportController.delete(
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
           createNotification(
-            [hazardReport.userId],
-            hazardReport.userId,
+            [hazardReport.userId._id],
+            hazardReport.userId._id,
             "Hazard Report Closed",
             `Your report regarding  ${hazardReport.category} ${
               hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
@@ -662,8 +662,8 @@ hazardReportController.put(
             req.io.emit("hazard-report");
             req.io.emit(`${hazardReport.userId}`);
             createNotification(
-              [hazardReport.userId],
-              hazardReport.userId,
+              [hazardReport.userId._id],
+              hazardReport.userId._id,
               "Hazard Report Closed",
               `Your report regarding  ${hazardReport.category} ${
                 hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""

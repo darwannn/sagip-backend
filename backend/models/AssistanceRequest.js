@@ -67,6 +67,9 @@ const AssistanceRequestSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isBeingResponded: {
+      type: Boolean,
+    },
     archivedDate: {
       type: Date,
     },

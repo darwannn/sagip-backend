@@ -1353,7 +1353,7 @@ authController.put(
             userIds,
             req.user.id,
             "New Verification Request",
-            `${user.firstname} ${user.lastname} has sent a verification request.`,
+            `${user.firstname} ${user.lastname} has submitted  a verification request.`,
             "info"
           );
           console.log("====================================");

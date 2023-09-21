@@ -227,6 +227,8 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (target === "alert") {
     message = `${from} ${content}`;
+  } else if (target === "notification") {
+    message = `${from} ${content}`;
   }
   const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,

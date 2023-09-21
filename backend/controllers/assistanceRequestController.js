@@ -695,6 +695,7 @@ assistanceRequestController.put(
       const { assignedTeam } = req.body;
       // let = status = "";
       let updateFields = {};
+
       if (action === "verify") {
         if (isEmpty(assignedTeam))
           error["assignedTeam"] = "Please select a team to respond";
@@ -704,8 +705,25 @@ assistanceRequestController.put(
         if (action === "verify") {
           updateFields = { status: "ongoing", assignedTeam };
         } else if (action === "resolve") {
-          updateFields = { status: "resolved" };
+          updateFields = {
+            status: "resolved",
+            $unset: {
+              isBeingResponded: 1,
+            },
+          };
+        } else if (action === "respond") {
+          console.log("respond");
+          updateFields = {
+            $set: {
+              isBeingResponded: true,
+            },
+          };
         }
+        /* if (action === "verify") {
+          updateFields = { status: "ongoing", assignedTeam };
+        } else if (action === "resolve") {
+          updateFields = { status: "resolved" };
+        } */
         const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
           req.params.id,
           updateFields,
@@ -728,6 +746,48 @@ assistanceRequestController.put(
           req.io.emit(`${assistanceRequest.userId}`);
 
           if (action === "verify") {
+            const team = await Team.findOne({ _id: assignedTeam });
+            console.log("Type of team.members:", typeof team.members);
+            console.log("Contents of team.members:", team.members);
+            console.log("team");
+            console.log(team);
+            const teamMembers = [team.head, ...team.members];
+            console.log("========teamMembers============================");
+            console.log(teamMembers);
+            console.log("====================================");
+            /* sendBulkSMS(
+              teamMembers,
+              "notification",
+              `Your team has been assigned to respond on ${
+                assistanceRequest.category
+              }${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`,
+              ""
+            );
+ */
+            createNotification(
+              teamMembers,
+              assistanceRequest.userId._id,
+              "Assistance Required",
+              `Your team has been assigned to respond to ${
+                assistanceRequest.category
+              }${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`,
+              "success"
+            );
+
+            return res.status(200).json({
+              success: true,
+              message: "Assistance Request Verified",
+              // assistanceRequest,
+            });
+          } else if (action === "respond") {
             sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
@@ -742,8 +802,8 @@ assistanceRequestController.put(
             );
 
             createNotification(
-              [assistanceRequest.userId],
-              assistanceRequest.userId,
+              [assistanceRequest.userId._id],
+              assistanceRequest.userId._id,
               "Assistance Request Verified",
               `Your request regarding ${assistanceRequest.category}${
                 assistanceRequest.street !== ""
@@ -757,13 +817,13 @@ assistanceRequestController.put(
 
             return res.status(200).json({
               success: true,
-              message: "Assistance Request Verified",
+              message: "Responding to Assistance Request ",
               // assistanceRequest,
             });
           } else if (action === "resolve") {
             createNotification(
-              [assistanceRequest.userId],
-              assistanceRequest.userId,
+              [assistanceRequest.userId._id],
+              assistanceRequest.userId._id,
               "Assistance Request Resolved",
               `Your request regarding ${assistanceRequest.category}${
                 assistanceRequest.street !== ""
@@ -932,8 +992,8 @@ assistanceRequestController.put(
             req.io.emit("assistance-request");
             req.io.emit(`${assistanceRequest.userId}`);
             createNotification(
-              [assistanceRequest.userId],
-              assistanceRequest.userId,
+              [assistanceRequest.userId._id],
+              assistanceRequest.userId._id,
               "Assistance Request Closed",
               `Your request regarding ${assistanceRequest.category}${
                 assistanceRequest.street !== ""
@@ -1037,8 +1097,8 @@ assistanceRequestController.put(
               /*  await createPusher(`${assistanceRequest.userId}`, "reload", {}); */
               req.io.emit(`${assistanceRequest.userId}`);
               createNotification(
-                [assistanceRequest.userId],
-                assistanceRequest.userId,
+                [assistanceRequest.userId._id],
+                assistanceRequest.userId._id,
                 "Assistance Request Closed",
                 `Your request regarding ${assistanceRequest.category}${
                   assistanceRequest.street !== ""
