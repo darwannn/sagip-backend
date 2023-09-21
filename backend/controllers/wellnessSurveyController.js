@@ -95,7 +95,9 @@ wellnessSurveyController.get("/", async (req, res) => {
     const wellnessSurvey = await WellnessSurvey.find({
       archivedDate: { $exists: false },
       isArchived: false,
-    });
+    })
+      .populate("unaffected", "-password")
+      .populate("affected", "-password");
     if (wellnessSurvey) {
       return res.status(200).json(wellnessSurvey);
       return res.status(200).json({
@@ -237,8 +239,8 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     })
-      .populate("unaffected")
-      .populate("affected");
+      .populate("unaffected", "-password")
+      .populate("affected", "-password");
 
     if (wellnessSurvey) {
       const barangayCounts = {
@@ -404,7 +406,9 @@ wellnessSurveyController.get("/:id", async (req, res) => {
       _id: req.params.id,
       archivedDate: { $exists: false },
       isArchived: false,
-    });
+    })
+      .populate("unaffected", "-password")
+      .populate("affected", "-password");
     /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id); */
 
     if (wellnessSurvey) {
