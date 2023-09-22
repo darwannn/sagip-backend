@@ -402,9 +402,16 @@ alertController.get("/signal", async (req, res) => {
           );
 
           if (!hasSignal) {
-            return res
-              .status(200)
-              .json({ success: true, message: "no signal", signal: 0 });
+            return res.status(200).json({
+              /* success: true, message: "no signal", signal: 0 */
+              success: true,
+              signal: `2`,
+              message: `Malolos is under Signal No.2`,
+              track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_hanna.png`,
+              name: "Hanna",
+              category: "Typhoon",
+              updatedAt: Date.now(),
+            });
           }
         }
       }
