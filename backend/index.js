@@ -38,6 +38,7 @@ mongoose.connect(process.env.MONGO_URL, () =>
 );
 
 app.use((req, res, next) => {
+  res.set("Access-Control-Allow-Origin", "*");
   req.io = io;
   next();
 });
