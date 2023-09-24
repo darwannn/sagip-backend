@@ -850,6 +850,7 @@ authController.post("/login", async (req, res) => {
               return res.status(200).json({
                 success: true,
                 message: "Login Successfully",
+                userType: user._doc.userType,
                 user: {
                   target: "login",
                   id: user._doc._id,
