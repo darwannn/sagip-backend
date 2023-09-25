@@ -70,29 +70,6 @@ app.use("/statistics", statisticsController);
 app.use("/wellness-survey", wellnessSurveyController);
 
 io.on("connection", (socket) => {
-  /* socket.on("new-user-add", (newUserId) => {
-    if (!onlineUsers.some((user) => user.userId === newUserId)) {
-      onlineUsers.push({ userId: newUserId, socketId: socket.id });
-      console.log("new user is here!", onlineUsers);
-    }
-    // send all active users to new user
-    io.emit("get-users", onlineUsers);
-  });
-
-  socket.on("disconnect", () => {
-    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-    console.log("user disconnected", onlineUsers);
-    // send all online users to all users
-    io.emit("get-users", onlineUsers);
-  });
-
-  socket.on("offline", () => {
-    // remove user from active users
-    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
-    console.log("user is offline", onlineUsers);
-    // send all online users to all users
-    io.emit("get-users", onlineUsers);
-  }); */
   socket.onAny((event, data) => {
     console.log("Received event:", event, "with data:", data);
 
