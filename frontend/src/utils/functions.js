@@ -1,7 +1,7 @@
 import Pusher from "pusher-js";
 import io from "socket.io-client";
-const socket = io.connect("http://localhost:5000");
-/* const socket = io.connect("https://sagip.onrender.com"); */
+/* const socket = io.connect("http://localhost:5000"); */
+const socket = io.connect("https://sagip.onrender.com");
 /* http://localhost:5000/ */
 export const reverseGeoCoding = (latitude, longitude) => {
   return new Promise((resolve, reject) => {
