@@ -625,5 +625,50 @@ teamController.put(
     }
   }
 );
+teamController.put(
+  "/reset/:id",
+  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+    const error = {};
+    try {
+      const updateFields = { head: null, members: [] };
+
+      const team = await Team.findByIdAndUpdate(req.params.id, updateFields);
+
+      if (team) {
+        /* await createPusher("team", "reload", {}); */
+        /* req.io.emit("reload", { receiver: "team" }); */
+        req.io.emit("team");
+
+        await createNotification(
+          [team.head, ...team.members],
+          team._id,
+          `Team Assignment`,
+          `You have been remove from ${team.name}.`,
+          "info"
+        );
+
+        return res.status(200).json({
+          success: true,
+          message: "Reset Successfully",
+          team,
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      console.log("====================================");
+      console.log(error);
+      console.log("====================================");
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 module.exports = teamController;

@@ -619,73 +619,89 @@ hazardReportController.delete(
     }
   }
 );
+
 hazardReportController.put(
   "/:action/:id",
   tokenMiddleware,
-  /* userTypeMiddleware([
-      "responder",
-  "dispatcher",
-  "admin",
-  "super-admin",
-]), */
+  //   userTypeMiddleware([
+  //       "responder",
+  //   "dispatcher",
+  //   "admin",
+  //   "super-admin",
+  // ]),
   async (req, res) => {
+    const error = {};
     try {
+      const { reason, note } = req.body;
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        console.log(action);
-        if (action === "archive") {
-          updateFields = {
-            isArchived: true,
-            archivedDate: Date.now(),
-          };
-        } else if (action === "unarchive") {
-          updateFields = {
-            isArchived: false,
-            $unset: { archivedDate: Date.now() },
-          };
-        }
-        const hazardReport = await HazardReport.findByIdAndUpdate(
-          req.params.id,
-          updateFields,
-          { new: true }
-        );
-        if (hazardReport) {
-          console.log("====================================");
-          console.log("hazardReport");
-          console.log("====================================");
-          /*   await createPusher("hazard-report", "reload", {}); */
+        /* if (isEmpty(reason)) error["reason"] = "Required field"; */
+        if (Object.keys(error).length === 0) {
+          console.log(action);
           if (action === "archive") {
-            dismissedRequestCount("archive", hazardReport.userId);
-            /*  await createPusher(`${hazardReport.userId}`, "reload", {});
-            await createPusher("hazard-report-mobile", "reload", {}); */
-            req.io.emit("hazard-report");
-            req.io.emit(`${hazardReport.userId}`);
-            createNotification(
-              [hazardReport.userId._id],
-              hazardReport.userId._id,
-              "Hazard Report Closed",
-              `Your report regarding  ${hazardReport.category} ${
-                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
-              }, has been carefully reviewed, and we have determined that the reported hazard is not substantiated. Your hazard report has been closed.`,
-              "error"
-            );
-            return res.status(200).json({
-              success: true,
-              message: "Archived Successfully",
-            });
+            updateFields = {
+              isArchived: true,
+              archivedDate: Date.now(),
+            };
           } else if (action === "unarchive") {
-            dismissedRequestCount("unarchive", hazardReport.userId);
-            return res.status(200).json({
-              success: true,
-              message: "Unrchived Successfully",
+            updateFields = {
+              isArchived: false,
+              $unset: { archivedDate: Date.now() },
+            };
+          }
+          const hazardReport = await HazardReport.findByIdAndUpdate(
+            req.params.id,
+            updateFields,
+            { new: true }
+          );
+          if (hazardReport) {
+            console.log("====================================");
+            console.log("hazardReport");
+            console.log("====================================");
+            // await createPusher("hazard-report", "reload", {});
+            if (action === "archive") {
+              console.log("archive");
+              dismissedRequestCount("archive", hazardReport.userId);
+              //  await createPusher(`${hazardReport.userId}`, "reload", {});
+              // await createPusher("hazard-report-mobile", "reload", {});
+              req.io.emit("hazard-report");
+              req.io.emit(`${hazardReport.userId}`);
+              createNotification(
+                [hazardReport.userId._id],
+                hazardReport.userId._id,
+                "Hazard Report Closed",
+                `Your report regarding  ${hazardReport.category} ${
+                  hazardReport.street !== ""
+                    ? ` on ${hazardReport.street} Street`
+                    : ""
+                } has been closed due to: \n\n${reason}${
+                  isEmpty(note) ? "" : `\n\n${note}`
+                }.`,
+                "error"
+              );
+              return res.status(200).json({
+                success: true,
+                message: "Archived Successfully",
+              });
+            } else if (action === "unarchive") {
+              dismissedRequestCount("unarchive", hazardReport.userId);
+              return res.status(200).json({
+                success: true,
+                message: "Unrchived Successfully",
+              });
+            }
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "not found",
             });
           }
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "not found",
-          });
+        }
+        if (Object.keys(error).length !== 0) {
+          error["success"] = false;
+          error["message"] = "input error";
+          return res.status(400).json(error);
         }
       } else {
         return res.status(500).json({

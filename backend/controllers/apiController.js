@@ -222,7 +222,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   console.log("=========contactNumbers===========================");
   console.log(contactNumbers);
   console.log("====================================");
-  /* SMS GATE WAY */
+  /* SMS GATE WAY GAGAMITIN */
   let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (target === "alert") {
@@ -249,38 +249,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     .catch(function (error) {
       throw error;
     });
-  /* ------------------------- */
-  /* console.log("send bulk sms");
-  return { error: 0, message: "testing" }; */
-
-  /* QUICK SMS */
-
-  /* const results = [];
-
-  for (const contactNumber of contactNumbers) {
-    console.log("send bulk sms");
-    try {
-      console.log("====================================");
-      console.log("testing lang");
-      console.log("====================================");
-      const success = await sendSMS(contactNumber, target, message);
-
-      results.push({ success: success });
-    } catch (error) {
-      console.error("Error sending SMS:", error);
-      results.push({ success: false, message: "Internal Server Error" });
-    }
-  }
-
-  const allSuccessful = results.every((result) => result.success);
-
-  if (allSuccessful) {
-    //  return { success: true, message: "SMS Sent Successfully" };
-    return true;
-  } else {
-    // return { success: false, message: "Some SMS failed to send" };
-    return false;
-  } */
+  return true;
 };
 
 const sendSMS = async (phone, target, content, expiration) => {
@@ -305,37 +274,6 @@ const sendSMS = async (phone, target, content, expiration) => {
   }
 
   const encodedMessage = message;
-
-  /* return axios
-    .get(
-      `http://${process.env.SMS_API_ADDRESS}:8080?phone=${encodeURIComponent(
-        phone
-      )}&message=${encodeURIComponent(message)}` 
-    //   , {
-    //   params: {
-    //     phone,
-    //     message: encodedMessage,
-    //   },
-    //   paramsSerializer: (params) => {
-    //     let result = "";
-    //     Object.keys(params).forEach((key) => {
-    //       result += `${key}=${encodeURIComponent(params[key])}&`;
-    //     });
-    //     return result.substring(0, result.length - 1);
-    //   },
-    // }
-    )
-
-    .then((response) => {
-      console.log("sred", response);
-      console.log("sred", response.status);
-      console.log("sred", response.message);
-      return response.status === 200 ? true : false;
-    })
-    .catch((error) => {
-      console.error("Error sending SMS:", error);
-      return false;
-    }); */
 
   const smsData = {
     token: process.env.SMS_API,

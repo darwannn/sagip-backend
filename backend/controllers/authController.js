@@ -1529,106 +1529,135 @@ authController.put(
   // "super-admin",
   // ]),
   async (req, res) => {
+    const error = {};
     try {
+      const { reason, note } = req.body;
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       console.log("====================================");
       console.log(action);
       console.log("====================================");
       if (action === "reject" || action === "approve") {
-        const user = await User.findByIdAndUpdate(
-          req.params.id,
-          {
-            $unset: {
-              verificationRequestDate: Date.now(),
+        /* if (isEmpty(reason)) error["reason"] = "Required field"; */
+        if (Object.keys(error).length === 0) {
+          const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {
+              $unset: {
+                verificationRequestDate: Date.now(),
+              },
             },
-          },
-          { new: true }
-        );
-
-        if (action === "reject") {
-          const cloud = await cloudinaryUploader(
-            "destroy",
-            "",
-            "image",
-            folderPath,
-            user.verificationPicture[0]
+            { new: true }
           );
-          user.verificationPicture.map(async (picture) => {
-            await cloudinaryUploader(
+
+          if (action === "reject") {
+            const cloud = await cloudinaryUploader(
               "destroy",
               "",
               "image",
               folderPath,
-              picture
+              user.verificationPicture[0]
             );
-          });
+            user.verificationPicture.map(async (picture) => {
+              await cloudinaryUploader(
+                "destroy",
+                "",
+                "image",
+                folderPath,
+                picture
+              );
+            });
 
-          /*  if (cloud !== "error") { */
-          user.verificationPicture = [];
+            /*  if (cloud !== "error") { */
+            user.verificationPicture = [];
 
-          await user.save();
-          /* } else {
+            await user.save();
+            /* } else {
             return res.status(500).json({
               success: false,
               message: "Internal Server Error",
             });
           } */
-        } else if (action === "approve") {
-          user.status = "verified";
-          await user.save();
-        }
-
-        if (user) {
-          if (action === "reject") {
-            sendSMS(
-              user.contactNumber,
-              "verification-request",
-              `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
-              ""
-            );
-            /*  await createPusher("verification-request-mobile", "reload", {}); */
-            req.io.emit("verification-request");
-            createNotification(
-              [user._id],
-              user._id,
-              "Verification Request Rejected",
-              `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
-              "error"
-            );
-
-            return res.status(200).json({
-              success: true,
-              message: "Verification Request Rejected",
-            });
           } else if (action === "approve") {
-            sendSMS(
-              user.contactNumber,
-              "verification-request",
-              "Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.",
-              ""
-            );
+            user.status = "verified";
+            await user.save();
+          }
 
-            /* await createPusher("verification-request-mobile", "reload", {}); */
-            req.io.emit("verification-request");
-            createNotification(
-              [user._id],
-              user._id,
-              "Verification Request Approved",
-              `Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.`,
-              "success"
-            );
+          if (user) {
+            if (action === "reject") {
+              /* sendSMS(
+                user.contactNumber,
+                "verification-request",
+                `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
+                ""
+              );
+            
+              req.io.emit("verification-request");
+              createNotification(
+                [user._id],
+                user._id,
+                "Verification Request Rejected",
+                `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
+                "error"
+              ); */
+              sendSMS(
+                user.contactNumber,
+                "verification-request",
+                `We regret to inform you that your verification request has been rejected due to: \n\n${reason}${
+                  isEmpty(note) ? "" : `\n\n${note}`
+                }.`,
+                ""
+              );
 
-            return res.status(200).json({
-              success: true,
-              message: "Verification Request Approved",
+              req.io.emit("verification-request");
+              createNotification(
+                [user._id],
+                user._id,
+                "Verification Request Rejected",
+                `We regret to inform you that your verification request has been rejected due to: \n\n${reason}${
+                  isEmpty(note) ? "" : `\n\n${note}`
+                }.`,
+                "error"
+              );
+
+              return res.status(200).json({
+                success: true,
+                message: "Verification Request Rejected",
+              });
+            } else if (action === "approve") {
+              sendSMS(
+                user.contactNumber,
+                "verification-request",
+                "Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.",
+                ""
+              );
+
+              /* await createPusher("verification-request-mobile", "reload", {}); */
+              req.io.emit("verification-request");
+              createNotification(
+                [user._id],
+                user._id,
+                "Verification Request Approved",
+                `Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.`,
+                "success"
+              );
+
+              return res.status(200).json({
+                success: true,
+                message: "Verification Request Approved",
+              });
+            }
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
             });
           }
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
+        }
+        if (Object.keys(error).length !== 0) {
+          error["success"] = false;
+          error["message"] = "input error";
+          return res.status(400).json(error);
         }
       } else {
         return res.status(500).json({

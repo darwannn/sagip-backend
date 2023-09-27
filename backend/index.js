@@ -69,6 +69,7 @@ app.use("/notification", notificationController);
 app.use("/statistics", statisticsController);
 app.use("/wellness-survey", wellnessSurveyController);
 
+/* forwards data from mobile */
 io.on("connection", (socket) => {
   socket.onAny((event, data) => {
     console.log("Received event:", event, "with data:", data);

@@ -1096,15 +1096,29 @@ assistanceRequestController.put(
               console.log("====================================");
               /*  await createPusher(`${assistanceRequest.userId}`, "reload", {}); */
               req.io.emit(`${assistanceRequest.userId}`);
+              sendSMS(
+                assistanceRequest.userId.contactNumber,
+                "notification",
+                `Your request regarding ${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street} Street`
+                    : ""
+                } has been closed due to: \n\n${reason}${
+                  isEmpty(note) ? "" : `\n\n${note}`
+                }.`,
+                ""
+              );
               createNotification(
                 [assistanceRequest.userId._id],
                 assistanceRequest.userId._id,
                 "Assistance Request Closed",
                 `Your request regarding ${assistanceRequest.category}${
                   assistanceRequest.street !== ""
-                    ? ` on ${assistanceRequest.street}`
+                    ? ` on ${assistanceRequest.street} Street`
                     : ""
-                } has been closed due to: \n\n ${reason}\n ${note}.`,
+                } has been closed due to: \n\n${reason}${
+                  isEmpty(note) ? "" : `\n\n${note}`
+                }.`,
                 "error"
               );
               return res.status(200).json({
