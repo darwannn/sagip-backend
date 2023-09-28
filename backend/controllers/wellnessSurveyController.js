@@ -52,7 +52,7 @@ wellnessSurveyController.post(
               /*  await createPusher("wellness-survey", "reload", {}); */
               createNotificationAll(
                 wellnessSurvey._id,
-                "New Wellness Check Survey",
+                "Wellness Check Survey",
                 `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
                 "info",
                 false
@@ -494,7 +494,7 @@ wellnessSurveyController.put(
               req.io.emit("wellness-survey");
               createNotificationAll(
                 wellnessSurvey._id,
-                "New Wellness Check Survey",
+                "Wellness Check Survey",
                 `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
                 "info",
                 true

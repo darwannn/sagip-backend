@@ -81,7 +81,7 @@ emergencyFacilityController.post(
             if (status === "operational") {
               createNotificationAll(
                 emergencyFacility._id,
-                `New Emergency Facility`,
+                `Emergency Facility`,
                 `Checkout the recently added ${category}: ${name}.`,
                 "info",
                 true

@@ -782,7 +782,7 @@ authController.post("/login", async (req, res) => {
     if (isEmpty(password)) error["password"] = "Required field";
 
     if (Object.keys(error).length == 0) {
-      if (user.attempt >= 4) {
+      if (user.attempt >= 5) {
         let generatedCode = await generateCode();
         user.verificationCode = generatedCode;
         await user.save();

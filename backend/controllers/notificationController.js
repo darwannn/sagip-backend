@@ -117,7 +117,8 @@ const createNotificationAll = async (
     const users = await User.find({
       userType: "resident",
     });
-    const fcmTokens = users.flatMap((user) => user.fcmTokens);
+    const fcmTokens = users.flatMap((user) => user.fcmToken);
+    console.log(fcmTokens);
     createPushNotificationToken(title, message, fcmTokens, linkId);
   }
   const users = await User.find({
@@ -144,6 +145,9 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
       notification: {
         title: title,
         body: body,
+      },
+      data: {
+        linkId: linkId,
       },
       tokens: tokens,
     };
@@ -177,6 +181,9 @@ const createPushNotificationTopic = (title, body, topic, linkId) => {
     notification: {
       title: title,
       body: body,
+    },
+    data: {
+      linkId: linkId,
     },
     topic: topic,
   };

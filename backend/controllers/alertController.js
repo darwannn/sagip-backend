@@ -427,6 +427,13 @@ alertController.get("/signal", async (req, res) => {
 
 alertController.get("/weather", async (req, res) => {
   const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+  createNotificationAll(
+    "home",
+    "Safety Tip",
+    `Read the recently added safety tip: test.`,
+    "info",
+    true
+  );
   /* sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration);
   sendSMS("09395372592", "sms-verification", "22222",codeExpiration); */
   /*   createPushNotificationToken("title", "body", [

@@ -84,7 +84,7 @@ safetyTipController.post(
             if (status === "published") {
               createNotificationAll(
                 safetyTip._id,
-                "New Safety Tip",
+                "Safety Tip",
                 `Read the recently added safety tip: ${title}.`,
                 "info",
                 true
