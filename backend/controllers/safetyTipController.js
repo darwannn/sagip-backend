@@ -81,12 +81,15 @@ safetyTipController.post(
           if (safetyTip) {
             /*  await createPusher("safety-tips", "reload", {}); */
             req.io.emit("safety-tips");
-            createNotificationAll(
-              safetyTip._id,
-              "New Safety Tip",
-              `Read the recently added safety tip: ${title}.`,
-              "info"
-            );
+            if (status === "published") {
+              createNotificationAll(
+                safetyTip._id,
+                "New Safety Tip",
+                `Read the recently added safety tip: ${title}.`,
+                "info",
+                true
+              );
+            }
             return res.status(200).json({
               success: true,
               message: "Added successfully",

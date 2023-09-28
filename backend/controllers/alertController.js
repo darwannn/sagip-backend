@@ -236,6 +236,8 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
         "City Of Malolos (Capital)"
       ); */
       /* console.log(fcmTokens); */
+      //createPushNotificationToken(alertTitle, alertMessage, fcmTokens,"");
+      createPushNotificationTopic(alertTitle, alertMessage, "sagip", "");
     } else {
       const users = await getInfoByBarangay(
         "City Of Malolos (Capital)",
@@ -265,9 +267,9 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       }
       contactNumbers = users.contactNumbers;
       fcmTokens = users.fcmTokens;
+      createPushNotificationToken(alertTitle, alertMessage, fcmTokens, "");
     }
 
-    createPushNotificationToken(alertTitle, alertMessage, fcmTokens);
     console.log(contactNumbers);
     console.log(fcmTokens);
 

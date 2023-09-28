@@ -100,12 +100,26 @@ const createNotification = async (ids, linkId, title, message, type) => {
   const users = await User.find({ _id: { $in: ids } }, { fcmToken: 1 });
   const fcmTokens = users.map((user) => user.fcmToken).flat();
 
-  createPushNotificationToken(title, message, fcmTokens);
+  createPushNotificationToken(title, message, fcmTokens, linkId);
   console.log("notifications created");
 };
 
-const createNotificationAll = async (linkId, title, message, type) => {
-  /*  createPushNotificationTopic(title, message, "sagip"); */
+const createNotificationAll = async (
+  linkId,
+  title,
+  message,
+  type,
+  sendAllPushNotif
+) => {
+  if (sendAllPushNotif) {
+    createPushNotificationTopic(title, message, "sagip", linkId);
+  } else {
+    const users = await User.find({
+      userType: "resident",
+    });
+    const fcmTokens = users.flatMap((user) => user.fcmTokens);
+    createPushNotificationToken(title, message, fcmTokens, linkId);
+  }
   const users = await User.find({
     userType: "resident",
   });
@@ -124,7 +138,7 @@ const createNotificationAll = async (linkId, title, message, type) => {
   console.log("notification created all");
 };
 
-const createPushNotificationToken = (title, body, tokens) => {
+const createPushNotificationToken = (title, body, tokens, linkId) => {
   if (tokens.length !== 0) {
     const message = {
       notification: {
@@ -157,7 +171,7 @@ const createPushNotificationToken = (title, body, tokens) => {
   console.log("====================================");
 };
 
-const createPushNotificationTopic = (title, body, topic) => {
+const createPushNotificationTopic = (title, body, topic, linkId) => {
   /* if (tokens.length !== 0) { */
   const message = {
     notification: {

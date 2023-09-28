@@ -890,7 +890,10 @@ accountController.put("/fcm", async (req, res) => {
     const { identifier, fcmToken } = req.body;
 
     let userIdentifier = await checkIdentifier(identifier);
-
+    console.log("token");
+    console.log(identifier);
+    console.log(fcmToken);
+    console.log(userIdentifier);
     if (!userIdentifier) {
       error["identifier"] = "not found";
     } else {

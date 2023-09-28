@@ -54,7 +54,8 @@ wellnessSurveyController.post(
                 wellnessSurvey._id,
                 "New Wellness Check Survey",
                 `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
-                "info"
+                "info",
+                false
               );
             }
             return res.status(200).json({
@@ -495,7 +496,8 @@ wellnessSurveyController.put(
                 wellnessSurvey._id,
                 "New Wellness Check Survey",
                 `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
-                "info"
+                "info",
+                true
               );
             }
 

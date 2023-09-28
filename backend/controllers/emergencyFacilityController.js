@@ -78,12 +78,15 @@ emergencyFacilityController.post(
             status,
           });
           if (emergencyFacility) {
-            createNotificationAll(
-              emergencyFacility._id,
-              `New Emergency Facility`,
-              `Checkout the recently added ${category}: ${name}.`,
-              "info"
-            );
+            if (status === "operational") {
+              createNotificationAll(
+                emergencyFacility._id,
+                `New Emergency Facility`,
+                `Checkout the recently added ${category}: ${name}.`,
+                "info",
+                true
+              );
+            }
 
             /* await createPusher("emergency-facility", "reload", {}); */
             req.io.emit("emergency-facility");
