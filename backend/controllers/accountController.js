@@ -11,7 +11,7 @@ const {
   isEmailOwner,
   isContactNumberOwner,
   isContactNumberExists,
-  checkIdentifier,
+  checkIdentifierType,
   isEmail,
   isContactNumber,
   generateCode,
@@ -889,20 +889,20 @@ accountController.put("/fcm", async (req, res) => {
   try {
     const { identifier, fcmToken } = req.body;
 
-    let userIdentifier = await checkIdentifier(identifier);
+    let userIdentifierType = await checkIdentifierType(identifier);
     console.log("token");
     console.log(identifier);
     console.log(fcmToken);
-    console.log(userIdentifier);
-    if (!userIdentifier) {
+    console.log(userIdentifierType);
+    if (!userIdentifierType) {
       error["identifier"] = "not found";
     } else {
       let query;
-      if (userIdentifier === "contactNumber") {
+      if (userIdentifierType === "contactNumber") {
         query = {
           contactNumber: identifier,
         };
-      } else if (userIdentifier === "email") {
+      } else if (userIdentifierType === "email") {
         query = {
           email: identifier,
         };
