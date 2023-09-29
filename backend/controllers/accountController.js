@@ -943,6 +943,29 @@ accountController.put("/fcm", async (req, res) => {
     });
   }
 });
+accountController.put("/remove-fcm", async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    const result = await User.updateMany({ $pull: { fcmToken: fcmToken } });
+
+    if (result.nModified > 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Removed Successfully",
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
 
 accountController.put(
   "/new-password",
