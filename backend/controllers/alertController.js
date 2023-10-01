@@ -216,6 +216,7 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
   if (Object.keys(error).length == 0) {
     let contactNumbers = [];
     let fcmTokens = [];
+    let userIds = [];
 
     if (location.includes("All")) {
       const users = await getInfoByMunicipality("City Of Malolos (Capital)");
@@ -236,8 +237,9 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
         "City Of Malolos (Capital)"
       ); */
       /* console.log(fcmTokens); */
-      //createPushNotificationToken(alertTitle, alertMessage, fcmTokens,"");
-      createPushNotificationTopic(alertTitle, alertMessage, "sagip", "");
+
+      /* createPushNotificationTopic(alertTitle, alertMessage, "sagip", ""); */
+      createNotificationAll("", alertTitle, alertMessage, "warning", true);
     } else {
       const users = await getInfoByBarangay(
         "City Of Malolos (Capital)",
@@ -267,7 +269,12 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       }
       contactNumbers = users.contactNumbers;
       fcmTokens = users.fcmTokens;
-      createPushNotificationToken(alertTitle, alertMessage, fcmTokens, "");
+      userIds = users._id;
+      /* createPushNotificationToken(alertTitle, alertMessage, fcmTokens, ""); */
+
+      if (Array.isArray(userIds) && userIds.length > 0) {
+        createNotification([userIds], "", alertTitle, alertMessage, "warning");
+      }
     }
 
     console.log(contactNumbers);
@@ -427,13 +434,13 @@ alertController.get("/signal", async (req, res) => {
 
 alertController.get("/weather", async (req, res) => {
   const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-  createNotificationAll(
+  /*  createNotificationAll(
     "home",
     "Safety Tip",
     `Read the recently added safety tip: test.`,
     "info",
     true
-  );
+  ); */
   /* sendEmail("darwinsanluis.ramos14@gmail.com", "Test", "1234", codeExpiration);
   sendSMS("09395372592", "sms-verification", "22222",codeExpiration); */
   /*   createPushNotificationToken("title", "body", [

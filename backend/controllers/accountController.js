@@ -188,6 +188,7 @@ accountController.post(
           birthdate,
           contactNumber,
           isOnline: false,
+          emailStatus: "verified",
           isBanned: false,
           profilePicture,
           attempt,
