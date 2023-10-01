@@ -147,7 +147,7 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
         body: body,
       },
       data: {
-        linkId: linkId,
+        linkId: String(linkId),
       },
       tokens: tokens,
     };
@@ -183,7 +183,7 @@ const createPushNotificationTopic = (title, body, topic, linkId) => {
       body: body,
     },
     data: {
-      linkId: linkId,
+      linkId: String(linkId),
     },
     topic: topic,
   };
