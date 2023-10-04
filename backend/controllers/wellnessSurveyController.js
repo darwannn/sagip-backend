@@ -10,6 +10,8 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+
+const moment = require("moment");
 wellnessSurveyController.post(
   "/add",
   tokenMiddleware,
@@ -466,7 +468,13 @@ wellnessSurveyController.put(
 
       if (Object.keys(error).length === 0) {
         console.log(req.params.id);
+        console.log(endDate);
+        console.log(status);
+        console.log(moment(endDate).isBefore(moment(), "second"));
 
+        if (moment(endDate).isBefore(moment(), "day")) {
+          status = "inactive";
+        }
         if (
           !(
             activeWellnessSurvey.length !== 0 &&
@@ -485,19 +493,20 @@ wellnessSurveyController.put(
 
           if (wellnessSurvey) {
             if (
-              activeWellnessSurvey.length !== 0 &&
-              status === "active" &&
-              !activeWellnessSurvey[0]._id.equals(req.params.id)
+              /*    activeWellnessSurvey.length !== 0 && */
+              status === "active" /* && */
+              /*   !activeWellnessSurvey[0]._id.equals(req.params.id) */
             ) {
               /* await createPusher("wellness-survey", "reload", {}); */
               /* req.io.emit("reload", { receiver: "wellness-survey" }); */
+              console.log("update notif");
               req.io.emit("wellness-survey");
               createNotificationAll(
                 wellnessSurvey._id,
                 "Wellness Check Survey",
                 `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
                 "info",
-                true
+                false
               );
             }
 

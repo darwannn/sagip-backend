@@ -88,7 +88,7 @@ cronJobController.post("/backup", async (req, res) => {
   }
 });
 
-cronJobController.post("/delete", async (req, res) => {
+cronJobController.post("/archive", async (req, res) => {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -123,7 +123,7 @@ cronJobController.post("/delete", async (req, res) => {
   }
 });
 
-cronJobController.post("/inactive", async (req, res) => {
+cronJobController.post("/survey/active", async (req, res) => {
   try {
     const currentDate = moment().startOf("day");
 
