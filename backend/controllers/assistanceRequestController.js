@@ -707,6 +707,10 @@ assistanceRequestController.put(
         } else if (action === "resolve") {
           updateFields = {
             status: "resolved",
+
+            $set: {
+              dateResolved: Date.now(),
+            },
             $unset: {
               isBeingResponded: 1,
             },

@@ -41,6 +41,9 @@ const HazardReportSchema = new mongoose.Schema(
       type: String,
       default: "unverified",
     },
+    dateResolved: {
+      type: Date,
+    },
     isArchived: {
       type: Boolean,
       default: false,

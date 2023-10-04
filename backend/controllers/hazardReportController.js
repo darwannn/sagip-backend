@@ -466,14 +466,21 @@ hazardReportController.put(
   async (req, res) => {
     const error = {};
     try {
+      let updateFields = {};
       let action = req.params.action.toLowerCase();
       let = status = "";
 
       if (action === "verify") {
-        status = "ongoing";
+        updateFields = { status: "ongoing" };
       } else if (action === "resolve") {
-        status = "resolved";
+        updateFields = {
+          status: "resolved",
+          $set: {
+            dateResolved: Date.now(),
+          },
+        };
       }
+
       console.log(action);
       console.log("new");
       console.log(req.params.id);
@@ -481,7 +488,7 @@ hazardReportController.put(
       if (Object.keys(error).length === 0) {
         const hazardReport = await HazardReport.findByIdAndUpdate(
           req.params.id,
-          { status: status },
+          updateFields,
           { new: true }
         );
         if (hazardReport) {
