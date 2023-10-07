@@ -64,7 +64,11 @@ teamController.post(
 
 teamController.get("/", async (req, res) => {
   try {
-    const team = await Team.find({})
+    /*   const team = await Team.find({}) */
+    const team = await Team.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    })
       .populate("head", "-password")
       .populate("members", "-password");
 
@@ -94,6 +98,8 @@ teamController.get("/myteam", tokenMiddleware, async (req, res) => {
     const userId = req.user.id;
     const team = await Team.findOne({
       $or: [{ members: userId }, { head: userId }],
+      /* archivedDate: { $exists: false },
+      isArchived: false, */
     })
       .populate("head", "-password")
       .populate("members", "-password");
@@ -133,6 +139,8 @@ teamController.get("/active", async (req, res) => {
         { members: { $ne: [] } },
         { _id: { $nin: assignedTeams.map((item) => item.assignedTeam) } },
       ],
+      /* archivedDate: { $exists: false },
+      isArchived: false, */
     })
       .populate("head", "-password")
       .populate("members", "-password");
@@ -161,7 +169,12 @@ teamController.get("/active", async (req, res) => {
 
 teamController.get("/responder", async (req, res) => {
   try {
-    const teams = await Team.find({}).populate("head").populate("members");
+    const teams = await Team.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    })
+      .populate("head")
+      .populate("members");
 
     if (teams.length > 0) {
       let assignedResponders = [];
@@ -243,7 +256,11 @@ teamController.get("/responder", async (req, res) => {
 
 teamController.get("/:id", async (req, res) => {
   try {
-    const team = await Team.findById(req.params.id)
+    const team = await Team.findOne({
+      _id: req.params.id,
+      archivedDate: { $exists: false },
+      isArchived: false,
+    })
       .populate("head", "-password")
       .populate("members", "-password");
 
@@ -671,7 +688,7 @@ teamController.put(
   }
 );
 
-/* teamController.put(
+teamController.put(
   "/:action/:id",
   tokenMiddleware,
   //   userTypeMiddleware([
@@ -710,30 +727,42 @@ teamController.put(
             // await createPusher("hazard-report", "reload", {});
             if (action === "archive") {
               console.log("archive");
+              const updateFields = { head: null, members: [] };
 
-              const teamMembers = [team.head, ...team.members];
-              console.log("========teamMembers============================");
-              console.log(teamMembers);
-              console.log("====================================");
-              if (team.head !== null || team.members.length !== 0) {
+              const team = await Team.findByIdAndUpdate(
+                req.params.id,
+                updateFields
+              );
+              if (team) {
+                const teamMembers = [team.head, ...team.members];
+                console.log("========teamMembers============================");
+                console.log(teamMembers);
                 console.log("====================================");
-                console.log("inside");
-                console.log("====================================");
-                await createNotification(
-                  teamMembers,
-                  team._id,
-                  `Team Deleted`,
-                  `Your current team, ${team.name} has been deleted.`,
-                  "info"
-                );
-               
-                req.io.emit("team");
+                if (team.head !== null || team.members.length !== 0) {
+                  console.log("====================================");
+                  console.log("inside");
+                  console.log("====================================");
+                  await createNotification(
+                    teamMembers,
+                    team._id,
+                    `Team Deleted`,
+                    `Your current team, ${team.name} has been deleted.`,
+                    "info"
+                  );
+
+                  req.io.emit("team");
+                }
+
+                return res.status(200).json({
+                  success: true,
+                  message: "Archived Successfully",
+                });
+              } else {
+                return res.status(500).json({
+                  success: false,
+                  message: "Internal Server Error",
+                });
               }
-
-              return res.status(200).json({
-                success: true,
-                message: "Archived Successfully",
-              });
             } else if (action === "unarchive") {
               dismissedRequestCount("unarchive", hazardReport.userId);
               return res.status(200).json({
@@ -766,6 +795,6 @@ teamController.put(
       });
     }
   }
-); */
+);
 
 module.exports = teamController;

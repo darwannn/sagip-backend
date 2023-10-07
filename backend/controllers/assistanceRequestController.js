@@ -295,6 +295,8 @@ assistanceRequestController.get(
       const myTeam = await Team.findOne({
         $or: [{ members: req.user.id }, { head: req.user.id }],
         /*      assignedTeam: { $ne: null }, */
+        /* archivedDate: { $exists: false },
+        isArchived: false, */
       })
         .populate("head", "-password")
         .populate("members", "-password");
@@ -356,6 +358,8 @@ assistanceRequestController.get(
 
       const team = await Team.findOne({
         $or: [{ head: req.user.id }, { members: req.user.id }],
+        /* archivedDate: { $exists: false },
+        isArchived: false, */
       });
       console.log("====================================");
       console.log(team._id);
@@ -410,6 +414,8 @@ assistanceRequestController.get(
 
       const team = await Team.findOne({
         $or: [{ head: req.user.id }, { members: req.user.id }],
+        /*   archivedDate: { $exists: false },
+        isArchived: false, */
       });
       console.log("====================================");
       console.log(team._id);
@@ -788,6 +794,8 @@ assistanceRequestController.put(
 
           if (action === "verify") {
             const team = await Team.findOne({ _id: assignedTeam });
+            /* const team = await Team.findOne({ _id: assignedTeam,  archivedDate: { $exists: false },
+              isArchived: false, }); */
             console.log("Type of team.members:", typeof team.members);
             console.log("Contents of team.members:", team.members);
             console.log("team");
