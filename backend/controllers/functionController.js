@@ -68,7 +68,7 @@ const generateCode = async () => {
 
 const verifyPassword = (password, field) => {
   const passwordRequirements =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&,*.])(?=.*\d).{8,16}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&,*._])(?=.*\d).{8,16}$/;
   if (!passwordRequirements.test(password)) {
     return true;
   }

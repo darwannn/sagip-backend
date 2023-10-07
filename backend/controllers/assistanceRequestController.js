@@ -40,8 +40,6 @@ assistanceRequestController.post(
     const error = {};
     try {
       const {
-        description,
-        category,
         latitude,
         longitude,
         street,
@@ -49,8 +47,10 @@ assistanceRequestController.post(
 
         hasChanged,
       } = req.body;
-      let { answers } = req.body;
+      let { answers, description, category } = req.body;
+      let status = "";
       const action = req.params.action.toLowerCase();
+      console.log("actoin", action);
       if (action === "add" || action === "auto-add") {
         /*  console.log(proof); */
         if (action === "add") {
@@ -88,7 +88,7 @@ assistanceRequestController.post(
           }
         }
 
-        if (Object.keys(error).length === 0) {
+        if (Object.keys(error).length === 0 || action === "auto-add") {
           let cloud = "";
           if (req.file) {
             cloud = await cloudinaryUploader(
@@ -103,11 +103,44 @@ assistanceRequestController.post(
           if (cloud !== "error" || req.file) {
             if (req.file)
               console.log("File uploaded successfully:", cloud.secure_url);
-            const proof = req.file
+            let proof = req.file
               ? `${cloud.original_filename}.${cloud.format}`
               : "";
-            answers = answers && answers.length !== 0 ? answers.split(",") : [];
+            console.log(answers);
+            console.log("+++++++++++++++++++++++");
+            console.log(proof);
+            console.log(req.file);
+            answers = answers && answers.length !== 0 ? answers : [];
 
+            console.log("+++++++++++++++++++++++");
+            /* adds defailt value when auto sending */
+
+            if (action === "auto-add") {
+              console.log("+++++++++++++++++++++++ano bayah");
+              console.log(description);
+              if (isEmpty(proof)) {
+                proof = "default.jpg";
+                status = "incomplete";
+              }
+              if (isEmpty(category)) {
+                category = "Unspecified";
+                status = "incomplete";
+              }
+              if (
+                isEmpty(description) ||
+                description === undefined ||
+                description === "undefined"
+              ) {
+                description =
+                  "The form was automatically submitted as the user was unable to answer this field within the specified time frame.";
+                status = "incomplete";
+              }
+
+              /*  if (isEmpty(proof) || isEmpty(category) || isEmpty(description))
+                status = "incomplete"; */
+            } else {
+              status = "unverified";
+            }
             const assistanceRequest = await AssistanceRequest.create({
               description,
               category,
@@ -117,9 +150,10 @@ assistanceRequestController.post(
               municipality,
               answers,
               proof,
+              status,
               userId: req.user.id,
             });
-
+            console.log(assistanceRequest);
             if (assistanceRequest) {
               /* await createPusher("assistance-request-web", "reload", {}); */
               req.io.emit("assistance-request");
@@ -432,7 +466,7 @@ assistanceRequestController.get(
       console.log("====================================");
       const assistanceRequest = await AssistanceRequest.findOne({
         userId: req.user.id,
-        status: { $in: ["ongoing", "unverified"] },
+        status: { $in: ["ongoing", "unverified", "incomplete"] },
         archivedDate: { $exists: false },
         isArchived: false,
       })
@@ -593,7 +627,7 @@ assistanceRequestController.put(
           longitude,
           street,
           municipality,
-          answers: answers.split(","),
+          answers: answers,
         };
 
         console.log("====================================");
@@ -608,13 +642,16 @@ assistanceRequestController.put(
           if (assistanceRequest.proof.includes(".mp4")) {
             old_resource_type = "video";
           }
-          await cloudinaryUploader(
-            "destroy",
-            "",
-            old_resource_type,
-            folderPath,
-            assistanceRequest.proof
-          );
+
+          if (assistanceRequest.proof !== "default.jpg") {
+            await cloudinaryUploader(
+              "destroy",
+              "",
+              old_resource_type,
+              folderPath,
+              assistanceRequest.proof
+            );
+          }
 
           const cloud = await cloudinaryUploader(
             "upload",

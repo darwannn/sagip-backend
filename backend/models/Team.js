@@ -21,6 +21,14 @@ const TeamSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+   
+    archivedDate: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

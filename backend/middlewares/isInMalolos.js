@@ -10,14 +10,19 @@ const isInMalolos = async (req, res, next) => {
       console.log(isEmpty(latitude));
       console.log("latitude");
       console.log(latitude);
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+      console.log(longitude);
 
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+      // const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${120.80829156110384},${14.847181109982058}&key=${
+      /*  process.env.GOOGLE_MAPS_API_KEY
+      }`; */
+
+      /*  console.log(geocodeUrl); */
       const response = await axios.get(geocodeUrl);
 
       const results = response.data.results;
-      console.log("geocodeUrl");
-      console.log(geocodeUrl);
-      console.log(results);
+      /* console.log("geocodeUrl");
+      console.log(results); */
       if (results && results.length > 0) {
         const addressComponents = results[0].address_components;
         let streetCode = addressComponents.find((component) =>
@@ -57,12 +62,21 @@ const isInMalolos = async (req, res, next) => {
           streetNumber = "";
         }
         if (municipalityName !== "Malolos") {
-          return res.status(400).json({
+          /* return res.status(400).json({
             success: false,
             latitude: "Unfortunately, the selected area is outside Malolos",
             longitude: "Unfortunately, the selected area is outside Malolos",
             message: "input error",
-          });
+          }); */
+          const combinedStreet = streetNumber
+            ? `${streetNumber} ${streetName}`
+            : streetName;
+
+          console.log(combinedStreet);
+          console.log(municipalityName);
+          req.body.street = combinedStreet;
+          req.body.municipality = municipalityName;
+          next();
         } else {
           const combinedStreet = streetNumber
             ? `${streetNumber} ${streetName}`

@@ -671,4 +671,101 @@ teamController.put(
   }
 );
 
+/* teamController.put(
+  "/:action/:id",
+  tokenMiddleware,
+  //   userTypeMiddleware([
+  //       "responder",
+  //   "dispatcher",
+  //   "admin",
+  //   "super-admin",
+  // ]),
+  async (req, res) => {
+    const error = {};
+    try {
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        if (Object.keys(error).length === 0) {
+          console.log(action);
+          if (action === "archive") {
+            updateFields = {
+              isArchived: true,
+              archivedDate: Date.now(),
+            };
+          } else if (action === "unarchive") {
+            updateFields = {
+              $unset: { archivedDate: Date.now() },
+            };
+          }
+          const team = await Team.findByIdAndUpdate(
+            req.params.id,
+            updateFields,
+            { new: true }
+          );
+          if (team) {
+            console.log("====================================");
+            console.log("team");
+            console.log("====================================");
+            // await createPusher("hazard-report", "reload", {});
+            if (action === "archive") {
+              console.log("archive");
+
+              const teamMembers = [team.head, ...team.members];
+              console.log("========teamMembers============================");
+              console.log(teamMembers);
+              console.log("====================================");
+              if (team.head !== null || team.members.length !== 0) {
+                console.log("====================================");
+                console.log("inside");
+                console.log("====================================");
+                await createNotification(
+                  teamMembers,
+                  team._id,
+                  `Team Deleted`,
+                  `Your current team, ${team.name} has been deleted.`,
+                  "info"
+                );
+               
+                req.io.emit("team");
+              }
+
+              return res.status(200).json({
+                success: true,
+                message: "Archived Successfully",
+              });
+            } else if (action === "unarchive") {
+              dismissedRequestCount("unarchive", hazardReport.userId);
+              return res.status(200).json({
+                success: true,
+                message: "Unrchived Successfully",
+              });
+            }
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "not found",
+            });
+          }
+        }
+        if (Object.keys(error).length !== 0) {
+          error["success"] = false;
+          error["message"] = "input error";
+          return res.status(400).json(error);
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+); */
+
 module.exports = teamController;
