@@ -182,6 +182,7 @@ authController.post("/register", async (req, res) => {
           verificationCode,
           codeExpiration
         );
+        sendEmail(user.email, "register", verificationCode, codeExpiration);
 
         /*  if (verificationCode !== 0) { */
         return res.status(200).json({

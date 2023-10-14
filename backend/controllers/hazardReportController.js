@@ -592,7 +592,8 @@ hazardReportController.delete(
 
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
-          createNotification(
+          dismissedRequestCount("archive", hazardReport.userId);
+          /* createNotification(
             [hazardReport.userId._id],
             hazardReport.userId._id,
             "Hazard Report Closed",
@@ -600,7 +601,7 @@ hazardReportController.delete(
               hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
             }, has been carefully reviewed, and we have determined that the reported hazard is not substantiated. Your hazard report has been closed.`,
             "error"
-          );
+          ); */
 
           return res.status(200).json({
             success: true,

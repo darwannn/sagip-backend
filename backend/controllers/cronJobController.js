@@ -97,9 +97,9 @@ cronJobController.post("/archive", async (req, res) => {
       archivedDate: { $lte: thirtyDaysAgo },
     });
 
-    await HazardReport.deleteMany({
+    /* await HazardReport.deleteMany({
       archivedDate: { $lte: thirtyDaysAgo },
-    });
+    }); */
     const archivedUsers = await User.find({
       archivedDate: { $lte: thirtyDaysAgo },
     });
@@ -107,10 +107,13 @@ cronJobController.post("/archive", async (req, res) => {
     for (const user of archivedUsers) {
       await user.remove();
     }
-    await AssistanceRequest.deleteMany({
+    /*   await AssistanceRequest.deleteMany({
       archivedDate: { $lte: thirtyDaysAgo },
     });
-
+    await Team.deleteMany({
+      archivedDate: { $lte: thirtyDaysAgo },
+    });
+ */
     return res.status(200).json({
       success: true,
       message: "Archived data deleted successfully",

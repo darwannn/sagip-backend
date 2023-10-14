@@ -114,7 +114,7 @@ assistanceRequestController.post(
 
             console.log("+++++++++++++++++++++++");
             /* adds defailt value when auto sending */
-
+            status = "unverified";
             if (action === "auto-add") {
               console.log("+++++++++++++++++++++++ano bayah");
               console.log(description);
@@ -131,16 +131,15 @@ assistanceRequestController.post(
                 description === undefined ||
                 description === "undefined"
               ) {
-                description =
-                  "The form was automatically submitted as the user was unable to answer this field within the specified time frame.";
+                description = "";
                 status = "incomplete";
               }
 
               /*  if (isEmpty(proof) || isEmpty(category) || isEmpty(description))
                 status = "incomplete"; */
-            } else {
+            } /* else {
               status = "unverified";
-            }
+            } */
             const assistanceRequest = await AssistanceRequest.create({
               description,
               category,
@@ -583,6 +582,7 @@ assistanceRequestController.put(
         hasChanged,
         answers,
       } = req.body;
+      let status = "";
       if (isEmpty(answers)) error["answers"] = "Required field";
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
@@ -640,22 +640,27 @@ assistanceRequestController.put(
         /*  console.log(req.file.originalname); */
         console.log(resource_type);
         console.log("====================================");
+        const assistanceRequestProof = await AssistanceRequest.findById(
+          req.params.id
+        );
+        if (assistanceRequestProof.status === "incomplete") {
+          status = "unverified";
+          updateFields.status = status;
+        } /* else {
+          status = assistanceRequestProof.status;
+        } */
         if (hasChanged && req.file) {
-          const assistanceRequest = await AssistanceRequest.findById(
-            req.params.id
-          );
-
-          if (assistanceRequest.proof.includes(".mp4")) {
+          if (assistanceRequestProof.proof.includes(".mp4")) {
             old_resource_type = "video";
           }
 
-          if (assistanceRequest.proof !== "default.jpg") {
+          if (assistanceRequestProof.proof !== "default.jpg") {
             await cloudinaryUploader(
               "destroy",
               "",
               old_resource_type,
               folderPath,
-              assistanceRequest.proof
+              assistanceRequestProof.proof
             );
           }
 
@@ -960,15 +965,86 @@ assistanceRequestController.put(
   }
 ); */
 
-assistanceRequestController.put(
+assistanceRequestController.delete(
   "/delete/:id",
   tokenMiddleware,
-  /* userTypeMiddleware([
-      "responder",
-  "dispatcher",
-  "admin",
-  "super-admin",
-]), */
+  //   userTypeMiddleware([
+  //       "responder",
+  //   "dispatcher",
+  //   "admin",
+  //   "super-admin",
+  // ]),
+  async (req, res) => {
+    const error = {};
+    try {
+      if (Object.keys(error).length === 0) {
+        let resource_type = "image";
+
+        const assistanceRequestImage = await AssistanceRequest.findById(
+          req.params.id
+        );
+
+        if (!isVideo(assistanceRequestImage.proof)) {
+          resource_type = "video";
+        }
+
+        const cloud = await cloudinaryUploader(
+          "destroy",
+          "",
+          resource_type,
+          folderPath,
+          assistanceRequestImage.proof
+        );
+
+        if (cloud !== "error") {
+          const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
+            req.params.id
+          );
+
+          if (assistanceRequest) {
+            req.io.emit("assistance-request");
+            req.io.emit(`${assistanceRequest.userId}`);
+            dismissedRequestCount("archive", assistanceRequest.userId);
+            return res.status(200).json({
+              success: true,
+              message: "Deleted successfully",
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: "Internal Server Error",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+/* assistanceRequestController.put(
+  "/delete/:id",
+  tokenMiddleware,
+//   userTypeMiddleware([
+//       "responder",
+//   "dispatcher",
+//   "admin",
+//   "super-admin",
+// ]),
   async (req, res) => {
     const error = {};
     try {
@@ -980,7 +1056,7 @@ assistanceRequestController.put(
       console.log(note);
       console.log("====================================");
       if (isEmpty(reason)) error["reason"] = "Required field";
-      /*    if (isEmpty(note)) error["note"] = "Required field"; */
+        //  if (isEmpty(note)) error["note"] = "Required field";
       if (Object.keys(error).length === 0) {
         let resource_type = "image";
 
@@ -1002,25 +1078,25 @@ assistanceRequestController.put(
           folderPath,
           assistanceRequestImage.proof
         );
-        /* await createNotification([userId], null, reason, note, "error"); */
+        // await createNotification([userId], null, reason, note, "error");
         if (cloud !== "error") {
           const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
             req.params.id
           );
 
           if (assistanceRequest) {
-            /* const user = await User.findByIdAndUpdate(
-              assistanceRequest.userId,
-              {
-                $inc: { dismissedRequestCount: 1 },
-              },
-              { new: true }
-            );
-            if (user.dismissedRequestCount === 3) {
-              user.isBanned = true;
-            } */
+            // const user = await User.findByIdAndUpdate(
+            //   assistanceRequest.userId,
+            //   {
+            //     $inc: { dismissedRequestCount: 1 },
+            //   },
+            //   { new: true }
+            // );
+            // if (user.dismissedRequestCount === 3) {
+            //   user.isBanned = true;
+            // }
 
-            /*    dismissedRequestCount("delete", assistanceRequest.userId); */
+              //  dismissedRequestCount("delete", assistanceRequest.userId);
 
             console.log("====================================");
             console.log(assistanceRequest.userId.contactNumber);
@@ -1036,8 +1112,8 @@ assistanceRequestController.put(
               ""
             );
 
-            /* await createPusher(`${assistanceRequest.userId}`, "reload", {});
-            await createPusher("assistance-request-mobile", "reload", {}); */
+            // await createPusher(`${assistanceRequest.userId}`, "reload", {});
+            // await createPusher("assistance-request-mobile", "reload", {});
             req.io.emit("assistance-request");
             req.io.emit(`${assistanceRequest.userId}`);
             createNotification(
@@ -1082,6 +1158,8 @@ assistanceRequestController.put(
     }
   }
 );
+ */
+
 assistanceRequestController.put(
   "/:action/:id",
   tokenMiddleware,
