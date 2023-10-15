@@ -319,6 +319,7 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
 
 alertController.get("/signal", async (req, res) => {
   try {
+    req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` });
     const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
     const response = await axios.get(url);
     const data = response.data;
@@ -412,14 +413,16 @@ alertController.get("/signal", async (req, res) => {
 
           if (!hasSignal) {
             return res.status(200).json({
-              /* success: true, message: "no signal", signal: 0 */
               success: true,
+              message: "no signal",
+              signal: 0,
+              /* success: true,
               signal: `2`,
               message: `Malolos is under Signal No.2`,
               track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_hanna.png`,
               name: "Hanna",
               category: "Typhoon",
-              updatedAt: Date.now(),
+              updatedAt: Date.now(), */
             });
           }
         }
@@ -433,7 +436,7 @@ alertController.get("/signal", async (req, res) => {
 });
 
 alertController.get("/weather", async (req, res) => {
-  req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` });
+  /*   req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` }); */
   const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
   /*  createNotificationAll(
     "home",
