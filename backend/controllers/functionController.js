@@ -328,6 +328,8 @@ const dismissedRequestCount = async (action, userId) => {
   });
   if (user.dismissedRequestCount >= 3) {
     user.isBanned = true;
+    /* req.io.emit(`${req.params.id}`); */
+    req.io.emit("ban", { receiver: `${userId}` });
   } else {
     user.isBanned = false;
   }

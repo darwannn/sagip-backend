@@ -726,6 +726,11 @@ accountController.put(
 
           req.io.emit(`${req.params.id}`);
           /* await createPusher("user", "reload", {});  */
+
+          if (isBanned) {
+            req.io.emit("ban", { receiver: `${req.params.id}` });
+          }
+
           return res.status(200).json({
             success: true,
             message: "Profile Updated Successfully",
