@@ -728,7 +728,7 @@ accountController.put(
           /* await createPusher("user", "reload", {});  */
 
           if (isBanned) {
-            req.io.emit("ban", { receiver: `${req.params.id}` });
+            req.io.emit("banned", { receiver: `${req.params.id}` });
           }
 
           return res.status(200).json({

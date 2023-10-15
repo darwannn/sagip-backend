@@ -1004,7 +1004,7 @@ assistanceRequestController.delete(
           if (assistanceRequest) {
             req.io.emit("assistance-request");
             req.io.emit(`${assistanceRequest.userId}`);
-            dismissedRequestCount("archive", assistanceRequest.userId);
+            dismissedRequestCount("archive", assistanceRequest.userId, req);
             return res.status(200).json({
               success: true,
               message: "Deleted successfully",
@@ -1096,7 +1096,7 @@ assistanceRequestController.delete(
             //   user.isBanned = true;
             // }
 
-              //  dismissedRequestCount("delete", assistanceRequest.userId);
+              //  dismissedRequestCount("delete", assistanceRequest.userId,req);
 
             console.log("====================================");
             console.log(assistanceRequest.userId.contactNumber);
@@ -1216,7 +1216,7 @@ assistanceRequestController.put(
                 user.isBanned = true;
               }
  */
-              dismissedRequestCount("archive", assistanceRequest.userId);
+              dismissedRequestCount("archive", assistanceRequest.userId, req);
 
               console.log("=======jjj=============================");
               console.log(assistanceRequest.userId);
@@ -1260,7 +1260,7 @@ assistanceRequestController.put(
                 }
               ); */
 
-              dismissedRequestCount("unarchive", assistanceRequest.userId);
+              dismissedRequestCount("unarchive", assistanceRequest.userId, req);
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",

@@ -592,7 +592,7 @@ hazardReportController.delete(
 
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
-          dismissedRequestCount("archive", hazardReport.userId);
+          dismissedRequestCount("archive", hazardReport.userId, req);
           /* createNotification(
             [hazardReport.userId._id],
             hazardReport.userId._id,
@@ -670,7 +670,7 @@ hazardReportController.put(
             // await createPusher("hazard-report", "reload", {});
             if (action === "archive") {
               console.log("archive");
-              dismissedRequestCount("archive", hazardReport.userId);
+              dismissedRequestCount("archive", hazardReport.userId, req);
               //  await createPusher(`${hazardReport.userId}`, "reload", {});
               // await createPusher("hazard-report-mobile", "reload", {});
               req.io.emit("hazard-report");
@@ -693,7 +693,7 @@ hazardReportController.put(
                 message: "Archived Successfully",
               });
             } else if (action === "unarchive") {
-              dismissedRequestCount("unarchive", hazardReport.userId);
+              dismissedRequestCount("unarchive", hazardReport.userId, req);
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",

@@ -29,7 +29,8 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 // const isBanned = require('../middlewares/authMiddleware')
 
 /* const currentDate = new Date(); */
-const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
+const codeExpiration = moment().add(15, "minutes");
+
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/verification-request";
 
@@ -353,21 +354,28 @@ authController.put(
         if (Object.keys(error).length == 0) {
           const user = await User.findById(userId);
           if (user) {
+            const currentMoment = moment();
+            const codeExpirationMoment = moment(user.codeExpiration);
             const currentTimestamp = Date.now();
-            if (currentTimestamp > user.codeExpiration) {
+            console.log(user.codeExpiration);
+            console.log(currentMoment);
+            console.log(codeExpirationMoment);
+            console.log(currentMoment.isAfter(codeExpirationMoment));
+            if (currentMoment.isAfter(codeExpirationMoment)) {
               const user = await updateVerificationCode(req.user.id);
-              if (user) {
+              /*  if (user) { */
+              return res.status(400).json({
+                success: false,
+                verificationCode:
+                  "Verification code has expired. A new verification code has been sent",
+                message: "input error",
+              });
+              /* } else {
                 return res.status(200).json({
                   success: false,
-                  message:
-                    "Verification code has expired. A new verification code has been sent",
+                  message: "Internal Server Error",
                 });
-              } else {
-                return res.status(200).json({
-                  success: false,
-                  message: "Verification code has expired.",
-                });
-              }
+              } */
             } else {
               console.log("====================================");
               console.log(code);
@@ -1403,7 +1411,7 @@ authController.get(
 
       /* let user = await User.find({}); */
       /* sort */
-      user.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      /* user.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); */
       user = user.filter(
         (record) =>
           record.verificationPicture.length !== 0 &&

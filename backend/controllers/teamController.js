@@ -764,7 +764,7 @@ teamController.put(
                 });
               }
             } else if (action === "unarchive") {
-              dismissedRequestCount("unarchive", hazardReport.userId);
+              dismissedRequestCount("unarchive", hazardReport.userId, req);
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",

@@ -6,9 +6,10 @@ const User = require("../models/User");
 const Team = require("../models/Team");
 
 const { createPusher, sendSMS, sendEmail } = require("./apiController");
-const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // 1 day expiration
+//const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // 1 day expiration
 /* const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expire after 15 minutes */
 /* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
+const codeExpiration = moment().add(15, "minutes");
 const { cloudinary } = require("../utils/config");
 const isEmpty = (value) => {
   if (value === "" || value === null || value === undefined) {
@@ -310,7 +311,7 @@ const getUsersId = async (userType) => {
   }
 };
 
-const dismissedRequestCount = async (action, userId) => {
+const dismissedRequestCount = async (action, userId, req) => {
   let updateFields;
 
   if (action === "unarchive") {
@@ -329,7 +330,7 @@ const dismissedRequestCount = async (action, userId) => {
   if (user.dismissedRequestCount >= 3) {
     user.isBanned = true;
     /* req.io.emit(`${req.params.id}`); */
-    req.io.emit("ban", { receiver: `${userId}` });
+    req.io.emit("banned", { receiver: `${userId}` });
   } else {
     user.isBanned = false;
   }

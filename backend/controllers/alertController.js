@@ -319,7 +319,7 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
 
 alertController.get("/signal", async (req, res) => {
   try {
-    req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` });
+    /* req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` }); */
     const url = "https://pagasa.chlod.net/api/v1/bulletin/list";
     const response = await axios.get(url);
     const data = response.data;
