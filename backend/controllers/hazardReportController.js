@@ -592,7 +592,7 @@ hazardReportController.delete(
 
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
-          dismissedRequestCount("archive", hazardReport.userId, req);
+          /* dismissedRequestCount("archive", hazardReport.userId, req); */
           /* createNotification(
             [hazardReport.userId._id],
             hazardReport.userId._id,

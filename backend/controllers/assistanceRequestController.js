@@ -1007,7 +1007,7 @@ assistanceRequestController.delete(
         if (assistanceRequest) {
           req.io.emit("assistance-request");
           req.io.emit(`${assistanceRequest.userId}`);
-          dismissedRequestCount("archive", assistanceRequest.userId, req);
+          /* dismissedRequestCount("archive", assistanceRequest.userId, req); */
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",
