@@ -77,7 +77,7 @@ const isInMalolos = async (req, res, next) => {
 
           if (combinedStreet !== "") {
             if (
-              !combinedStreet.toLowerCase().includes("highway") ||
+              !combinedStreet.toLowerCase().includes("highway") &&
               !combinedStreet.toLowerCase().includes("road")
             )
               combinedStreet = `${combinedStreet} Street`;

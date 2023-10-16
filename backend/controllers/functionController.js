@@ -237,6 +237,7 @@ const updateVerificationCode = async (id) => {
     },
     { new: true }
   );
+
   return user;
 };
 

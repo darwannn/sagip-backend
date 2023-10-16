@@ -361,9 +361,22 @@ authController.put(
             console.log(currentMoment);
             console.log(codeExpirationMoment);
             console.log(currentMoment.isAfter(codeExpirationMoment));
-            if (currentMoment.isAfter(codeExpirationMoment)) {
+            if (!codeExpirationMoment.isAfter(currentMoment)) {
               const user = await updateVerificationCode(req.user.id);
               /*  if (user) { */
+              sendSMS(
+                user.contactNumber,
+                "register",
+                verificationCode,
+                codeExpiration
+              );
+              sendEmail(
+                user.email,
+                "register",
+                verificationCode,
+                codeExpiration
+              );
+
               return res.status(400).json({
                 success: false,
                 verificationCode:
