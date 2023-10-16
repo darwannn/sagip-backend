@@ -367,13 +367,13 @@ authController.put(
               sendSMS(
                 user.contactNumber,
                 "register",
-                verificationCode,
+                user.verificationCode,
                 codeExpiration
               );
               sendEmail(
                 user.email,
                 "register",
-                verificationCode,
+                user.verificationCode,
                 codeExpiration
               );
 
