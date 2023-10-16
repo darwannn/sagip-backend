@@ -987,40 +987,43 @@ assistanceRequestController.delete(
         if (!isVideo(assistanceRequestImage.proof)) {
           resource_type = "video";
         }
+        /*  const cloud = ""; */
 
-        const cloud = await cloudinaryUploader(
-          "destroy",
-          "",
-          resource_type,
-          folderPath,
-          assistanceRequestImage.proof
+        if (assistanceRequestImage.proof !== "default.jpg") {
+          /* cloud =  */ await cloudinaryUploader(
+            "destroy",
+            "",
+            resource_type,
+            folderPath,
+            assistanceRequestImage.proof
+          );
+        }
+
+        /*    if (cloud !== "error") { */
+        const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
+          req.params.id
         );
 
-        if (cloud !== "error") {
-          const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
-            req.params.id
-          );
-
-          if (assistanceRequest) {
-            req.io.emit("assistance-request");
-            req.io.emit(`${assistanceRequest.userId}`);
-            dismissedRequestCount("archive", assistanceRequest.userId, req);
-            return res.status(200).json({
-              success: true,
-              message: "Deleted successfully",
-            });
-          } else {
-            return res.status(500).json({
-              success: false,
-              message: "Internal Server Error",
-            });
-          }
+        if (assistanceRequest) {
+          req.io.emit("assistance-request");
+          req.io.emit(`${assistanceRequest.userId}`);
+          dismissedRequestCount("archive", assistanceRequest.userId, req);
+          return res.status(200).json({
+            success: true,
+            message: "Deleted successfully",
+          });
         } else {
           return res.status(500).json({
             success: false,
             message: "Internal Server Error",
           });
         }
+        /* } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        } */
       }
 
       if (Object.keys(error).length !== 0) {

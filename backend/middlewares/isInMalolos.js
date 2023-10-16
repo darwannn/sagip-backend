@@ -68,22 +68,40 @@ const isInMalolos = async (req, res, next) => {
             longitude: "Unfortunately, the selected area is outside Malolos",
             message: "input error",
           }); */
-          const combinedStreet = streetNumber
+          let combinedStreet = streetNumber
             ? `${streetNumber} ${streetName}`
             : streetName;
 
           console.log(combinedStreet);
           console.log(municipalityName);
+
+          if (combinedStreet !== "") {
+            if (
+              !combinedStreet.toLowerCase().includes("highway") ||
+              !combinedStreet.toLowerCase().includes("road")
+            )
+              combinedStreet = `${combinedStreet} Street`;
+          }
           req.body.street = combinedStreet;
           req.body.municipality = municipalityName;
           next();
         } else {
-          const combinedStreet = streetNumber
+          let combinedStreet = streetNumber
             ? `${streetNumber} ${streetName}`
             : streetName;
 
           console.log(combinedStreet);
           console.log(municipalityName);
+
+          if (combinedStreet !== "") {
+            console.log(combinedStreet.toLowerCase());
+            console.log(!combinedStreet.toLowerCase().includes("highway"));
+            if (
+              !combinedStreet.toLowerCase().includes("highway") &&
+              !combinedStreet.toLowerCase().includes("road")
+            )
+              combinedStreet = `${combinedStreet} Street`;
+          }
           req.body.street = combinedStreet;
           req.body.municipality = municipalityName;
           next();

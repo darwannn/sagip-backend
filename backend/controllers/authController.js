@@ -1540,14 +1540,12 @@ authController.put(
   async (req, res) => {
     const error = {};
     try {
-      const { reason, note } = req.body;
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       console.log("====================================");
       console.log(action);
       console.log("====================================");
       if (action === "reject" || action === "approve") {
-        /* if (isEmpty(reason)) error["reason"] = "Required field"; */
         if (Object.keys(error).length === 0) {
           const user = await User.findByIdAndUpdate(
             req.params.id,
@@ -1560,6 +1558,8 @@ authController.put(
           );
 
           if (action === "reject") {
+            const { reason, note } = req.body;
+            /* if (isEmpty(reason)) error["reason"] = "Required field"; */
             const cloud = await cloudinaryUploader(
               "destroy",
               "",
