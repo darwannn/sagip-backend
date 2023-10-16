@@ -936,7 +936,7 @@ authController.post("/login", async (req, res) => {
                     user._doc.userType,
                     user._doc.status,
                     "7d",
-                    identifier
+                    user.contactNumber
                   ),
                 });
               }
