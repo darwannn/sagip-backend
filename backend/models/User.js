@@ -74,6 +74,7 @@ const userSchema = mongoose.Schema(
     },
     codeExpiration: {
       type: Date,
+      /*  default: Date.now, */
     },
 
     userType: {

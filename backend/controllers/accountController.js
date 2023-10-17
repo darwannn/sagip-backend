@@ -25,7 +25,6 @@ const {
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 const currentDate = new Date();
-const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
@@ -77,6 +76,7 @@ accountController.post(
   ]), */
   async (req, res) => {
     try {
+      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
       const error = {};
       let {
         firstname,
@@ -321,6 +321,7 @@ accountController.put(
   ]), */
   async (req, res) => {
     try {
+      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
       const error = {};
       console.log("====================================");
       let action = req.params.action.toLowerCase();

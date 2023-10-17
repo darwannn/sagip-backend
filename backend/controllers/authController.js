@@ -26,10 +26,6 @@ const {
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-// const isBanned = require('../middlewares/authMiddleware')
-
-/* const currentDate = new Date(); */
-const codeExpiration = moment().add(15, "minutes");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/verification-request";
@@ -137,7 +133,7 @@ authController.post("/register", async (req, res) => {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-
+      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
       const user = await User.create({
         email,
         password: hashedPassword,
@@ -350,7 +346,7 @@ authController.put(
         } else if (isNumber(code)) {
           error["verificationCode"] = "Invalid code";
         }
-
+        const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
         if (Object.keys(error).length == 0) {
           const user = await User.findById(userId);
           if (user) {
@@ -359,7 +355,9 @@ authController.put(
             const currentTimestamp = Date.now();
             console.log(user.codeExpiration);
             console.log(currentMoment);
+            console.log(moment.utc(currentMoment).local().format());
             console.log(codeExpirationMoment);
+            console.log(moment.utc(codeExpirationMoment).local().format());
             console.log(currentMoment.isAfter(codeExpirationMoment));
             if (!codeExpirationMoment.isAfter(currentMoment)) {
               const user = await updateVerificationCode(req.user.id);
@@ -802,7 +800,7 @@ authController.post("/login", async (req, res) => {
       }
     }
     if (isEmpty(password)) error["password"] = "Required field";
-
+    const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
     if (Object.keys(error).length == 0) {
       if (user.attempt >= 5) {
         let generatedCode = await generateCode();
@@ -981,7 +979,7 @@ authController.post("/forgot-password", async (req, res) => {
     }
 
     console.log(accountExists);
-
+    const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
     if (Object.keys(error).length == 0) {
       let identifierType = await checkIdentifierType(identifier);
       // let generatedCode = await generateCode();
@@ -1228,7 +1226,7 @@ authController.put(
       console.log(identifier);
       console.log("====================================");
       const user = await updateVerificationCode(req.user.id);
-
+      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
       if (user) {
         console.log("Current COde: " + user.verificationCode);
         let identifierType = await checkIdentifierType(identifier);

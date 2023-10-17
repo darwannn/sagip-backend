@@ -6,10 +6,7 @@ const User = require("../models/User");
 const Team = require("../models/Team");
 
 const { createPusher, sendSMS, sendEmail } = require("./apiController");
-//const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // 1 day expiration
-/* const codeExpiration = new Date(new Date().getTime() + 15 * 60000); //will expire after 15 minutes */
-/* const codeExpiration = new Date(new Date().getTime() - 24 * 60 * 60 * 1000); */ // Expiration date set to yesterday
-const codeExpiration = moment().add(15, "minutes");
+
 const { cloudinary } = require("../utils/config");
 const isEmpty = (value) => {
   if (value === "" || value === null || value === undefined) {
@@ -227,16 +224,19 @@ const calculateArchivedDate = (date) => {
 }; */
 
 const updateVerificationCode = async (id) => {
+  const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
   let generatedCode = await generateCode();
-
   const user = await User.findByIdAndUpdate(
     id,
     {
       verificationCode: generatedCode,
-      codeExpiration: codeExpiration,
+      codeExpiration,
     },
     { new: true }
   );
+
+  console.log("user,", user);
+
   return user;
 };
 

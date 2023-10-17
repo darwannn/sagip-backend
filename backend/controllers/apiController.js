@@ -32,11 +32,6 @@ const pusher = new Pusher({
 });
  */
 
-const codeExpiration = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-const formattedCodeExpiration = moment(codeExpiration).format(
-  "MMMM DD, YYYY | hh:MM A"
-);
-
 apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
   try {
     /*  await createNotification(
@@ -279,7 +274,7 @@ const sendSMS = async (phone, target, content, expiration) => {
     token: process.env.SMS_API,
     sendto: phone,
     body: message,
-    sim: "0",
+    sim: "1",
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   };
