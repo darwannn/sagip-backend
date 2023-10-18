@@ -872,13 +872,14 @@ assistanceRequestController.put(
               } is on their way to assist you.`,
               "success"
             );
-            req.io.emit(`resolved-${assistanceRequest.userId._id}`);
+
             return res.status(200).json({
               success: true,
               message: "Responding to Assistance Request ",
               // assistanceRequest,
             });
           } else if (action === "resolve") {
+            req.io.emit(`resolved-${assistanceRequest.userId._id}`);
             createNotification(
               req,
               [assistanceRequest.userId._id],
