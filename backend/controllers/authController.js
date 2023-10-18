@@ -1599,6 +1599,7 @@ authController.put(
                 ""
               );
 
+              req.io.emit(user._id);
               req.io.emit("verification-request");
               createNotification(
                 [user._id],
