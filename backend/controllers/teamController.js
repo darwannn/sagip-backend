@@ -439,7 +439,7 @@ teamController.put(
         }
         /* await createPusher("team", "reload", {}); */
         /* req.io.emit("reload", { receiver: "team" }); */
-        /* req.io.emit("team"); */
+        req.io.emit("team");
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
