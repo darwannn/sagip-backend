@@ -365,6 +365,7 @@ emergencyFacilityController.delete(
             message: "Deleted Successfully",
           });
         } else {
+          req.io.emit("emergency-facility");
           return res.status(500).json({
             success: false,
             message: "Internal Server Error",

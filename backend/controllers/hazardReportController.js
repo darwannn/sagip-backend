@@ -697,6 +697,8 @@ hazardReportController.put(
                 message: "Archived Successfully",
               });
             } else if (action === "unarchive") {
+              req.io.emit("hazard-report");
+              req.io.emit(`${hazardReport.userId}`);
               dismissedRequestCount("unarchive", hazardReport.userId, req);
               return res.status(200).json({
                 success: true,

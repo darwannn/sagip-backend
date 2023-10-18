@@ -872,7 +872,7 @@ assistanceRequestController.put(
               } is on their way to assist you.`,
               "success"
             );
-
+            req.io.emit(`resolved-${assistanceRequest.userId._id}`);
             return res.status(200).json({
               success: true,
               message: "Responding to Assistance Request ",
@@ -1268,7 +1268,7 @@ assistanceRequestController.put(
                   $dec: { dismissedRequestCount: 1 },
                 }
               ); */
-
+              req.io.emit(`${assistanceRequest.userId}`);
               dismissedRequestCount("unarchive", assistanceRequest.userId, req);
               return res.status(200).json({
                 success: true,

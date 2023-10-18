@@ -207,6 +207,7 @@ accountController.post(
       }); */
 
         if (user) {
+          req.io.emit("user");
           return res.status(200).json({
             success: true,
             message: "Created Successfully",
@@ -282,7 +283,7 @@ accountController.delete(
             `Your account has been deleted.`,
             "info"
           ); */
-
+        req.io.emit("user");
         /*  await createPusher("user", "reload", {}); */
         return res.status(200).json({
           success: true,
@@ -715,7 +716,7 @@ accountController.put(
 
         if (user) {
           /* await createPusher(`${req.params.id}`, "reload", {}); */
-
+          req.io.emit("user");
           req.io.emit(`${req.params.id}`);
           /* await createPusher("user", "reload", {});  */
 
@@ -824,6 +825,7 @@ accountController.put(
         if (user) {
           /* await createPusher(`${req.user.id}`, "reload", {}); */
           req.io.emit(`${req.user.id}`);
+          req.io.emit("user");
           /* await createPusher("user", "reload", {});  */
           return res.status(200).json({
             success: true,

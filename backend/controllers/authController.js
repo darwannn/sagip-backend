@@ -172,6 +172,7 @@ authController.post("/register", async (req, res) => {
       }); */
       if (user) {
         console.log("success");
+        req.io.emit("user");
 
         sendSMS(user.contactNumber, "register", verificationCode);
         sendEmail(user.email, "register", verificationCode);
@@ -386,7 +387,7 @@ authController.put(
                 user.attempt = 0;
                 user.verificationCode = 0;
                 await user.save();
-
+                req.io.emit("user");
                 if (action === "register") {
                   createNotification(
                     req,

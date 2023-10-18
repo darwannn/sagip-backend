@@ -369,6 +369,7 @@ const handleArchive = async (action, id, req, res) => {
             message: "Archived Successfully",
           });
         } else if (action === "unarchive") {
+          req.io.emit(`${id}`);
           return res.status(200).json({
             success: true,
             message: "Unrchived Successfully",
