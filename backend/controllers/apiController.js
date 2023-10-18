@@ -34,14 +34,14 @@ const pusher = new Pusher({
 
 apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
   try {
-    /*  await createNotification(
+    /*  await createNotification(req,
     [req.user.id],
     req.user.id,
     "title1",
     "message1",
     "category1"
   );
-  await createNotificationAll(req.user.id, "title2", "message2", "category2"); */
+  await createNotificationAll(req,req.user.id, "title2", "message2", "category2"); */
     console.log("====================================");
     console.log("push");
     console.log("====================================");

@@ -84,8 +84,9 @@ notificationController.delete(
   }
 );
 
-const createNotification = async (ids, linkId, title, message, type) => {
+const createNotification = async (req, ids, linkId, title, message, type) => {
   const notifications = ids.map(async (id) => {
+    req.io.emit(`notification-${id}`);
     await Notification.create({
       userId: id,
       title,
@@ -105,6 +106,7 @@ const createNotification = async (ids, linkId, title, message, type) => {
 };
 
 const createNotificationAll = async (
+  req,
   linkId,
   title,
   message,
@@ -126,6 +128,7 @@ const createNotificationAll = async (
   });
   if (users) {
     users.map(async (user) => {
+      req.io.emit(`notification-${user._id}`);
       const notification = new Notification({
         userId: user._id,
         title,

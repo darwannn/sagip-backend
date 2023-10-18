@@ -83,6 +83,7 @@ safetyTipController.post(
             req.io.emit("safety-tips");
             if (status === "published") {
               createNotificationAll(
+                req,
                 safetyTip._id,
                 "Safety Tip",
                 `Read the recently added safety tip: ${title}.`,

@@ -239,7 +239,7 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       /* console.log(fcmTokens); */
 
       /* createPushNotificationTopic(alertTitle, alertMessage, "sagip", ""); */
-      createNotificationAll("", alertTitle, alertMessage, "warning", true);
+      createNotificationAll(req, "", alertTitle, alertMessage, "warning", true);
     } else {
       const users = await getInfoByBarangay(
         "City Of Malolos (Capital)",
@@ -273,7 +273,14 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       /* createPushNotificationToken(alertTitle, alertMessage, fcmTokens, ""); */
 
       if (Array.isArray(userIds) && userIds.length > 0) {
-        createNotification([userIds], "", alertTitle, alertMessage, "warning");
+        createNotification(
+          req,
+          [userIds],
+          "",
+          alertTitle,
+          alertMessage,
+          "warning"
+        );
       }
     }
 
@@ -438,7 +445,7 @@ alertController.get("/signal", async (req, res) => {
 alertController.get("/weather", async (req, res) => {
   /*   req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` }); */
   /*  const codeExpiration = moment().add(15, 'minutes'); */
-  /*  createNotificationAll(
+  /*  createNotificationAll(req,
     "home",
     "Safety Tip",
     `Read the recently added safety tip: test.`,

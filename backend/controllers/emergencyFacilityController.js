@@ -80,6 +80,7 @@ emergencyFacilityController.post(
           if (emergencyFacility) {
             if (status === "operational") {
               createNotificationAll(
+                req,
                 emergencyFacility._id,
                 `Emergency Facility`,
                 `Checkout the recently added ${category}: ${name}.`,

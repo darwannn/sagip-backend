@@ -302,6 +302,7 @@ teamController.delete(
           console.log("inside");
           console.log("====================================");
           await createNotification(
+            req,
             teamMembers,
             team._id,
             `Team Deleted`,
@@ -413,6 +414,7 @@ teamController.put(
         //may team gagawing unassigned
         if (newTeamId === "unassigned") {
           await createNotification(
+            req,
             [userId],
             userId,
             `Team Assignment`,
@@ -422,6 +424,7 @@ teamController.put(
         } else if (prevTeamId === "") {
           // walang prev team
           await createNotification(
+            req,
             [userId],
             userId,
             `Team Assignment`,
@@ -430,6 +433,7 @@ teamController.put(
           );
         } else {
           await createNotification(
+            req,
             [userId],
             userId,
             `Team Assignment`,
@@ -503,6 +507,7 @@ teamController.put(
         //may team gagawing unassigned
         if (newTeamId === "unassigned") {
           await createNotification(
+            req,
             [userId],
             userId,
             `Team Assignment`,
@@ -512,6 +517,7 @@ teamController.put(
         } else if (prevTeamId === "") {
           // walang prev team
           await createNotification(
+            req,
             [userId],
             userId,
             `Team Assignment`,
@@ -520,6 +526,7 @@ teamController.put(
           );
         } else {
           await createNotification(
+            req,
             [userId],
             userId,
             `Team Assignment`,
@@ -598,6 +605,7 @@ teamController.put(
           req.io.emit("team");
           if (!isEmpty(head))
             await createNotification(
+              req,
               [head],
               team._id,
               `Team Assignment`,
@@ -606,6 +614,7 @@ teamController.put(
             );
           if (!members.length === 0)
             await createNotification(
+              req,
               members,
               team._id,
               `Team Assignment `,
@@ -658,6 +667,7 @@ teamController.put(
         req.io.emit("team");
 
         await createNotification(
+          req,
           [team.head, ...team.members],
           team._id,
           `Team Assignment`,
@@ -743,6 +753,7 @@ teamController.put(
                   console.log("inside");
                   console.log("====================================");
                   await createNotification(
+                    req,
                     teamMembers,
                     team._id,
                     `Team Deleted`,

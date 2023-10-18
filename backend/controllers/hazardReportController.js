@@ -109,6 +109,7 @@ hazardReportController.post(
             req.io.emit("hazard-report");
             const userIds = await getUsersId("dispatcher");
             createNotification(
+              req,
               userIds,
               req.user.id,
               "New Hazport Report",
@@ -417,7 +418,7 @@ hazardReportController.put(
           /*    await createPusher("assistance-request-web", "reload", {}); */
           req.io.emit("hazard-report");
           const userIds = await getUsersId("dispatcher");
-          /* createNotification(
+          /* createNotification(req,
             userIds,
             req.user.id,
             "Hazard report Updated",
@@ -499,6 +500,7 @@ hazardReportController.put(
 
           if (action === "verify") {
             createNotification(
+              req,
               [hazardReport.userId._id],
               hazardReport._id,
               "Hazard Report Verified",
@@ -515,6 +517,7 @@ hazardReportController.put(
             });
           } else if (action === "resolve") {
             createNotification(
+              req,
               [hazardReport.userId._id],
               hazardReport.userId._id,
               "Hazard Report Resolved",
@@ -593,7 +596,7 @@ hazardReportController.delete(
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
           /* dismissedRequestCount("archive", hazardReport.userId, req); */
-          /* createNotification(
+          /* createNotification(req,
             [hazardReport.userId._id],
             hazardReport.userId._id,
             "Hazard Report Closed",
@@ -676,6 +679,7 @@ hazardReportController.put(
               req.io.emit("hazard-report");
               req.io.emit(`${hazardReport.userId}`);
               createNotification(
+                req,
                 [hazardReport.userId._id],
                 hazardReport.userId._id,
                 "Hazard Report Closed",

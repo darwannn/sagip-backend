@@ -159,6 +159,7 @@ assistanceRequestController.post(
               req.io.emit("unverified-assistance-request");
               const userIds = await getUsersId("dispatcher");
               createNotification(
+                req,
                 userIds,
                 req.user.id,
                 "New assistance request",
@@ -692,7 +693,7 @@ assistanceRequestController.put(
           /*  await createPusher("assistance-request-web", "reload", {}); */
           req.io.emit("assistance-request");
           const userIds = await getUsersId("dispatcher");
-          /* createNotification(
+          /* createNotification(req,
             userIds,
             req.user.id,
             "Assistance Request Updated",
@@ -824,6 +825,7 @@ assistanceRequestController.put(
             );
  */
             createNotification(
+              req,
               teamMembers,
               assistanceRequest.userId._id,
               "Assistance Required",
@@ -857,6 +859,7 @@ assistanceRequestController.put(
             );
 
             createNotification(
+              req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
               "Assistance Request Verified",
@@ -877,6 +880,7 @@ assistanceRequestController.put(
             });
           } else if (action === "resolve") {
             createNotification(
+              req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
               "Assistance Request Resolved",
@@ -1082,7 +1086,7 @@ assistanceRequestController.delete(
           folderPath,
           assistanceRequestImage.proof
         );
-        // await createNotification([userId], null, reason, note, "error");
+        // await createNotification(req,[userId], null, reason, note, "error");
         if (cloud !== "error") {
           const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
             req.params.id
@@ -1120,7 +1124,7 @@ assistanceRequestController.delete(
             // await createPusher("assistance-request-mobile", "reload", {});
             req.io.emit("assistance-request");
             req.io.emit(`${assistanceRequest.userId}`);
-            createNotification(
+            createNotification(req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
               "Assistance Request Closed",
@@ -1240,6 +1244,7 @@ assistanceRequestController.put(
                 ""
               );
               createNotification(
+                req,
                 [assistanceRequest.userId._id],
                 assistanceRequest.userId._id,
                 "Assistance Request Closed",

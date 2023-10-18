@@ -389,6 +389,7 @@ authController.put(
 
                 if (action === "register") {
                   createNotification(
+                    req,
                     [req.user.id],
                     req.user.id,
                     "Welcome to SAGIP",
@@ -474,7 +475,7 @@ authController.put(
                     }
                   );
                   if (userContactNumber) {
-                    /* createNotification(
+                    /* createNotification(req,
                       [req.user.id],
                       req.user.id,
                       "Contact Number Updated",
@@ -521,7 +522,7 @@ authController.put(
                     }
                   );
                   if (userEmail) {
-                    /* createNotification(
+                    /* createNotification(req,
                       [req.user.id],
                       req.user.id,
                       "Email Updated",
@@ -1122,7 +1123,7 @@ authController.put(
                 "Password has been changed successfully. You can now login with your new password",
             });
           } else {
-            /* createNotification(
+            /* createNotification(req,
               [req.user.id],
               req.user.id,
               "Password has been changed",
@@ -1341,6 +1342,7 @@ authController.put(
           /* await createPusher("verification-request-web", "reload", {}); */
           req.io.emit("verification-request");
           createNotification(
+            req,
             userIds,
             req.user.id,
             "New Verification Request",
@@ -1583,7 +1585,7 @@ authController.put(
               );
             
               req.io.emit("verification-request");
-              createNotification(
+              createNotification(req,
                 [user._id],
                 user._id,
                 "Verification Request Rejected",
@@ -1602,6 +1604,7 @@ authController.put(
               req.io.emit(user._id);
               req.io.emit("verification-request");
               createNotification(
+                req,
                 [user._id],
                 user._id,
                 "Verification Request Rejected",
@@ -1626,6 +1629,7 @@ authController.put(
               /* await createPusher("verification-request-mobile", "reload", {}); */
               req.io.emit("verification-request");
               createNotification(
+                req,
                 [user._id],
                 user._id,
                 "Verification Request Approved",
@@ -1710,7 +1714,7 @@ authController.put(
         if (req.body.action === "reject") {
           //sendSMS(`Verification Request Rejected`, user.contactNumber,"");
 
-          await createNotification(
+          await createNotification(req,
             req.params.id,
             "title",
             "message",
@@ -1722,7 +1726,7 @@ authController.put(
             message: "Verification Request Rejected",
           });
         } else {
-          await createNotification(
+          await createNotification(req,
             req.params.id,
             "title",
             "message",

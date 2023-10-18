@@ -275,7 +275,7 @@ accountController.delete(
         /*  await createPusher(`${user._id}`, "reload", {}); */
 
         req.io.emit(`${user._id}`);
-        /*  createNotification(
+        /*  createNotification(req,
             req.params.id,
             req.params.id,
             "Account Deleted",
@@ -1046,6 +1046,7 @@ accountController.put(
             });
           } else {
             createNotification(
+              req,
               [req.user.id],
               req.user.id,
               "Password Changed!",
