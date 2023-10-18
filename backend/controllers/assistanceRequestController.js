@@ -156,7 +156,7 @@ assistanceRequestController.post(
             if (assistanceRequest) {
               /* await createPusher("assistance-request-web", "reload", {}); */
               req.io.emit("assistance-request");
-              req.io.emit("new-assistance-request");
+              req.io.emit("unverified-assistance-request");
               const userIds = await getUsersId("dispatcher");
               createNotification(
                 userIds,
@@ -836,7 +836,7 @@ assistanceRequestController.put(
               }`,
               "success"
             );
-
+            req.io.emit(team._id);
             return res.status(200).json({
               success: true,
               message: "Assistance Request Verified",
