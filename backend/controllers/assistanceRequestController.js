@@ -156,6 +156,7 @@ assistanceRequestController.post(
             if (assistanceRequest) {
               /* await createPusher("assistance-request-web", "reload", {}); */
               req.io.emit("assistance-request");
+              req.io.emit("new-assistance-request");
               const userIds = await getUsersId("dispatcher");
               createNotification(
                 userIds,

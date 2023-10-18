@@ -37,6 +37,7 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+const moment = require("moment");
 accountController.get("/", async (req, res) => {
   try {
     const user = await User.find({});
@@ -76,7 +77,7 @@ accountController.post(
   ]), */
   async (req, res) => {
     try {
-      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+      const codeExpiration = moment().add(15, "minutes");
       const error = {};
       let {
         firstname,
@@ -321,7 +322,7 @@ accountController.put(
   ]), */
   async (req, res) => {
     try {
-      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+      /* const codeExpiration = moment().add(15, 'minutes'); */
       const error = {};
       console.log("====================================");
       let action = req.params.action.toLowerCase();
@@ -377,12 +378,7 @@ accountController.put(
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
             console.log("send sms");
-            sendSMS(
-              contactNumber,
-              "sms-verification",
-              user.verificationCode,
-              codeExpiration
-            );
+            sendSMS(contactNumber, "sms-verification", user.verificationCode);
           }
           console.log("====================================");
           console.log(user._doc.email);
@@ -390,12 +386,7 @@ accountController.put(
           console.log("====================================");
           if (action === "email" || action === "verify-email") {
             console.log("send email");
-            sendEmail(
-              email,
-              "email-verification",
-              user.verificationCode,
-              codeExpiration
-            );
+            sendEmail(email, "email-verification", user.verificationCode);
           }
           if (user) {
             //console.log("Current COde: " + generatedCode);

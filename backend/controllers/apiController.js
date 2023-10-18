@@ -247,7 +247,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   return true;
 };
 
-const sendSMS = async (phone, target, content, expiration) => {
+const sendSMS = async (phone, target, content) => {
   let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (
@@ -345,7 +345,7 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
   }
 }; */
 
-async function sendEmail(to, target, code, expiration) {
+async function sendEmail(to, target, code) {
   let subject = "";
   let content = "";
   if (target === "change-email") {

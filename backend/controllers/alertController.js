@@ -437,7 +437,7 @@ alertController.get("/signal", async (req, res) => {
 
 alertController.get("/weather", async (req, res) => {
   /*   req.io.emit("banned", { receiver: `64c0ece7ea4101cc029b459c` }); */
-  const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+  /*  const codeExpiration = moment().add(15, 'minutes'); */
   /*  createNotificationAll(
     "home",
     "Safety Tip",

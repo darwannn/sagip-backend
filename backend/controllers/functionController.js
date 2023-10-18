@@ -224,7 +224,7 @@ const calculateArchivedDate = (date) => {
 }; */
 
 const updateVerificationCode = async (id) => {
-  const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+  const codeExpiration = moment().add(15, "minutes");
   let generatedCode = await generateCode();
   const user = await User.findByIdAndUpdate(
     id,

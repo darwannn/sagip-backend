@@ -133,7 +133,7 @@ authController.post("/register", async (req, res) => {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+      const codeExpiration = moment().add(15, "minutes");
       const user = await User.create({
         email,
         password: hashedPassword,
@@ -173,13 +173,8 @@ authController.post("/register", async (req, res) => {
       if (user) {
         console.log("success");
 
-        sendSMS(
-          user.contactNumber,
-          "register",
-          verificationCode,
-          codeExpiration
-        );
-        sendEmail(user.email, "register", verificationCode, codeExpiration);
+        sendSMS(user.contactNumber, "register", verificationCode);
+        sendEmail(user.email, "register", verificationCode);
 
         /*  if (verificationCode !== 0) { */
         return res.status(200).json({
@@ -339,14 +334,15 @@ authController.put(
         action === "forgot-password" ||
         action === "login" ||
         action === "contact" ||
-        action === "email"
+        action === "email" ||
+        action === "attempt"
       ) {
         if (isEmpty(code)) {
           error["verificationCode"] = "Required field";
         } else if (isNumber(code)) {
           error["verificationCode"] = "Invalid code";
         }
-        const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+
         if (Object.keys(error).length == 0) {
           const user = await User.findById(userId);
           if (user) {
@@ -362,18 +358,8 @@ authController.put(
             if (!codeExpirationMoment.isAfter(currentMoment)) {
               const user = await updateVerificationCode(req.user.id);
               /*  if (user) { */
-              sendSMS(
-                user.contactNumber,
-                "register",
-                user.verificationCode,
-                codeExpiration
-              );
-              sendEmail(
-                user.email,
-                "register",
-                user.verificationCode,
-                codeExpiration
-              );
+              sendSMS(user.contactNumber, "register", user.verificationCode);
+              sendEmail(user.email, "register", user.verificationCode);
 
               return res.status(400).json({
                 success: false,
@@ -450,7 +436,7 @@ authController.put(
                       ""
                     ),
                   });
-                if (action === "login")
+                if (action === "login" || action === "attempt")
                   return res.status(200).json({
                     success: true,
                     message:
@@ -800,7 +786,7 @@ authController.post("/login", async (req, res) => {
       }
     }
     if (isEmpty(password)) error["password"] = "Required field";
-    const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+
     if (Object.keys(error).length == 0) {
       if (user.attempt >= 5) {
         let generatedCode = await generateCode();
@@ -817,14 +803,9 @@ authController.post("/login", async (req, res) => {
 
         if (user) {
           if (identifierType === "email") {
-            sendEmail(user.email, "attempt", generatedCode, codeExpiration);
+            sendEmail(user.email, "attempt", generatedCode);
           } else if (identifierType === "contactNumber") {
-            sendSMS(
-              user.contactNumber,
-              "attempt",
-              generatedCode,
-              codeExpiration
-            );
+            sendSMS(user.contactNumber, "attempt", generatedCode);
           }
         }
         return res.status(200).json({
@@ -911,8 +892,7 @@ authController.post("/login", async (req, res) => {
               sendSMS(
                 userVerificationCode.contactNumber,
                 "register",
-                userVerificationCode.verificationCode,
-                codeExpiration
+                userVerificationCode.verificationCode
               );
 
               if (userVerificationCode) {
@@ -979,7 +959,7 @@ authController.post("/forgot-password", async (req, res) => {
     }
 
     console.log(accountExists);
-    const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+
     if (Object.keys(error).length == 0) {
       let identifierType = await checkIdentifierType(identifier);
       // let generatedCode = await generateCode();
@@ -992,19 +972,9 @@ authController.post("/forgot-password", async (req, res) => {
       const user = await updateVerificationCode(accountExists.id);
       if (user) {
         if (identifierType === "email") {
-          sendEmail(
-            user.email,
-            "forgot-password",
-            user.verificationCode,
-            codeExpiration
-          );
+          sendEmail(user.email, "forgot-password", user.verificationCode);
         } else if (identifierType === "contactNumber") {
-          sendSMS(
-            user.contactNumber,
-            "forgot-password",
-            user.verificationCode,
-            codeExpiration
-          );
+          sendSMS(user.contactNumber, "forgot-password", user.verificationCode);
         }
         if (user.isBanned) {
           return res.status(500).json({
@@ -1226,7 +1196,7 @@ authController.put(
       console.log(identifier);
       console.log("====================================");
       const user = await updateVerificationCode(req.user.id);
-      const codeExpiration = new Date(new Date().getTime() + 15 * 60000);
+
       if (user) {
         console.log("Current COde: " + user.verificationCode);
         let identifierType = await checkIdentifierType(identifier);
@@ -1237,7 +1207,7 @@ authController.put(
           sendEmail(identifier, action, user.verificationCode);
         } else if (identifierType === "contactNumber") {
           console.log("send sms");
-          sendSMS(identifier, action, user.verificationCode, codeExpiration);
+          sendSMS(identifier, action, user.verificationCode);
           /*  return res.status(200).json({
             success: true,
             message: `Verification code has been resent to ${identifier}`,
