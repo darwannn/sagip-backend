@@ -348,7 +348,7 @@ const getAllFcmTokensInBarangays = async (municipality, location) => {
 async function sendEmail(to, target, code) {
   let subject = "";
   let content = "";
-  if (target === "change-email") {
+  if (target === "email-verification") {
     subject = "Change or verify your email address";
     content = `To change or verify your email address, please use the following code:`;
   } else if (target === "forgot-password") {

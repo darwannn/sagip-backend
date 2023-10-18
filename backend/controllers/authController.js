@@ -1538,8 +1538,8 @@ authController.put(
             { new: true }
           );
 
+          const { reason, note } = req.body;
           if (action === "reject") {
-            const { reason, note } = req.body;
             /* if (isEmpty(reason)) error["reason"] = "Required field"; */
             const cloud = await cloudinaryUploader(
               "destroy",
