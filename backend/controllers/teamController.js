@@ -112,7 +112,7 @@ teamController.get("/myteam", tokenMiddleware, async (req, res) => {
         position: team.head._id === userId ? "head" : "member",
       });
     } else {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "not found",
       });

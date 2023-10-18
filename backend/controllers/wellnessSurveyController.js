@@ -572,7 +572,6 @@ wellnessSurveyController.put(
         /*  await createPusher("wellness-survey", "reload", {}); */
         /* req.io.emit("reload", { receiver: "wellness-survey" }); */
         req.io.emit("wellness-survey");
-
         return res.json({
           success: true,
           message: "Answered Submitted Successfully",
