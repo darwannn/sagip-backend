@@ -221,6 +221,7 @@ safetyTipController.get(
       console.log("im here");
       const safetyTip = await SafetyTip.find({
         saves: req.user.id,
+        status: "published",
       });
       if (safetyTip) {
         return res.status(200).json(safetyTip);
