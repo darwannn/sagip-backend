@@ -119,12 +119,12 @@ const AssistanceRequestSchema = new mongoose.Schema(
       medicalHistory: [
         {
           type: String,
-          default: "",
+          /* default: "", */
         },
       ],
       medicalCondition: {
         type: String,
-        default: "",
+        /*   default: "", */
       },
 
       allergies: [
@@ -145,31 +145,31 @@ const AssistanceRequestSchema = new mongoose.Schema(
       signs: {
         loc: {
           type: String,
-          default: "",
+          /* default: "", */
         },
         speech: {
           type: String,
-          default: "",
+          /*  default: "", */
         },
         skin: {
           type: String,
-          default: "",
+          /*   default: "", */
         },
         color: {
           type: String,
-          default: "",
+          /* default: "", */
         },
         respiration: {
           type: String,
-          default: "",
+          /* default: "", */
         },
         pulse: {
           type: String,
-          default: "",
+          /* default: "", */
         },
         pupils: {
           type: String,
-          default: "",
+          /* default: "", */
         },
       },
 
@@ -207,12 +207,12 @@ const AssistanceRequestSchema = new mongoose.Schema(
       ],
       injury: {
         type: String,
-        default: "",
+        /*   default: "", */
       },
 
       management: {
         type: String,
-        default: "",
+        /* default: "", */
       },
     },
   },

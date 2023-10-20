@@ -944,7 +944,7 @@ assistanceRequestController.put(
           error["assignedTeam"] = "Please select a team to respond";
       }
       // console.log(assignedTeam);
-
+      let respondersContant = [];
       if (Object.keys(error).length === 0) {
         if (action === "verify") {
           console.log("verify");
@@ -963,7 +963,10 @@ assistanceRequestController.put(
             (member) =>
               `${member.lastname}, ${member.firstname} ${member.middlename}`
           );
-
+          respondersContant = [
+            teamHead.contactNumber,
+            ...teamMembers.map((member) => member.contactNumber),
+          ];
           const respondersName = [headName, ...memberNames];
           console.log(respondersName);
           updateFields = {
@@ -1039,19 +1042,20 @@ assistanceRequestController.put(
             console.log("========teamMembers============================");
             console.log(teamMembers);
             console.log("====================================");
-            /* sendBulkSMS(
-              teamMembers,
-              "notification",
-              `Your team has been assigned to respond on ${
+
+            const smsRes = await sendBulkSMS(
+              `Your team has been assigned to respond to ${
                 assistanceRequest.category
               }${
                 assistanceRequest.street !== ""
                   ? ` on ${assistanceRequest.street}`
                   : ""
               }`,
-              ""
+              "notification",
+              respondersContant
             );
- */
+            console.log(smsRes);
+
             createNotification(
               req,
               teamMembers,
@@ -1108,6 +1112,18 @@ assistanceRequestController.put(
             });
           } else if (action === "resolve") {
             req.io.emit(`resolved-${assistanceRequest.userId._id}`);
+
+            sendSMS(
+              assistanceRequest.userId.contactNumber,
+              "notification",
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been resolved. If you need any further assistance, feel free to reach out.`,
+              ""
+            );
+
             createNotification(
               req,
               [assistanceRequest.userId._id],
@@ -1127,12 +1143,19 @@ assistanceRequestController.put(
               // assistanceRequest,
             });
           } else if (action === "arrive") {
+            sendSMS(
+              assistanceRequest.userId.contactNumber,
+              "notification",
+              `Do not worry,the responders are now on the scene and are ready to assist you.`,
+              ""
+            );
+
             createNotification(
               req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
               "Responders Arrived",
-              `Do not worry as the responders are now on the scene.`,
+              `Do not worry, the responders are now on the scene and are ready to assist you.`,
               "success"
             );
 
