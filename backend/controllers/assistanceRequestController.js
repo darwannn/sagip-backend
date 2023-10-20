@@ -54,7 +54,7 @@ assistanceRequestController.post(
       if (action === "add" || action === "auto-add") {
         /*  console.log(proof); */
         if (action === "add") {
-          if (isEmpty(answers)) error["answers"] = "Required field";
+          /*  if (isEmpty(answers)) error["answers"] = "Required field"; */
           if (isEmpty(category)) error["category"] = "Required field";
           if (isEmpty(description)) error["description"] = "Required field";
           if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -558,6 +558,199 @@ assistanceRequestController.get("/:id", async (req, res) => {
 });
 
 assistanceRequestController.put(
+  "/pre-assessment/:id",
+  tokenMiddleware,
+  //   userTypeMiddleware([
+  //   "resident",
+  //   "responder",
+  //   "dispatcher",
+  //   "admin",
+  //   "super-admin",
+  // ]),
+  multerMiddleware.single("proof"),
+
+  async (req, res) => {
+    const error = {};
+    try {
+      let {
+        isSelfReported,
+
+        fullName,
+        birthdate,
+        gender,
+        address,
+        contactNumber,
+
+        hospitalName,
+        medicalHistory,
+        medicalCondition,
+
+        /* array */
+        allergies,
+        medications,
+
+        loc,
+        speech,
+        skin,
+        color,
+        respiration,
+        pulse,
+        pupils,
+
+        /* array */
+        bloodPressure,
+        pulseRate,
+        respiratoryRate,
+        temperature,
+        oxygenSaturation,
+        glucoseLevel,
+
+        injury,
+        management,
+      } = req.body;
+      if (isEmpty(hospitalName)) error["hospitalName"] = "Required field";
+      if (isEmpty(medicalCondition))
+        error["medicalCondition"] = "Required field";
+
+      if (isEmpty(loc)) error["loc"] = "Required field";
+      if (isEmpty(speech)) error["speech"] = "Required field";
+      if (isEmpty(skin)) error["skin"] = "Required field";
+      if (isEmpty(color)) error["color"] = "Required field";
+      if (isEmpty(respiration)) error["respiration"] = "Required field";
+      if (isEmpty(pulse)) error["pulse"] = "Required field";
+      if (isEmpty(pupils)) error["pupils"] = "Required field";
+
+      if (medicalHistory && medicalHistory.length === 0)
+        error["medicalHistory"] = "Required field";
+      if (allergies && allergies.length === 0)
+        error["allergies"] = "Required field";
+      if (medications.length === 0) error["medications"] = "Required field";
+
+      if (bloodPressure && bloodPressure.length === 0)
+        error["bloodPressure"] = "Required field";
+      if (pulseRate && pulseRate.length === 0)
+        error["pulseRate"] = "Required field";
+      if (respiratoryRate && respiratoryRate.length === 0)
+        error["respiratoryRate"] = "Required field";
+      if (temperature && temperature.length === 0)
+        error["temperature"] = "Required field";
+      if (oxygenSaturation && oxygenSaturation.length === 0)
+        error["oxygenSaturation"] = "Required field";
+      if (glucoseLevel && glucoseLevel.length === 0)
+        error["glucoseLevel"] = "Required field";
+
+      if (isEmpty(injury)) error["injury"] = "Required field";
+      if (isEmpty(management)) error["management"] = "Required field";
+
+      if (isSelfReported === false || isSelfReported === "false") {
+        if (isEmpty(fullName)) error["fullName"] = "Required field";
+        if (isEmpty(birthdate)) error["birthdate"] = "Required field";
+        if (isEmpty(gender)) error["gender"] = "Required field";
+        if (isEmpty(address)) error["address"] = "Required field";
+        if (isEmpty(contactNumber)) error["contactNumber"] = "Required field";
+      }
+
+      /* else {
+        const assistanceRequest = await AssistanceRequest.findOne({
+          _id: req.params.id,
+        });
+        fullName = `${assistanceRequest.userId.lastname}, ${assistanceRequest.userId.firstname} ${assistanceRequest.userId.middlename}`;
+        birthdate = assistanceRequest.userId.birthdate;
+        gender = assistanceRequest.userId.gender;
+        address = `${assistanceRequest.userId.street}, ${assistanceRequest.userId.barangay}, ${assistanceRequest.userId.municipality}, ${assistanceRequest.userId.province}`;
+        contactNumber = assistanceRequest.userId.contactNumber;
+      } */
+
+      console.log("=======isSelfReported==================");
+      console.log(isSelfReported);
+      console.log("====================================");
+
+      if (Object.keys(error).length === 0) {
+        const vitalSignsArray = [];
+
+        for (let i = 0; i < bloodPressure.length; i++) {
+          const newVitalSign = {
+            bloodPressure: bloodPressure[i],
+            pulseRate: pulseRate[i],
+            respiratoryRate: respiratoryRate[i],
+            temperature: temperature[i],
+            oxygenSaturation: oxygenSaturation[i],
+            glucoseLevel: glucoseLevel[i],
+            dateRecorded: Date.now(),
+          };
+          vitalSignsArray.push(newVitalSign);
+        }
+
+        let preAssessmentData = {
+          hospitalName,
+          medicalHistory,
+          medicalCondition,
+          allergies,
+          medications,
+          signs: { loc, speech, skin, color, respiration, pulse, pupils },
+          vitalSigns: vitalSignsArray,
+          injury,
+          management,
+        };
+
+        let updateFields = {
+          isSelfReported,
+          preAssessment: preAssessmentData, // Assign the preAssessmentData object
+        };
+
+        if (isSelfReported === false || isSelfReported === "false") {
+          preAssessmentData = {
+            ...preAssessmentData,
+            fullName,
+            birthdate,
+            gender,
+            address,
+            contactNumber,
+          };
+
+          updateFields = {
+            ...updateFields,
+            preAssessment: preAssessmentData, // Assign the preAssessmentData object
+          };
+        }
+
+        const assistanceRequest = await AssistanceRequest.findByIdAndUpdate(
+          req.params.id,
+          updateFields,
+          { new: true }
+        );
+
+        if (assistanceRequest) {
+          req.io.emit("assistance-request");
+
+          return res.status(200).json({
+            success: true,
+            message: "Updated Successfully",
+            assistanceRequest,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+          });
+        }
+      }
+
+      if (Object.keys(error).length !== 0) {
+        error["success"] = false;
+        error["message"] = "input error";
+        return res.status(400).json(error);
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
+assistanceRequestController.put(
   "/update/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
@@ -585,7 +778,7 @@ assistanceRequestController.put(
         answers,
       } = req.body;
       let status = "";
-      if (isEmpty(answers)) error["answers"] = "Required field";
+      /*   if (isEmpty(answers)) error["answers"] = "Required field"; */
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
@@ -751,9 +944,37 @@ assistanceRequestController.put(
           error["assignedTeam"] = "Please select a team to respond";
       }
       // console.log(assignedTeam);
+
       if (Object.keys(error).length === 0) {
         if (action === "verify") {
-          updateFields = { status: "ongoing", assignedTeam };
+          console.log("verify");
+          const user = await User.findById(req.user.id);
+          const team = await Team.findById(assignedTeam)
+            .populate("head", "-password")
+            .populate("members", "-password");
+          console.log(team);
+
+          const teamHead = team.head;
+          const teamMembers = team.members;
+          console.log(teamHead);
+
+          const headName = `${teamHead.lastname}, ${teamHead.firstname} ${teamHead.middlename}`;
+          const memberNames = teamMembers.map(
+            (member) =>
+              `${member.lastname}, ${member.firstname} ${member.middlename}`
+          );
+
+          const respondersName = [headName, ...memberNames];
+          console.log(respondersName);
+          updateFields = {
+            status: "ongoing",
+            assignedTeam,
+            $set: {
+              dateDispatched: Date.now(),
+              dispatcherName: `${user.lastname}, ${user.firstname} ${user.middlename}`,
+              respondersName: respondersName,
+            },
+          };
         } else if (action === "resolve") {
           updateFields = {
             status: "resolved",
@@ -763,6 +984,13 @@ assistanceRequestController.put(
             },
             $unset: {
               isBeingResponded: 1,
+            },
+          };
+        } else if (action === "arrive") {
+          console.log("arrive");
+          updateFields = {
+            $set: {
+              dateArrived: Date.now(),
             },
           };
         } else if (action === "respond") {
@@ -890,6 +1118,21 @@ assistanceRequestController.put(
                   ? ` on ${assistanceRequest.street}`
                   : ""
               } has been resolved. If you need any further assistance, feel free to reach out.`,
+              "success"
+            );
+
+            return res.status(200).json({
+              success: true,
+              message: "Assistance Request Resolved",
+              // assistanceRequest,
+            });
+          } else if (action === "arrive") {
+            createNotification(
+              req,
+              [assistanceRequest.userId._id],
+              assistanceRequest.userId._id,
+              "Responders Arrived",
+              `Do not worry as the responders are now on the scene.`,
               "success"
             );
 

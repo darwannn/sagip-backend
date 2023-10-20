@@ -63,7 +63,17 @@ const AssistanceRequestSchema = new mongoose.Schema(
       type: String,
       default: "unverified",
     },
+    isSelfReported: {
+      type: Boolean,
+      default: false,
+    },
     dateResolved: {
+      type: Date,
+    },
+    dateDispatched: {
+      type: Date,
+    },
+    dateArrived: {
       type: Date,
     },
     isArchived: {
@@ -75,6 +85,135 @@ const AssistanceRequestSchema = new mongoose.Schema(
     },
     archivedDate: {
       type: Date,
+    },
+    dispatcherName: {
+      type: String,
+    },
+    respondersName: [
+      {
+        type: String,
+      },
+    ],
+    preAssessment: {
+      fullName: {
+        type: String,
+      },
+      birthdate: {
+        type: Date,
+      },
+      gender: {
+        type: String,
+      },
+      address: {
+        type: String,
+      },
+      contactNumber: {
+        type: String,
+      },
+
+      hospitalName: {
+        type: String,
+        /*  default: "", */
+      },
+
+      medicalHistory: [
+        {
+          type: String,
+          default: "",
+        },
+      ],
+      medicalCondition: {
+        type: String,
+        default: "",
+      },
+
+      allergies: [
+        {
+          type: String,
+          /*   default: "", */
+          default: [],
+        },
+      ],
+      medications: [
+        {
+          type: String,
+          /*  default: "", */
+          default: [],
+        },
+      ],
+
+      signs: {
+        loc: {
+          type: String,
+          default: "",
+        },
+        speech: {
+          type: String,
+          default: "",
+        },
+        skin: {
+          type: String,
+          default: "",
+        },
+        color: {
+          type: String,
+          default: "",
+        },
+        respiration: {
+          type: String,
+          default: "",
+        },
+        pulse: {
+          type: String,
+          default: "",
+        },
+        pupils: {
+          type: String,
+          default: "",
+        },
+      },
+
+      vitalSigns: [
+        {
+          bloodPressure: {
+            type: String,
+
+            /* default: "", */
+          },
+          pulseRate: {
+            type: String,
+            /* default: "", */
+          },
+          respiratoryRate: {
+            type: String,
+            /* default: "", */
+          },
+          temperature: {
+            type: String,
+            /*  default: "", */
+          },
+          oxygenSaturation: {
+            type: String,
+            /*   default: "", */
+          },
+          glucoseLevel: {
+            type: String,
+            /*      default: "", */
+          },
+          dateRecorded: {
+            type: Date,
+          },
+        },
+      ],
+      injury: {
+        type: String,
+        default: "",
+      },
+
+      management: {
+        type: String,
+        default: "",
+      },
     },
   },
   { timestamps: true }

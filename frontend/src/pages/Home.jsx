@@ -49,7 +49,99 @@ function Home() {
     } else {
       console.log("Notifications not supported");
     }
+
+    /* preassessment */
     const fetchData = async () => {
+      if (serverResponse !== "") {
+        toast.success(serverResponse);
+
+        dispatch(getServerResponse());
+      }
+      try {
+        const formData = new FormData();
+
+        formData.append("isSelfReported", true);
+
+        formData.append("hospitalName", "Ace Hospital");
+        formData.append("medicalCondition", "Asthma");
+
+        formData.append("loc", "Alert");
+        formData.append("speech", "Coherent");
+        formData.append("skin", "Normal");
+        formData.append("color", "Normal");
+        formData.append("respiration", "Normal");
+        formData.append("pulse", "Normal");
+        formData.append("pupils", "Equal");
+
+        // Example for "medicalHistory" as an array
+
+        var medicalHistory = ["Stroke", "Heart Attack", "Diabetes"];
+        for (var i = 0; i < medicalHistory.length; i++) {
+          formData.append("medicalHistory[]", medicalHistory[i]);
+        }
+
+        // Example for "allergies" and "medications" as arrays
+        formData.append("allergies[]", "None");
+        formData.append("medications[]", "None");
+        // Example for "vitalSigns" as an array of objects
+        var bloodPressure = ["120/60", "150/20"];
+        for (var j = 0; j < bloodPressure.length; j++) {
+          formData.append("bloodPressure[]", bloodPressure[j]);
+        }
+        // formData.append("bloodPressure[]", "");
+        formData.append("pulseRate[]", "");
+        formData.append("temperature[]", "");
+        formData.append("respiratoryRate[]", "");
+        formData.append("oxygenSaturation[]", "");
+        formData.append("glucoseLevel[]", "");
+        /*    formData.append("bloodPressure[]", "120/80");
+        formData.append("pulseRate[]", "90");
+        formData.append("temperature[]", "89");
+        formData.append("oxygenSaturation[]", "56");
+        formData.append("glucoseLevel[]", "34"); */
+
+        formData.append("injury", "Broken neck");
+        formData.append("management", "Applied pressure");
+        formData.append("fullName", "DD");
+        formData.append("birthdate", Date.now());
+        formData.append("gender", "Required field");
+        formData.append("address", "Required field");
+        formData.append("contactNumber", "Required field");
+
+        const options = { Authorization: `Bearer ${token}` };
+
+        /* const weatherResponse1 = await request(
+          "/assistance-request/pre-assessment/64aa696b7cb8e80d87602f1c",
+          "PUT",
+          options,
+          formData
+        );
+        console.log(weatherResponse1); */
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+
+      try {
+        const action = "verify";
+        /*  const action = "respond"; */
+        /*  const action = "resolve"; */
+        /*  const action = "arrive"; */
+        const options = { Authorization: `Bearer ${token}` };
+        const weatherResponse1 = await request(
+          `/assistance-request/update/${action}/652d45b8eafbc0a34ee5ecbb`,
+          "PUT",
+          options,
+          { assignedTeam: "64cb4997aefb86308f2888a8" }
+        );
+        console.log(weatherResponse1);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [serverResponse, dispatch]);
+  /* const fetchData = async () => {
       if (serverResponse !== "") {
         toast.success(serverResponse);
 
@@ -73,7 +165,7 @@ function Home() {
     };
 
     fetchData();
-  }, [serverResponse, dispatch]);
+  }, [serverResponse, dispatch]); */
 
   useEffect(() => {
     const fetchWellnessSurveys = async () => {
