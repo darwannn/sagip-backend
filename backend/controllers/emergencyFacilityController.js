@@ -238,7 +238,7 @@ emergencyFacilityController.put(
         error["contactNumber"] = "Required field";
       } else {
         if (isContactOrTeleNumber(contactNumber))
-          error["contactNumber"] = "Invalid contact number1";
+          error["contactNumber"] = "Invalid contact number";
       }
 
       if (hasChanged === true) {
@@ -257,6 +257,7 @@ emergencyFacilityController.put(
 
       if (Object.keys(error).length === 0) {
         console.log("no error");
+        contactNumber = contactNumber.replace(/\s+/g, "");
         const updateFields = {
           name,
           latitude,

@@ -85,6 +85,19 @@ const isContactNumber = (value) => {
 };
 const isContactOrTeleNumber = (value) => {
   const trimmedValue = value.replace(/\s+/g, "");
+  if (!/^\d+$/.test(trimmedValue)) {
+    console.log("error1");
+    return true;
+  }
+
+  if (
+    trimmedValue.length !== 11 &&
+    trimmedValue.length !== 10 &&
+    trimmedValue.length !== 7
+  ) {
+    console.log("error4");
+    return true;
+  }
   if (trimmedValue.length === 11) {
     if (!trimmedValue.startsWith("09")) return true;
   } else if (trimmedValue.length === 10) {
