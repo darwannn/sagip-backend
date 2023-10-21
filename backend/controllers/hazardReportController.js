@@ -667,7 +667,6 @@ hazardReportController.put(
             { new: true }
           );
           if (hazardReport) {
-            console.log("====================================");
             console.log("hazardReport");
             console.log("====================================");
             // await createPusher("hazard-report", "reload", {});
