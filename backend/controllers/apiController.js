@@ -192,7 +192,7 @@ const createPusher = async (io, channel, event, data) => {
   //   token: process.env.SMS_API,
   //   sendto: contactNumber,
   //   body: message,
-  //   sim: "1",
+  //   sim: "0",
   //   device_id: process.env.DEVICE_ID,
   //   urgent: "1",
   // };
@@ -218,7 +218,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   console.log(contactNumbers);
   console.log("====================================");
   /* SMS GATE WAY GAGAMITIN */
-  /*  let message = "";
+  let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (target === "alert") {
     message = `${from} ${content}`;
@@ -228,7 +228,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
-    sim: "1",
+    sim: "0",
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   }));
@@ -243,7 +243,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     })
     .catch(function (error) {
       throw error;
-    }); */
+    });
   return true;
 };
 
@@ -268,13 +268,13 @@ const sendSMS = async (phone, target, content) => {
     message = `${from}Your SAGIP verification code is [ ${content} ]. The code will expire after 15 minutes.`;
   }
 
-  /* const encodedMessage = message;
+  const encodedMessage = message;
 
   const smsData = {
     token: process.env.SMS_API,
     sendto: phone,
     body: message,
-    sim: "1",
+    sim: "0",
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   };
@@ -289,7 +289,7 @@ const sendSMS = async (phone, target, content) => {
     })
     .catch(function (error) {
       throw error;
-    }); */
+    });
   /* console.log("send sms");
   return { error: 0, message: "testing" };
 
