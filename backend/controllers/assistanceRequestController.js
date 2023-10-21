@@ -1043,18 +1043,18 @@ assistanceRequestController.put(
             console.log(teamMembers);
             console.log("====================================");
 
-            const smsRes = await sendBulkSMS(
-              `Your team has been assigned to respond to ${
-                assistanceRequest.category
-              }${
-                assistanceRequest.street !== ""
-                  ? ` on ${assistanceRequest.street}`
-                  : ""
-              }`,
-              "notification",
-              respondersContant
-            );
-            console.log(smsRes);
+            // const smsRes = await sendBulkSMS(
+            //   `Your team has been assigned to respond to ${
+            //     assistanceRequest.category
+            //   }${
+            //     assistanceRequest.street !== ""
+            //       ? ` on ${assistanceRequest.street}`
+            //       : ""
+            //   }`,
+            //   "notification",
+            //   respondersContant
+            // );
+            // console.log(smsRes);
 
             createNotification(
               req,
@@ -1113,16 +1113,16 @@ assistanceRequestController.put(
           } else if (action === "resolve") {
             req.io.emit(`resolved-${assistanceRequest.userId._id}`);
 
-            sendSMS(
-              assistanceRequest.userId.contactNumber,
-              "notification",
-              `Your request regarding ${assistanceRequest.category}${
-                assistanceRequest.street !== ""
-                  ? ` on ${assistanceRequest.street}`
-                  : ""
-              } has been resolved. If you need any further assistance, feel free to reach out.`,
-              ""
-            );
+            // sendSMS(
+            //   assistanceRequest.userId.contactNumber,
+            //   "notification",
+            //   `Your request regarding ${assistanceRequest.category}${
+            //     assistanceRequest.street !== ""
+            //       ? ` on ${assistanceRequest.street}`
+            //       : ""
+            //   } has been resolved. If you need any further assistance, feel free to reach out.`,
+            //   ""
+            // );
 
             createNotification(
               req,
@@ -1143,12 +1143,12 @@ assistanceRequestController.put(
               // assistanceRequest,
             });
           } else if (action === "arrive") {
-            sendSMS(
-              assistanceRequest.userId.contactNumber,
-              "notification",
-              `Do not worry,the responders are now on the scene and are ready to assist you.`,
-              ""
-            );
+            // sendSMS(
+            //   assistanceRequest.userId.contactNumber,
+            //   "notification",
+            //   `Do not worry,the responders are now on the scene and are ready to assist you.`,
+            //   ""
+            // );
 
             createNotification(
               req,
@@ -1498,18 +1498,18 @@ assistanceRequestController.put(
               console.log("====================================");
               /*  await createPusher(`${assistanceRequest.userId}`, "reload", {}); */
               req.io.emit(`${assistanceRequest.userId}`);
-              sendSMS(
-                assistanceRequest.userId.contactNumber,
-                "notification",
-                `Your request regarding ${assistanceRequest.category}${
-                  assistanceRequest.street !== ""
-                    ? ` on ${assistanceRequest.street} Street`
-                    : ""
-                } has been closed due to: \n\n${reason}${
-                  isEmpty(note) ? "" : `\n\n${note}`
-                }.`,
-                ""
-              );
+              // sendSMS(
+              //   assistanceRequest.userId.contactNumber,
+              //   "notification",
+              //   `Your request regarding ${assistanceRequest.category}${
+              //     assistanceRequest.street !== ""
+              //       ? ` on ${assistanceRequest.street} Street`
+              //       : ""
+              //   } has been closed due to: \n\n${reason}${
+              //     isEmpty(note) ? "" : `\n\n${note}`
+              //   }.`,
+              //   ""
+              // );
               createNotification(
                 req,
                 [assistanceRequest.userId._id],

@@ -1578,12 +1578,7 @@ authController.put(
 
           if (user) {
             if (action === "reject") {
-              /* sendSMS(
-                user.contactNumber,
-                "verification-request",
-                `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
-                ""
-              );
+              /*
             
               req.io.emit("verification-request");
               createNotification(req,
@@ -1593,14 +1588,15 @@ authController.put(
                 `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
                 "error"
               ); */
-              sendSMS(
-                user.contactNumber,
-                "verification-request",
-                `We regret to inform you that your verification request has been rejected due to: \n\n${reason}${
-                  isEmpty(note) ? "" : `\n\n${note}`
-                }.`,
-                ""
-              );
+
+              // sendSMS(
+              //   user.contactNumber,
+              //   "verification-request",
+              //   `We regret to inform you that your verification request has been rejected due to: \n\n${reason}${
+              //     isEmpty(note) ? "" : `\n\n${note}`
+              //   }.`,
+              //   ""
+              // );
 
               req.io.emit(user._id);
               req.io.emit("verification-request");
@@ -1620,12 +1616,12 @@ authController.put(
                 message: "Verification Request Rejected",
               });
             } else if (action === "approve") {
-              sendSMS(
-                user.contactNumber,
-                "verification-request",
-                "Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.",
-                ""
-              );
+              // sendSMS(
+              //   user.contactNumber,
+              //   "verification-request",
+              //   "Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.",
+              //   ""
+              // );
 
               /* await createPusher("verification-request-mobile", "reload", {}); */
               req.io.emit("verification-request");

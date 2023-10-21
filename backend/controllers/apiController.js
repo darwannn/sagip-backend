@@ -225,7 +225,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   } else if (target === "notification") {
     message = `${from} ${content}`;
   }
-  const smsData = contactNumbers.map((contactNumber) => ({
+  /*  const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
     sim: "0",
@@ -243,8 +243,27 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     })
     .catch(function (error) {
       throw error;
-    });
-  return true;
+    }); */
+  const numbersString = contactNumbers.join(",");
+  const params = {
+    apikey: process.env.SEMAPHORE_API_KEY,
+    number: numbersString,
+    message: message,
+  };
+  return (
+    axios
+      /* .post(
+      `https://api.semaphore.co/api/v4/messages?apikey=${process.env.SEMAPHORE_API_KEY}&number=${numbersString}&message=${message}`
+    ) */
+      .post("https://api.semaphore.co/api/v4/messages", params)
+      .then(function (response) {
+        return response.status === 200 ? true : false;
+      })
+      .catch(function (error) {
+        throw error;
+      })
+  );
+  /*  return true; */
 };
 
 const sendSMS = async (phone, target, content) => {
@@ -257,18 +276,18 @@ const sendSMS = async (phone, target, content) => {
   ) {
     message = `${from} ${content}`;
   } else if (target === "register") {
-    message = `${from}Thank you for registering to SAGIP! Your verification code is [ ${content} ]. The code will expire after 15 minutes.`;
+    message = `${from}Thank you for registering to SAGIP! Your verification code is ${content}. The code will expire after 15 minutes.`;
   } else if (target === "attempt") {
-    message = `${from}We detected a suspicious activity on your SAGIP account. If this was you, please use the following code to verify your identity: [ ${content} ]. The link will expire after 15 minutes.`;
+    message = `${from}We detected a suspicious activity on your SAGIP account. If this was you, please use the following code to verify your identity: ${content}. The link will expire after 15 minutes.`;
   } else if (target === "forgot-password") {
-    message = `${from}We heard that you lost your SAGIP password. Sorry about that! But don’t worry! You can use the following code to reset your password: [ ${content} ]. The link will expire after 15 minutes.`;
+    message = `${from}We heard that you lost your SAGIP password. Sorry about that! But don’t worry! You can use the following code to reset your password: ${content}. The link will expire after 15 minutes.`;
   } else if (target === "sms-verification") {
-    message = `${from}To verify your phone number, please use the following code: [ ${content} ]. The code will expire after 15 minutes.`;
+    message = `${from}To verify your phone number, please use the following code: ${content}. The code will expire after 15 minutes.`;
   } else {
-    message = `${from}Your SAGIP verification code is [ ${content} ]. The code will expire after 15 minutes.`;
+    message = `${from}Your SAGIP verification code is ${content}. The code will expire after 15 minutes.`;
   }
 
-  const encodedMessage = message;
+  /*   const encodedMessage = message;
 
   const smsData = {
     token: process.env.SMS_API,
@@ -289,7 +308,25 @@ const sendSMS = async (phone, target, content) => {
     })
     .catch(function (error) {
       throw error;
+    }); */
+
+  const params = {
+    apikey: process.env.SEMAPHORE_API_KEY,
+    number: phone,
+    message: message,
+  };
+
+  /*  .post(`https://api.semaphore.co/api/v4/messages?apikey=${process.env.SEMAPHORE_API_KEY}&number=${phone}&message=${content}`, null, { */
+  return axios
+
+    .post("https://api.semaphore.co/api/v4/messages", params)
+    .then(function (response) {
+      return response.status === 200 ? true : false;
+    })
+    .catch(function (error) {
+      throw error;
     });
+
   /* console.log("send sms");
   return { error: 0, message: "testing" };
 
