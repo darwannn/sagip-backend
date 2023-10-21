@@ -110,13 +110,13 @@ function Home() {
 
         const options = { Authorization: `Bearer ${token}` };
 
-        /* const weatherResponse1 = await request(
+        const weatherResponse1 = await request(
           "/assistance-request/pre-assessment/64aa696b7cb8e80d87602f1c",
           "PUT",
-          options,
+          { Authorization: `Bearer ${token}` },
           formData
         );
-        console.log(weatherResponse1); */
+        console.log(weatherResponse1);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -126,14 +126,14 @@ function Home() {
         /*  const action = "respond"; */
         /*  const action = "resolve"; */
         /*  const action = "arrive"; */
-        const options = { Authorization: `Bearer ${token}` };
+        /*  const options = { Authorization: `Bearer ${token}` };
         const weatherResponse1 = await request(
           `/assistance-request/update/${action}/652d45b8eafbc0a34ee5ecbb`,
           "PUT",
           options,
           { assignedTeam: "64cb4997aefb86308f2888a8" }
         );
-        console.log(weatherResponse1);
+        console.log(weatherResponse1); */
       } catch (error) {
         console.error("Error fetching data:", error);
       }

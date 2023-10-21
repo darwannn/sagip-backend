@@ -274,7 +274,7 @@ const sendSMS = async (phone, target, content) => {
     token: process.env.SMS_API,
     sendto: phone,
     body: message,
-    sim: "1",
+    sim: "0",
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   };
