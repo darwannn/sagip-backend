@@ -250,11 +250,9 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     number: numbersString,
     message: message,
   };
-  return (
+  /*  return (
     axios
-      /* .post(
-      `https://api.semaphore.co/api/v4/messages?apikey=${process.env.SEMAPHORE_API_KEY}&number=${numbersString}&message=${message}`
-    ) */
+    
       .post("https://api.semaphore.co/api/v4/messages", params)
       .then(function (response) {
         return response.status === 200 ? true : false;
@@ -262,8 +260,8 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
       .catch(function (error) {
         throw error;
       })
-  );
-  /*  return true; */
+  ); */
+  return true;
 };
 
 const sendSMS = async (phone, target, content) => {
