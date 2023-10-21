@@ -192,7 +192,7 @@ const createPusher = async (io, channel, event, data) => {
   //   token: process.env.SMS_API,
   //   sendto: contactNumber,
   //   body: message,
-  //   sim: "0",
+  //   sim: "1",
   //   device_id: process.env.DEVICE_ID,
   //   urgent: "1",
   // };
@@ -228,7 +228,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
-    sim: "0",
+    sim: "1",
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   }));
@@ -274,7 +274,7 @@ const sendSMS = async (phone, target, content) => {
     token: process.env.SMS_API,
     sendto: phone,
     body: message,
-    sim: "0",
+    sim: "1",
     device_id: process.env.DEVICE_ID,
     urgent: "1",
   };
