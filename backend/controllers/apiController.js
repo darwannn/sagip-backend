@@ -218,7 +218,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   console.log(contactNumbers);
   console.log("====================================");
   /* SMS GATE WAY GAGAMITIN */
-  /* let message = "";
+  let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (target === "alert") {
     message = `${from} ${content}`;
@@ -243,7 +243,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     })
     .catch(function (error) {
       throw error;
-    }); */
+    });
   return true;
 };
 
