@@ -41,18 +41,21 @@ const AssistanceRequestSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    /*  situation: {
-      question: {
+    cancelled: {
+      reason: {
         type: String,
-        required: true,
+        default: "",
       },
-      answers: {
-        answers: {
-          type: String,
-          required: true,
-        },
+      note: {
+        type: String,
+        default: "",
       },
-    }, */
+      dateCancelled: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+
     answers: [
       {
         type: String,
@@ -113,63 +116,53 @@ const AssistanceRequestSchema = new mongoose.Schema(
 
       hospitalName: {
         type: String,
-        /*  default: "", */
       },
 
       medicalHistory: [
         {
           type: String,
-          /* default: "", */
         },
       ],
       medicalCondition: {
         type: String,
-        /*   default: "", */
       },
 
       allergies: [
         {
           type: String,
-          /*   default: "", */
-          default: [],
+          /* 
+          default: [], */
         },
       ],
       medications: [
         {
           type: String,
-          /*  default: "", */
-          default: [],
+
+          /*  default: [], */
         },
       ],
 
       signs: {
         loc: {
           type: String,
-          /* default: "", */
         },
         speech: {
           type: String,
-          /*  default: "", */
         },
         skin: {
           type: String,
-          /*   default: "", */
         },
         color: {
           type: String,
-          /* default: "", */
         },
         respiration: {
           type: String,
-          /* default: "", */
         },
         pulse: {
           type: String,
-          /* default: "", */
         },
         pupils: {
           type: String,
-          /* default: "", */
         },
       },
 
@@ -177,28 +170,21 @@ const AssistanceRequestSchema = new mongoose.Schema(
         {
           bloodPressure: {
             type: String,
-
-            /* default: "", */
           },
           pulseRate: {
             type: String,
-            /* default: "", */
           },
           respiratoryRate: {
             type: String,
-            /* default: "", */
           },
           temperature: {
             type: String,
-            /*  default: "", */
           },
           oxygenSaturation: {
             type: String,
-            /*   default: "", */
           },
           glucoseLevel: {
             type: String,
-            /*      default: "", */
           },
           dateRecorded: {
             type: Date,
@@ -207,12 +193,10 @@ const AssistanceRequestSchema = new mongoose.Schema(
       ],
       injury: {
         type: String,
-        /*   default: "", */
       },
 
       management: {
         type: String,
-        /* default: "", */
       },
     },
   },

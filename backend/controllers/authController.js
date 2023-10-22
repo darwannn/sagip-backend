@@ -1605,8 +1605,8 @@ authController.put(
                 [user._id],
                 user._id,
                 "Verification Request Rejected",
-                `We regret to inform you that your verification request has been rejected due to: \n\n${reason}${
-                  isEmpty(note) ? "" : `\n\n${note}`
+                `We regret to inform you that your verification request has been rejected due to: ${reason}${
+                  isEmpty(note) ? "" : `<br><br>${note}`
                 }.`,
                 "error"
               );

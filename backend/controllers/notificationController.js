@@ -143,6 +143,8 @@ const createNotificationAll = async (
 };
 
 const createPushNotificationToken = (title, body, tokens, linkId) => {
+  title = title.replace(/<br>/g, "\n");
+  body = body.replace(/<br>/g, "\n");
   if (tokens.length !== 0) {
     const message = {
       notification: {
@@ -180,6 +182,8 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
 
 const createPushNotificationTopic = (title, body, topic, linkId) => {
   /* if (tokens.length !== 0) { */
+  title = title.replace(/<br>/g, "\n");
+  body = body.replace(/<br>/g, "\n");
   const message = {
     notification: {
       title: title,

@@ -886,13 +886,14 @@ assistanceRequestController.put(
           /*  await createPusher("assistance-request-web", "reload", {}); */
           req.io.emit("assistance-request");
           const userIds = await getUsersId("dispatcher");
-          /* createNotification(req,
+          createNotification(
+            req,
             userIds,
             req.user.id,
             "Assistance Request Updated",
             `${category} on ${street} ${municipality}`,
             "info"
-          ); */
+          );
 
           return res.status(200).json({
             success: true,
@@ -1450,8 +1451,11 @@ assistanceRequestController.put(
       const { reason, note } = req.body;
       let updateFields = {};
       let action = req.params.action.toLowerCase();
-      if (action === "unarchive" || action === "archive") {
-        if (isEmpty(reason)) error["reason"] = "Required field";
+      if (
+        action === "unarchive" ||
+        action === "archive" ||
+        action === "cancel"
+      ) {
         if (Object.keys(error).length === 0) {
           console.log("====================================");
           console.log(reason);
@@ -1459,9 +1463,23 @@ assistanceRequestController.put(
           console.log("====================================");
           console.log(action);
           if (action === "archive") {
+            if (isEmpty(reason)) error["reason"] = "Required field";
             updateFields = {
+              status: "cancelled",
               isArchived: true,
               archivedDate: Date.now(),
+            };
+          } else if (action === "cancel") {
+            if (isEmpty(reason)) error["reason"] = "Required field";
+            updateFields = {
+              status: "cancelled",
+              $set: {
+                cancelled: {
+                  reason: reason,
+                  note: note,
+                  dateCancelled: Date.now(),
+                },
+              },
             };
           } else if (action === "unarchive") {
             updateFields = {
@@ -1478,7 +1496,7 @@ assistanceRequestController.put(
             console.log("====================================");
             console.log("assistanceRequest");
             console.log("====================================");
-
+            req.io.emit("assistance-request");
             if (action === "archive") {
               /*  const user = await User.findByIdAndUpdate(
                 assistanceRequest.userId,
@@ -1497,7 +1515,7 @@ assistanceRequestController.put(
               console.log(assistanceRequest.userId);
               console.log("====================================");
               /*  await createPusher(`${assistanceRequest.userId}`, "reload", {}); */
-              req.io.emit(`${assistanceRequest.userId}`);
+              /* req.io.emit(`${assistanceRequest.userId}`); */
               // sendSMS(
               //   assistanceRequest.userId.contactNumber,
               //   "notification",
@@ -1510,6 +1528,8 @@ assistanceRequestController.put(
               //   }.`,
               //   ""
               // );
+              console.log(reason);
+              console.log(note);
               createNotification(
                 req,
                 [assistanceRequest.userId._id],
@@ -1519,14 +1539,80 @@ assistanceRequestController.put(
                   assistanceRequest.street !== ""
                     ? ` on ${assistanceRequest.street} Street`
                     : ""
-                } has been closed due to: \n\n${reason}${
-                  isEmpty(note) ? "" : `\n\n${note}`
+                } has been closed due to: ${reason}${
+                  isEmpty(note) ? "" : `<br><br>${note}`
                 }.`,
                 "error"
               );
               return res.status(200).json({
                 success: true,
                 message: "Archived Successfully",
+              });
+            } else if (action === "cancel") {
+              console.log("cancel");
+              console.log(assistanceRequest.assignedTeam);
+              const team = await Team.findById(assistanceRequest.assignedTeam)
+                .populate("head", "-password")
+                .populate("members", "-password");
+              console.log(team);
+
+              const teamHead = team.head;
+              const teamMembers = team.members;
+
+              respondersContant = [
+                teamHead.contactNumber,
+                ...teamMembers.map((member) => member.contactNumber),
+              ];
+              respondersId = [
+                teamHead._id,
+                ...teamMembers.map((member) => member._id),
+              ];
+              console.log("respondersContant", respondersContant);
+              console.log(respondersId);
+
+              /* await sendBulkSMS(
+                cancelledNotification,
+
+                "notification",
+                respondersContant
+              );
+ */
+              const userIds = await getUsersId("dispatcher");
+              createNotification(
+                req,
+                userIds,
+                req.user.id,
+                "Assistance Request Cancelled",
+                `${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                } request has been cancelled due to: ${reason}${
+                  isEmpty(note) ? "" : `<br><br>${note}`
+                }.`,
+                "info"
+              );
+
+              createNotification(
+                req,
+                teamMembers,
+                assistanceRequest.userId._id,
+                "Assistance Request Cancelled",
+                `${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                } request has been cancelled due to: ${reason}${
+                  isEmpty(note) ? "" : `<br><br>${note}`
+                }.`,
+                "success"
+              );
+
+              req.io.emit(`cancelled-${assistanceRequest.userId._id}`);
+
+              return res.status(200).json({
+                success: true,
+                message: "Cancelled Successfully",
               });
             } else if (action === "unarchive") {
               /* const user = await User.findByIdAndUpdate(
@@ -1535,7 +1621,7 @@ assistanceRequestController.put(
                   $dec: { dismissedRequestCount: 1 },
                 }
               ); */
-              req.io.emit(`${assistanceRequest.userId}`);
+              /* req.io.emit(`${assistanceRequest.userId}`); */
               dismissedRequestCount("unarchive", assistanceRequest.userId, req);
               return res.status(200).json({
                 success: true,

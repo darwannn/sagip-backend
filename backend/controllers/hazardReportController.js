@@ -686,8 +686,8 @@ hazardReportController.put(
                   hazardReport.street !== ""
                     ? ` on ${hazardReport.street} Street`
                     : ""
-                } has been closed due to: \n\n${reason}${
-                  isEmpty(note) ? "" : `\n\n${note}`
+                } has been closed due to: ${reason}${
+                  isEmpty(note) ? "" : `<br><br>${note}`
                 }.`,
                 "error"
               );
