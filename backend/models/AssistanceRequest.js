@@ -44,15 +44,12 @@ const AssistanceRequestSchema = new mongoose.Schema(
     cancelled: {
       reason: {
         type: String,
-        default: "",
       },
       note: {
         type: String,
-        default: "",
       },
       dateCancelled: {
         type: Date,
-        default: Date.now,
       },
     },
 
