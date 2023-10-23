@@ -342,12 +342,15 @@ const dismissedRequestCount = async (action, userId, req) => {
   });
   if (user.dismissedRequestCount >= 3) {
     user.isBanned = true;
-    /* req.io.emit(`${req.params.id}`); */
-    req.io.emit("banned", { receiver: `${userId}` });
+    // req.io.emit(`${req.params.id}`);
+    req.io.emit(`logout-${userId}`);
+    // req.io.emit("banned", { receiver: `${userId}` });
   } else {
     user.isBanned = false;
   }
   user.save();
+  console.log("user", `logout`);
+  /*  req.io.emit(`logout`); */
 };
 
 const handleArchive = async (action, id, req, res) => {

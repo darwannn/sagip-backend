@@ -1619,18 +1619,19 @@ authController.put(
               // sendSMS(
               //   user.contactNumber,
               //   "verification-request",
-              //   "Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.",
+              //   "Good news! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and emergency requests.",
               //   ""
               // );
 
               /* await createPusher("verification-request-mobile", "reload", {}); */
+              /* req.io.emit(`logout-${req.params.id}`); */
               req.io.emit("verification-request");
               createNotification(
                 req,
                 [user._id],
                 user._id,
                 "Verification Request Approved",
-                `Congratulations! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and assistance requests.`,
+                `Good news! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and emergency requests.`,
                 "success"
               );
 

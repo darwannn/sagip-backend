@@ -162,13 +162,15 @@ assistanceRequestController.post(
             if (assistanceRequest) {
               /* await createPusher("assistance-request-web", "reload", {}); */
               req.io.emit("assistance-request");
-              req.io.emit("unverified-assistance-request");
+              req.io.emit("new-assistance-request", {
+                assistanceRequest: assistanceRequest,
+              });
               const userIds = await getUsersId("dispatcher");
               createNotification(
                 req,
                 userIds,
                 req.user.id,
-                "New assistance request",
+                "New Emergency Request",
                 `${category} on ${street} ${municipality}.`,
                 "info"
               );
@@ -896,7 +898,7 @@ assistanceRequestController.put(
             req,
             userIds,
             req.user.id,
-            "Assistance Request Updated",
+            "Emergency Request Updated",
             `${category} on ${street} ${municipality}`,
             "info"
           );
@@ -1077,10 +1079,29 @@ assistanceRequestController.put(
               }`,
               "success"
             );
-            req.io.emit(team._id);
+
+            createNotification(
+              req,
+              [assistanceRequest.userId._id],
+              assistanceRequest.userId._id,
+              "Emergency Request Verified",
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been verified. ${
+                team.name
+              } has been assigned to assist you.`,
+              "success"
+            );
+
+            console.log(team._id);
+            req.io.emit(team._id, {
+              assistanceRequest: assistanceRequest,
+            });
             return res.status(200).json({
               success: true,
-              message: "Assistance Request Verified",
+              message: "Emergency Request Verified",
               // assistanceRequest,
             });
           } else if (action === "respond") {
@@ -1101,25 +1122,22 @@ assistanceRequestController.put(
               req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
-              "Assistance Request Verified",
-              `Your request regarding ${assistanceRequest.category}${
-                assistanceRequest.street !== ""
-                  ? ` on ${assistanceRequest.street}`
-                  : ""
-              } has been verified. Please wait as ${
-                assistanceRequest.assignedTeam.name
-              } is on their way to assist you.`,
+              "Responers on the Way",
+              `Please wait as ${assistanceRequest.assignedTeam.name} is on their way  to assist you.`,
               "success"
             );
 
             return res.status(200).json({
               success: true,
-              message: "Responding to Assistance Request ",
+              message: "Responding to Emergency Request ",
               // assistanceRequest,
             });
           } else if (action === "resolve") {
             req.io.emit(`resolved-${assistanceRequest.userId._id}`);
-
+            req.io.emit(`resolved-assistance-request`, {
+              assistanceRequest: assistanceRequest,
+              team: assistanceRequest.assignedTeam,
+            });
             // sendSMS(
             //   assistanceRequest.userId.contactNumber,
             //   "notification",
@@ -1135,7 +1153,7 @@ assistanceRequestController.put(
               req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
-              "Assistance Request Resolved",
+              "Emergency Request Resolved",
               `Your request regarding ${assistanceRequest.category}${
                 assistanceRequest.street !== ""
                   ? ` on ${assistanceRequest.street}`
@@ -1146,7 +1164,7 @@ assistanceRequestController.put(
 
             return res.status(200).json({
               success: true,
-              message: "Assistance Request Resolved",
+              message: "Emergency Request Resolved",
               // assistanceRequest,
             });
           } else if (action === "arrive") {
@@ -1168,7 +1186,7 @@ assistanceRequestController.put(
 
             return res.status(200).json({
               success: true,
-              message: "Assistance Request Resolved",
+              message: "Emergency Request Resolved",
               // assistanceRequest,
             });
           }
@@ -1219,7 +1237,7 @@ assistanceRequestController.put(
         
           return res.status(200).json({
             success: true,
-            message: "Assistance Request Resolved",
+            message: "Emergency Request Resolved",
             assistanceRequest,
           });
         } else {
@@ -1269,23 +1287,41 @@ assistanceRequestController.delete(
         /*  const cloud = ""; */
 
         if (assistanceRequestImage.proof !== "default.jpg") {
-          /* cloud =  */ await cloudinaryUploader(
+          /* cloud =  */
+          /* await cloudinaryUploader(
             "destroy",
             "",
             resource_type,
             folderPath,
             assistanceRequestImage.proof
-          );
+          ); */
         }
 
         /*    if (cloud !== "error") { */
-        const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
+        const assistanceRequest = await AssistanceRequest.findById(
           req.params.id
         );
 
         if (assistanceRequest) {
+          const userIds = await getUsersId("dispatcher");
+          createNotification(
+            req,
+            userIds,
+            req.user.id,
+            "Emergency Request Cancelled",
+            `${assistanceRequest.category}${
+              assistanceRequest.street !== ""
+                ? ` on ${assistanceRequest.street}`
+                : ""
+            } request has been cancelled.`,
+            "info"
+          );
+
           req.io.emit("assistance-request");
           req.io.emit(`${assistanceRequest.userId}`);
+          req.io.emit(`cancelled-assistance-request`, {
+            assistanceRequest: assistanceRequest,
+          });
           /* dismissedRequestCount("archive", assistanceRequest.userId, req); */
           return res.status(200).json({
             success: true,
@@ -1401,7 +1437,7 @@ assistanceRequestController.delete(
             createNotification(req,
               [assistanceRequest.userId._id],
               assistanceRequest.userId._id,
-              "Assistance Request Closed",
+              "Emergency Request Closed",
               `Your request regarding ${assistanceRequest.category}${
                 assistanceRequest.street !== ""
                   ? ` on ${assistanceRequest.street}`
@@ -1472,6 +1508,13 @@ assistanceRequestController.put(
             if (isEmpty(reason)) error["reason"] = "Required field";
             updateFields = {
               status: "cancelled",
+              $set: {
+                cancelled: {
+                  reason: reason,
+                  note: note,
+                  dateCancelled: Date.now(),
+                },
+              },
               isArchived: true,
               archivedDate: Date.now(),
             };
@@ -1540,22 +1583,32 @@ assistanceRequestController.put(
                 req,
                 [assistanceRequest.userId._id],
                 assistanceRequest.userId._id,
-                "Assistance Request Closed",
+                "Emergency Request Closed",
                 `Your request regarding ${assistanceRequest.category}${
                   assistanceRequest.street !== ""
-                    ? ` on ${assistanceRequest.street} Street`
+                    ? ` on ${assistanceRequest.street}`
                     : ""
                 } has been closed due to: ${reason}${
                   isEmpty(note) ? "" : `<br><br>${note}`
                 }.`,
                 "error"
               );
+              req.io.emit("assistance-request");
+
+              req.io.emit(`rejected-${assistanceRequest.userId._id}`, {
+                assistanceRequest: assistanceRequest,
+              });
               return res.status(200).json({
                 success: true,
                 message: "Archived Successfully",
               });
             } else if (action === "cancel") {
-              console.log("cancel");
+              /* console.log(`cancelled-assistance-request`, {
+                assistanceRequest: assistanceRequest,
+                team: assistanceRequest.assignedTeam,
+              }); */
+              /*   console.log(`cancelled-${assistanceRequest.assignedTeam._id}`);
+              console.log("cancel"); */
               console.log(assistanceRequest.assignedTeam);
               const team = await Team.findById(assistanceRequest.assignedTeam)
                 .populate("head", "-password")
@@ -1588,7 +1641,7 @@ assistanceRequestController.put(
                 req,
                 userIds,
                 req.user.id,
-                "Assistance Request Cancelled",
+                "Emergency Request Cancelled",
                 `${assistanceRequest.category}${
                   assistanceRequest.street !== ""
                     ? ` on ${assistanceRequest.street}`
@@ -1598,12 +1651,13 @@ assistanceRequestController.put(
                 }.`,
                 "info"
               );
-
+              console.log(userIds);
+              console.log("teamMembers", teamMembers);
               createNotification(
                 req,
-                teamMembers,
+                respondersId,
                 assistanceRequest.userId._id,
-                "Assistance Request Cancelled",
+                "Emergency Request Cancelled",
                 `${assistanceRequest.category}${
                   assistanceRequest.street !== ""
                     ? ` on ${assistanceRequest.street}`
@@ -1614,7 +1668,13 @@ assistanceRequestController.put(
                 "success"
               );
 
-              req.io.emit(`cancelled-${assistanceRequest.userId._id}`);
+              req.io.emit(`cancelled-assistance-request`, {
+                assistanceRequest: assistanceRequest,
+                team: assistanceRequest.assignedTeam,
+              });
+              req.io.emit(`cancelled-${assistanceRequest.assignedTeam._id}`, {
+                assistanceRequest: assistanceRequest,
+              });
 
               return res.status(200).json({
                 success: true,

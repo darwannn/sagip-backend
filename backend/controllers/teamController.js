@@ -34,7 +34,8 @@ teamController.post(
         if (team) {
           /*  await createPusher("team", "reload", {}); */
           /*  req.io.emit("reload", { receiver: "team" }); */
-          /* req.io.emit("team"); */
+          req.io.emit("team");
+
           return res.status(200).json({
             success: true,
             message: "Added Successfully",
@@ -110,6 +111,7 @@ teamController.get("/myteam", tokenMiddleware, async (req, res) => {
         message: "Team found",
         name: team.name,
         position: team.head._id === userId ? "head" : "member",
+        _id: team._id,
       });
     } else {
       return res.status(200).json({
@@ -312,6 +314,7 @@ teamController.delete(
           /* await createPusher("team", "reload", {}); */
           /* req.io.emit("reload", { receiver: "team" }); */
           req.io.emit("team");
+          req.io.emit(team._id);
         }
         return res.status(200).json({
           success: true,
@@ -444,6 +447,7 @@ teamController.put(
         /* await createPusher("team", "reload", {}); */
         /* req.io.emit("reload", { receiver: "team" }); */
         req.io.emit("team");
+        /* req.io.emit(team._id); */
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -536,7 +540,9 @@ teamController.put(
         }
         /* await createPusher("team", "reload", {}); */
         /* req.io.emit("reload", { receiver: "team" }); */
-        /* req.io.emit("team"); */
+        req.io.emit("team");
+        /*  req.io.emit(team._id); */
+        req.io.emit(userId);
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
