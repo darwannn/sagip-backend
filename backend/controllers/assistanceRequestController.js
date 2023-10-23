@@ -118,11 +118,17 @@ assistanceRequestController.post(
             if (action === "auto-add") {
               console.log("+++++++++++++++++++++++ano bayah");
               console.log(description);
+              console.log("Initial category value: " + category);
               if (isEmpty(proof)) {
                 proof = "default.jpg";
                 status = "incomplete";
               }
-              if (isEmpty(category)) {
+              if (
+                isEmpty(category) ||
+                category === "undefined" ||
+                category === "null"
+              ) {
+                console.log("Setting category to Unspecified");
                 category = "Unspecified";
                 status = "incomplete";
               }
