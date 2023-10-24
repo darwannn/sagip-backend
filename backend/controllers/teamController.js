@@ -455,13 +455,32 @@ teamController.put(
       let newPosition;
       //may team gagawing unassigned
       if (newTeamId === "unassigned") {
-        removedTeam = await Team.findById(prevTeamId);
+        /*   removedTeam = await Team.findById(prevTeamId);
         if (removedTeam.head.toString() === userId) {
           removedTeam.head = null;
         } else {
           removedTeam.members.pull(userId);
         }
-        await removedTeam.save();
+        await removedTeam.save(); */
+        if (action === "member") {
+          console.log("====================================");
+          console.log(prevTeamId);
+          console.log("====================================");
+          removedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { $pull: { members: userId } },
+            { new: true }
+          );
+          console.log("mem");
+        } else if (action === "head") {
+          removedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { head: null },
+            { new: true }
+          );
+          console.log("head1");
+        }
+        console.log("removedTeam:", removedTeam);
       } else if (
         prevTeamId === "" ||
         prevTeamId === null ||
@@ -485,7 +504,7 @@ teamController.put(
         /* new team from old team */
 
         removedTeam = await Team.findById(prevTeamId);
-        if (removedTeam.head.toString() === userId) {
+        if (removedTeam.head && removedTeam.head.toString() === userId) {
           removedTeam.head = null;
         } else {
           removedTeam.members.pull(userId);
