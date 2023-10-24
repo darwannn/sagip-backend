@@ -327,6 +327,67 @@ teamController.get("/:id", async (req, res) => {
   }
 });
 
+teamController.put(
+  "/reset/:id",
+  tokenMiddleware,
+  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+    const error = {};
+    try {
+      const updateFields = { head: null, members: [] };
+      /* const oldTeam = await Team.findById(req.params.id); */
+      const team = await Team.findByIdAndUpdate(req.params.id, updateFields);
+
+      if (team) {
+        /* await createPusher("team", "reload", {}); */
+        /* req.io.emit("reload", { receiver: "team" }); */
+        req.io.emit("team");
+        console.log("[team.head, ...team.members]");
+
+        if (team.members.length !== 0) {
+          await createNotification(
+            req,
+            [team.members],
+            team._id,
+            `Team Assignment`,
+            `You have been remove from ${team.name}.`,
+            "info"
+          );
+        }
+
+        if (team.head != null) {
+          await createNotification(
+            req,
+            [team.head],
+            team._id,
+            `Team Assignment`,
+            `You have been remove from ${team.name}.`,
+            "info"
+          );
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "Reset Successfully",
+          team,
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      console.log("====================================");
+      console.log(error);
+      console.log("====================================");
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
 teamController.delete(
   "/delete/:id",
   tokenMiddleware,
@@ -685,52 +746,6 @@ teamController.put(
         error["success"] = false;
         error["message"] = "input error";
         return res.status(400).json(error);
-      }
-    } catch (error) {
-      console.log("====================================");
-      console.log(error);
-      console.log("====================================");
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-);
-teamController.put(
-  "/reset/:id",
-  tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
-    const error = {};
-    try {
-      const updateFields = { head: null, members: [] };
-
-      const team = await Team.findByIdAndUpdate(req.params.id, updateFields);
-
-      if (team) {
-        /* await createPusher("team", "reload", {}); */
-        /* req.io.emit("reload", { receiver: "team" }); */
-        req.io.emit("team");
-
-        await createNotification(
-          req,
-          [team.head, ...team.members],
-          team._id,
-          `Team Assignment`,
-          `You have been remove from ${team.name}.`,
-          "info"
-        );
-
-        return res.status(200).json({
-          success: true,
-          message: "Reset Successfully",
-          team,
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
       }
     } catch (error) {
       console.log("====================================");
