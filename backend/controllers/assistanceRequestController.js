@@ -1288,17 +1288,17 @@ assistanceRequestController.delete(
 
         if (assistanceRequestImage.proof !== "default.jpg") {
           /* cloud =  */
-          /* await cloudinaryUploader(
+          await cloudinaryUploader(
             "destroy",
             "",
             resource_type,
             folderPath,
             assistanceRequestImage.proof
-          ); */
+          );
         }
 
         /*    if (cloud !== "error") { */
-        const assistanceRequest = await AssistanceRequest.findById(
+        const assistanceRequest = await AssistanceRequest.findByIdAndDelete(
           req.params.id
         );
 

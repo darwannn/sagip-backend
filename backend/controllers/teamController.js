@@ -8,7 +8,9 @@ const {
   isImage,
   isLessThanSize,
   getTeamMembersId,
+  getUsersId,
 } = require("./functionController");
+
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const { createPusher, sendSMS, sendBulkSMS } = require("./apiController");
 const {
@@ -62,7 +64,45 @@ teamController.post(
     }
   }
 );
+teamController.put("/reset", tokenMiddleware, async (req, res) => {
+  try {
+    const updateFields = { head: null, members: [] };
 
+    const team = await Team.updateMany({}, updateFields);
+
+    if (team) {
+      req.io.emit("team");
+      const respondersId = await getUsersId("responder");
+
+      await createNotification(
+        req,
+        respondersId,
+        "team",
+        "Team Assignment",
+        "All teams have been reset.",
+        "info"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Reset Successfully",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  } catch (error) {
+    console.log("====================================");
+    console.log(error);
+    console.log("====================================");
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error: " + error,
+    });
+  }
+});
 teamController.get("/", async (req, res) => {
   try {
     /*   const team = await Team.find({}) */
@@ -789,7 +829,7 @@ teamController.put(
               });
             }
           } else {
-            return res.status(500).json({
+            return res.status(400).json({
               success: false,
               message: "not found",
             });

@@ -340,7 +340,7 @@ const dismissedRequestCount = async (action, userId, req) => {
   const user = await User.findByIdAndUpdate(userId, updateFields, {
     new: true,
   });
-  if (user.dismissedRequestCount >= 3) {
+  if (user.dismissedRequestCount >= 2) {
     user.isBanned = true;
     // req.io.emit(`${req.params.id}`);
     req.io.emit(`logout-${userId}`);
