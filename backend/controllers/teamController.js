@@ -3,6 +3,7 @@ const Team = require("../models/Team");
 const AssistanceRequest = require("../models/AssistanceRequest");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
+const mongoose = require("mongoose");
 const {
   isEmpty,
   isImage,
@@ -439,7 +440,8 @@ teamController.delete(
 teamController.put(
   "/update/assignment/:action",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+  //userTypeMiddleware(["admin", "super-admin"]),
+  async (req, res) => {
     try {
       let action = req.params.action.toLowerCase();
       const { newTeamId, userId, prevTeamId } = req.body;
@@ -450,6 +452,138 @@ teamController.put(
       let team;
       let removedTeam;
       let reassignedTeam;
+      let newPosition;
+      //may team gagawing unassigned
+      if (newTeamId === "unassigned") {
+        removedTeam = await Team.findById(prevTeamId);
+        if (removedTeam.head.toString() === userId) {
+          removedTeam.head = null;
+        } else {
+          removedTeam.members.pull(userId);
+        }
+        await removedTeam.save();
+      } else if (
+        prevTeamId === "" ||
+        prevTeamId === null ||
+        prevTeamId === undefined
+      ) {
+        // walang prev team gagawing assigned
+        if (action === "member") {
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { $push: { members: userId } },
+            { new: true }
+          );
+        } else if (action === "head") {
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { head: userId },
+            { new: true }
+          );
+        }
+      } else {
+        /* new team from old team */
+
+        removedTeam = await Team.findById(prevTeamId);
+        if (removedTeam.head.toString() === userId) {
+          removedTeam.head = null;
+        } else {
+          removedTeam.members.pull(userId);
+        }
+
+        await removedTeam.save();
+        if (action === "member") {
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { $push: { members: userId } },
+            { new: true }
+          );
+        } else if (action === "head") {
+          /*  reassignedTeam = await Team.findByIdAndUpdate(
+            prevTeamId,
+            { head: null },
+            { new: true }
+          ); */
+          team = await Team.findByIdAndUpdate(
+            newTeamId,
+            { head: userId },
+            { new: true }
+          );
+        }
+      }
+      console.log("====================================");
+      console.log(removedTeam);
+      console.log("====================================");
+      if (team || removedTeam || reassignedTeam) {
+        //may team gagawing unassigned
+        if (newTeamId === "unassigned") {
+          await createNotification(
+            req,
+            [userId],
+            userId,
+            `Team Assignment`,
+            `You have been remove from ${removedTeam.name}.`,
+            "info"
+          );
+        } else if (prevTeamId === "") {
+          // walang prev team
+          await createNotification(
+            req,
+            [userId],
+            userId,
+            `Team Assignment`,
+            `You have been assigned to ${team.name}.`,
+            "info"
+          );
+        } else {
+          await createNotification(
+            req,
+            [userId],
+            userId,
+            `Team Assignment`,
+            `You have been assigned to ${team.name}.`,
+            "info"
+          );
+        }
+
+        // req.io.emit("reload", { receiver: "team" });
+        req.io.emit("team");
+        // req.io.emit(team._id);
+        return res.status(200).json({
+          success: true,
+          message: "Updated Successfully",
+          team,
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+/* teamController.put(
+  "/update/assignment/:action",
+  tokenMiddleware,
+   //userTypeMiddleware(["admin", "super-admin"]),
+    async (req, res) => {
+    try {
+      let action = req.params.action.toLowerCase();
+      const { newTeamId, userId, prevTeamId } = req.body;
+      console.log(userId);
+      console.log(newTeamId);
+      console.log(prevTeamId);
+
+      let team;
+      let removedTeam;
+      let reassignedTeam;
+      let newPosition;
       //may team gagawing unassigned
       if (newTeamId === "unassigned") {
         if (action === "member") {
@@ -471,8 +605,11 @@ teamController.put(
           console.log("head1");
         }
         console.log("removedTeam:", removedTeam);
-      } else if (prevTeamId === "") {
-        // walang prev team
+      } 
+      
+      
+      else if (prevTeamId === "") {
+        // walang prev team gagawing assigned
         if (action === "member") {
           team = await Team.findByIdAndUpdate(
             newTeamId,
@@ -486,11 +623,15 @@ teamController.put(
             { new: true }
           );
         }
-      } else {
+      } 
+      
+      
+      // new team from old team
+      else {
         if (action === "member") {
           reassignedTeam = await Team.findByIdAndUpdate(
             prevTeamId,
-            { $pull: { members: userId } },
+            { $pull: { members: userId, } },
             { new: true }
           );
           team = await Team.findByIdAndUpdate(
@@ -545,10 +686,10 @@ teamController.put(
             "info"
           );
         }
-        /* await createPusher("team", "reload", {}); */
-        /* req.io.emit("reload", { receiver: "team" }); */
+        
+        // req.io.emit("reload", { receiver: "team" });
         req.io.emit("team");
-        /* req.io.emit(team._id); */
+        // req.io.emit(team._id);
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -567,7 +708,8 @@ teamController.put(
       });
     }
   }
-);
+); */
+
 teamController.put(
   "/update/unassign/:action",
   tokenMiddleware,
