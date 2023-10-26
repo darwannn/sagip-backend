@@ -1617,12 +1617,13 @@ authController.put(
                 message: "Verification Request Rejected",
               });
             } else if (action === "approve") {
-              // sendSMS(
-              //   user.contactNumber,
-              //   "verification-request",
-              //   "Good news! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and emergency requests.",
-              //   ""
-              // );
+              /* sms uncomment */
+              /*  sendSMS(
+                user.contactNumber,
+                "verification-request",
+                "Good news! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and emergency requests.",
+                ""
+              ); */
 
               /* await createPusher("verification-request-mobile", "reload", {}); */
               /* req.io.emit(`logout-${req.params.id}`); */
@@ -1631,7 +1632,7 @@ authController.put(
                 req,
                 [user._id],
                 user._id,
-                "Verification Request Approved",
+                "Your account has been fully activated",
                 `Good news! Your account has been fully activated. You now have access to all app functionalities, including hazard reporting and emergency requests.`,
                 "success"
               );

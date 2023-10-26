@@ -1051,19 +1051,18 @@ assistanceRequestController.put(
             console.log("========teamMembers============================");
             console.log(teamMembers);
             console.log("====================================");
-
-            // const smsRes = await sendBulkSMS(
-            //   `Your team has been assigned to respond to ${
-            //     assistanceRequest.category
-            //   }${
-            //     assistanceRequest.street !== ""
-            //       ? ` on ${assistanceRequest.street}`
-            //       : ""
-            //   }`,
-            //   "notification",
-            //   respondersContant
-            // );
-            // console.log(smsRes);
+            /* sms uncomment */
+            /* await sendBulkSMS(
+              `Your team has been assigned to respond to ${
+                assistanceRequest.category
+              }${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`,
+              "notification",
+              respondersContant
+            ); */
 
             createNotification(
               req,
@@ -1094,6 +1093,19 @@ assistanceRequestController.put(
               } has been assigned to assist you.`,
               "success"
             );
+            /* sms uncomment */
+            /* sendSMS(
+              assistanceRequest.userId.contactNumber,
+              "notification",
+              `Your request regarding ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              } has been verified. ${
+                team.name
+              } has been assigned to assist you.`,
+              ""
+            ); */
 
             console.log(team._id);
             req.io.emit(team._id, {
@@ -1105,18 +1117,18 @@ assistanceRequestController.put(
               // assistanceRequest,
             });
           } else if (action === "respond") {
-            sendSMS(
-              assistanceRequest.userId.contactNumber,
-              "notification",
-              `Your request regarding ${assistanceRequest.category}${
-                assistanceRequest.street !== ""
-                  ? ` on ${assistanceRequest.street}`
-                  : ""
-              } has been verified. Please wait as ${
-                assistanceRequest.assignedTeam.name
-              } is on their way to assist you.`,
-              ""
-            );
+            // sendSMS(
+            //   assistanceRequest.userId.contactNumber,
+            //   "notification",
+            //   `Your request regarding ${assistanceRequest.category}${
+            //     assistanceRequest.street !== ""
+            //       ? ` on ${assistanceRequest.street}`
+            //       : ""
+            //   } has been verified. Please wait as ${
+            //     assistanceRequest.assignedTeam.name
+            //   } is on their way to assist you.`,
+            //   ""
+            // );
 
             createNotification(
               req,

@@ -221,9 +221,9 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (target === "alert") {
-    message = `${from} ${content}`;
+    message = `${from}${content}`;
   } else if (target === "notification") {
-    message = `${from} ${content}`;
+    message = `${from}${content}`;
   }
   /*  const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
@@ -272,7 +272,7 @@ const sendSMS = async (phone, target, content) => {
     target === "verification-request" ||
     target === "alert"
   ) {
-    message = `${from} ${content}`;
+    message = `${from}${content}`;
   } else if (target === "register") {
     message = `${from}Thank you for registering to SAGIP! Your verification code is ${content}. The code will expire after 15 minutes.`;
   } else if (target === "attempt") {

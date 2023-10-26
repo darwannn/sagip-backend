@@ -79,8 +79,8 @@ teamController.put("/reset", tokenMiddleware, async (req, res) => {
         req,
         respondersId,
         "team",
-        "Team Assignment",
-        "All teams have been reset.",
+        "New Team Rotation",
+        "A new team rotation will be implemented. Please check your team assignment later.",
         "info"
       );
 
@@ -347,7 +347,7 @@ teamController.put(
         if (team.members.length !== 0) {
           await createNotification(
             req,
-            [team.members],
+            team.members,
             team._id,
             `Team Assignment`,
             `You have been remove from ${team.name}.`,
@@ -551,7 +551,9 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name}.`,
+            `You have been assigned to ${team.name} as ${
+              action === "head" ? "team leader " : "a " + action
+            }.`,
             "info"
           );
         } else {
@@ -560,7 +562,9 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name}.`,
+            `You have been reassigned to ${team.name} as ${
+              action === "head" ? "team leader " : "a " + action
+            }.`,
             "info"
           );
         }
@@ -729,6 +733,7 @@ teamController.put(
   }
 ); */
 
+/* di nagamit? */
 teamController.put(
   "/update/unassign/:action",
   tokenMiddleware,
@@ -787,7 +792,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name} as member.`,
+            `You have been assigned to ${team.name} as a member.`,
             "info"
           );
         } else {
@@ -796,7 +801,7 @@ teamController.put(
             [userId],
             userId,
             `Team Assignment`,
-            `You have been assigned to ${team.name} as member.`,
+            `You have been assigned to ${team.name} as a member.`,
             "info"
           );
         }
@@ -866,7 +871,9 @@ teamController.put(
         const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
           new: true,
         });
-
+        console.log("====================================");
+        console.log(members);
+        console.log(members.length !== 0);
         if (team) {
           /* await createPusher("team", "reload", {}); */
           /* req.io.emit("reload", { receiver: "team" }); */
@@ -877,16 +884,16 @@ teamController.put(
               [head],
               team._id,
               `Team Assignment`,
-              `You have been assigned to ${team.name} as head.`,
+              `You have been assigned to ${team.name} as team leader.`,
               "info"
             );
-          if (!members.length === 0)
+          if (members.length !== 0)
             await createNotification(
               req,
               members,
               team._id,
               `Team Assignment `,
-              `You have been assigned to ${team.name} as member.`,
+              `You have been assigned to ${team.name} as a member.`,
               "info"
             );
 
@@ -978,8 +985,8 @@ teamController.put(
                     req,
                     teamMembers,
                     team._id,
-                    `Team Deleted`,
-                    `Your current team, ${team.name} has been deleted.`,
+                    `Team Archived`,
+                    `Your current team, ${team.name} has been archived.`,
                     "info"
                   );
 

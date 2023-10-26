@@ -722,6 +722,7 @@ accountController.put(
 
           if (isBanned) {
             /* req.io.emit("banned", { receiver: `${req.params.id}` }); */
+            console.log(`logout-${req.params.id}`);
             req.io.emit(`logout-${req.params.id}`);
           }
 
