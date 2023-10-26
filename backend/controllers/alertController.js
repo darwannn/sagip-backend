@@ -30,8 +30,8 @@ alertController.post(
   "/sms/add",
   tokenMiddleware,
   /*   userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     const error = {};
@@ -81,7 +81,7 @@ alertController.post(
 alertController.get(
   "/sms",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+  /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
     try {
       const alert = await Alert.find({});
 
@@ -113,8 +113,8 @@ alertController.put(
   "/sms/update/:id",
   tokenMiddleware,
   /*   userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     const error = {};
@@ -170,7 +170,7 @@ alertController.put(
 alertController.delete(
   "/sms/delete/:id",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+  /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
     try {
       const alert = await Alert.findByIdAndDelete(req.params.id);
       if (alert) {
@@ -420,16 +420,16 @@ alertController.get("/signal", async (req, res) => {
 
           if (!hasSignal) {
             return res.status(200).json({
-              success: true,
-              message: "no signal",
-              signal: 0,
               /* success: true,
-              signal: `2`,
-              message: `Malolos is under Signal No.2`,
+              message: "no signal",
+              signal: 0, */
+              success: true,
+              signal: `1`,
+              message: `Malolos is under Signal No.1`,
               track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_hanna.png`,
               name: "Hanna",
               category: "Typhoon",
-              updatedAt: Date.now(), */
+              updatedAt: Date.now(),
             });
           }
         }

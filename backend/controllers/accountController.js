@@ -73,7 +73,7 @@ accountController.post(
   /*  tokenMiddleware,
   userTypeMiddleware([
     
-    "super-admin",
+    "admin",
   ]), */
   async (req, res) => {
     try {
@@ -238,7 +238,7 @@ accountController.post(
 accountController.delete(
   "/delete/:id",
   tokenMiddleware,
-  /* userTypeMiddleware(["super-admin"]), */
+  /* userTypeMiddleware(["admin"]), */
   async (req, res) => {
     try {
       /*  const userImage = await User.findById(req.params.id);
@@ -318,8 +318,8 @@ accountController.put(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     try {
@@ -475,8 +475,8 @@ accountController.put(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     // Variable declaration
@@ -524,8 +524,8 @@ accountController.put(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */
 
   multerMiddleware.single("image"),
@@ -759,8 +759,8 @@ accountController.put(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   tokenMiddleware,
   multerMiddleware.single("image"),
@@ -863,8 +863,8 @@ accountController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   async (req, res) => {
     await handleArchive(req.params.action, req.user.id, req, res);
@@ -878,8 +878,8 @@ accountController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   async (req, res) => {
     await handleArchive(req.params.action, req.params.id, req, res);
@@ -975,8 +975,8 @@ accountController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     try {
       const error = {};

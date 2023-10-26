@@ -7,8 +7,8 @@ const isAdmin = async (req, res, next) => {
       user.userType === "resident" ||
       user.userType === "responder" ||
       user.userType === "dispatcher" ||
-      user.userType === "admin" ||
-      user.userType === "super-admin"
+      user.userType === "employee" ||
+      user.userType === "admin"
     ) {
       next();
     } else {

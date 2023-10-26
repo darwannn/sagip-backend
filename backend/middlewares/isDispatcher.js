@@ -5,8 +5,8 @@ const isAdmin = async (req, res, next) => {
     const user = await User.findById(req.user.id);
     if (
       user.userType === "dispatcher" ||
-      user.userType === "admin" ||
-      user.userType === "super-admin"
+      user.userType === "employee" ||
+      user.userType === "admin"
     ) {
       next();
     } else {

@@ -320,8 +320,8 @@ authController.put(
   //   "resident",
   //   "responder",
   //   "dispatcher",
+  //   "employee",
   //   "admin",
-  //   "super-admin",
   // ]),
   async (req, res) => {
     try {
@@ -597,8 +597,8 @@ authController.put(
 //   "resident",
 //   "responder",
 //   "dispatcher",
+//   "employee",
 //   "admin",
-//   "super-admin",
 // ]),
   async (req, res) => {
     try {
@@ -728,8 +728,8 @@ authController.post(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   async (req, res) => {
     try {
@@ -793,6 +793,7 @@ authController.post("/login", async (req, res) => {
       if (user.attempt >= 5) {
         let generatedCode = await generateCode();
         user.verificationCode = generatedCode;
+        user.codeExpiration = moment().add(15, "minutes");
         await user.save();
         let identifierType = await checkIdentifierType(identifier);
         // let generatedCode = await generateCode();
@@ -1070,8 +1071,8 @@ authController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     try {
       const error = {};
@@ -1168,8 +1169,8 @@ authController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     try {
       // let action = req.params.action.toLowerCase();
@@ -1247,8 +1248,8 @@ authController.post(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   async (req, res) => {
     try {
@@ -1287,8 +1288,8 @@ authController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   multerMiddleware.single("selfieImage"),
   async (req, res) => {
@@ -1339,7 +1340,7 @@ authController.put(
         );
 
         if (user) {
-          const userIds = await getUsersId("super-admin");
+          const userIds = await getUsersId("admin");
           /* await createPusher("verification-request-web", "reload", {}); */
           req.io.emit("verification-request");
           createNotification(
@@ -1383,7 +1384,7 @@ authController.get(
   tokenMiddleware,
   /* userTypeMiddleware([
   
-  "super-admin",
+  "admin",
 ]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
@@ -1434,8 +1435,8 @@ authController.get(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
@@ -1479,7 +1480,7 @@ authController.get(
   "/verify-identity/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
-  "super-admin",
+  "admin",
 ]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
@@ -1519,7 +1520,7 @@ authController.put(
   "/verification-request/:action/:id",
   tokenMiddleware,
   //   userTypeMiddleware([
-  // "super-admin",
+  // "admin",
   // ]),
   async (req, res) => {
     const error = {};
@@ -1670,7 +1671,7 @@ authController.put(
   "/verification-request/:id",
   //   tokenMiddleware,
   //   userTypeMiddleware([
-  // "super-admin",
+  // "admin",
   // ]),
   async (req, res) => {
     try {

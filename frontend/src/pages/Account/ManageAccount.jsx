@@ -64,7 +64,7 @@ const Account = ({ user }) => {
         return (
           categoryMatch &&
           searchMatch &&
-          ["responder", "dispatcher", "admin", "super-admin"].includes(
+          ["responder", "dispatcher", "employee", "admin"].includes(
             account.userType
           )
         );

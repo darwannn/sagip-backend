@@ -30,8 +30,8 @@ assistanceRequestController.post(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   multerMiddleware.single("proof"),
   isInMalolos,
@@ -358,8 +358,8 @@ assistanceRequestController.get(
   tokenMiddleware,
   /* userTypeMiddleware([
   "responder",
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     try {
       /* let userId = "64a6df2b64b1389a52aa020d"; */
@@ -415,8 +415,8 @@ assistanceRequestController.get(
   tokenMiddleware,
   /* userTypeMiddleware([
   "responder",
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     try {
       /*    let userId = "64a6df2b64b1389a52aa020d"; */
@@ -572,8 +572,8 @@ assistanceRequestController.put(
   //   "resident",
   //   "responder",
   //   "dispatcher",
+  //   "employee",
   //   "admin",
-  //   "super-admin",
   // ]),
   multerMiddleware.single("proof"),
 
@@ -765,8 +765,8 @@ assistanceRequestController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   multerMiddleware.single("proof"),
   isInMalolos,
@@ -936,8 +936,8 @@ assistanceRequestController.put(
   /* userTypeMiddleware([
       "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
@@ -1217,8 +1217,8 @@ assistanceRequestController.put(
 //   userTypeMiddleware([
 //       "responder",
 //   "dispatcher",
+//   "employee",
 //   "admin",
-//   "super-admin",
 // ]),
 //     multerMiddleware.single("image"),
   async (req, res) => {
@@ -1268,8 +1268,8 @@ assistanceRequestController.delete(
   //   userTypeMiddleware([
   //       "responder",
   //   "dispatcher",
+  //   "employee",
   //   "admin",
-  //   "super-admin",
   // ]),
   async (req, res) => {
     const error = {};
@@ -1360,8 +1360,8 @@ assistanceRequestController.delete(
 //   userTypeMiddleware([
 //       "responder",
 //   "dispatcher",
+//   "employee",
 //   "admin",
-//   "super-admin",
 // ]),
   async (req, res) => {
     const error = {};
@@ -1484,8 +1484,8 @@ assistanceRequestController.put(
   /* userTypeMiddleware([
       "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   async (req, res) => {
     const error = {};

@@ -96,12 +96,12 @@ statisticsController.get(
           (user) => user.userType === "responder"
         ).length;
 
-        const admins = staffs.filter(
-          (user) => user.userType === "admin"
+        const employees = staffs.filter(
+          (user) => user.userType === "employee"
         ).length;
 
-        const superAdmins = staffs.filter(
-          (user) => user.userType === "super-admin"
+        const admins = staffs.filter(
+          (user) => user.userType === "admin"
         ).length;
         const verifiedUsers = users.filter((user) => {
           return user.status === "verified" && user.userType === "resident";
@@ -136,8 +136,8 @@ statisticsController.get(
 
           dispatchers,
           responders,
+          employees,
           admins,
-          superAdmins,
           assistanceRequests: assistanceRequests,
 
           newAssistanceRequest,

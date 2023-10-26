@@ -28,8 +28,8 @@ hazardReportController.post(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   multerMiddleware.single("proof"),
   isInMalolos,
@@ -302,8 +302,8 @@ hazardReportController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   multerMiddleware.single("proof"),
   isInMalolos,
@@ -459,8 +459,8 @@ hazardReportController.put(
   /* userTypeMiddleware([
      "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   /*   multerMiddleware.single("image"), */
 
@@ -561,8 +561,8 @@ hazardReportController.delete(
   /* userTypeMiddleware([
       "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */
   async (req, res) => {
     try {
@@ -637,8 +637,8 @@ hazardReportController.put(
   //   userTypeMiddleware([
   //       "responder",
   //   "dispatcher",
+  //   "employee",
   //   "admin",
-  //   "super-admin",
   // ]),
   async (req, res) => {
     const error = {};

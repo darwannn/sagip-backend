@@ -43,8 +43,8 @@ export const userTypeCategory = [
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ];
 
 export const hazardCategory = [

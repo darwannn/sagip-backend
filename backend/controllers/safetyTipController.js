@@ -28,7 +28,7 @@ const folderPath = "sagip/media/safety-tips";
 safetyTipController.post(
   "/add",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */
+  /*  userTypeMiddleware(["employee", "admin"]), */
   multerMiddleware.single("image"),
   async (req, res) => {
     const error = {};
@@ -214,8 +214,8 @@ safetyTipController.get(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     try {
@@ -277,7 +277,7 @@ safetyTipController.get("/:id", async (req, res) => {
 
 safetyTipController.put(
   "/update/:id",
-  /*  userTypeMiddleware(["admin", "super-admin"]), */
+  /*  userTypeMiddleware(["employee", "admin"]), */
   tokenMiddleware,
   multerMiddleware.single("image"),
   async (req, res) => {
@@ -385,8 +385,8 @@ safetyTipController.delete(
   "/delete/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]),  */ async (req, res) => {
     try {
       const safetyTipImage = await SafetyTip.findById(req.params.id);
@@ -436,8 +436,8 @@ safetyTipController.put(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     try {

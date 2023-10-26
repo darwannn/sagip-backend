@@ -16,8 +16,8 @@ wellnessSurveyController.post(
   "/add",
   tokenMiddleware,
   /* userTypeMiddleware([
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     const error = {};
     try {
@@ -312,8 +312,8 @@ wellnessSurveyController.get(
     "resident",
     "responder",
     "dispatcher",
+    "employee",
     "admin",
-    "super-admin",
   ]), */ async (req, res) => {
     try {
       const wellnessSurvey = await WellnessSurvey.findOne({ status: "active" });
@@ -440,8 +440,8 @@ wellnessSurveyController.put(
   "/update/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     const error = {};
@@ -552,8 +552,8 @@ wellnessSurveyController.put(
   "resident",
   "responder",
   "dispatcher",
+  "employee",
   "admin",
-  "super-admin",
 ]), */ async (req, res) => {
     try {
       const { answer } = req.body;
@@ -599,8 +599,8 @@ wellnessSurveyController.delete(
   "/delete/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     try {
@@ -635,8 +635,8 @@ wellnessSurveyController.put(
   "/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     try {

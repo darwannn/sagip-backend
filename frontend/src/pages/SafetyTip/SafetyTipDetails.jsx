@@ -60,7 +60,7 @@ const SafetyTipDetails = () => {
           />
           <div>
             <h3>{safetyTipDetails.title}</h3>
-            {user.userType === "admin" || user.userType === "super-admin" ? (
+            {user.userType === "employee" || user.userType === "admin" ? (
               <div>
                 {" "}
                 {isSaved ? (

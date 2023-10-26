@@ -22,8 +22,8 @@ emergencyFacilityController.post(
   "/add",
   tokenMiddleware,
   /*  userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   multerMiddleware.single("image"),
   async (req, res) => {
@@ -210,8 +210,8 @@ emergencyFacilityController.put(
   "/update/:id",
   tokenMiddleware,
   /*   userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   multerMiddleware.single("image"),
   async (req, res) => {
@@ -338,8 +338,8 @@ emergencyFacilityController.delete(
   "/delete/:id",
   tokenMiddleware,
   /*  userTypeMiddleware([
+    "employee",
     "admin",
-    "super-admin",
   ]), */
   async (req, res) => {
     try {

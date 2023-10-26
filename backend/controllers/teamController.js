@@ -21,7 +21,7 @@ const {
 teamController.post(
   "/add",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */
+  /*  userTypeMiddleware(["employee", "admin"]), */
   async (req, res) => {
     const error = {};
     try {
@@ -331,7 +331,7 @@ teamController.get("/:id", async (req, res) => {
 teamController.put(
   "/reset/:id",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+  /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
     const error = {};
     try {
       const updateFields = { head: null, members: [] };
@@ -392,7 +392,7 @@ teamController.put(
 teamController.delete(
   "/delete/:id",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */
+  /*  userTypeMiddleware(["employee", "admin"]), */
   async (req, res) => {
     try {
       const team = await Team.findByIdAndDelete(req.params.id);
@@ -440,7 +440,7 @@ teamController.delete(
 teamController.put(
   "/update/assignment/:action",
   tokenMiddleware,
-  //userTypeMiddleware(["admin", "super-admin"]),
+  //userTypeMiddleware(["employee", "admin"]),
   async (req, res) => {
     try {
       let action = req.params.action.toLowerCase();
@@ -590,7 +590,7 @@ teamController.put(
 /* teamController.put(
   "/update/assignment/:action",
   tokenMiddleware,
-   //userTypeMiddleware(["admin", "super-admin"]),
+   //userTypeMiddleware(["employee", "admin"]),
     async (req, res) => {
     try {
       let action = req.params.action.toLowerCase();
@@ -732,7 +732,7 @@ teamController.put(
 teamController.put(
   "/update/unassign/:action",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+  /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
     try {
       const { newTeamId, userId } = req.body;
 
@@ -827,7 +827,7 @@ teamController.put(
 teamController.put(
   "/update/:id",
   tokenMiddleware,
-  /*  userTypeMiddleware(["admin", "super-admin"]), */ async (req, res) => {
+  /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
     const error = {};
     try {
       let { head, members } = req.body;
@@ -926,8 +926,8 @@ teamController.put(
   //   userTypeMiddleware([
   //       "responder",
   //   "dispatcher",
+  //   "employee",
   //   "admin",
-  //   "super-admin",
   // ]),
   async (req, res) => {
     const error = {};
