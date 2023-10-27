@@ -510,6 +510,20 @@ hazardReportController.put(
               "success"
             );
 
+            createNotificationAll(
+              req,
+              hazardReport._id,
+              `Ongoing Hazard`,
+              `${
+                hazardReport.category.toLowerCase() === "others"
+                  ? "There is an ongoing hazard"
+                  : hazardReport.category
+              }${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }.`,
+              "info",
+              true
+            );
             return res.status(200).json({
               success: true,
               message: "Hazard Report Verified",

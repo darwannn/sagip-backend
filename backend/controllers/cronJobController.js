@@ -8,7 +8,8 @@ const { MongoClient, ObjectId } = require("mongodb");
 const { promises: fs } = require("fs");
 
 const path = require("path");
-
+const { getTyphoonSignal, getWeatherData } = require("./alertController");
+const { createNotificationAll } = require("./notificationController");
 const { cloudinary } = require("../utils/config");
 const currentDate = moment().format("MMMM DD, YYYY");
 const folderPath = `sagip/backup/${currentDate}`;
@@ -124,6 +125,36 @@ cronJobController.post("/archive", async (req, res) => {
       message: "Internal Server Error: " + error,
     });
   }
+});
+
+cronJobController.get("/alert/signal", async (req, res) => {
+  const response = await getTyphoonSignal();
+  if (response.success) {
+    const { signal, message, category, name } = response;
+    console.log();
+    if (signal !== 0) {
+      const alertTitle = `${category} ${name} Update`;
+      const alertMessage = `${message}. Stay indoors or evacuate to a safer place when necessary.`;
+      createNotificationAll(req, "", alertTitle, alertMessage, "warning", true);
+    }
+  }
+  res.status(200).json(response);
+});
+
+cronJobController.get("/alert/weather", async (req, res) => {
+  const response = await getWeatherData();
+  if (response.success) {
+    const { weather } = response;
+
+    const alertTitle = `Malolos City Weather Update`;
+    const alertMessage = `Good Morning Maloleños! Expect ${
+      ["a", "e", "i", "o", "u"].includes(weather[0].toLowerCase())
+        ? "an "
+        : "a "
+    } ${weather} weather condition today.`;
+    createNotificationAll(req, "", alertTitle, alertMessage, "warning", true);
+  }
+  res.status(200).json(response);
 });
 
 cronJobController.post("/survey/active", async (req, res) => {

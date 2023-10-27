@@ -88,7 +88,7 @@ safetyTipController.post(
                 "Safety Tip",
                 `Read the recently added safety tip: ${title}.`,
                 "info",
-                true
+                false
               );
             }
             return res.status(200).json({

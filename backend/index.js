@@ -7,7 +7,7 @@ const socketIO = require("socket.io");
 
 const authController = require("./controllers/authController");
 const accountController = require("./controllers/accountController");
-const alertController = require("./controllers/alertController");
+const { alertController } = require("./controllers/alertController");
 const { apiController } = require("./controllers/apiController");
 const safetyTipController = require("./controllers/safetyTipController");
 const emergencyFacilityController = require("./controllers/emergencyFacilityController");

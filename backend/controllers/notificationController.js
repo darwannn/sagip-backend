@@ -123,9 +123,14 @@ const createNotificationAll = async (
     console.log(fcmTokens);
     createPushNotificationToken(title, message, fcmTokens, linkId);
   }
-  const users = await User.find({
-    userType: "resident",
-  });
+  let userTypes = {};
+  if (sendAllPushNotif) {
+    userTypes = { userType: { $in: ["resident", "responder"] } };
+  } else {
+    userTypes = { userType: "resident" };
+  }
+
+  const users = await User.find(userTypes);
   if (users) {
     users.map(async (user) => {
       req.io.emit(`notification-${user._id}`);
