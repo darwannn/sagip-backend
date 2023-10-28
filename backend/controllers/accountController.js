@@ -1049,14 +1049,14 @@ accountController.put(
                 "Your password has been changed successfully. You can now login with your new password",
             });
           } else {
-            createNotification(
+            /* createNotification(
               req,
               [req.user.id],
               req.user.id,
               "Password Changed!",
               "Your password has been changed successfully.",
               "info"
-            );
+            ); */
             return res.status(200).json({
               success: true,
               message: "Your password has been changed successfully",

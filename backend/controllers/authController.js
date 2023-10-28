@@ -1207,10 +1207,10 @@ authController.put(
         if (identifierType === "email") {
           console.log("send email");
 
-          sendEmail(identifier, action, user.verificationCode);
+          sendEmail(identifier, "email-verification", user.verificationCode);
         } else if (identifierType === "contactNumber") {
           console.log("send sms");
-          sendSMS(identifier, action, user.verificationCode);
+          sendSMS(identifier, "sms-verification", user.verificationCode);
           /*  return res.status(200).json({
             success: true,
             message: `Verification code has been resent to ${identifier}`,

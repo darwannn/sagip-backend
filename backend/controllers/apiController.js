@@ -432,11 +432,7 @@ async function sendEmail(to, target, code) {
                                     ${content}
                                 </td>
                             </tr>
-                            <tr>
-                                <td style='color:#292929!important; font-weight: bold; padding: 5px 0px;'>
-                                    Please enter this verification code:
-                                </td>
-                            </tr>
+                           
                             <tr>
                                 <td>
                                       <div style='color:#292929; font-size: 60px; font-weight: bold; padding: 10px 0px;'>${code}</div>
