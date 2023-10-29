@@ -25,9 +25,15 @@ const TeamSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-   
+
     archivedDate: {
       type: Date,
+    },
+
+    requestId: {
+      type: mongoose.Types.ObjectId,
+      ref: "AssistanceRequest",
+      default: null,
     },
   },
   { timestamps: true }

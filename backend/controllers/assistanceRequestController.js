@@ -944,6 +944,7 @@ assistanceRequestController.put(
     const error = {};
     try {
       let action = req.params.action.toLowerCase();
+
       const { assignedTeam } = req.body;
       // let = status = "";
       let updateFields = {};
@@ -951,6 +952,15 @@ assistanceRequestController.put(
       if (action === "verify") {
         if (isEmpty(assignedTeam))
           error["assignedTeam"] = "Please select a team to respond";
+        const assistanceReqTeam = await AssistanceRequest.findById(
+          req.params.id
+        );
+        if (assistanceReqTeam.assignedTeam) {
+          return res.status(200).json({
+            success: true,
+            message: "A team has already been assigned",
+          });
+        }
       }
       // console.log(assignedTeam);
       let respondersContant = [];
@@ -987,6 +997,11 @@ assistanceRequestController.put(
               respondersName: respondersName,
             },
           };
+          await Team.findByIdAndUpdate(
+            assignedTeam,
+            { requestId: req.params.id },
+            { new: true }
+          );
         } else if (action === "resolve") {
           updateFields = {
             status: "resolved",
@@ -998,6 +1013,20 @@ assistanceRequestController.put(
               isBeingResponded: 1,
             },
           };
+
+          const assistanceReqTeam = await AssistanceRequest.findById(
+            req.params.id
+          );
+          await Team.findByIdAndUpdate(
+            assistanceReqTeam.assignedTeam,
+            {
+              requestId: null,
+              $inc: {
+                response: 1,
+              },
+            },
+            { new: true }
+          );
         } else if (action === "arrive") {
           console.log("arrive");
           updateFields = {
@@ -1606,7 +1635,7 @@ assistanceRequestController.put(
                 "error"
               );
               req.io.emit("assistance-request");
-
+              req.io.emit(`${assistanceRequest.userId._id}`);
               req.io.emit(`rejected-${assistanceRequest.userId._id}`, {
                 assistanceRequest: assistanceRequest,
               });

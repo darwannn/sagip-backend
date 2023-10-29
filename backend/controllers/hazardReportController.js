@@ -491,7 +491,7 @@ hazardReportController.put(
           req.params.id,
           updateFields,
           { new: true }
-        );
+        ).populate("userId", "-password");
         if (hazardReport) {
           /* await createPusher("hazard-report-mobile", "reload", {}); */
           /* await createPusher(`${hazardReport.userId}`, "reload", {}); */
@@ -667,11 +667,20 @@ hazardReportController.put(
           if (action === "archive") {
             updateFields = {
               isArchived: true,
+              status: "cancelled",
+              $set: {
+                cancelled: {
+                  reason: reason,
+                  note: note,
+                  dateCancelled: Date.now(),
+                },
+              },
               archivedDate: Date.now(),
             };
           } else if (action === "unarchive") {
             updateFields = {
               isArchived: false,
+              status: "unverified",
               $unset: { archivedDate: Date.now() },
             };
           }

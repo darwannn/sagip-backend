@@ -111,6 +111,7 @@ teamController.get("/", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     })
+      .populate("requestId")
       .populate("head", "-password")
       .populate("members", "-password");
 
@@ -143,6 +144,7 @@ teamController.get("/myteam", tokenMiddleware, async (req, res) => {
       /* archivedDate: { $exists: false },
       isArchived: false, */
     })
+      .populate("requestId")
       .populate("head", "-password")
       .populate("members", "-password");
 
@@ -185,6 +187,7 @@ teamController.get("/active", async (req, res) => {
       /* archivedDate: { $exists: false },
       isArchived: false, */
     })
+      .populate("requestId")
       .populate("head", "-password")
       .populate("members", "-password");
 
@@ -216,6 +219,7 @@ teamController.get("/responder", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     })
+      .populate("requestId")
       .populate("head")
       .populate("members");
 
@@ -304,6 +308,7 @@ teamController.get("/:id", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     })
+      .populate("requestId")
       .populate("head", "-password")
       .populate("members", "-password");
 

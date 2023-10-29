@@ -51,6 +51,17 @@ const HazardReportSchema = new mongoose.Schema(
     archivedDate: {
       type: Date,
     },
+    cancelled: {
+      reason: {
+        type: String,
+      },
+      note: {
+        type: String,
+      },
+      dateCancelled: {
+        type: Date,
+      },
+    },
   },
   { timestamps: true }
 );
