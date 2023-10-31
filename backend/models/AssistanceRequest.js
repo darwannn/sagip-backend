@@ -92,11 +92,13 @@ const AssistanceRequestSchema = new mongoose.Schema(
       },
     ],
 
-    preAssessmentId: {
-      type: mongoose.Types.ObjectId,
-      ref: "PreAssessment",
-      default: null,
-    },
+    preAssessmentId: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "PreAssessment",
+        default: null,
+      },
+    ],
   },
   { timestamps: true }
 );

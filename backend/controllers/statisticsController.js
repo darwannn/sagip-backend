@@ -23,7 +23,8 @@ statisticsController.get(
       const teams = await Team.find({});
 
       const newAssistanceRequest = assistanceRequests.filter(
-        (request) => request.status === "unverified"
+        (request) =>
+          request.status === "unverified" || request.status === "incomplete"
       ).length;
       const ongoingAssistanceRequest = assistanceRequests.filter(
         (request) => request.status === "ongoing"
@@ -63,7 +64,8 @@ statisticsController.get(
       if (users) {
         /* assistanceRequest */
         const pendingAssistanceRequests = assistanceRequests.filter(
-          (request) => request.status === "unverified"
+          (request) =>
+            request.status === "unverified" || request.status === "incomplete"
         ).length;
         const pendingHazardReports = hazardReports.filter(
           (report) => report.status === "unverified"
@@ -81,13 +83,18 @@ statisticsController.get(
         ).length;
         users.length;
         const usersThisMonth = users.filter((user) => {
-          moment(user.createdAt).isSame(moment(), "month") &&
-            user.userType === "resident";
+          return (
+            moment(user.createdAt).isSame(moment(), "month") &&
+            user.userType === "resident"
+          );
         }).length;
+
+        console.log(users.length);
+        console.log(usersThisMonth);
         const staffs = users.filter((user) => user.userType !== "resident");
-        const activeUsersThisMonth = users.filter((user) =>
+        /*  const activeUsersThisMonth = users.filter((user) =>
           moment(user.updatedAt).isSame(moment(), "month")
-        ).length;
+        ).length; */
         const dispatchers = staffs.filter(
           (user) => user.userType === "dispatcher"
         ).length;
@@ -129,7 +136,7 @@ statisticsController.get(
           staffs: staffs.length,
           responses,
           usersThisMonth: usersThisMonth,
-          activeUsersThisMonth: activeUsersThisMonth,
+          /* activeUsersThisMonth: activeUsersThisMonth, */
 
           verifiedUsers,
           unverifiedUsers,

@@ -309,6 +309,7 @@ assistanceRequestController.get(
         isArchived: false, */
       })
         .populate("head", "-password")
+        .populate("preAssessmentId")
         .populate("members", "-password");
       console.log("====================================");
       console.log(req.user.id);
@@ -537,6 +538,7 @@ assistanceRequestController.get("/:id", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     })
+      .populate("preAssessmentId")
       .populate("userId", "-password")
       .populate({
         path: "assignedTeam",
