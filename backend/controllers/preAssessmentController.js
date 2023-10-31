@@ -38,7 +38,7 @@ preAssessmentController.get("/:id", async (req, res) => {
 });
 
 preAssessmentController.post(
-  "/create/:id",
+  "/add/:id",
   tokenMiddleware,
   //   userTypeMiddleware([
   //   "resident",
