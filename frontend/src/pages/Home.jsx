@@ -26,7 +26,7 @@ function Home() {
   const [isSOSPlaying, setIsSOSPlaying] = useState(false); // Added intervalId state
 
   useEffect(() => {
-    if ("Notification" in window) {
+    /* if ("Notification" in window) {
       Notification.requestPermission()
         .then((permission) => {
           if (permission === "granted") {
@@ -49,70 +49,54 @@ function Home() {
     } else {
       console.log("Notifications not supported");
     }
-
+ */
     /* preassessment */
     const fetchData = async () => {
-      if (serverResponse !== "") {
+      /*  if (serverResponse !== "") {
         toast.success(serverResponse);
 
         dispatch(getServerResponse());
-      }
+      } */
       try {
         const formData = new FormData();
 
         formData.append("isSelfReported", true);
 
-        formData.append("hospitalName", "Ace Hospital");
-        formData.append("medicalCondition", "Asthma");
+        formData.append("firstname", "MyFirstname");
+        formData.append("lastname", "MyLastname");
+        formData.append("middlename", "MyMiddlename");
+        formData.append("contactNumber", "09999999999");
+        formData.append("address", "Kalsada, Tabe, Guiguinto, Bulacan");
+        formData.append("incidentLocation", "Malolos, Bulacan");
+        formData.append("incidentDescription", "nadapang bata");
 
-        formData.append("loc", "Alert");
-        formData.append("speech", "Coherent");
-        formData.append("skin", "Normal");
-        formData.append("color", "Normal");
-        formData.append("respiration", "Normal");
-        formData.append("pulse", "Normal");
-        formData.append("pupils", "Equal");
+        formData.append("concerns", "malay ko");
+        formData.append("allergies", "shrimp");
+        formData.append("medications", "paracetamol");
+        formData.append("signs", "signs 0");
+        formData.append("speech", "speech 1");
+        formData.append("skin", "skin 2");
+        formData.append("color", "color 3");
+        formData.append("breathing", "breathing 4");
+        formData.append("pulse", "pulse 5");
+        formData.append("pupils", "pupils 6");
 
-        // Example for "medicalHistory" as an array
-
+        var medicalCondition = ["fracutre", "seizure"];
         var medicalHistory = ["Stroke", "Heart Attack", "Diabetes"];
+
         for (var i = 0; i < medicalHistory.length; i++) {
           formData.append("medicalHistory[]", medicalHistory[i]);
         }
-
-        // Example for "allergies" and "medications" as arrays
-        formData.append("allergies[]", "None");
-        formData.append("medications[]", "None");
-        // Example for "vitalSigns" as an array of objects
-        var bloodPressure = ["120/60", "150/20"];
-        for (var j = 0; j < bloodPressure.length; j++) {
-          formData.append("bloodPressure[]", bloodPressure[j]);
+        for (var j = 0; j < medicalCondition.length; j++) {
+          formData.append("medicalCondition[]", medicalCondition[j]);
         }
-        // formData.append("bloodPressure[]", "");
-        formData.append("pulseRate[]", "");
-        formData.append("temperature[]", "");
-        formData.append("respiratoryRate[]", "");
-        formData.append("oxygenSaturation[]", "");
-        formData.append("glucoseLevel[]", "");
-        /*    formData.append("bloodPressure[]", "120/80");
-        formData.append("pulseRate[]", "90");
-        formData.append("temperature[]", "89");
-        formData.append("oxygenSaturation[]", "56");
-        formData.append("glucoseLevel[]", "34"); */
-
-        formData.append("injury", "Broken neck");
-        formData.append("management", "Applied pressure");
-        formData.append("fullName", "DD");
-        formData.append("birthdate", Date.now());
-        formData.append("gender", "Required field");
-        formData.append("address", "Required field");
-        formData.append("contactNumber", "Required field");
-
-        const options = { Authorization: `Bearer ${token}` };
-
+        //create = id = assistance request id
+        //update = id = pre-assessment id
         const weatherResponse1 = await request(
-          "/assistance-request/pre-assessment/64aa696b7cb8e80d87602f1c",
-          "PUT",
+          "/pre-assessment/create/6532a9714ff6000e68f13b63",
+          /*   "/pre-assessment/update/654139168ef18c545095af54", */
+          /* "PUT", */
+          "POST",
           { Authorization: `Bearer ${token}` },
           formData
         );

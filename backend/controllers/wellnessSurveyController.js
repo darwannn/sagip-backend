@@ -321,11 +321,17 @@ wellnessSurveyController.get(
       const user = await User.findOne({
         _id: req.user.id,
       });
+      if (!wellnessSurvey) {
+        return res.status(200).json({
+          success: false,
+          message: "No Active Survey ",
+        });
+      }
 
       /*   if (user.userType === "resident") { */
       let surveyResponse = [
-        ...wellnessSurvey.affected,
-        ...wellnessSurvey.unaffected,
+        ...(wellnessSurvey.affected || []),
+        ...(wellnessSurvey.unaffected || []),
       ];
       let isResponded = false;
 

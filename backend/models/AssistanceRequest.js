@@ -63,10 +63,7 @@ const AssistanceRequestSchema = new mongoose.Schema(
       type: String,
       default: "unverified",
     },
-    isSelfReported: {
-      type: Boolean,
-      default: false,
-    },
+
     dateResolved: {
       type: Date,
     },
@@ -94,107 +91,11 @@ const AssistanceRequestSchema = new mongoose.Schema(
         type: String,
       },
     ],
-    preAssessment: {
-      fullName: {
-        type: String,
-      },
-      birthdate: {
-        type: Date,
-      },
-      gender: {
-        type: String,
-      },
-      address: {
-        type: String,
-      },
-      contactNumber: {
-        type: String,
-      },
 
-      hospitalName: {
-        type: String,
-      },
-
-      medicalHistory: [
-        {
-          type: String,
-        },
-      ],
-      medicalCondition: {
-        type: String,
-      },
-
-      allergies: [
-        {
-          type: String,
-          /* 
-          default: [], */
-        },
-      ],
-      medications: [
-        {
-          type: String,
-
-          /*  default: [], */
-        },
-      ],
-
-      signs: {
-        loc: {
-          type: String,
-        },
-        speech: {
-          type: String,
-        },
-        skin: {
-          type: String,
-        },
-        color: {
-          type: String,
-        },
-        respiration: {
-          type: String,
-        },
-        pulse: {
-          type: String,
-        },
-        pupils: {
-          type: String,
-        },
-      },
-
-      vitalSigns: [
-        {
-          bloodPressure: {
-            type: String,
-          },
-          pulseRate: {
-            type: String,
-          },
-          respiratoryRate: {
-            type: String,
-          },
-          temperature: {
-            type: String,
-          },
-          oxygenSaturation: {
-            type: String,
-          },
-          glucoseLevel: {
-            type: String,
-          },
-          dateRecorded: {
-            type: Date,
-          },
-        },
-      ],
-      injury: {
-        type: String,
-      },
-
-      management: {
-        type: String,
-      },
+    preAssessmentId: {
+      type: mongoose.Types.ObjectId,
+      ref: "PreAssessment",
+      default: null,
     },
   },
   { timestamps: true }

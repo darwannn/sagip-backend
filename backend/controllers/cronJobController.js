@@ -92,7 +92,7 @@ cronJobController.post("/backup", async (req, res) => {
 cronJobController.post("/archive", async (req, res) => {
   try {
     const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 360);
 
     await WellnessSurvey.deleteMany({
       archivedDate: { $lte: thirtyDaysAgo },
