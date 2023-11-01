@@ -223,6 +223,7 @@ authController.post("/register", async (req, res) => {
     });
   }
 });
+
 authController.post("/validate/:action", async (req, res) => {
   try {
     const error = {};
@@ -842,6 +843,7 @@ authController.post("/login", async (req, res) => {
             console.log(user.status);
             console.log("====================================");
             if (!(user.status === "unverified")) {
+              /*    if (!user.isArchived) { */
               // Check if the user has exceeded the maximum number of attempts
 
               // Reset the attempt number if the password is correct
@@ -870,20 +872,21 @@ authController.post("/login", async (req, res) => {
                   ""
                 ),
               });
-              /* } else {
-              const data = calculateArchivedDate();
-              if (data) {
-                const { daysLeft, deletionDate } = data;
-                return res.status(200).json({
-                  isArchived: true,
-                  success: false,
-                  daysLeft,
-                  deletionDate,
-                  message: `Your account is scheduled for Deltetion on ${deletionDate}. 
-                  To keep your account deletion scheduled in ${daysLeft}, you can simply log out.`,
-                });
-              }
-            } */
+              /*   } else {
+                //  const data = calculateArchivedDate();
+                if (data) {
+                    //  const { daysLeft, deletionDate } = data;
+                  return res.status(200).json({
+                    isArchived: true,
+                    success: false,
+                  //   daysLeft,
+                  // deletionDate,
+                  // message: `Your account is scheduled for Deltetion on ${deletionDate}. 
+                  // To keep your account deletion scheduled in ${daysLeft}, you can simply log out.`,
+                    message: `Your account is disabled`,
+                  });
+                }
+              } */
             } else {
               /* return res.status(500).json({
                 success: false,

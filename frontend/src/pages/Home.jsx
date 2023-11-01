@@ -93,7 +93,7 @@ function Home() {
         //create = id = assistance request id
         //update = id = pre-assessment id
         const weatherResponse1 = await request(
-          /*       "/pre-assessment/create/6532a9714ff6000e68f13b63", */
+          /*       "/pre-assessment/add/6532a9714ff6000e68f13b63", */
           "/pre-assessment/update/654139168ef18c545095af54",
           "PUT",
           /* "POST", */

@@ -235,6 +235,45 @@ accountController.post(
   }
 );
 
+accountController.put(
+  "/reactivate",
+  tokenMiddleware,
+  //   userTypeMiddleware([
+  //       "responder",
+  //   "dispatcher",
+  //   "employee",
+  //   "admin",
+  // ]),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        {
+          isArchived: false,
+          $unset: { archivedDate: Date.now() },
+        },
+        { new: true }
+      );
+      if (user) {
+        return res.status(200).json({
+          success: true,
+          message: "Account Reactivated",
+        });
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Internal Server Error",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
 accountController.delete(
   "/delete/:id",
   tokenMiddleware,
