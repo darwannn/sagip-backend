@@ -10,14 +10,7 @@ notificationController.get("/", tokenMiddleware, async (req, res) => {
     const notification = await Notification.find({ userId: req.user.id });
 
     if (notification) {
-      // console.log(notification._doc);
       return res.status(200).json(notification);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        notification,*/
-        ...notification,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -102,7 +95,6 @@ const createNotification = async (req, ids, linkId, title, message, type) => {
   const fcmTokens = users.map((user) => user.fcmToken).flat();
 
   createPushNotificationToken(title, message, fcmTokens, linkId);
-  console.log("notifications created");
 };
 
 const createNotificationAll = async (
@@ -120,7 +112,6 @@ const createNotificationAll = async (
       userType: "resident",
     });
     const fcmTokens = users.flatMap((user) => user.fcmToken);
-    console.log(fcmTokens);
     createPushNotificationToken(title, message, fcmTokens, linkId);
   }
   let userTypes = {};
@@ -144,7 +135,6 @@ const createNotificationAll = async (
       await notification.save();
     });
   }
-  console.log("notification created all");
 };
 
 const createPushNotificationToken = (title, body, tokens, linkId) => {
@@ -180,9 +170,6 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
         return "Internal Server Error: " + error;
       });
   }
-  console.log("====================================");
-  console.log("ahhhhhh");
-  console.log("====================================");
 };
 
 const createPushNotificationTopic = (title, body, topic, linkId) => {

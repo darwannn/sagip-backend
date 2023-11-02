@@ -12,15 +12,10 @@ preAssessmentController.get("/:id", async (req, res) => {
   try {
     const preAssessment = await PreAssessment.findOne({
       _id: req.params.id,
-      /*   archivedDate: { $exists: false },
-        isArchived: false, */
     }).populate("requestId");
 
     if (preAssessment) {
-      /*      return res.status(200).json(assistanceRequest); */
       return res.status(200).json({
-        /* success: true,
-          message: "found", */
         ...preAssessment._doc,
       });
     } else {

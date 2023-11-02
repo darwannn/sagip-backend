@@ -31,10 +31,6 @@ const EmergencyFacilitySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    /*   isFull: {
-      type: Boolean,
-      default: false,
-    }, */
   },
   { timestamps: true }
 );

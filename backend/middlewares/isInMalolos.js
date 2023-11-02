@@ -13,16 +13,11 @@ const isInMalolos = async (req, res, next) => {
       console.log(longitude);
 
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
-      // const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${120.80829156110384},${14.847181109982058}&key=${
-      /*  process.env.GOOGLE_MAPS_API_KEY
-      }`; */
 
-      /*  console.log(geocodeUrl); */
       const response = await axios.get(geocodeUrl);
 
       const results = response.data.results;
-      /* console.log("geocodeUrl");
-      console.log(results); */
+
       if (results && results.length > 0) {
         const addressComponents = results[0].address_components;
         let streetCode = addressComponents.find((component) =>

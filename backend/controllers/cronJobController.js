@@ -21,10 +21,10 @@ cronJobController.post("/backup", async (req, res) => {
       useUnifiedTopology: true,
     });
     await client.connect();
-    console.log("Connected successfully to the server");
+
     const db = client.db("sagip");
     const collections = await db.listCollections().toArray();
-    console.log(collections);
+
     for (const collection of collections) {
       const query = {};
       const docs = await db.collection(collection.name).find(query).toArray();
@@ -36,9 +36,7 @@ cronJobController.post("/backup", async (req, res) => {
             transformedDoc[field] = { $date: doc[field] };
           } else if (Array.isArray(doc[field])) {
             transformedDoc[field] = doc[field].map((element) => {
-              /* if (typeof element === "object" && element instanceof Date) {
-                return { $date: element };
-              } else */ if (isValidObjectId(doc[element])) {
+              if (isValidObjectId(doc[element])) {
                 return { $oid: element };
               } else {
                 return element;
@@ -58,7 +56,6 @@ cronJobController.post("/backup", async (req, res) => {
       const jsonDocs = JSON.stringify(transformedDocs);
 
       await fs.writeFile(path.join(tempFolderPath, fileName), jsonDocs);
-      console.log(`Successfully backed up ${collection.name} to ${fileName}`);
 
       const fileBuffer = await fs.readFile(path.join(tempFolderPath, fileName));
 
@@ -70,8 +67,6 @@ cronJobController.post("/backup", async (req, res) => {
           public_id: fileName,
         }
       );
-
-      console.log("Uploaded to Cloudinary:", cloudinaryUploadResult.secure_url);
 
       await fs.unlink(path.join(tempFolderPath, fileName));
     }
@@ -131,7 +126,7 @@ cronJobController.get("/alert/signal", async (req, res) => {
   const response = await getTyphoonSignal();
   if (response.success) {
     const { signal, message, category, name } = response;
-    console.log();
+
     if (signal !== 0) {
       const alertTitle = `${category} ${name} Update`;
       const alertMessage = `${message}. Stay indoors or evacuate to a safer place when necessary.`;

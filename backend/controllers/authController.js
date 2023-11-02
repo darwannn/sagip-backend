@@ -1,9 +1,9 @@
 const authController = require("express").Router();
 const User = require("../models/User");
-const Notification = require("../models/Notification");
+
 const bcrypt = require("bcryptjs");
 const moment = require("moment");
-const nodemailer = require("nodemailer");
+
 const {
   isEmpty,
   isEmailExists,
@@ -19,7 +19,7 @@ const {
   generateToken,
   updateVerificationCode,
   cloudinaryUploader,
-  calculateArchivedDate,
+
   getUsersId,
   handleArchive,
   verifyPassword,
@@ -31,7 +31,7 @@ const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/verification-request";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher, sendSMS, sendEmail } = require("./apiController");
+const { sendSMS, sendEmail } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
@@ -166,12 +166,7 @@ authController.post("/register", async (req, res) => {
         /*      lastOnlineDate: Date.now, */
       });
 
-      /* const notification = await Notification.create({
-        userId: user._doc._id,
-        notifications: [],
-      }); */
       if (user) {
-        console.log("success");
         req.io.emit("user");
 
         sendSMS(user.contactNumber, "register", verificationCode);
@@ -350,13 +345,7 @@ authController.put(
           if (user) {
             const currentMoment = moment();
             const codeExpirationMoment = moment(user.codeExpiration);
-            const currentTimestamp = Date.now();
-            console.log(user.codeExpiration);
-            console.log(currentMoment);
-            console.log(moment.utc(currentMoment).local().format());
-            console.log(codeExpirationMoment);
-            console.log(moment.utc(codeExpirationMoment).local().format());
-            console.log(currentMoment.isAfter(codeExpirationMoment));
+
             if (!codeExpirationMoment.isAfter(currentMoment)) {
               const user = await updateVerificationCode(req.user.id);
               /*  if (user) { */
@@ -376,10 +365,6 @@ authController.put(
                 });
               } */
             } else {
-              console.log("====================================");
-              console.log(code);
-              console.log(user.verificationCode);
-              console.log("====================================");
               if (parseInt(code) === user.verificationCode) {
                 if (user.codeExpiration)
                   if (user.status == "unverified") {
@@ -460,15 +445,8 @@ authController.put(
                     ),
                   });
                 if (action === "contact") {
-                  /*  return res.status(200).json({
-                    success: true,
-                    message: "Contact number has been updated successfully",
-                  }); */
-                  console.log("update contact");
                   let { contactNumber } = req.body;
-                  console.log("====================================");
-                  console.log(contactNumber);
-                  console.log("====================================");
+
                   const userContactNumber = await User.findByIdAndUpdate(
                     req.user.id,
                     { contactNumber },
@@ -511,11 +489,8 @@ authController.put(
                   }
                 }
                 if (action === "email") {
-                  console.log("email");
                   let { email } = req.body;
-                  console.log("====================================");
-                  console.log(email);
-                  console.log("====================================");
+
                   const userEmail = await User.findByIdAndUpdate(
                     req.user.id,
                     { email, emailStatus: "verified" },
@@ -591,137 +566,7 @@ authController.put(
     }
   }
 );
-/* authController.post(
-  "/contact-verification",
-  tokenMiddleware,
-//   userTypeMiddleware([
-//   "resident",
-//   "responder",
-//   "dispatcher",
-//   "employee",
-//   "admin",
-// ]),
-  async (req, res) => {
-    try {
-      const error = {};
-      const { code, type } = req.body;
-      const userId = req.user.id;
 
-      if (isEmpty(code)) {
-        error["verificationCode"] = "Required field";
-      } else if (isNumber(code)) {
-        error["verificationCode"] = "Invalid code";
-      }
-
-      if (Object.keys(error).length == 0) {
-        const user = await User.findById(userId);
-        if (user) {
-          const currentTimestamp = Date.now();
-          if (currentTimestamp > user.codeExpiration) {
-            const user = await updateVerificationCode(req.user.id);
-            if (user) {
-              return res.status(200).json({
-                success: false,
-                message:
-                  "Verification code has expired. A new verification code has been sent",
-              });
-            } else {
-              return res.status(200).json({
-                success: false,
-                message: "Verification code has expired.",
-              });
-            }
-          } else {
-            console.log("====================================");
-            console.log(code);
-            console.log(user.verificationCode);
-            console.log("====================================");
-            if (parseInt(code) === user.verificationCode) {
-              if (user.codeExpiration)
-                if (user.status == "unverified") {
-                  user.status = "semi-verified";
-                }
-              user.attempt = 0;
-              user.verificationCode = 0;
-              await user.save();
-
-              if (type === "register")
-                return res.status(200).json({
-                  success: true,
-                  message:
-                    "Verified successfully. You can now use your account!",
-                  user: {
-                    target: "login",
-                    id: user._doc._id,
-                    userType: user._doc.userType,
-                    status: user._doc.status,
-                    email: user._doc.email,
-                  },
-                  token: generateToken(user._id),
-                });
-
-              if (type === "forgot-password")
-                return res.status(200).json({
-                  success: true,
-                  message: "Enter your new password",
-                  user: {
-                    target: "new-password",
-                    id: user._doc._id,
-                    userType: user._doc.userType,
-                    status: user._doc.status,
-                  },
-                  token: generateToken(user._id),
-                });
-              if (type === "login")
-                return res.status(200).json({
-                  success: true,
-                  message:
-                    "Verified successfully. You can now use your account!",
-                  user: {
-                    target: "login",
-                    id: user._doc._id,
-                    userType: user._doc.userType,
-                    status: user._doc.status,
-                  },
-                  token: generateToken(user._id),
-                });
-              if (type === "contact")
-                return res.status(200).json({
-                  success: true,
-                  message: "Contact number has been updated successfully",
-                });
-            } else {
-              error["verificationCode"] = "Incorrect verification code";
-              user.attempt += 1;
-              await user.save();
-            }
-          }
-        } else {
-      
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
-        }
-      }
-
-      if (Object.keys(error).length != 0) {
-      
-        error["success"] = false;
-        error["message"] = "input error";
-
-        return res.status(400).json(error);
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-); */
-
-/* check or archive */
 authController.post(
   "/password-verification/:action",
   tokenMiddleware,
@@ -736,7 +581,6 @@ authController.post(
     try {
       const { password } = req.body;
 
-      console.log("req.body");
       if (isEmpty(password)) {
         return res.status(200).json({
           success: true,
@@ -839,9 +683,6 @@ authController.post("/login", async (req, res) => {
                 "Account suspended. Please contact us if you think this isn't right",
             });
           } else {
-            console.log("====================================");
-            console.log(user.status);
-            console.log("====================================");
             if (!(user.status === "unverified")) {
               /*    if (!user.isArchived) { */
               // Check if the user has exceeded the maximum number of attempts
@@ -902,9 +743,7 @@ authController.post("/login", async (req, res) => {
               );
 
               if (userVerificationCode) {
-                console.log(
-                  "Current COde: " + userVerificationCode.verificationCode
-                );
+                console.log("Code: " + userVerificationCode.verificationCode);
                 return res.status(200).json({
                   success: false,
                   message: `Please verify your contact number.Verification code has been send to ${userVerificationCode.contactNumber}`,
@@ -928,7 +767,7 @@ authController.post("/login", async (req, res) => {
           }
         } else {
           error["password"] = "Incorrect password";
-          console.log(user.attempt);
+
           user.attempt++;
           await user.save();
         }
@@ -964,17 +803,9 @@ authController.post("/forgot-password", async (req, res) => {
       }
     }
 
-    console.log(accountExists);
-
     if (Object.keys(error).length == 0) {
       let identifierType = await checkIdentifierType(identifier);
-      // let generatedCode = await generateCode();
-      // console.log(accountExists.id);
 
-      // const user = await User.findByIdAndUpdate(accountExists.id, {
-      //   verificationCode: generatedCode,
-      //   codeExpiration: codeExpiration,
-      // });
       const user = await updateVerificationCode(accountExists.id);
       if (user) {
         if (identifierType === "email") {
@@ -989,9 +820,6 @@ authController.post("/forgot-password", async (req, res) => {
               "Account suspended. Please contact us if you think this isn't right",
           });
         } else {
-          /* if (!user.archivedDate) { */
-          //console.log("Current COde: " + generatedCode);
-
           if (identifierType === "email") {
             return res.status(200).json({
               success: true,
@@ -1033,20 +861,6 @@ authController.post("/forgot-password", async (req, res) => {
               ),
             });
           }
-          /* } else {
-            const data = calculateArchivedDate();
-            if (data) {
-              const { daysLeft, deletionDate } = data;
-              return res.status(200).json({
-                isArchived: true,
-                success: false,
-                daysLeft,
-                deletionDate,
-                message: `Your account is scheduled for Deltetion on ${deletionDate}. 
-              To keep your account deletion scheduled in ${daysLeft}, you can simply log out.`,
-              });
-            }
-          } */
         }
       } else {
         error["error"] = "Database Error";
@@ -1089,10 +903,6 @@ authController.put(
         if (verifyPassword(password)) {
           error["password"] = "";
         } else {
-          console.log("====================================");
-          console.log(password);
-          console.log("====================================");
-          console.log(await bcrypt.compare(password, oldUserPassword.password));
           if (await bcrypt.compare(password, oldUserPassword.password)) {
             error["password"] =
               "Password must not be the same as the old password";
@@ -1114,7 +924,6 @@ authController.put(
       const hashedPassword = await bcrypt.hash(password, salt);
 
       if (Object.keys(error).length == 0) {
-        console.log(req.user);
         const user = await User.findByIdAndUpdate(req.user.id, {
           verificationCode: 0,
           password: hashedPassword,
@@ -1141,7 +950,6 @@ authController.put(
             });
           }
         } else {
-          /* error["message"] = "Database Error"; */
           return res.status(500).json({
             success: false,
             message: "Internal Server Error",
@@ -1150,12 +958,10 @@ authController.put(
       }
 
       if (Object.keys(error).length != 0) {
-        console.log("error");
         error["message"] = "input error";
         res.status(400).json(error);
       }
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -1164,7 +970,6 @@ authController.put(
   }
 );
 
-//general resend
 authController.put(
   "/resend-code/",
   tokenMiddleware,
@@ -1176,48 +981,21 @@ authController.put(
   "admin",
 ]), */ async (req, res) => {
     try {
-      // let action = req.params.action.toLowerCase();
-      // if (
-      //   action === "register" ||
-      //   action === "forgot-password" ||
-      //   action === "login" ||
-      //   action === "contact" ||
-      //   action === "email"
-      // ) {
       const { identifier, action } = req.body;
 
-      // if (action === "register") {
-      // }
-      // if (action === "forgot-password") {
-      // }
-
-      // if (action === "login") {
-      // }
-
-      // if (action === "contact") {
-      // }
-      // if (action === "email") {
-      // }
-      console.log("====================================");
-      console.log(identifier);
-      console.log("====================================");
       const user = await updateVerificationCode(req.user.id);
 
       if (user) {
-        console.log("Current COde: " + user.verificationCode);
+        console.log("Code: " + user.verificationCode);
         let identifierType = await checkIdentifierType(identifier);
 
         if (identifierType === "email") {
-          console.log("send email");
+          console.log("Email");
 
           sendEmail(identifier, "email-verification", user.verificationCode);
         } else if (identifierType === "contactNumber") {
-          console.log("send sms");
+          console.log("SMS");
           sendSMS(identifier, "sms-verification", user.verificationCode);
-          /*  return res.status(200).json({
-            success: true,
-            message: `Verification code has been resent to ${identifier}`,
-          }); */
         }
         return res.status(200).json({
           success: true,
@@ -1229,14 +1007,7 @@ authController.put(
           message: "Internal Server Error",
         });
       }
-      // } else {
-      //   return res.status(500).json({
-      //     success: false,
-      //     message: "Error 404: Not Found",
-      //   });
-      // }
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -1281,9 +1052,6 @@ authController.post(
   }
 );
 
-/* -----------------------verification request */
-
-//create verification request
 authController.put(
   "/verify-identity",
   tokenMiddleware,
@@ -1344,7 +1112,7 @@ authController.put(
 
         if (user) {
           const userIds = await getUsersId("admin");
-          /* await createPusher("verification-request-web", "reload", {}); */
+
           req.io.emit("verification-request");
           createNotification(
             req,
@@ -1354,9 +1122,7 @@ authController.put(
             `${user.firstname} ${user.lastname} has submitted  a verification request.`,
             "info"
           );
-          console.log("====================================");
-          console.log(userIds);
-          console.log("====================================");
+
           return res.status(200).json({
             success: true,
             message: "Verification Request Submitted Successfully",
@@ -1385,11 +1151,7 @@ authController.put(
 authController.get(
   "/verification-request",
   tokenMiddleware,
-  /* userTypeMiddleware([
-  
-  "admin",
-]), */
-  /*   multerMiddleware.single("image"), */
+
   async (req, res) => {
     try {
       let user = await User.find({
@@ -1397,8 +1159,6 @@ authController.get(
         isArchived: false,
       });
 
-      /* let user = await User.find({}); */
-      /* sort */
       /* user.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); */
       user = user.filter(
         (record) =>
@@ -1409,12 +1169,6 @@ authController.get(
 
       if (user) {
         return res.status(200).json(user);
-        return res.status(200).json({
-          /* success: true,
-        message: "found", 
-        emergencyFacility,*/
-          ...user,
-        });
       } else {
         return res.status(200).json({
           success: false,
@@ -1422,7 +1176,6 @@ authController.get(
         });
       }
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -1444,17 +1197,9 @@ authController.get(
   /*   multerMiddleware.single("image"), */
   async (req, res) => {
     try {
-      /*       console.log("====================================");
-      console.log(req.user.id);
-      console.log("===================================="); */
       const user = await User.findById(req.user.id);
       if (user.verificationRequestDate === undefined) {
-        if (
-          /* (user.verificationRequestDate === undefined &&
-            user.verificationPicture.length <= 0) || */
-          user.status === "verified" ||
-          user.userType !== "resident"
-        ) {
+        if (user.status === "verified" || user.userType !== "resident") {
           return res.status(200).json({
             success: false,
             message: "not found",
@@ -1469,7 +1214,6 @@ authController.get(
         });
       }
     } catch (error) {
-      // If an exception occurs, respond with an internal server error
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -1478,7 +1222,6 @@ authController.get(
   }
 );
 
-// manage detils
 authController.get(
   "/verify-identity/:id",
   tokenMiddleware,
@@ -1518,7 +1261,6 @@ authController.get(
   }
 );
 
-//manage control reject or verify
 authController.put(
   "/verification-request/:action/:id",
   tokenMiddleware,
@@ -1528,11 +1270,8 @@ authController.put(
   async (req, res) => {
     const error = {};
     try {
-      let updateFields = {};
       let action = req.params.action.toLowerCase();
-      console.log("====================================");
-      console.log(action);
-      console.log("====================================");
+
       if (action === "reject" || action === "approve") {
         if (Object.keys(error).length === 0) {
           const user = await User.findByIdAndUpdate(
@@ -1565,16 +1304,9 @@ authController.put(
               );
             });
 
-            /*  if (cloud !== "error") { */
             user.verificationPicture = [];
 
             await user.save();
-            /* } else {
-            return res.status(500).json({
-              success: false,
-              message: "Internal Server Error",
-            });
-          } */
           } else if (action === "approve") {
             user.status = "verified";
             await user.save();
@@ -1582,29 +1314,9 @@ authController.put(
 
           if (user) {
             if (action === "reject") {
-              /*
-            
-              req.io.emit("verification-request");
-              createNotification(req,
-                [user._id],
-                user._id,
-                "Verification Request Rejected",
-                `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
-                "error"
-              ); */
-
-              // sendSMS(
-              //   user.contactNumber,
-              //   "verification-request",
-              //   `We regret to inform you that your verification request has been rejected due to: \n\n${reason}${
-              //     isEmpty(note) ? "" : `\n\n${note}`
-              //   }.`,
-              //   ""
-              // );
-
               req.io.emit(user._id);
               req.io.emit("verification-request");
-              createNotification(
+              /* createNotification(
                 req,
                 [user._id],
                 user._id,
@@ -1612,6 +1324,14 @@ authController.put(
                 `We regret to inform you that your verification request has been rejected due to: ${reason}${
                   isEmpty(note) ? "" : `<br><br>${note}`
                 }.`,
+                "error"
+              ); */
+              createNotification(
+                req,
+                [user._id],
+                user._id,
+                "Verification Request Rejected",
+                `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
                 "error"
               );
 
@@ -1628,8 +1348,6 @@ authController.put(
                 ""
               ); */
 
-              /* await createPusher("verification-request-mobile", "reload", {}); */
-              /* req.io.emit(`logout-${req.params.id}`); */
               req.io.emit("verification-request");
               createNotification(
                 req,
@@ -1671,90 +1389,5 @@ authController.put(
     }
   }
 );
-/* authController.put(
-  "/verification-request/:id",
-  //   tokenMiddleware,
-  //   userTypeMiddleware([
-  // "admin",
-  // ]),
-  async (req, res) => {
-    try {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          $unset: {
-            verificationRequestDate: Date.now(),
-          },
-        },
-        { new: true }
-      );
 
-      if (req.body.action === "reject") {
-        const cloud = await cloudinaryUploader(
-          "destroy",
-          "",
-          "image",
-          folderPath,
-          user.verificationPicture[0]
-        );
-
-        if (cloud !== "error") {
-          user.verificationPicture = [];
-
-          await user.save();
-        } else {
-          return res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-          });
-        }
-      } else {
-        user.status = "verified";
-        await user.save();
-      }
-
-      if (user) {
-        if (req.body.action === "reject") {
-          //sendSMS(`Verification Request Rejected`, user.contactNumber,"");
-
-          await createNotification(req,
-            req.params.id,
-            "title",
-            "message",
-            "category"
-          );
-
-          return res.status(200).json({
-            success: true,
-            message: "Verification Request Rejected",
-          });
-        } else {
-          await createNotification(req,
-            req.params.id,
-            "title",
-            "message",
-            "category"
-          );
-          //sendSMS(`Verification Request Approved`, user.contactNumber,"");
-
-          return res.status(200).json({
-            success: true,
-            message: "Verification Request Approved",
-          });
-        }
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-);
- */
 module.exports = authController;

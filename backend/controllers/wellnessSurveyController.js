@@ -5,7 +5,6 @@ const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty } = require("./functionController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
@@ -21,7 +20,7 @@ wellnessSurveyController.post(
 ]), */ async (req, res) => {
     const error = {};
     try {
-      let { title, category, /* isActive */ status, endDate } = req.body;
+      let { title, category, status, endDate } = req.body;
       if (typeof status === "string") status = status.toLowerCase();
       status = "active";
       if (isEmpty(title)) error["title"] = "Required field";
@@ -49,9 +48,8 @@ wellnessSurveyController.post(
 
           if (wellnessSurvey) {
             if (status === "active") {
-              /*   req.io.emit("reload", { receiver: "wellness-survey" }); */
               req.io.emit("wellness-survey");
-              /*  await createPusher("wellness-survey", "reload", {}); */
+
               createNotificationAll(
                 req,
                 wellnessSurvey._id,
@@ -104,12 +102,6 @@ wellnessSurveyController.get("/", async (req, res) => {
       .populate("affected", "-password");
     if (wellnessSurvey) {
       return res.status(200).json(wellnessSurvey);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        wellnessSurvey,*/
-        ...wellnessSurvey,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -126,112 +118,6 @@ wellnessSurveyController.get("/", async (req, res) => {
 
 wellnessSurveyController.get("/report/:id", async (req, res) => {
   try {
-    /* const barangay =  [
-      "anilao",
-      "atlag",
-      "babatnin",
-      "bagna",
-      "bagong bayan",
-      "balayong",
-      "balite",
-      "bangkal",
-      "barihan",
-      "bulihan",
-      "bungahan",
-      "caingin",
-      "calero",
-      "caliligawan",
-      "canalate",
-      "caniogan",
-      "catmon",
-      "cofradia",
-      "dakila",
-      "guinhawa",
-      "ligas",
-      "liyang",
-      "longos",
-      "look 1st",
-      "look 2nd",
-      "lugam",
-      "mabolo",
-      "mambog",
-      "masile",
-      "matimbo",
-      "mojon",
-      "namayan",
-      "niugan",
-      "pamarawan",
-      "panasahan",
-      "pinagbakahan",
-      "san agustin",
-      "san gabriel",
-      "san juan",
-      "san pablo",
-      "san vicente (pob.)",
-      "santiago",
-      "santisima trinidad",
-      "santo cristo",
-      "santo niño (pob.)",
-      "santo rosario (pob.)",
-      "santol",
-      "sumapang bata",
-      "sumapang matanda",
-      "taal",
-      "tikay",
-    ]; */
-    const barangay2 = [
-      "Anilao",
-      "Atlag",
-      "Babatnin",
-      "Bagna",
-      "Bagong Bayan",
-      "Balayong",
-      "Balite",
-      "Bangkal",
-      "Barihan",
-      "Bulihan",
-      "Bungahan",
-      "Caingin",
-      "Calero",
-      "Caliligawan",
-      "Canalate",
-      "Caniogan",
-      "Catmon",
-      "Cofradia",
-      "Dakila",
-      "Guinhawa",
-      "Ligas",
-      "Liyang",
-      "Longos",
-      "Look 1st",
-      "Look 2nd",
-      "Lugam",
-      "Mabolo",
-      "Mambog",
-      "Masile",
-      "Matimbo",
-      "Mojon",
-      "Namayan",
-      "Niugan",
-      "Pamarawan",
-      "Panasahan",
-      "Pinagbakahan",
-      "San Agustin",
-      "San Gabriel",
-      "San Juan",
-      "San Pablo",
-      "San Vicente (Pob.)",
-      "Santiago",
-      "Santisima Trinidad",
-      "Santo Cristo",
-      "Santo Niño (Pob.)",
-      "Santo Rosario (Pob.)",
-      "Santol",
-      "Sumapang Bata",
-      "Sumapang Matanda",
-      "Taal",
-      "Tikay",
-    ];
     const barangays = getBarangays("031410");
 
     const barangay = barangays.map((barangay) => barangay.brgyDesc);
@@ -336,15 +222,6 @@ wellnessSurveyController.get(
       let isResponded = false;
 
       for (const response of surveyResponse) {
-        console.log("====================================");
-        console.log("response:", response.toString());
-        console.log("req.user.id:", req.user.id);
-        console.log(
-          "response === req.user.id:",
-          response.toString() === req.user.id
-        );
-        console.log("====================================");
-
         if (response.toString() === req.user.id) {
           isResponded = true;
           break;
@@ -352,9 +229,7 @@ wellnessSurveyController.get(
           isResponded = false;
         }
       }
-      console.log("====================================");
-      console.log(isResponded);
-      console.log("====================================");
+
       if (isResponded) {
         return res.status(200).json({
           success: false,
@@ -388,13 +263,11 @@ wellnessSurveyController.get("/active", async (req, res) => {
       isArchived: false,
       status: "active",
     });
-    /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id); */
 
     if (wellnessSurvey) {
-      /*      return res.status(200).json(wellnessSurvey); */
       return res.status(200).json({
         success: true,
-        /*    message: "found", */
+
         ...wellnessSurvey._doc,
       });
     } else {
@@ -419,13 +292,11 @@ wellnessSurveyController.get("/:id", async (req, res) => {
     })
       .populate("unaffected", "-password")
       .populate("affected", "-password");
-    /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id); */
 
     if (wellnessSurvey) {
-      /*      return res.status(200).json(wellnessSurvey); */
       return res.status(200).json({
         success: true,
-        /*    message: "found", */
+
         ...wellnessSurvey._doc,
       });
     } else {
@@ -464,21 +335,7 @@ wellnessSurveyController.put(
         status: "active",
       });
 
-      /*    console.log("====================================");
-      console.log(activeWellnessSurvey.length === 0);
-      console.log("====================================");
-      if (activeWellnessSurvey.length !== 0) {
-        if (activeWellnessSurvey._id !== req.params.id && isActive) {
-          error["category"] = "There is already an active survey";
-        }
-      } */
-
       if (Object.keys(error).length === 0) {
-        console.log(req.params.id);
-        console.log(endDate);
-        console.log(status);
-        console.log(moment(endDate).isBefore(moment(), "second"));
-
         if (moment(endDate).isBefore(moment(), "day")) {
           status = "inactive";
         }
@@ -499,13 +356,7 @@ wellnessSurveyController.put(
           );
 
           if (wellnessSurvey) {
-            if (
-              /*    activeWellnessSurvey.length !== 0 && */
-              status === "active" /* && */
-              /*   !activeWellnessSurvey[0]._id.equals(req.params.id) */
-            ) {
-              /* await createPusher("wellness-survey", "reload", {}); */
-              /* req.io.emit("reload", { receiver: "wellness-survey" }); */
+            if (status === "active") {
               console.log("update notif");
               req.io.emit("wellness-survey");
               createNotificationAll(
@@ -577,8 +428,6 @@ wellnessSurveyController.put(
       );
 
       if (wellnessSurvey) {
-        /*  await createPusher("wellness-survey", "reload", {}); */
-        /* req.io.emit("reload", { receiver: "wellness-survey" }); */
         req.io.emit("wellness-survey");
         return res.json({
           success: true,
@@ -615,8 +464,6 @@ wellnessSurveyController.delete(
       );
       if (wellnessSurvey) {
         if (wellnessSurvey.status === "active") {
-          /*   await createPusher("wellness-survey", "reload", {}); */
-          /* req.io.emit("reload", { receiver: "wellness-survey" }); */
           req.io.emit("wellness-survey");
         }
         return res.status(200).json({
@@ -659,7 +506,7 @@ wellnessSurveyController.put(
         } else if (action === "unarchive") {
           updateFields = {
             isArchived: false,
-            /* status: "active", */
+
             $unset: { archivedDate: Date.now() },
           };
         }
@@ -671,8 +518,6 @@ wellnessSurveyController.put(
 
         if (wellnessSurvey) {
           if (wellnessSurvey.status === "active") {
-            /* await createPusher("wellness-survey", "reload", {}); */
-            /* req.io.emit("reload", { receiver: "wellness-survey" }); */
             req.io.emit("wellness-survey");
           }
           if (action === "archive") {

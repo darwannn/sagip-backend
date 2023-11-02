@@ -23,7 +23,7 @@ const wellnessSurveyController = require("./controllers/wellnessSurveyController
 const statisticsController = require("./controllers/statisticsController");
 
 const app = express();
-const server = http.createServer(app); // Create an HTTP server
+const server = http.createServer(app);
 /* const io = socketIO(server, {
   cors: {
     origin: ["http://localhost:3000", "http://localhost:5173"],
@@ -71,7 +71,6 @@ app.use("/notification", notificationController);
 app.use("/statistics", statisticsController);
 app.use("/wellness-survey", wellnessSurveyController);
 
-/* forwards data from mobile */
 io.on("connection", (socket) => {
   socket.onAny((event, data) => {
     console.log("Received event:", event, "with data:", data);

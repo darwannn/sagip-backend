@@ -1,39 +1,34 @@
 const path = require("path");
-const Notification = require("../models/Notification");
 const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Team = require("../models/Team");
 
-const { createPusher, sendSMS, sendEmail } = require("./apiController");
+const { sendSMS, sendEmail } = require("./apiController");
 
 const { cloudinary } = require("../utils/config");
+
 const isEmpty = (value) => {
   if (value === "" || value === null || value === undefined) {
     return true;
   }
-
   if (typeof value === "string" && value.trim() === "") {
     return true;
   }
-
   return false;
 };
 
 const isImage = (file) => {
   const allowedExtensions = [".png", ".jpeg", ".jpg"];
   const extname = path.extname(file).toLowerCase();
-  console.log("ssss");
-  console.log("s" + extname);
+
   if (!allowedExtensions.includes(extname)) {
     return true;
   }
 };
 const isValidExtensions = (file, extensions) => {
-  /*   const allowedExtensions = [".mp4"]; */
   const extname = path.extname(file.originalname).toLowerCase();
-  console.log("ssss");
-  console.log("s" + extname);
+
   if (!extensions.includes(extname)) {
     return true;
   }
@@ -41,8 +36,7 @@ const isValidExtensions = (file, extensions) => {
 const isVideo = (file) => {
   const allowedExtensions = [".mp4"];
   const extname = path.extname(file).toLowerCase();
-  console.log("ssss");
-  console.log("s" + extname);
+
   if (!allowedExtensions.includes(extname)) {
     return true;
   }
@@ -86,7 +80,6 @@ const isContactNumber = (value) => {
 const isContactOrTeleNumber = (value) => {
   const trimmedValue = value.replace(/\s+/g, "");
   if (!/^\d+$/.test(trimmedValue)) {
-    console.log("error1");
     return true;
   }
 
@@ -95,36 +88,17 @@ const isContactOrTeleNumber = (value) => {
     trimmedValue.length !== 10 &&
     trimmedValue.length !== 7
   ) {
-    console.log("error4");
     return true;
   }
   if (trimmedValue.length === 11) {
     if (!trimmedValue.startsWith("09")) return true;
   } else if (trimmedValue.length === 10) {
-    console.log("error2");
     if (!trimmedValue.startsWith("04479")) return true;
   } else if (trimmedValue.length === 7 && !trimmedValue.startsWith("0")) {
-    console.log("error3");
     if (!trimmedValue.startsWith("79")) return true;
   }
 };
 
-/* const isContactOrTeleNumber = (value) => {
-  const trimmedValue = value.replace(/\s+/g, ""); // Remove spaces
-  console.log(trimmedValue);
-  if (trimmedValue.length === 11 && trimmedValue.startsWith("09")) {
-    console.log("error1");
-    return true;
-  } else if (trimmedValue.length === 10 && trimmedValue.startsWith("04479")) {
-    console.log("error2");
-    return true;
-  } else if (trimmedValue.length === 7 && !trimmedValue.startsWith("0")) {
-    console.log("error3");
-    return true;
-  }
-
-  return false; // Invalid number
-}; */
 const isEmail = (value) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -219,22 +193,6 @@ const calculateArchivedDate = (date) => {
   const deletionDate = targetDate.format("MMMM DD, YYYY");
   return { daysLeft, deletionDate };
 };
-/* const createEmptyNotification = async (id) => {
-  const notification = await Notification.create({
-    userId: id,
-    notifications: [],
-  });
-
-  return notification;
-}; */
-
-/* const readNotification = async (id) => {
-  const notification = await Notification.updateMany(
-    { userId: id },
-    { $set: { "notifications.$[].isRead": true } }
-  );
-  return notification;
-}; */
 
 const updateVerificationCode = async (id) => {
   const codeExpiration = moment().add(15, "minutes");
@@ -247,8 +205,6 @@ const updateVerificationCode = async (id) => {
     },
     { new: true }
   );
-
-  console.log("user,", user);
 
   return user;
 };
@@ -290,9 +246,6 @@ const cloudinaryUploader = async (
         });
     }
   } catch (error) {
-    console.log("====================================");
-    console.log(error);
-    console.log("====================================");
     cloudinaryResult = "error";
   }
 
@@ -342,22 +295,18 @@ const dismissedRequestCount = async (action, userId, req) => {
   });
   if (user.dismissedRequestCount >= 2) {
     user.isBanned = true;
-    // req.io.emit(`${req.params.id}`);
+
     req.io.emit(`logout-${userId}`);
-    // req.io.emit("banned", { receiver: `${userId}` });
   } else {
     user.isBanned = false;
   }
   user.save();
-  console.log("user", `logout`);
-  /*  req.io.emit(`logout`); */
 };
 
 const handleArchive = async (action, id, req, res) => {
   try {
     let updateFields = {};
     if (action === "unarchive" || action === "archive") {
-      console.log(action);
       if (action === "archive") {
         updateFields = {
           isArchived: true,
@@ -376,9 +325,7 @@ const handleArchive = async (action, id, req, res) => {
         { new: true }
       );
       if (user) {
-        /* await createPusher("user", "reload", {}); */
         if (action === "archive") {
-          /* await createPusher(`${id}`, "reload", {}); */
           req.io.emit(`${id}`);
           return res.status(200).json({
             success: true,

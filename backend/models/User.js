@@ -17,45 +17,43 @@ const userSchema = mongoose.Schema(
     },
     contactNumber: {
       type: String,
-      /* required: true, */
     },
     email: {
       type: String,
-      /*  required: true, */
     },
     region: {
       type: String,
-      /* required: true, */
+
       default: "",
     },
     province: {
       type: String,
-      /* required: true, */
+
       default: "",
     },
     municipality: {
       type: String,
-      /* required: true, */
+
       default: "",
     },
     barangay: {
       type: String,
-      /* required: true, */
+
       default: "",
     },
     street: {
       type: String,
-      /* required: true, */
+
       default: "",
     },
     gender: {
       type: String,
-      /* required: true, */
+
       default: "",
     },
     birthdate: {
       type: Date,
-      /* required: true, */
+
       default: null,
     },
     password: {
@@ -74,7 +72,6 @@ const userSchema = mongoose.Schema(
     },
     codeExpiration: {
       type: Date,
-      /*  default: Date.now, */
     },
 
     userType: {
@@ -122,16 +119,6 @@ const userSchema = mongoose.Schema(
       type: [String],
       default: [],
     },
-
-    /*   teamId: {
-      type: mongoose.Types.ObjectId,
-      ref: "Team",
-    },
-
-    isAssigned: {
-      type: String,
-      default: false,
-    }, */
 
     lastDismissedRequestDate: {
       type: Date,

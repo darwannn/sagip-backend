@@ -33,10 +33,6 @@ const WellnessSurveySchema = new mongoose.Schema(
         default: [],
       },
     ],
-    /* isActive: {
-      type: Boolean,
-      default: false,
-    }, */
     status: {
       type: String,
       required: true,

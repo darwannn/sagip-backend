@@ -16,7 +16,6 @@ const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/hazard-report";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
@@ -47,16 +46,11 @@ hazardReportController.post(
         municipality,
       } = req.body;
 
-      //naka default status sa model, wala nang iba
       if (isEmpty(category)) error["category"] = "Required field";
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["longitude"] = "Mark a location";
-      console.log("=====req.file===============================");
-      console.log(hasChanged);
-      console.log("hasChanged");
-      console.log(req.file);
-      console.log("====================================");
+
       if (!req.file) {
         error["proof"] = "Required field";
       } else {
@@ -90,7 +84,6 @@ hazardReportController.post(
         );
 
         if (cloud !== "error") {
-          console.log("File uploaded successfully:", cloud.secure_url);
           const hazardReport = await HazardReport.create({
             description,
             category,
@@ -103,9 +96,6 @@ hazardReportController.post(
             userId: req.user.id,
           });
           if (hazardReport) {
-            /*     await createPusher("hazard-report", "reload", {}); */
-            /* await createPusher("hazard-report-web", "reload", {});
-             */
             req.io.emit("hazard-report");
             const userIds = await getUsersId("dispatcher");
             createNotification(
@@ -151,10 +141,6 @@ hazardReportController.post(
 
 hazardReportController.get("/", async (req, res) => {
   try {
-    /* const hazardReports = await HazardReport.find({}).populate(
-      "userId",
-      "-password"
-    ); */
     const hazardReports = await HazardReport.find({
       archivedDate: { $exists: false },
       isArchived: false,
@@ -162,12 +148,6 @@ hazardReportController.get("/", async (req, res) => {
 
     if (hazardReports) {
       return res.status(200).json(hazardReports);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        hazardReports,*/
-        ...hazardReports,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -183,9 +163,6 @@ hazardReportController.get("/", async (req, res) => {
 });
 hazardReportController.get("/ongoing", async (req, res) => {
   try {
-    /* const hazardReports = await HazardReport.find({
-      status: "ongoing",
-    }).populate("userId", "-password"); */
     const hazardReports = await HazardReport.find({
       status: "ongoing",
       archivedDate: { $exists: false },
@@ -194,12 +171,6 @@ hazardReportController.get("/ongoing", async (req, res) => {
 
     if (hazardReports) {
       return res.status(200).json(hazardReports);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        hazardReports,*/
-        ...hazardReports,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -216,14 +187,6 @@ hazardReportController.get("/ongoing", async (req, res) => {
 
 hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
   try {
-    console.log("====================================");
-    console.log(req.user.id);
-    console.log("====================================");
-    /*   const hazardReport = await HazardReport.find({
-      userId: req.user.id,
-      archivedDate: { $exists: false },
-      isArchived: false,
-    }).populate("userId", "-password"); */
     const hazardReport = await HazardReport.find({
       userId: req.user.id,
       status: { $in: "unverified" },
@@ -234,21 +197,7 @@ hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
     console.log(hazardReport);
     console.log("====================================");
     if (hazardReport) {
-      /*      return res.status(200).json(hazardReport); */
-      /* if (hazardReport.status === "unverified") { */
-      /* return res.status(200).json({
-          success: false,
-          message: "we are still verifying the report",
-        }); */
-      /* } else { */
       return res.status(200).json(hazardReport);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        hazardReport,*/
-        ...hazardReport,
-      });
-      /*  } */
     } else {
       return res.status(200).json({
         success: false,
@@ -270,15 +219,9 @@ hazardReportController.get("/:id", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     }).populate("userId", "-password");
-    /* const hazardReport = await HazardReport.findById(req.params.id).populate(
-      "userId",
-      "-password"
-    ); */
+
     if (hazardReport) {
-      /*      return res.status(200).json(hazardReport); */
       return res.status(200).json({
-        /*  success: true,
-        message: "found", */
         ...hazardReport._doc,
       });
     } else {
@@ -326,12 +269,8 @@ hazardReportController.put(
       if (isEmpty(description)) error["description"] = "Required field";
       if (isEmpty(latitude)) error["latitude"] = "Mark a location";
       if (isEmpty(longitude)) error["longitude"] = "Mark a location";
-      console.log("=====req.file===============================");
-      console.log(req.file);
-      console.log("====================================");
 
       if (hasChanged === "true" || hasChanged === true) {
-        console.log("changeeeeeeeeeeee");
         if (!req.file) {
           error["proof"] = "Required field";
         } else {
@@ -341,15 +280,12 @@ hazardReportController.put(
           ) {
             error["proof"] = "Only PNG, JPEG, JPG, and MP4 files are allowed";
           } else {
-            console.log("1else11111");
             if (!isImage(req.file.originalname)) {
               if (isLessThanSize(req.file, 10 * 1024 * 1024)) {
                 error["proof"] = "File size should be less than 10MB";
               }
-              console.log("111111");
             }
             if (!isVideo(req.file.originalname)) {
-              console.log("222222");
               resource_type = "video";
               if (isLessThanSize(req.file, 50 * 1024 * 1024)) {
                 error["proof"] = "File size should be less than 50MB";
@@ -358,11 +294,8 @@ hazardReportController.put(
           }
         }
       } else {
-        console.log("not change");
       }
-      console.log("=======hasChanged==================");
-      console.log(hasChanged);
-      console.log("====================================");
+
       if (Object.keys(error).length === 0) {
         const updateFields = {
           description,
@@ -373,10 +306,6 @@ hazardReportController.put(
           municipality,
         };
 
-        console.log("====================================");
-        /*  console.log(req.file.originalname); */
-        console.log(resource_type);
-        console.log("====================================");
         if (hasChanged && req.file) {
           const hazardReport = await HazardReport.findById(req.params.id);
 
@@ -415,16 +344,16 @@ hazardReportController.put(
           { new: true }
         );
         if (hazardReport) {
-          /*    await createPusher("assistance-request-web", "reload", {}); */
           req.io.emit("hazard-report");
-          const userIds = await getUsersId("dispatcher");
-          /* createNotification(req,
-            userIds,
+          const dispatcherIds = await getUsersId("dispatcher");
+          createNotification(
+            req,
+            dispatcherIds,
             req.user.id,
-            "Hazard report Updated",
-            `${category} on ${street} ${municipality}`,
+            "Hazard Report Cancelled",
+            `${category} on ${street} ${municipality} has been cancelled.`,
             "info"
-          ); */
+          );
 
           return res.status(200).json({
             success: true,
@@ -482,10 +411,6 @@ hazardReportController.put(
         };
       }
 
-      console.log(action);
-      console.log("new");
-      console.log(req.params.id);
-      console.log(status);
       if (Object.keys(error).length === 0) {
         const hazardReport = await HazardReport.findByIdAndUpdate(
           req.params.id,
@@ -493,8 +418,6 @@ hazardReportController.put(
           { new: true }
         ).populate("userId", "-password");
         if (hazardReport) {
-          /* await createPusher("hazard-report-mobile", "reload", {}); */
-          /* await createPusher(`${hazardReport.userId}`, "reload", {}); */
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
 
@@ -587,9 +510,6 @@ hazardReportController.delete(
       if (!isVideo(hazardReportImage.proof)) {
         resource_type = "video";
       }
-      console.log("====================================");
-      console.log(resource_type);
-      console.log("====================================");
 
       const cloud = await cloudinaryUploader(
         "destroy",
@@ -604,21 +524,19 @@ hazardReportController.delete(
         );
 
         if (hazardReport) {
-          /* await createPusher(`${hazardReport.userId}`, "reload", {});
-          await createPusher("hazard-report-mobile", "reload", {}); */
-
           req.io.emit("hazard-report");
           req.io.emit(`${hazardReport.userId}`);
-          /* dismissedRequestCount("archive", hazardReport.userId, req); */
-          /* createNotification(req,
-            [hazardReport.userId._id],
-            hazardReport.userId._id,
-            "Hazard Report Closed",
-            `Your report regarding  ${hazardReport.category} ${
+          const userIds = await getUsersId("dispatcher");
+          createNotification(
+            req,
+            userIds,
+            req.user.id,
+            "Hazard Report Cancelled",
+            `${hazardReport.category}${
               hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
-            }, has been carefully reviewed, and we have determined that the reported hazard is not substantiated. Your hazard report has been closed.`,
-            "error"
-          ); */
+            } request has been cancelled.`,
+            "info"
+          );
 
           return res.status(200).json({
             success: true,
@@ -661,7 +579,7 @@ hazardReportController.put(
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        /* if (isEmpty(reason)) error["reason"] = "Required field"; */
+        if (isEmpty(reason)) error["reason"] = "Required field";
         if (Object.keys(error).length === 0) {
           console.log(action);
           if (action === "archive") {
@@ -690,14 +608,9 @@ hazardReportController.put(
             { new: true }
           );
           if (hazardReport) {
-            console.log("hazardReport");
-            console.log("====================================");
-            // await createPusher("hazard-report", "reload", {});
             if (action === "archive") {
-              console.log("archive");
               dismissedRequestCount("archive", hazardReport.userId, req);
-              //  await createPusher(`${hazardReport.userId}`, "reload", {});
-              // await createPusher("hazard-report-mobile", "reload", {});
+
               req.io.emit("hazard-report");
               req.io.emit(`${hazardReport.userId}`);
               createNotification(

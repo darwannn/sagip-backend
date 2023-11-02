@@ -2,58 +2,18 @@ const apiController = require("express").Router();
 const axios = require("axios");
 const moment = require("moment");
 const User = require("../models/User");
-const Pusher = require("pusher");
-const municipality = "Malolos";
+
 const nodemailer = require("nodemailer");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
-const {
-  createNotification,
-  createNotificationAll,
-  createPushNotificationTopic,
-  createPushNotificationToken,
-} = require("./notificationController");
-
-const { firebase } = require("../utils/config");
-const pusher = new Pusher({
-  appId: process.env.PUSHER_APP_ID,
-  key: process.env.PUSHER_KEY,
-  secret: process.env.PUSHER_SECRET,
-  cluster: process.env.PUSHER_CLUSTER,
-  useTLS: true,
-});
-
-/* firebase.initializeApp({
-  credential: firebase.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  }),
-});
- */
-
 apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
   try {
-    /*  await createNotification(req,
-    [req.user.id],
-    req.user.id,
-    "title1",
-    "message1",
-    "category1"
-  );
-  await createNotificationAll(req,req.user.id, "title2", "message2", "category2"); */
-    console.log("====================================");
-    console.log("push");
-    console.log("====================================");
-    const contactNumbers = ["09395372592"];
-    const message = "Hello";
-
     const { receiver, content, event } = req.body;
 
     const data = {
       sender: req.user.id,
       receiver,
-      content, // long lat
+      content,
     };
 
     if (req.io.emit(event, data)) {
@@ -76,148 +36,11 @@ apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
   }
 });
 
-const createPusher = async (io, channel, event, data) => {
-  /*   console.log("====================================");
-  console.log("new push");
-  console.log("====================================");
-  try {
-    io.emit(event, data); 
-    return true;
-  } catch (error) {
-    console.log(error);
-    return false;
-  } */
-};
-
-/* apiController.post("/send-alert", tokenMiddleware, async (req, res) => {
-  const error = {};
-  let { alertTitle, alertMessage, location } = req.body;
-
-  console.log("====================================");
-  console.log(req.user.id);
-  console.log(alertTitle);
-  console.log(alertMessage);
-  console.log(location);
-  console.log("====================================");
-  if (alertTitle === "") {
-    error["alertTitle"] = "Required field";
-  }
-  if (alertMessage === "") {
-    error["alertMessage"] = "Required field";
-  }
-
-  if (location.length === 0) error["location"] = "Required field";
-
-  if (Object.keys(error).length == 0) {
-    let contactNumbers = [];
-    let fcmTokens = [];
-
-    if (location.includes("All")) {
-      contactNumbers = await getInfoByMunicipality("Malolos");
-      if (!Array.isArray(contactNumbers)) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error: " + contactNumbers,
-        });
-      }
-      console.log(contactNumbers);
-      fcmTokens = await getAllFcmTokensInMunicipality("Malolos");
-      console.log(fcmTokens);
-      if (!Array.isArray(fcmTokens)) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error:2 " + contactNumbers,
-        });
-      }
-    } else {
-      contactNumbers = await getInfoByBarangay(
-        "Malolos",
-        location
-      );
-
-      console.log(contactNumbers);
-
-      if (!Array.isArray(contactNumbers)) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error:3 " + contactNumbers,
-        });
-      }
-      fcmTokens = await getAllFcmTokensInBarangays("Malolos", location);
-      if (!Array.isArray(fcmTokens)) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error:4 " + contactNumbers,
-        });
-      }
-    }
-
-    console.log(contactNumbers);
-    console.log(fcmTokens);
-
-    createPushNotificationToken(alertTitle, alertMessage, fcmTokens);
-
-    try {
-      const smsResponse = await sendBulkSMS(alertMessage, contactNumbers);
-      console.log(smsResponse);
-
-      if (smsResponse) {
-        return res
-          .status(200)
-          .json({ success: true, message: "SMS sent successfully" });
-            return res
-          .status(200)
-          .json({ success: true, message: smsResponse.message });
-      } else {
-        return res
-          .status(400)
-          .json({ success: false, message: smsResponse.message });
-      }
-    } catch (error) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Internal Server Error: " + error });
-    }
-  }
-  if (Object.keys(error).length != 0) {
-    error["success"] = false;
-    error["message"] = "input error";
-
-    return res.status(400).json(error);
-  }
-});
- */
-/* const sendSMS = async (message, contactNumber) => {
-  // const smsData = {
-  //   token: process.env.SMS_API,
-  //   sendto: contactNumber,
-  //   body: message,
-  //   sim: "0",
-  //   device_id: process.env.DEVICE_ID,
-  //   urgent: "1",
-  // };
-
-  // return axios
-  //   .post("https://smsgateway24.com/getdata/addsms", null, {
-  //     params: smsData,
-  //   })
-  //   .then(function (response) {
-  //     return response.data;
-  //   })
-  //   .catch(function (error) {
-  //     throw error;
-  //   });
-  // console.log("send sms");
-  // return { error: 0, message: "testing" };
-
-  return await send(contactNumber, message);
-}; */
-
 const sendBulkSMS = async (content, target, contactNumbers) => {
   console.log("=========contactNumbers===========================");
   console.log(contactNumbers);
   console.log("====================================");
-  /* SMS GATE WAY GAGAMITIN */
+
   let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
   if (target === "alert") {
@@ -225,6 +48,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   } else if (target === "notification") {
     message = `${from}${content}`;
   }
+  /* SMS Gateway */
   /*  const smsData = contactNumbers.map((contactNumber) => ({
     sendto: contactNumber,
     body: message,
@@ -250,6 +74,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     number: numbersString,
     message: message,
   };
+  /* SEMAPHORE */
   /*  return (
     axios
     
@@ -284,7 +109,7 @@ const sendSMS = async (phone, target, content) => {
   } else {
     message = `${from}Your SAGIP verification code is ${content}. The code will expire after 15 minutes.`;
   }
-
+  /* SMS Gateway */
   /*   const encodedMessage = message;
 
   const smsData = {
@@ -313,8 +138,7 @@ const sendSMS = async (phone, target, content) => {
     number: phone,
     message: message,
   };
-
-  /*  .post(`https://api.semaphore.co/api/v4/messages?apikey=${process.env.SEMAPHORE_API_KEY}&number=${phone}&message=${content}`, null, { */
+  /* SEMAPHORE */
   return axios
 
     .post("https://api.semaphore.co/api/v4/messages", params)
@@ -330,55 +154,6 @@ const sendSMS = async (phone, target, content) => {
 
   return await send(contactNumber, message); */
 };
-
-/* 
-const getInfoByMunicipality = async (municipality) => {
-  try {
-    const users = await User.find({ municipality: municipality });
-    const contactNumbers = users.map((user) => user.contactNumber);
-    return contactNumbers;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-};
-
-const getInfoByBarangay = async (municipality, location) => {
-  try {
-    const users = await User.find({
-      barangay: { $in: location },
-      municipality,
-    });
-    const contactNumbers = users.map((user) => user.contactNumber);
-    return contactNumbers;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-};
-
-const getAllFcmTokensInMunicipality = async (municipality) => {
-  try {
-    const users = await User.find({ municipality: municipality });
-    const fcmTokens = users.flatMap((user) => user.fcmToken);
-    return fcmTokens;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-};
-
-const getAllFcmTokensInBarangays = async (municipality, location) => {
-  try {
-    const users = await User.find({
-      barangay: { $in: location },
-      municipality,
-    });
-
-    const fcmTokens = users.flatMap((user) => user.fcmToken);
-    //console.log(fcmTokens);
-    return fcmTokens;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-}; */
 
 async function sendEmail(to, target, code) {
   let subject = "";
@@ -505,22 +280,10 @@ async function sendEmail(to, target, code) {
   }
 }
 
-/* const isEmpty = (value) => {
-  if (value === "" || value === null || value === undefined) {
-    return true;
-  }
-
-  if (typeof value === "string" && value.trim() === "") {
-    return true;
-  }
-
-  return false;
-}; */
-
 module.exports = {
   sendSMS,
   sendBulkSMS,
-  createPusher,
+
   sendEmail,
   apiController,
 };

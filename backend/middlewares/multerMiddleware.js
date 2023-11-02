@@ -1,7 +1,5 @@
 const multer = require("multer");
-const path = require("path");
 
-// Multer config
 const multerMiddleware = multer({
   storage: multer.diskStorage({
     filename: (req, file, cb) => {

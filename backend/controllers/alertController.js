@@ -6,26 +6,13 @@ const axios = require("axios");
 const moment = require("moment");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
-const {
-  isEmpty,
-  isImage,
-  isLessThanSize,
-  isContactNumber,
-  cloudinaryUploader,
-} = require("./functionController");
+const { isEmpty } = require("./functionController");
 
 const {
   createNotification,
   createNotificationAll,
-  createPushNotificationTopic,
-  createPushNotificationToken,
 } = require("./notificationController");
-const {
-  createPusher,
-  sendSMS,
-  sendBulkSMS,
-  sendEmail,
-} = require("./apiController");
+const { sendSMS, sendBulkSMS } = require("./apiController");
 alertController.post(
   "/sms/add",
   tokenMiddleware,
@@ -86,14 +73,7 @@ alertController.get(
       const alert = await Alert.find({});
 
       if (alert) {
-        // console.log(alert._doc);
         return res.status(200).json(alert);
-        return res.status(200).json({
-          /* success: true,
-        message: "found", 
-        alert,*/
-          ...alert,
-        });
       } else {
         return res.status(200).json({
           success: false,
@@ -198,12 +178,6 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
   const error = {};
   let { alertTitle, alertMessage, location } = req.body;
 
-  console.log("====================================");
-  console.log(req.user.id);
-  console.log(alertTitle);
-  console.log(alertMessage);
-  console.log(location);
-  console.log("====================================");
   if (alertTitle === "") {
     error["alertTitle"] = "Required field";
   }
@@ -232,32 +206,14 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       }
       contactNumbers = users.contactNumbers;
       fcmTokens = users.fcmTokens;
-      /*    console.log(contactNumbers); */
-      /*  fcmTokens = await getAllFcmTokensInMunicipality(
-        "City Of Malolos (Capital)"
-      ); */
-      /* console.log(fcmTokens); */
 
-      /* createPushNotificationTopic(alertTitle, alertMessage, "sagip", ""); */
       createNotificationAll(req, "", alertTitle, alertMessage, "warning", true);
     } else {
       const users = await getInfoByBarangay(
         "City Of Malolos (Capital)",
         location
       );
-      /* 
-      console.log(contactNumbers);
 
-      if (!Array.isArray(contactNumbers)) {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error:3 " + contactNumbers,
-        });
-      } */
-      /* fcmTokens = await getAllFcmTokensInBarangays(
-        "City Of Malolos (Capital)",
-        location
-      ); */
       if (
         !Array.isArray(users.contactNumbers) ||
         !Array.isArray(users.fcmTokens)
@@ -270,7 +226,6 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       contactNumbers = users.contactNumbers;
       fcmTokens = users.fcmTokens;
       userIds = users._id;
-      /* createPushNotificationToken(alertTitle, alertMessage, fcmTokens, ""); */
 
       if (Array.isArray(userIds) && userIds.length > 0) {
         createNotification(
@@ -301,9 +256,6 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });
       } else {
-        /* return res
-          .status(500)
-          .json({ success: false, message: "Internal Server Error" }); */
         return res.status(200).json({
           success: true,
           message:
@@ -357,7 +309,6 @@ alertController.get("/weather", async (req, res) => {
 
 const getInfoByMunicipality = async (municipality) => {
   try {
-    /*    console.log(municipality); */
     const users = await User.find(/* { municipality: municipality } */);
 
     const contactNumbers = users.map((user) => user.contactNumber);
@@ -367,19 +318,6 @@ const getInfoByMunicipality = async (municipality) => {
   } catch (error) {
     return "Internal Server Error: " + error;
   }
-  /*  try {
-    console.log(municipality);
-    const allUsers = await User.find({});
-    const matchingUsers = allUsers.filter((user) =>
-      user.municipality.includes(municipality)
-    );
-    const contactNumbers = matchingUsers.map((user) => user.contactNumber);
-    const fcmTokens = matchingUsers.flatMap((user) => user.fcmToken);
-
-    return { contactNumbers, fcmTokens };
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  } */
 };
 
 const getInfoByBarangay = async (municipality, location) => {
@@ -397,36 +335,7 @@ const getInfoByBarangay = async (municipality, location) => {
   } catch (error) {
     return "Internal Server Error: " + error;
   }
-  /*  try {
-    console.log(municipality);
-    const allUsers = await User.find({ barangay: { $in: location } });
-    const matchingUsers = allUsers.filter(
-      (user) => user.municipality.includes(municipality) 
-    );
-    const contactNumbers = matchingUsers.map((user) => user.contactNumber);
-    const fcmTokens = matchingUsers.flatMap((user) => user.fcmToken);
-    console.log(contactNumbers, fcmTokens);
-    return { contactNumbers, fcmTokens };
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-   */
 };
-
-/* const getAllFcmTokensInBarangays = async (municipality, location) => {
-  try {
-    const users = await User.find({
-      barangay: { $in: location },
-      municipality,
-    });
-
-    const fcmTokens = users.flatMap((user) => user.fcmToken);
-    //console.log(fcmTokens);
-    return fcmTokens;
-  } catch (error) {
-    return "Internal Server Error: " + error;
-  }
-}; */
 
 async function getWeatherData() {
   try {

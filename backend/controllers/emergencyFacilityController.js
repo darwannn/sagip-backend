@@ -4,13 +4,11 @@ const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
 const folderPath = "sagip/media/emergency-facility";
-const { sendSMS, createPusher } = require("./apiController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const {
   isEmpty,
   isImage,
   isLessThanSize,
-  isContactNumber,
   cloudinaryUploader,
   isContactOrTeleNumber,
 } = require("./functionController");
@@ -18,6 +16,7 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+
 emergencyFacilityController.post(
   "/add",
   tokenMiddleware,
@@ -89,7 +88,6 @@ emergencyFacilityController.post(
               );
             }
 
-            /* await createPusher("emergency-facility", "reload", {}); */
             req.io.emit("emergency-facility");
 
             return res.status(200).json({
@@ -128,15 +126,9 @@ emergencyFacilityController.post(
 emergencyFacilityController.get("/", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({});
-    /* console.log(emergencyFacility); */
+
     if (emergencyFacility) {
       return res.status(200).json(emergencyFacility);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        emergencyFacility,*/
-        ...emergencyFacility,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -156,15 +148,9 @@ emergencyFacilityController.get("/operational", async (req, res) => {
     const emergencyFacility = await EmergencyFacility.find({
       $or: [{ status: "operational" }, { status: "full" }],
     });
-    /* console.log(emergencyFacility); */
+
     if (emergencyFacility) {
       return res.status(200).json(emergencyFacility);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        emergencyFacility,*/
-        ...emergencyFacility,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -183,10 +169,7 @@ emergencyFacilityController.get("/:id", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.findById(req.params.id);
 
-    /* console.log(emergencyFacility); */
-
     if (emergencyFacility) {
-      /*      return res.status(200).json(emergencyFacility); */
       return res.status(200).json({
         success: true,
         message: "found",
@@ -256,7 +239,6 @@ emergencyFacilityController.put(
       }
 
       if (Object.keys(error).length === 0) {
-        console.log("no error");
         contactNumber = contactNumber.replace(/\s+/g, "");
         const updateFields = {
           name,
@@ -279,7 +261,6 @@ emergencyFacilityController.put(
             emergencyFacilityImage.image
           );
 
-          /* updateFields.image = req.file.filename; */
           const cloud = await cloudinaryUploader(
             "upload",
             req.file.path,
@@ -304,7 +285,6 @@ emergencyFacilityController.put(
         );
 
         if (emergencyFacility) {
-          /* await createPusher("emergency-facility", "reload", {}); */
           console.log("res");
           req.io.emit("emergency-facility");
           return res.status(200).json({
@@ -359,7 +339,6 @@ emergencyFacilityController.delete(
         );
 
         if (emergencyFacility) {
-          /*  await createPusher("emergency-facility", "reload", {}); */
           req.io.emit("emergency-facility");
           return res.status(200).json({
             success: true,

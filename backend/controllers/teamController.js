@@ -3,21 +3,15 @@ const Team = require("../models/Team");
 const AssistanceRequest = require("../models/AssistanceRequest");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-const mongoose = require("mongoose");
-const {
-  isEmpty,
-  isImage,
-  isLessThanSize,
-  getTeamMembersId,
-  getUsersId,
-} = require("./functionController");
 
-const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const { createPusher, sendSMS, sendBulkSMS } = require("./apiController");
+const { isEmpty, getUsersId } = require("./functionController");
+
+const { sendSMS, sendBulkSMS } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+
 teamController.post(
   "/add",
   tokenMiddleware,
@@ -35,8 +29,6 @@ teamController.post(
         });
 
         if (team) {
-          /*  await createPusher("team", "reload", {}); */
-          /*  req.io.emit("reload", { receiver: "team" }); */
           req.io.emit("team");
 
           return res.status(200).json({
@@ -95,9 +87,6 @@ teamController.put("/reset", tokenMiddleware, async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("====================================");
-    console.log(error);
-    console.log("====================================");
     return res.status(500).json({
       success: false,
       message: "Internal Server Error: " + error,
@@ -106,7 +95,6 @@ teamController.put("/reset", tokenMiddleware, async (req, res) => {
 });
 teamController.get("/", async (req, res) => {
   try {
-    /*   const team = await Team.find({}) */
     const team = await Team.find({
       archivedDate: { $exists: false },
       isArchived: false,
@@ -117,12 +105,6 @@ teamController.get("/", async (req, res) => {
 
     if (team) {
       return res.status(200).json(team);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        team,*/
-        ...team,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -141,8 +123,6 @@ teamController.get("/myteam", tokenMiddleware, async (req, res) => {
     const userId = req.user.id;
     const team = await Team.findOne({
       $or: [{ members: userId }, { head: userId }],
-      /* archivedDate: { $exists: false },
-      isArchived: false, */
     })
       .populate("requestId")
       .populate("head", "-password")
@@ -175,17 +155,13 @@ teamController.get("/active", async (req, res) => {
       { status: "ongoing" },
       "assignedTeam"
     );
-    /*    console.log("====================================");
-    console.log(await getTeamMembersId("64a6d2deea160b889a498dc5"));
-    console.log("===================================="); */
+
     const team = await Team.find({
       $and: [
         { head: { $ne: null } },
         { members: { $ne: [] } },
         { _id: { $nin: assignedTeams.map((item) => item.assignedTeam) } },
       ],
-      /* archivedDate: { $exists: false },
-      isArchived: false, */
     })
       .populate("requestId")
       .populate("head", "-password")
@@ -193,12 +169,6 @@ teamController.get("/active", async (req, res) => {
 
     if (team) {
       return res.status(200).json(team);
-      return res.status(200).json({
-        /* success: true,
-        message: "found", 
-        team,*/
-        ...team,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -229,9 +199,6 @@ teamController.get("/responder", async (req, res) => {
 
       for (const team of teams) {
         if (team.head) {
-          console.log("====================================");
-          console.log(team.head);
-          console.log("====================================");
           if (team.head.isArchived === false) {
             assignedResponders.push({
               _id: team.head._id,
@@ -263,7 +230,7 @@ teamController.get("/responder", async (req, res) => {
       }
 
       const assignedUserIds = assignedResponders.map((user) => user._id);
-      console.log(assignedUserIds);
+
       const unassignedUsers = await User.find({
         userType: "responder",
         _id: { $nin: assignedUserIds },
@@ -281,11 +248,10 @@ teamController.get("/responder", async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        /* message: "found", */
+
         assignedResponders: assignedResponders,
         unassignedResponders: unassignedResponders,
         responders: [...unassignedResponders, ...assignedResponders],
-        /*  responders, */
       });
     } else {
       return res.status(200).json({
@@ -313,10 +279,9 @@ teamController.get("/:id", async (req, res) => {
       .populate("members", "-password");
 
     if (team) {
-      /*      return res.status(200).json(team); */
       return res.status(200).json({
         success: true,
-        /*   message: "found", */
+
         ...team._doc,
       });
     } else {
@@ -340,14 +305,11 @@ teamController.put(
     const error = {};
     try {
       const updateFields = { head: null, members: [] };
-      /* const oldTeam = await Team.findById(req.params.id); */
+
       const team = await Team.findByIdAndUpdate(req.params.id, updateFields);
 
       if (team) {
-        /* await createPusher("team", "reload", {}); */
-        /* req.io.emit("reload", { receiver: "team" }); */
         req.io.emit("team");
-        console.log("[team.head, ...team.members]");
 
         if (team.members.length !== 0) {
           await createNotification(
@@ -383,9 +345,6 @@ teamController.put(
         });
       }
     } catch (error) {
-      console.log("====================================");
-      console.log(error);
-      console.log("====================================");
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -403,13 +362,8 @@ teamController.delete(
       const team = await Team.findByIdAndDelete(req.params.id);
       if (team) {
         const teamMembers = [team.head, ...team.members];
-        console.log("========teamMembers============================");
-        console.log(teamMembers);
-        console.log("====================================");
+
         if (team.head !== null || team.members.length !== 0) {
-          console.log("====================================");
-          console.log("inside");
-          console.log("====================================");
           await createNotification(
             req,
             teamMembers,
@@ -418,8 +372,7 @@ teamController.delete(
             `Your current team, ${team.name} has been deleted.`,
             "info"
           );
-          /* await createPusher("team", "reload", {}); */
-          /* req.io.emit("reload", { receiver: "team" }); */
+
           req.io.emit("team");
           req.io.emit(team._id);
         }
@@ -450,48 +403,30 @@ teamController.put(
     try {
       let action = req.params.action.toLowerCase();
       const { newTeamId, userId, prevTeamId } = req.body;
-      console.log(userId);
-      console.log(newTeamId);
-      console.log(prevTeamId);
 
       let team;
       let removedTeam;
       let reassignedTeam;
-      let newPosition;
-      //may team gagawing unassigned
+
       if (newTeamId === "unassigned") {
-        /*   removedTeam = await Team.findById(prevTeamId);
-        if (removedTeam.head.toString() === userId) {
-          removedTeam.head = null;
-        } else {
-          removedTeam.members.pull(userId);
-        }
-        await removedTeam.save(); */
         if (action === "member") {
-          console.log("====================================");
-          console.log(prevTeamId);
-          console.log("====================================");
           removedTeam = await Team.findByIdAndUpdate(
             prevTeamId,
             { $pull: { members: userId } },
             { new: true }
           );
-          console.log("mem");
         } else if (action === "head") {
           removedTeam = await Team.findByIdAndUpdate(
             prevTeamId,
             { head: null },
             { new: true }
           );
-          console.log("head1");
         }
-        console.log("removedTeam:", removedTeam);
       } else if (
         prevTeamId === "" ||
         prevTeamId === null ||
         prevTeamId === undefined
       ) {
-        // walang prev team gagawing assigned
         if (action === "member") {
           team = await Team.findByIdAndUpdate(
             newTeamId,
@@ -506,8 +441,6 @@ teamController.put(
           );
         }
       } else {
-        /* new team from old team */
-
         removedTeam = await Team.findById(prevTeamId);
         if (removedTeam.head && removedTeam.head.toString() === userId) {
           removedTeam.head = null;
@@ -523,11 +456,6 @@ teamController.put(
             { new: true }
           );
         } else if (action === "head") {
-          /*  reassignedTeam = await Team.findByIdAndUpdate(
-            prevTeamId,
-            { head: null },
-            { new: true }
-          ); */
           team = await Team.findByIdAndUpdate(
             newTeamId,
             { head: userId },
@@ -535,11 +463,8 @@ teamController.put(
           );
         }
       }
-      console.log("====================================");
-      console.log(removedTeam);
-      console.log("====================================");
+
       if (team || removedTeam || reassignedTeam) {
-        //may team gagawing unassigned
         if (newTeamId === "unassigned") {
           await createNotification(
             req,
@@ -550,7 +475,6 @@ teamController.put(
             "info"
           );
         } else if (prevTeamId === "") {
-          // walang prev team
           await createNotification(
             req,
             [userId],
@@ -574,9 +498,8 @@ teamController.put(
           );
         }
 
-        // req.io.emit("reload", { receiver: "team" });
         req.io.emit("team");
-        // req.io.emit(team._id);
+
         return res.status(200).json({
           success: true,
           message: "Updated Successfully",
@@ -596,244 +519,7 @@ teamController.put(
     }
   }
 );
-/* teamController.put(
-  "/update/assignment/:action",
-  tokenMiddleware,
-   //userTypeMiddleware(["employee", "admin"]),
-    async (req, res) => {
-    try {
-      let action = req.params.action.toLowerCase();
-      const { newTeamId, userId, prevTeamId } = req.body;
-      console.log(userId);
-      console.log(newTeamId);
-      console.log(prevTeamId);
 
-      let team;
-      let removedTeam;
-      let reassignedTeam;
-      let newPosition;
-      //may team gagawing unassigned
-      if (newTeamId === "unassigned") {
-        if (action === "member") {
-          console.log("====================================");
-          console.log(prevTeamId);
-          console.log("====================================");
-          removedTeam = await Team.findByIdAndUpdate(
-            prevTeamId,
-            { $pull: { members: userId } },
-            { new: true }
-          );
-          console.log("mem");
-        } else if (action === "head") {
-          removedTeam = await Team.findByIdAndUpdate(
-            prevTeamId,
-            { head: null },
-            { new: true }
-          );
-          console.log("head1");
-        }
-        console.log("removedTeam:", removedTeam);
-      } 
-      
-      
-      else if (prevTeamId === "") {
-        // walang prev team gagawing assigned
-        if (action === "member") {
-          team = await Team.findByIdAndUpdate(
-            newTeamId,
-            { $push: { members: userId } },
-            { new: true }
-          );
-        } else if (action === "head") {
-          team = await Team.findByIdAndUpdate(
-            newTeamId,
-            { head: userId },
-            { new: true }
-          );
-        }
-      } 
-      
-      
-      // new team from old team
-      else {
-        if (action === "member") {
-          reassignedTeam = await Team.findByIdAndUpdate(
-            prevTeamId,
-            { $pull: { members: userId, } },
-            { new: true }
-          );
-          team = await Team.findByIdAndUpdate(
-            newTeamId,
-            { $push: { members: userId } },
-            { new: true }
-          );
-        } else if (action === "head") {
-          reassignedTeam = await Team.findByIdAndUpdate(
-            prevTeamId,
-            { head: null },
-            { new: true }
-          );
-          team = await Team.findByIdAndUpdate(
-            newTeamId,
-            { head: userId },
-            { new: true }
-          );
-        }
-      }
-      console.log("====================================");
-      console.log(removedTeam);
-      console.log("====================================");
-      if (team || removedTeam || reassignedTeam) {
-        //may team gagawing unassigned
-        if (newTeamId === "unassigned") {
-          await createNotification(
-            req,
-            [userId],
-            userId,
-            `Team Assignment`,
-            `You have been remove from ${removedTeam.name}.`,
-            "info"
-          );
-        } else if (prevTeamId === "") {
-          // walang prev team
-          await createNotification(
-            req,
-            [userId],
-            userId,
-            `Team Assignment`,
-            `You have been assigned to ${team.name}.`,
-            "info"
-          );
-        } else {
-          await createNotification(
-            req,
-            [userId],
-            userId,
-            `Team Assignment`,
-            `You have been assigned to ${team.name}.`,
-            "info"
-          );
-        }
-        
-        // req.io.emit("reload", { receiver: "team" });
-        req.io.emit("team");
-        // req.io.emit(team._id);
-        return res.status(200).json({
-          success: true,
-          message: "Updated Successfully",
-          team,
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-); */
-
-/* di nagamit? */
-teamController.put(
-  "/update/unassign/:action",
-  tokenMiddleware,
-  /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
-    try {
-      const { newTeamId, userId } = req.body;
-
-      let team;
-      let removedTeam;
-      let reassignedTeam;
-      //may team gagawing unassigned
-      if (newTeamId === "unassigned") {
-        console.log("====================================");
-        console.log(prevTeamId);
-        console.log("====================================");
-        removedTeam = await Team.findByIdAndUpdate(
-          prevTeamId,
-          { $pull: { members: userId } },
-          { new: true }
-        );
-      } else if (prevTeamId === "") {
-        // walang prev team
-        team = await Team.findByIdAndUpdate(
-          newTeamId,
-          { $push: { members: userId } },
-          { new: true }
-        );
-      } else {
-        reassignedTeam = await Team.findByIdAndUpdate(
-          prevTeamId,
-          { $pull: { members: userId } },
-          { new: true }
-        );
-        team = await Team.findByIdAndUpdate(
-          newTeamId,
-          { $push: { members: userId } },
-          { new: true }
-        );
-      }
-
-      if (team || removedTeam || reassignedTeam) {
-        //may team gagawing unassigned
-        if (newTeamId === "unassigned") {
-          await createNotification(
-            req,
-            [userId],
-            userId,
-            `Team Assignment`,
-            `You have been removed from ${removedTeam.name}.`,
-            "info"
-          );
-        } else if (prevTeamId === "") {
-          // walang prev team
-          await createNotification(
-            req,
-            [userId],
-            userId,
-            `Team Assignment`,
-            `You have been assigned to ${team.name} as a member.`,
-            "info"
-          );
-        } else {
-          await createNotification(
-            req,
-            [userId],
-            userId,
-            `Team Assignment`,
-            `You have been assigned to ${team.name} as a member.`,
-            "info"
-          );
-        }
-        /* await createPusher("team", "reload", {}); */
-        /* req.io.emit("reload", { receiver: "team" }); */
-        req.io.emit("team");
-        /*  req.io.emit(team._id); */
-        req.io.emit(userId);
-        return res.status(200).json({
-          success: true,
-          message: "Updated Successfully",
-          team,
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: "Internal Server Error",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-);
 teamController.put(
   "/update/:id",
   tokenMiddleware,
@@ -841,12 +527,8 @@ teamController.put(
     const error = {};
     try {
       let { head, members } = req.body;
-      /*  console.log(head); */
-      console.log(head);
-      console.log(members);
-      const oldTeam = await Team.findById(req.params.id);
 
-      // Update the team properties with the new values
+      const oldTeam = await Team.findById(req.params.id);
 
       if (isEmpty(head)) {
         if (oldTeam.head !== null) {
@@ -861,27 +543,16 @@ teamController.put(
       }
       members = [...members, ...oldTeam.members];
 
-      /*   members = [...members, ...oldTeam.members]; */
-
-      // Save the updated team object to the database
       const updatedTeam = await oldTeam.save();
-
-      // if (isEmpty(head)) error["head"] = "Required field";
-      // if (members.length === 0) error["members"] = "Required field";
 
       if (Object.keys(error).length === 0) {
         const updateFields = { head, members };
-        /*      const previousTeam = await Team.findById(req.params.id);
-        const previousMembers = previousTeam.members; */
+
         const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
           new: true,
         });
-        console.log("====================================");
-        console.log(members);
-        console.log(members.length !== 0);
+
         if (team) {
-          /* await createPusher("team", "reload", {}); */
-          /* req.io.emit("reload", { receiver: "team" }); */
           req.io.emit("team");
           if (!isEmpty(head))
             await createNotification(
@@ -921,9 +592,6 @@ teamController.put(
         return res.status(400).json(error);
       }
     } catch (error) {
-      console.log("====================================");
-      console.log(error);
-      console.log("====================================");
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -948,7 +616,6 @@ teamController.put(
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
         if (Object.keys(error).length === 0) {
-          console.log(action);
           if (action === "archive") {
             updateFields = {
               isArchived: true,
@@ -965,12 +632,7 @@ teamController.put(
             { new: true }
           );
           if (team) {
-            console.log("====================================");
-            console.log("team");
-            console.log("====================================");
-            // await createPusher("hazard-report", "reload", {});
             if (action === "archive") {
-              console.log("archive");
               const updateFields = { head: null, members: [] };
 
               const team = await Team.findByIdAndUpdate(
@@ -979,13 +641,8 @@ teamController.put(
               );
               if (team) {
                 const teamMembers = [team.head, ...team.members];
-                console.log("========teamMembers============================");
-                console.log(teamMembers);
-                console.log("====================================");
+
                 if (team.head !== null || team.members.length !== 0) {
-                  console.log("====================================");
-                  console.log("inside");
-                  console.log("====================================");
                   await createNotification(
                     req,
                     teamMembers,

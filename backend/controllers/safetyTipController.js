@@ -3,11 +3,7 @@ const SafetyTip = require("../models/SafetyTip");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
-const isResident = require("../middlewares/isResident");
-const isAdmin = require("../middlewares/isAdmin");
-const isSuperAdmin = require("../middlewares/isSuperAdmin");
-const isResponder = require("../middlewares/isResponder");
-const isDispatcher = require("../middlewares/isDispatcher");
+
 const {
   createNotification,
   createNotificationAll,
@@ -19,7 +15,6 @@ const {
   isLessThanSize,
   cloudinaryUploader,
 } = require("./functionController");
-const { createPusher } = require("./apiController");
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
@@ -35,14 +30,6 @@ safetyTipController.post(
     try {
       let { title, content, category, status } = req.body;
       if (typeof status === "string") status = status.toLowerCase();
-      console.log("======status==============================");
-      console.log(status);
-      console.log(title);
-      console.log(category);
-      console.log("====================================");
-      console.log("====================================");
-      console.log(req.file);
-      console.log("====================================");
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";
@@ -79,7 +66,6 @@ safetyTipController.post(
             authorId: req.user.id,
           });
           if (safetyTip) {
-            /*  await createPusher("safety-tips", "reload", {}); */
             req.io.emit("safety-tips");
             if (status === "published") {
               createNotificationAll(
@@ -132,12 +118,6 @@ safetyTipController.get("/", async (req, res) => {
     );
     if (safetyTips) {
       return res.status(200).json(safetyTips);
-      return res.status(200).json({
-        /* success: true,
-      message: "Record found", 
-      safetyTips,*/
-        ...safetyTips,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -160,12 +140,6 @@ safetyTipController.get("/published", async (req, res) => {
     );
     if (safetyTips) {
       return res.status(200).json(safetyTips);
-      return res.status(200).json({
-        /* success: true,
-      message: "Record found", 
-      safetyTips,*/
-        ...safetyTips,
-      });
     } else {
       return res.status(200).json({
         success: false,
@@ -187,7 +161,6 @@ safetyTipController.get("/published/:id", async (req, res) => {
       status: "published",
     }).populate("authorId", "-password");
     if (safetyTip) {
-      /*      return res.status(200).json(safetyTip); */
       return res.status(200).json({
         success: true,
         message: "found",
@@ -219,19 +192,12 @@ safetyTipController.get(
   ]), */
   async (req, res) => {
     try {
-      console.log("im here");
       const safetyTip = await SafetyTip.find({
         saves: req.user.id,
         status: "published",
       });
       if (safetyTip) {
         return res.status(200).json(safetyTip);
-        return res.status(200).json({
-          /* success: true,
-      message: "Record found", 
-      safetyTips,*/
-          ...safetyTip,
-        });
       } else {
         return res.status(200).json({
           success: false,
@@ -255,7 +221,6 @@ safetyTipController.get("/:id", async (req, res) => {
     );
 
     if (safetyTip) {
-      /*      return res.status(200).json(safetyTip); */
       return res.status(200).json({
         success: true,
         message: "found",
@@ -285,9 +250,7 @@ safetyTipController.put(
     try {
       let { title, content, category, status, hasChanged } = req.body;
       if (typeof status === "string") status = status.toLowerCase();
-      console.log("===========f=========================");
-      console.log(status);
-      console.log("====================================");
+
       if (isEmpty(title)) error["title"] = "Required field";
       if (isEmpty(content.replace(/<[^>]*>/g, "")))
         error["content"] = "Required field";
@@ -327,7 +290,6 @@ safetyTipController.put(
             safetyTipImage.image
           );
 
-          /*  updateFields.image = req.file.filename; */
           const cloud = await cloudinaryUploader(
             "upload",
             req.file.path,
@@ -352,7 +314,6 @@ safetyTipController.put(
         );
 
         if (safetyTip) {
-          /*  await createPusher("safety-tips", "reload", {}); */
           req.io.emit("safety-tips");
           return res.status(200).json({
             success: true,
@@ -399,10 +360,8 @@ safetyTipController.delete(
       );
       if (cloud !== "error") {
         const safetyTip = await SafetyTip.findByIdAndDelete(req.params.id);
-        console.log("safetyTip");
-        console.log(safetyTip.title);
+
         if (safetyTip) {
-          /* await createPusher("safety-tips", "reload", {}); */
           req.io.emit("safety-tips");
           return res.status(200).json({
             success: true,

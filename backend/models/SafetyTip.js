@@ -28,10 +28,7 @@ const SafetyTipSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    /* views: {
-      type: Number,
-      default: 0,
-    }, */
+
     saves: [
       {
         type: mongoose.Types.ObjectId,

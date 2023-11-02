@@ -88,9 +88,6 @@ statisticsController.get(
             user.userType === "resident"
           );
         }).length;
-
-        console.log(users.length);
-        console.log(usersThisMonth);
         const staffs = users.filter((user) => user.userType !== "resident");
         /*  const activeUsersThisMonth = users.filter((user) =>
           moment(user.updatedAt).isSame(moment(), "month")
