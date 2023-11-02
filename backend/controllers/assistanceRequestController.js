@@ -264,7 +264,7 @@ assistanceRequestController.get(
         $or: [{ members: req.user.id }, { head: req.user.id }],
       })
         .populate("head", "-password")
-        .populate("preAssessmentId")
+
         .populate("members", "-password");
 
       if (myTeam) {
@@ -351,55 +351,12 @@ assistanceRequestController.get(
     }
   }
 );
-assistanceRequestController.get(
-  "/torespond",
-  tokenMiddleware,
-  /* userTypeMiddleware([
-  "responder",
-  "employee",
-  "admin",
-]), */ async (req, res) => {
-    try {
-      const team = await Team.findOne({
-        $or: [{ head: req.user.id }, { members: req.user.id }],
-        /*   archivedDate: { $exists: false },
-        isArchived: false, */
-      });
-      console.log("====================================");
-      console.log(team._id);
-      console.log("====================================");
-      const assistanceRequest = await AssistanceRequest.find({
-        assignedTeam: team._id,
-        status: "ongoing",
-        archivedDate: { $exists: false },
-        isArchived: false,
-      }).populate("userId", "-password");
-
-      if (assistanceRequest) {
-        return res.status(200).json(assistanceRequest);
-      } else {
-        return res.status(200).json({
-          success: false,
-          message: "not found",
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error: " + error,
-      });
-    }
-  }
-);
 
 assistanceRequestController.get(
   "/myrequest",
   tokenMiddleware,
   async (req, res) => {
     try {
-      console.log("====================================");
-      console.log(req.user.id);
-      console.log("====================================");
       const assistanceRequest = await AssistanceRequest.findOne({
         userId: req.user.id,
         status: { $in: ["ongoing", "unverified", "incomplete"] },
@@ -1104,11 +1061,9 @@ assistanceRequestController.put(
                 message: "Archived Successfully",
               });
             } else if (action === "cancel") {
-              console.log(assistanceRequest.assignedTeam);
               const team = await Team.findById(assistanceRequest.assignedTeam)
                 .populate("head", "-password")
                 .populate("members", "-password");
-              console.log(team);
 
               const teamHead = team.head;
               const teamMembers = team.members;
