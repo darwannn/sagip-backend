@@ -51,7 +51,7 @@ const PreAssessmentSchema = new mongoose.Schema(
         },
       ],
 
-      signs: {
+      consciousness: {
         type: String,
       },
 
@@ -67,7 +67,7 @@ const PreAssessmentSchema = new mongoose.Schema(
         type: String,
       },
 
-      breathing: {
+      respiration: {
         type: String,
       },
 

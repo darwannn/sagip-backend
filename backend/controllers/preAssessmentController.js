@@ -69,7 +69,7 @@ preAssessmentController.post(
         medications,
         medicalHistory,
 
-        signs,
+        consciousness,
 
         speech,
 
@@ -77,7 +77,7 @@ preAssessmentController.post(
 
         color,
 
-        breathing,
+        respiration,
         pulse,
 
         pupils,
@@ -94,11 +94,11 @@ preAssessmentController.post(
       if (isEmpty(allergies)) error["allergies"] = "Required field";
       if (isEmpty(medications)) error["medications"] = "Required field";
 
-      if (isEmpty(signs)) error["signs"] = "Required field";
+      if (isEmpty(consciousness)) error["consciousness"] = "Required field";
       if (isEmpty(speech)) error["speech"] = "Required field";
       if (isEmpty(skin)) error["skin"] = "Required field";
       if (isEmpty(color)) error["color"] = "Required field";
-      if (isEmpty(breathing)) error["breathing"] = "Required field";
+      if (isEmpty(respiration)) error["respiration"] = "Required field";
       if (isEmpty(pulse)) error["pulse"] = "Required field";
       if (isEmpty(pupils)) error["pupils"] = "Required field";
 
@@ -131,11 +131,11 @@ preAssessmentController.post(
           allergies,
           medications,
           medicalHistory,
-          signs,
+          consciousness,
           speech,
           skin,
           color,
-          breathing,
+          respiration,
           pulse,
           pupils,
           medicalCondition,
@@ -215,7 +215,7 @@ preAssessmentController.put(
         medications,
         medicalHistory,
 
-        signs,
+        consciousness,
 
         speech,
 
@@ -223,7 +223,7 @@ preAssessmentController.put(
 
         color,
 
-        breathing,
+        respiration,
         pulse,
 
         pupils,
@@ -240,11 +240,11 @@ preAssessmentController.put(
       if (isEmpty(allergies)) error["allergies"] = "Required field";
       if (isEmpty(medications)) error["medications"] = "Required field";
 
-      if (isEmpty(signs)) error["signs"] = "Required field";
+      if (isEmpty(consciousness)) error["consciousness"] = "Required field";
       if (isEmpty(speech)) error["speech"] = "Required field";
       if (isEmpty(skin)) error["skin"] = "Required field";
       if (isEmpty(color)) error["color"] = "Required field";
-      if (isEmpty(breathing)) error["breathing"] = "Required field";
+      if (isEmpty(respiration)) error["respiration"] = "Required field";
       if (isEmpty(pulse)) error["pulse"] = "Required field";
       if (isEmpty(pupils)) error["pupils"] = "Required field";
 
@@ -265,11 +265,11 @@ preAssessmentController.put(
           allergies,
           medications,
           medicalHistory,
-          signs,
+          consciousness,
           speech,
           skin,
           color,
-          breathing,
+          respiration,
           pulse,
           pupils,
           medicalCondition,
