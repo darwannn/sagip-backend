@@ -683,37 +683,44 @@ authController.post("/login", async (req, res) => {
                 "Account suspended. Please contact us if you think this isn't right",
             });
           } else {
-            if (!(user.status === "unverified")) {
-              /*    if (!user.isArchived) { */
-              // Check if the user has exceeded the maximum number of attempts
-
-              // Reset the attempt number if the password is correct
-              /* if (!user.archivedDate) { */
-              user.attempt = 0;
-              user.isOnline = true;
-              user.lastOnlineDate = Date.now();
-              await user.save();
-
-              return res.status(200).json({
-                success: true,
-                message: "Login Successfully",
-                userType: user._doc.userType,
-                user: {
-                  target: "login",
-                  id: user._doc._id,
-                  userType: user._doc.userType,
-                  status: user._doc.status,
-                },
-                token: generateToken(
-                  "login",
-                  user._doc._id,
-                  user._doc.userType,
-                  user._doc.status,
-                  "7d",
-                  ""
-                ),
+            if (user.isArchived) {
+              return res.status(403).json({
+                success: false,
+                message:
+                  "Your account is disabled. Please contact us if you think this isn't right.",
               });
-              /*   } else {
+            } else {
+              if (!(user.status === "unverified")) {
+                /*    if (!user.isArchived) { */
+                // Check if the user has exceeded the maximum number of attempts
+
+                // Reset the attempt number if the password is correct
+                /* if (!user.archivedDate) { */
+                user.attempt = 0;
+                user.isOnline = true;
+                user.lastOnlineDate = Date.now();
+                await user.save();
+
+                return res.status(200).json({
+                  success: true,
+                  message: "Login Successfully",
+                  userType: user._doc.userType,
+                  user: {
+                    target: "login",
+                    id: user._doc._id,
+                    userType: user._doc.userType,
+                    status: user._doc.status,
+                  },
+                  token: generateToken(
+                    "login",
+                    user._doc._id,
+                    user._doc.userType,
+                    user._doc.status,
+                    "7d",
+                    ""
+                  ),
+                });
+                /*   } else {
                 //  const data = calculateArchivedDate();
                 if (data) {
                     //  const { daysLeft, deletionDate } = data;
@@ -728,40 +735,41 @@ authController.post("/login", async (req, res) => {
                   });
                 }
               } */
-            } else {
-              /* return res.status(500).json({
+              } else {
+                /* return res.status(500).json({
                 success: false,
                 message: "Internal Server Error: " + error,
               }); */
-              const userVerificationCode = await updateVerificationCode(
-                user._id
-              );
-              sendSMS(
-                userVerificationCode.contactNumber,
-                "register",
-                userVerificationCode.verificationCode
-              );
+                const userVerificationCode = await updateVerificationCode(
+                  user._id
+                );
+                sendSMS(
+                  userVerificationCode.contactNumber,
+                  "register",
+                  userVerificationCode.verificationCode
+                );
 
-              if (userVerificationCode) {
-                console.log("Code: " + userVerificationCode.verificationCode);
-                return res.status(200).json({
-                  success: false,
-                  message: `Please verify your contact number.Verification code has been send to ${userVerificationCode.contactNumber}`,
-                  user: {
-                    target: "register",
-                    id: userVerificationCode._doc._id,
-                    userType: userVerificationCode._doc.userType,
-                    status: userVerificationCode._doc.status,
-                  },
-                  token: generateToken(
-                    "register",
-                    user._doc._id,
-                    user._doc.userType,
-                    user._doc.status,
-                    "7d",
-                    user.contactNumber
-                  ),
-                });
+                if (userVerificationCode) {
+                  console.log("Code: " + userVerificationCode.verificationCode);
+                  return res.status(200).json({
+                    success: false,
+                    message: `Please verify your contact number.Verification code has been send to ${userVerificationCode.contactNumber}`,
+                    user: {
+                      target: "register",
+                      id: userVerificationCode._doc._id,
+                      userType: userVerificationCode._doc.userType,
+                      status: userVerificationCode._doc.status,
+                    },
+                    token: generateToken(
+                      "register",
+                      user._doc._id,
+                      user._doc.userType,
+                      user._doc.status,
+                      "7d",
+                      user.contactNumber
+                    ),
+                  });
+                }
               }
             }
           }
@@ -808,11 +816,6 @@ authController.post("/forgot-password", async (req, res) => {
 
       const user = await updateVerificationCode(accountExists.id);
       if (user) {
-        if (identifierType === "email") {
-          sendEmail(user.email, "forgot-password", user.verificationCode);
-        } else if (identifierType === "contactNumber") {
-          sendSMS(user.contactNumber, "forgot-password", user.verificationCode);
-        }
         if (user.isBanned) {
           return res.status(500).json({
             success: false,
@@ -820,46 +823,63 @@ authController.post("/forgot-password", async (req, res) => {
               "Account suspended. Please contact us if you think this isn't right",
           });
         } else {
-          if (identifierType === "email") {
-            return res.status(200).json({
-              success: true,
-              message: `Verification code has been sent to ${user._doc.email}`,
-              user: {
-                target: "forgot-password",
-                id: user._doc._id,
-                userType: user._doc.userType,
-                status: user._doc.status,
-                identifier: identifier,
-              },
-              token: generateToken(
+          if (user.isArchived) {
+            return res.status(403).json({
+              success: false,
+              message:
+                "Your account is disabled. Please contact us if you think this isn't right.",
+            });
+          } else {
+            if (identifierType === "email") {
+              sendEmail(user.email, "forgot-password", user.verificationCode);
+            } else if (identifierType === "contactNumber") {
+              sendSMS(
+                user.contactNumber,
                 "forgot-password",
-                user._doc._id,
-                user._doc.userType,
-                user._doc.status,
-                "7d",
+                user.verificationCode
+              );
+            }
+            if (identifierType === "email") {
+              return res.status(200).json({
+                success: true,
+                message: `Verification code has been sent to ${user._doc.email}`,
+                user: {
+                  target: "forgot-password",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                  identifier: identifier,
+                },
+                token: generateToken(
+                  "forgot-password",
+                  user._doc._id,
+                  user._doc.userType,
+                  user._doc.status,
+                  "7d",
 
-                identifier
-              ),
-            });
-          } else if (identifierType === "contactNumber") {
-            return res.status(200).json({
-              success: true,
-              message: `Verification code has been sent to ${user._doc.contactNumber}`,
-              user: {
-                target: "forgot-password",
-                id: user._doc._id,
-                userType: user._doc.userType,
-                status: user._doc.status,
-              },
-              token: generateToken(
-                "forgot-password",
-                user._doc._id,
-                user._doc.userType,
-                user._doc.status,
-                "7d",
-                identifier
-              ),
-            });
+                  identifier
+                ),
+              });
+            } else if (identifierType === "contactNumber") {
+              return res.status(200).json({
+                success: true,
+                message: `Verification code has been sent to ${user._doc.contactNumber}`,
+                user: {
+                  target: "forgot-password",
+                  id: user._doc._id,
+                  userType: user._doc.userType,
+                  status: user._doc.status,
+                },
+                token: generateToken(
+                  "forgot-password",
+                  user._doc._id,
+                  user._doc.userType,
+                  user._doc.status,
+                  "7d",
+                  identifier
+                ),
+              });
+            }
           }
         }
       } else {

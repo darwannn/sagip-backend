@@ -296,7 +296,10 @@ const dismissedRequestCount = async (action, userId, req) => {
   if (user.dismissedRequestCount >= 2) {
     user.isBanned = true;
 
-    req.io.emit(`logout-${userId}`);
+    req.io.emit(`logout-${userId}`, {
+      message:
+        "You have been logged out as your account has been suspended. Please contact us if you think this isn't right.",
+    });
   } else {
     user.isBanned = false;
   }
@@ -326,7 +329,10 @@ const handleArchive = async (action, id, req, res) => {
       );
       if (user) {
         if (action === "archive") {
-          req.io.emit(`${id}`);
+          req.io.emit(`logout-${id}`, {
+            message:
+              "You have been logged out as your account has been disabled. Please contact us if you think this isn't right.",
+          });
           return res.status(200).json({
             success: true,
             message: "Archived Successfully",

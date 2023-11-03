@@ -627,7 +627,10 @@ accountController.put(
           req.io.emit(`${req.params.id}`);
 
           if (isBanned) {
-            req.io.emit(`logout-${req.params.id}`);
+            req.io.emit(`logout-${req.params.id}`, {
+              message:
+                "You have been logged out as your account has been suspended. Please contact us if you think this isn't right.",
+            });
           }
 
           return res.status(200).json({
