@@ -5,7 +5,7 @@ const PreAssessment = require("../models/PreAssessment");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
 const { isEmpty } = require("./functionController");
-
+const moment = require("moment");
 const multerMiddleware = require("../middlewares/multerMiddleware");
 
 preAssessmentController.get("/:id", async (req, res) => {
@@ -76,7 +76,8 @@ preAssessmentController.post(
         pulse,
 
         pupils,
-
+        age,
+        gender,
         medicalCondition,
       } = req.body;
 
@@ -108,6 +109,8 @@ preAssessmentController.post(
         if (isEmpty(lastname)) error["lastname"] = "Required field";
         if (isEmpty(address)) error["address"] = "Required field";
         if (isEmpty(contactNumber)) error["contactNumber"] = "Required field";
+        if (isEmpty(age)) error["age"] = "Required field";
+        if (isEmpty(gender)) error["gender"] = "Required field";
       } else {
         const assistanceRequest = await AssistanceRequest.findOne({
           _id: req.params.id,
@@ -118,6 +121,12 @@ preAssessmentController.post(
         lastname = assistanceRequest.userId.lastname;
         address = `${assistanceRequest.userId.street}, ${assistanceRequest.userId.barangay}, ${assistanceRequest.userId.municipality}, ${assistanceRequest.userId.province}`;
         contactNumber = assistanceRequest.userId.contactNumber;
+        const birthdate = assistanceRequest.userId.birthdate;
+
+        const today = moment();
+
+        age = birthdate ? today.diff(moment(birthdate), "years") : null;
+        gender = assistanceRequest.userId.gender;
       }
 
       if (Object.keys(error).length === 0) {
@@ -144,7 +153,9 @@ preAssessmentController.post(
           address,
           contactNumber,
           incidentLocation,
-        incidentDescription,
+          incidentDescription,
+          age,
+          gender,
         };
 
         const preAssessment = await PreAssessment.create(newData);
@@ -225,6 +236,8 @@ preAssessmentController.put(
 
         pupils,
 
+        age,
+        gender,
         medicalCondition,
       } = req.body;
 
@@ -232,6 +245,8 @@ preAssessmentController.put(
         error["incidentLocation"] = "Required field";
       if (isEmpty(incidentDescription))
         error["incidentDescription"] = "Required field";
+      if (isEmpty(age)) error["age"] = "Required field";
+      if (isEmpty(gender)) error["gender"] = "Required field";
 
       if (isEmpty(concerns)) error["concerns"] = "Required field";
       if (isEmpty(allergies)) error["allergies"] = "Required field";
@@ -279,7 +294,9 @@ preAssessmentController.put(
           address,
           contactNumber,
           incidentLocation,
-        incidentDescription,
+          incidentDescription,
+          age,
+          gender,
         };
 
         const preAssessment = await PreAssessment.findByIdAndUpdate(

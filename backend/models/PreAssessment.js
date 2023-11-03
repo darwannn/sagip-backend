@@ -26,6 +26,12 @@ const PreAssessmentSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    gender: {
+      type: String,
+    },
+    age: {
+      type: Number,
+    },
 
     incidentLocation: {
       type: String,

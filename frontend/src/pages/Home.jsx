@@ -60,8 +60,10 @@ function Home() {
       try {
         const formData = new FormData();
 
-        formData.append("isSelfReported", true);
+        formData.append("isSelfReported", false);
 
+        formData.append("gender", "attack helicopter");
+        formData.append("age", "1");
         formData.append("firstname", "MyFirstname");
         formData.append("lastname", "MyLastname");
         formData.append("middlename", "MyMiddlename");
@@ -80,6 +82,8 @@ function Home() {
         formData.append("breathing", "breathing 4");
         formData.append("pulse", "pulse 5");
         formData.append("pupils", "pupils 6");
+        formData.append("consciousness", "pupils 6");
+        formData.append("respiration", "pupils 6");
 
         var medicalCondition = ["fracutre", "seizure"];
         var medicalHistory = ["Stroke", "Heart Attack", "Diabetes"];
@@ -93,7 +97,7 @@ function Home() {
         //create = id = assistance request id
         //update = id = pre-assessment id
         const weatherResponse1 = await request(
-          /*       "/pre-assessment/add/6532a9714ff6000e68f13b63", */
+          /*  "/pre-assessment/add/6532a9714ff6000e68f13b63", */
           "/pre-assessment/update/654139168ef18c545095af54",
           "PUT",
           /* "POST", */
@@ -123,7 +127,7 @@ function Home() {
       }
     };
 
-    /* fetchData(); */
+    fetchData();
   }, [serverResponse, dispatch]);
   /* const fetchData = async () => {
       if (serverResponse !== "") {
