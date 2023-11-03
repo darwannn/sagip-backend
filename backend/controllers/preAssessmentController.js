@@ -143,6 +143,8 @@ preAssessmentController.post(
           lastname,
           address,
           contactNumber,
+          incidentLocation,
+        incidentDescription,
         };
 
         const preAssessment = await PreAssessment.create(newData);
@@ -276,6 +278,8 @@ preAssessmentController.put(
           lastname,
           address,
           contactNumber,
+          incidentLocation,
+        incidentDescription,
         };
 
         const preAssessment = await PreAssessment.findByIdAndUpdate(
