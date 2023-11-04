@@ -146,8 +146,10 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
         title: title,
         body: body,
       },
+
       data: {
         linkId: String(linkId),
+        tag: createRandomTag(),
       },
       tokens: tokens,
     };
@@ -183,6 +185,7 @@ const createPushNotificationTopic = (title, body, topic, linkId) => {
     },
     data: {
       linkId: String(linkId),
+      tag: createRandomTag(),
     },
     topic: topic,
   };
@@ -198,6 +201,11 @@ const createPushNotificationTopic = (title, body, topic, linkId) => {
     });
 };
 /* }; */
+
+const createRandomTag = () => {
+  const randomTag = Math.floor(Math.random() * 1000000).toString();
+  return randomTag;
+};
 
 module.exports = {
   notificationController,
