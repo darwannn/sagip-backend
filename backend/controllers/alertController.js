@@ -459,8 +459,8 @@ async function getTyphoonSignal() {
               success: true,
               signal: `1`,
               message: `Malolos is under Signal No.1`,
-              track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_hanna.png`,
-              name: "Hanna",
+              track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_jenny.png`,
+              name: "Jenny",
               category: "Typhoon",
               updatedAt: Date.now(),
             };
