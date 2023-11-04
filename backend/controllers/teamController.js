@@ -121,6 +121,7 @@ teamController.get("/", async (req, res) => {
 teamController.get("/myteam", tokenMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log(userId);
     const team = await Team.findOne({
       $or: [{ members: userId }, { head: userId }],
     })
@@ -133,7 +134,7 @@ teamController.get("/myteam", tokenMiddleware, async (req, res) => {
         success: true,
         message: "Team found",
         name: team.name,
-        position: team.head._id === userId ? "head" : "member",
+        position: team.head && team.head._id == userId ? "leader" : "member",
         _id: team._id,
       });
     } else {
