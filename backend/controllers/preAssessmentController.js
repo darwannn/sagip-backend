@@ -86,22 +86,22 @@ preAssessmentController.post(
       if (isEmpty(incidentDescription))
         error["incidentDescription"] = "Required field";
 
-      if (isEmpty(concerns)) error["concerns"] = "Required field";
-      if (isEmpty(allergies)) error["allergies"] = "Required field";
-      if (isEmpty(medications)) error["medications"] = "Required field";
+      // if (isEmpty(concerns)) error["concerns"] = "Required field";
+      // if (isEmpty(allergies)) error["allergies"] = "Required field";
+      // if (isEmpty(medications)) error["medications"] = "Required field";
 
-      if (isEmpty(consciousness)) error["consciousness"] = "Required field";
-      if (isEmpty(speech)) error["speech"] = "Required field";
-      if (isEmpty(skin)) error["skin"] = "Required field";
-      if (isEmpty(color)) error["color"] = "Required field";
-      if (isEmpty(respiration)) error["respiration"] = "Required field";
-      if (isEmpty(pulse)) error["pulse"] = "Required field";
-      if (isEmpty(pupils)) error["pupils"] = "Required field";
+      // if (isEmpty(consciousness)) error["consciousness"] = "Required field";
+      // if (isEmpty(speech)) error["speech"] = "Required field";
+      // if (isEmpty(skin)) error["skin"] = "Required field";
+      // if (isEmpty(color)) error["color"] = "Required field";
+      // if (isEmpty(respiration)) error["respiration"] = "Required field";
+      // if (isEmpty(pulse)) error["pulse"] = "Required field";
+      // if (isEmpty(pupils)) error["pupils"] = "Required field";
 
-      if (medicalHistory && medicalHistory.length === 0)
-        error["medicalHistory"] = "Required field";
-      if (medicalCondition && medicalCondition.length === 0)
-        error["medicalCondition"] = "Required field";
+      // if (medicalHistory && medicalHistory.length === 0)
+      //   error["medicalHistory"] = "Required field";
+      // if (medicalCondition && medicalCondition.length === 0)
+      //   error["medicalCondition"] = "Required field";
 
       if (isSelfReported === false || isSelfReported === "false") {
         if (isEmpty(firstname)) error["firstname"] = "Required field";
@@ -248,22 +248,22 @@ preAssessmentController.put(
       if (isEmpty(age)) error["age"] = "Required field";
       if (isEmpty(gender)) error["gender"] = "Required field";
 
-      if (isEmpty(concerns)) error["concerns"] = "Required field";
-      if (isEmpty(allergies)) error["allergies"] = "Required field";
-      if (isEmpty(medications)) error["medications"] = "Required field";
+      // if (isEmpty(concerns)) error["concerns"] = "Required field";
+      // if (isEmpty(allergies)) error["allergies"] = "Required field";
+      // if (isEmpty(medications)) error["medications"] = "Required field";
 
-      if (isEmpty(consciousness)) error["consciousness"] = "Required field";
-      if (isEmpty(speech)) error["speech"] = "Required field";
-      if (isEmpty(skin)) error["skin"] = "Required field";
-      if (isEmpty(color)) error["color"] = "Required field";
-      if (isEmpty(respiration)) error["respiration"] = "Required field";
-      if (isEmpty(pulse)) error["pulse"] = "Required field";
-      if (isEmpty(pupils)) error["pupils"] = "Required field";
+      // if (isEmpty(consciousness)) error["consciousness"] = "Required field";
+      // if (isEmpty(speech)) error["speech"] = "Required field";
+      // if (isEmpty(skin)) error["skin"] = "Required field";
+      // if (isEmpty(color)) error["color"] = "Required field";
+      // if (isEmpty(respiration)) error["respiration"] = "Required field";
+      // if (isEmpty(pulse)) error["pulse"] = "Required field";
+      // if (isEmpty(pupils)) error["pupils"] = "Required field";
 
-      if (medicalHistory && medicalHistory.length === 0)
-        error["medicalHistory"] = "Required field";
-      if (medicalCondition && medicalCondition.length === 0)
-        error["medicalCondition"] = "Required field";
+      // if (medicalHistory && medicalHistory.length === 0)
+      //   error["medicalHistory"] = "Required field";
+      // if (medicalCondition && medicalCondition.length === 0)
+      //   error["medicalCondition"] = "Required field";
 
       if (isEmpty(firstname)) error["firstname"] = "Required field";
       if (isEmpty(middlename)) error["middlename"] = "Required field";
