@@ -170,7 +170,7 @@ authController.post("/register", async (req, res) => {
         req.io.emit("user");
 
         sendSMS(user.contactNumber, "register", verificationCode);
-        sendEmail(user.email, "register", verificationCode);
+        // sendEmail(user.email, "register", verificationCode);
 
         /*  if (verificationCode !== 0) { */
         return res.status(200).json({
