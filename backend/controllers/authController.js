@@ -1346,9 +1346,9 @@ authController.put(
           }
 
           if (user) {
+            req.io.emit(user._id);
+            req.io.emit("verification-request");
             if (action === "reject") {
-              req.io.emit(user._id);
-              req.io.emit("verification-request");
               /* createNotification(
                 req,
                 [user._id],
@@ -1381,7 +1381,6 @@ authController.put(
                 ""
               ); */
 
-              req.io.emit("verification-request");
               createNotification(
                 req,
                 [user._id],
