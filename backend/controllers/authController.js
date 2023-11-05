@@ -1192,7 +1192,6 @@ authController.get(
         isArchived: false,
       });
 
-      /* user.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); */
       user = user.filter(
         (record) =>
           record.verificationPicture.length !== 0 &&
@@ -1201,6 +1200,7 @@ authController.get(
       );
 
       if (user) {
+        user.sort((a, b) => a.createdAt - b.createdAt);
         return res.status(200).json(user);
       } else {
         return res.status(200).json({

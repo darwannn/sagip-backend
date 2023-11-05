@@ -145,8 +145,8 @@ hazardReportController.get("/", async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     }).populate("userId", "-password");
-
     if (hazardReports) {
+      hazardReports.sort((a, b) => a.createdAt - b.createdAt);
       return res.status(200).json(hazardReports);
     } else {
       return res.status(200).json({
@@ -170,6 +170,7 @@ hazardReportController.get("/ongoing", async (req, res) => {
     }).populate("userId", "-password");
 
     if (hazardReports) {
+      hazardReports.sort((a, b) => b.createdAt - a.createdAt);
       return res.status(200).json(hazardReports);
     } else {
       return res.status(200).json({
@@ -197,6 +198,7 @@ hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
     console.log(hazardReport);
     console.log("====================================");
     if (hazardReport) {
+      hazardReport.sort((a, b) => a.createdAt - b.createdAt);
       return res.status(200).json(hazardReport);
     } else {
       return res.status(200).json({

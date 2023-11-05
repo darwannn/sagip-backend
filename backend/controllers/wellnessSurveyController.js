@@ -101,6 +101,7 @@ wellnessSurveyController.get("/", async (req, res) => {
       .populate("unaffected", "-password")
       .populate("affected", "-password");
     if (wellnessSurvey) {
+      wellnessSurvey.sort((a, b) => b.createdAt - a.createdAt);
       return res.status(200).json(wellnessSurvey);
     } else {
       return res.status(200).json({

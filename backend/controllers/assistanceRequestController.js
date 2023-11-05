@@ -209,6 +209,7 @@ assistanceRequestController.get("/", async (req, res) => {
         ],
       });
     if (assistanceRequests) {
+      assistanceRequests.sort((a, b) => a.createdAt - b.createdAt);
       return res.status(200).json(assistanceRequests);
     } else {
       return res.status(200).json({

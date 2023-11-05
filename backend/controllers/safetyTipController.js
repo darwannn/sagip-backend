@@ -116,7 +116,9 @@ safetyTipController.get("/", async (req, res) => {
       "authorId",
       "-password"
     );
+
     if (safetyTips) {
+      safetyTips.sort((a, b) => b.createdAt - a.createdAt);
       return res.status(200).json(safetyTips);
     } else {
       return res.status(200).json({
@@ -139,6 +141,7 @@ safetyTipController.get("/published", async (req, res) => {
       "-password"
     );
     if (safetyTips) {
+      safetyTips.sort((a, b) => b.createdAt - a.createdAt);
       return res.status(200).json(safetyTips);
     } else {
       return res.status(200).json({

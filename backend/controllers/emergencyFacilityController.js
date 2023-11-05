@@ -128,6 +128,7 @@ emergencyFacilityController.get("/", async (req, res) => {
     const emergencyFacility = await EmergencyFacility.find({});
 
     if (emergencyFacility) {
+      emergencyFacility.sort((a, b) => b.createdAt - a.createdAt);
       return res.status(200).json(emergencyFacility);
     } else {
       return res.status(200).json({
