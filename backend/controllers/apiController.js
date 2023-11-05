@@ -37,7 +37,7 @@ apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
 });
 
 const sendBulkSMS = async (content, target, contactNumbers) => {
-  console.log("=========contactNumbers===========================");
+  console.log("=========contactNumbers=============");
   console.log(contactNumbers);
   console.log("====================================");
 
