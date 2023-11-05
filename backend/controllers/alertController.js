@@ -239,18 +239,18 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       }
     }
 
-    console.log(contactNumbers);
-    console.log(fcmTokens);
+    /*  console.log(contactNumbers);
+    console.log(fcmTokens); */
 
     try {
       const smsResponse = true;
-      console.log(smsResponse);
+      /* console.log(smsResponse); */
       const smsRes = await sendBulkSMS(
         `${alertTitle}\n\n${alertMessage}`,
         "alert",
         contactNumbers
       );
-      console.log(smsRes);
+      /* console.log(smsRes); */
       if (smsResponse) {
         return res
           .status(200)
@@ -322,7 +322,7 @@ const getInfoByMunicipality = async (municipality) => {
 
 const getInfoByBarangay = async (municipality, location) => {
   try {
-    console.log(municipality);
+    /* console.log(municipality); */
     const users = await User.find({
       municipality: municipality,
       barangay: { $in: location },
@@ -330,7 +330,7 @@ const getInfoByBarangay = async (municipality, location) => {
 
     const contactNumbers = users.map((user) => user.contactNumber);
     const fcmTokens = users.flatMap((user) => user.fcmToken);
-    console.log(contactNumbers, fcmTokens);
+    /* console.log(contactNumbers, fcmTokens); */
     return { contactNumbers, fcmTokens };
   } catch (error) {
     return "Internal Server Error: " + error;
