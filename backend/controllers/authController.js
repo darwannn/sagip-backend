@@ -1011,11 +1011,24 @@ authController.put(
 
         if (identifierType === "email") {
           console.log("Email");
-
-          sendEmail(identifier, "email-verification", user.verificationCode);
+          if (action === "forgot-password") {
+            sendEmail(identifier, "forgot-password", user.verificationCode);
+          } else if (action === "attempt") {
+            sendEmail(identifier, "attempt", user.verificationCode);
+          } else {
+            sendEmail(identifier, "email-verification", user.verificationCode);
+          }
         } else if (identifierType === "contactNumber") {
           console.log("SMS");
-          sendSMS(identifier, "sms-verification", user.verificationCode);
+          if (action === "forgot-password") {
+            sendSMS(identifier, "forgot-password", user.verificationCode);
+          } else if (action === "attempt") {
+            sendSMS(identifier, "attempt", user.verificationCode);
+          } else if (action === "register") {
+            sendSMS(identifier, "register", user.verificationCode);
+          } else {
+            sendSMS(identifier, "sms-verification", user.verificationCode);
+          }
         }
         return res.status(200).json({
           success: true,
