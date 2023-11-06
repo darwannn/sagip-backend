@@ -1024,7 +1024,15 @@ assistanceRequestController.put(
           if (assistanceRequest) {
             req.io.emit("assistance-request");
             if (action === "archive") {
-              dismissedRequestCount("archive", assistanceRequest.userId, req);
+              if (
+                ![
+                  "no responder available",
+                  "outside the scope of service",
+                  "outside service area",
+                ].includes(reason.toLowerCase())
+              ) {
+                dismissedRequestCount("archive", assistanceRequest.userId, req);
+              }
 
               // sendSMS(
               //   assistanceRequest.userId.contactNumber,
