@@ -457,7 +457,7 @@ async function getTyphoonSignal() {
               message: "no signal",
               signal: 0, */
               success: true,
-              signal: `1`,
+              signal: `2`,
               message: `Malolos is under Signal No.2`,
               track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_goring.png`,
               name: "Goring",
