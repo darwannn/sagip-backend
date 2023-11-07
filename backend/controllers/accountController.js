@@ -580,6 +580,9 @@ accountController.put(
           hasChanged,
         };
 
+        if (!isBanned) {
+          updateFields.dismissedRequestCount = 0;
+        }
         if (isArchived === true || isArchived === "true") {
           updateFields.archivedDate = Date.now();
         } else {

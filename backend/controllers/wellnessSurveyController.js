@@ -47,9 +47,8 @@ wellnessSurveyController.post(
           });
 
           if (wellnessSurvey) {
+            req.io.emit("wellness-survey");
             if (status === "active") {
-              req.io.emit("wellness-survey");
-
               createNotificationAll(
                 req,
                 wellnessSurvey._id,
@@ -357,9 +356,9 @@ wellnessSurveyController.put(
           );
 
           if (wellnessSurvey) {
+            req.io.emit("wellness-survey");
             if (status === "active") {
               console.log("update notif");
-              req.io.emit("wellness-survey");
               createNotificationAll(
                 req,
                 wellnessSurvey._id,
@@ -464,9 +463,9 @@ wellnessSurveyController.delete(
         req.params.id
       );
       if (wellnessSurvey) {
-        if (wellnessSurvey.status === "active") {
-          req.io.emit("wellness-survey");
-        }
+        req.io.emit("wellness-survey");
+        /* if (wellnessSurvey.status === "active") {
+        } */
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",
@@ -518,9 +517,9 @@ wellnessSurveyController.put(
         );
 
         if (wellnessSurvey) {
-          if (wellnessSurvey.status === "active") {
-            req.io.emit("wellness-survey");
-          }
+          req.io.emit("wellness-survey");
+          /* if (wellnessSurvey.status === "active") {
+          } */
           if (action === "archive") {
             return res.status(200).json({
               success: true,
