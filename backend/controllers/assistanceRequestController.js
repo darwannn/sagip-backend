@@ -750,7 +750,7 @@ assistanceRequestController.put(
               "success"
             );
             /* sms uncomment */
-            /* sendSMS(
+            sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
               `Your request regarding ${assistanceRequest.category}${
@@ -761,7 +761,7 @@ assistanceRequestController.put(
                 team.name
               } has been assigned to assist you.`,
               ""
-            ); */
+            );
 
             req.io.emit(team._id, {
               assistanceRequest: assistanceRequest,
