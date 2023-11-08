@@ -57,13 +57,13 @@ const isInMalolos = async (req, res, next) => {
           streetNumber = "";
         }
         if (municipalityName !== "Malolos") {
-          return res.status(400).json({
+          /* return res.status(400).json({
             success: false,
             latitude: "Unfortunately, the selected area is outside Malolos",
             longitude: "Unfortunately, the selected area is outside Malolos",
             message: "input error",
-          });
-          /*  let combinedStreet = streetNumber
+          }); */
+          let combinedStreet = streetNumber
             ? `${streetNumber} ${streetName}`
             : streetName;
 
@@ -79,7 +79,7 @@ const isInMalolos = async (req, res, next) => {
           }
           req.body.street = combinedStreet;
           req.body.municipality = municipalityName;
-          next(); */
+          next();
         } else {
           let combinedStreet = streetNumber
             ? `${streetNumber} ${streetName}`
