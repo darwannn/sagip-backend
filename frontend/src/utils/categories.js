@@ -31,12 +31,7 @@ export const emergencyFacilityCategory = [
     'Admin',
     'Super Admin',
   ]; */
-export const statusCategory = [
-  "all",
-  "unverified",
-  "semi-verified",
-  "verified",
-];
+export const statusCategory = ["all", "unverified", "pending", "verified"];
 
 export const userTypeCategory = [
   "all",

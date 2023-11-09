@@ -125,7 +125,10 @@ emergencyFacilityController.post(
 
 emergencyFacilityController.get("/", async (req, res) => {
   try {
-    const emergencyFacility = await EmergencyFacility.find({});
+    const emergencyFacility = await EmergencyFacility.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    });
 
     if (emergencyFacility) {
       emergencyFacility.sort((a, b) => b.createdAt - a.createdAt);
@@ -147,6 +150,9 @@ emergencyFacilityController.get("/", async (req, res) => {
 emergencyFacilityController.get("/operational", async (req, res) => {
   try {
     const emergencyFacility = await EmergencyFacility.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+
       $or: [{ status: "operational" }, { status: "full" }],
     });
 
@@ -366,5 +372,68 @@ emergencyFacilityController.delete(
     }
   }
 );
+emergencyFacilityController.put(
+  "/:action/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "employee",
+    "admin",
+  ]), */
+  async (req, res) => {
+    try {
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        console.log(action);
+        if (action === "archive") {
+          updateFields = {
+            isArchived: true,
+            archivedDate: Date.now(),
+          };
+        } else if (action === "unarchive") {
+          updateFields = {
+            isArchived: false,
 
+            $unset: { archivedDate: Date.now() },
+          };
+        }
+        const emergencyFacility = await EmergencyFacility.findByIdAndUpdate(
+          req.params.id,
+          updateFields
+          /*  { new: true } */
+        );
+
+        if (emergencyFacility) {
+          req.io.emit("emergency-facility");
+          if (action === "archive") {
+            return res.status(200).json({
+              success: true,
+              message: "Archived Successfully",
+            });
+          } else if (action === "unarchive") {
+            return res.status(200).json({
+              success: true,
+              message: "Unrchived Successfully",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 module.exports = emergencyFacilityController;

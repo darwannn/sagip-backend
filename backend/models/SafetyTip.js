@@ -36,6 +36,13 @@ const SafetyTipSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    archivedDate: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

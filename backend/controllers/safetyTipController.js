@@ -112,10 +112,10 @@ safetyTipController.post(
 
 safetyTipController.get("/", async (req, res) => {
   try {
-    const safetyTips = await SafetyTip.find({}).populate(
-      "authorId",
-      "-password"
-    );
+    const safetyTips = await SafetyTip.find({
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("authorId", "-password");
 
     if (safetyTips) {
       safetyTips.sort((a, b) => b.createdAt - a.createdAt);
@@ -136,10 +136,11 @@ safetyTipController.get("/", async (req, res) => {
 
 safetyTipController.get("/published", async (req, res) => {
   try {
-    const safetyTips = await SafetyTip.find({ status: "published" }).populate(
-      "authorId",
-      "-password"
-    );
+    const safetyTips = await SafetyTip.find({
+      status: "published",
+      archivedDate: { $exists: false },
+      isArchived: false,
+    }).populate("authorId", "-password");
     if (safetyTips) {
       safetyTips.sort((a, b) => b.createdAt - a.createdAt);
       return res.status(200).json(safetyTips);
@@ -198,6 +199,9 @@ safetyTipController.get(
       const safetyTip = await SafetyTip.find({
         saves: req.user.id,
         status: "published",
+
+        archivedDate: { $exists: false },
+        isArchived: false,
       });
       if (safetyTip) {
         return res.status(200).json(safetyTip);
@@ -420,6 +424,71 @@ safetyTipController.put(
         return res.status(200).json({
           success: true,
           message: "Saved Successfully",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
+
+safetyTipController.put(
+  "/:action/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "employee",
+    "admin",
+  ]), */
+  async (req, res) => {
+    try {
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        console.log(action);
+        if (action === "archive") {
+          updateFields = {
+            isArchived: true,
+            archivedDate: Date.now(),
+          };
+        } else if (action === "unarchive") {
+          updateFields = {
+            isArchived: false,
+
+            $unset: { archivedDate: Date.now() },
+          };
+        }
+        const safetyTip = await SafetyTip.findByIdAndUpdate(
+          req.params.id,
+          updateFields
+          /*  { new: true } */
+        );
+
+        if (safetyTip) {
+          req.io.emit("safety-tips");
+          if (action === "archive") {
+            return res.status(200).json({
+              success: true,
+              message: "Archived Successfully",
+            });
+          } else if (action === "unarchive") {
+            return res.status(200).json({
+              success: true,
+              message: "Unrchived Successfully",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found",
         });
       }
     } catch (error) {

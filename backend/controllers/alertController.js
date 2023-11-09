@@ -70,7 +70,10 @@ alertController.get(
   tokenMiddleware,
   /*  userTypeMiddleware(["employee", "admin"]), */ async (req, res) => {
     try {
-      const alert = await Alert.find({});
+      const alert = await Alert.find({
+        archivedDate: { $exists: false },
+        isArchived: false,
+      });
 
       if (alert) {
         return res.status(200).json(alert);
@@ -336,6 +339,71 @@ const getInfoByBarangay = async (municipality, location) => {
     return "Internal Server Error: " + error;
   }
 };
+
+alertController.put(
+  "/:action/:id",
+  tokenMiddleware,
+  /* userTypeMiddleware([
+    "employee",
+    "admin",
+  ]), */
+  async (req, res) => {
+    try {
+      let updateFields = {};
+      let action = req.params.action.toLowerCase();
+      if (action === "unarchive" || action === "archive") {
+        console.log(action);
+        if (action === "archive") {
+          updateFields = {
+            isArchived: true,
+            archivedDate: Date.now(),
+          };
+        } else if (action === "unarchive") {
+          updateFields = {
+            isArchived: false,
+
+            $unset: { archivedDate: Date.now() },
+          };
+        }
+        const alert = await Alert.findByIdAndUpdate(
+          req.params.id,
+          updateFields
+          /*  { new: true } */
+        );
+
+        if (alert) {
+          req.io.emit("alert");
+          if (action === "archive") {
+            return res.status(200).json({
+              success: true,
+              message: "Archived Successfully",
+            });
+          } else if (action === "unarchive") {
+            return res.status(200).json({
+              success: true,
+              message: "Unrchived Successfully",
+            });
+          }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "not found",
+          });
+        }
+      } else {
+        return res.status(500).json({
+          success: false,
+          message: "Error 404: Not Found",
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error: " + error,
+      });
+    }
+  }
+);
 
 async function getWeatherData() {
   try {

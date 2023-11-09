@@ -368,7 +368,7 @@ authController.put(
               if (parseInt(code) === user.verificationCode) {
                 if (user.codeExpiration)
                   if (user.status == "unverified") {
-                    user.status = "semi-verified";
+                    user.status = "pending";
                   }
                 user.attempt = 0;
                 user.verificationCode = 0;
@@ -1195,7 +1195,7 @@ authController.get(
       user = user.filter(
         (record) =>
           record.verificationPicture.length !== 0 &&
-          record.status === "semi-verified" &&
+          record.status === "pending" &&
           record.verificationRequestDate
       );
 
