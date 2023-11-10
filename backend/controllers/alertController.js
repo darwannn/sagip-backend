@@ -40,12 +40,12 @@ alertController.post(
         if (alert) {
           req.io.emit("alert");
           createAuditTrail(
-            req.user._id,
+            req.user.id,
             alert._id,
             "Alert",
-            "Alert",
+            "SMS Template",
             "Add",
-            `Added template, ${alert.alertTitle}`
+            `Added SMS template, ${alert.alertTitle}`
           );
           return res.status(200).json({
             success: true,
@@ -133,12 +133,12 @@ alertController.put(
         if (alert) {
           req.io.emit("alert");
           createAuditTrail(
-            req.user._id,
+            req.user.id,
             alert._id,
             "Alert",
             "Alert",
             "Update",
-            `Updated template, ${alert.alertTitle}`
+            `Updated SMS template, ${alert.alertTitle}`
           );
           return res.status(200).json({
             success: true,
@@ -175,12 +175,12 @@ alertController.delete(
       const alert = await Alert.findByIdAndDelete(req.params.id);
       if (alert) {
         createAuditTrail(
-          req.user._id,
+          req.user.id,
           alert._id,
           "Alert",
-          "Alert",
+          "SMS Template",
           "Delete",
-          `Deleted template, ${alert.alertTitle}`
+          `Deleted SMS template, ${alert.alertTitle}`
         );
         req.io.emit("alert");
         return res.status(200).json({
@@ -205,7 +205,8 @@ alertController.delete(
 alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
   const error = {};
   let { alertTitle, alertMessage, location } = req.body;
-
+  console.log(/* req.user */);
+  console.log(req.user);
   if (alertTitle === "") {
     error["alertTitle"] = "Required field";
   }
@@ -281,15 +282,16 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       /* console.log(smsRes); */
       if (smsResponse) {
         createAuditTrail(
-          req.user._id,
-          req.user._id,
+          req.user.id,
+          req.user.id,
           "User",
           "Alert",
-          "Send SMS",
+          "SMS Alert",
           `Sent SMS Alert, ${alertTitle} to ${
             location == "All" ? "Everyone" : location.join(", ")
           }`
         );
+
         return res
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });
@@ -409,11 +411,29 @@ alertController.put(
         if (alert) {
           req.io.emit("alert");
           if (action === "archive") {
+            createAuditTrail(
+              req.user.id,
+              alert._id,
+              "Alert",
+              "SMS Template",
+              "Archive",
+              `Archived SMS template, ${alert.alertTitle}`
+            );
+
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",
             });
           } else if (action === "unarchive") {
+            createAuditTrail(
+              req.user.id,
+
+              alert._id,
+              "Alert",
+              "SMS Template",
+              "Unarchive",
+              `Unarchived  SMS template, ${alert.alertTitle}`
+            );
             return res.status(200).json({
               success: true,
               message: "Unrchived Successfully",

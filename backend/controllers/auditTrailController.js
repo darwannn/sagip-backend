@@ -82,6 +82,12 @@ const createAuditTrail = async (
       return false;
     }
   } catch (error) {
+    console.log(userId);
+    console.log(actionId);
+    console.log(docModel);
+    console.log(category);
+    console.log(action);
+    console.log(description);
     console.log(error);
     return false;
   }

@@ -90,7 +90,7 @@ emergencyFacilityController.post(
 
             req.io.emit("emergency-facility");
             createAuditTrail(
-              req.user._id,
+              req.user.id,
               emergencyFacility._id,
               "EmergencyFacility",
               "Emergency Facility",
@@ -302,7 +302,7 @@ emergencyFacilityController.put(
           console.log("res");
           req.io.emit("emergency-facility");
           createAuditTrail(
-            req.user._id,
+            req.user.id,
             emergencyFacility._id,
             "EmergencyFacility",
             "Emergency Facility",
@@ -364,7 +364,7 @@ emergencyFacilityController.delete(
         if (emergencyFacility) {
           req.io.emit("emergency-facility");
           createAuditTrail(
-            req.user._id,
+            req.user.id,
             emergencyFacility._id,
             "EmergencyFacility",
             "Emergency Facility",
@@ -432,7 +432,7 @@ emergencyFacilityController.put(
           req.io.emit("emergency-facility");
           if (action === "archive") {
             createAuditTrail(
-              req.user._id,
+              req.user.id,
               emergencyFacility._id,
               "EmergencyFacility",
               "Emergency Facility",
@@ -445,7 +445,7 @@ emergencyFacilityController.put(
             });
           } else if (action === "unarchive") {
             createAuditTrail(
-              req.user._id,
+              req.user.id,
               emergencyFacility._id,
               "EmergencyFacility",
               "Emergency Facility",
