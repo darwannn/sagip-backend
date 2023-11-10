@@ -23,7 +23,7 @@ const {
 } = require("./functionController");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-
+const { createAuditTrail } = require("./auditTrailController");
 const currentDate = new Date();
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
@@ -38,6 +38,7 @@ const {
   createNotificationAll,
 } = require("./notificationController");
 const moment = require("moment");
+const { create } = require("../models/AuditTrail");
 accountController.get("/", async (req, res) => {
   try {
     const user = await User.find({});
@@ -160,6 +161,14 @@ accountController.post(
 
         if (user) {
           req.io.emit("user");
+          createAuditTrail(
+            req.user.id,
+            user._id,
+            "User",
+            "User",
+            "Add",
+            `Added a new ${userType}, ${user.firstname} ${user.lastname}`
+          );
           return res.status(200).json({
             success: true,
             message: "Created Successfully",
@@ -207,6 +216,14 @@ accountController.put(
         { new: true }
       );
       if (user) {
+        createAuditTrail(
+          req.user.id,
+          user._id,
+          "User",
+          "User",
+          "Reactivate",
+          `Reactivated ${user.firstname} ${user.lastname}'s account`
+        );
         return res.status(200).json({
           success: true,
           message: "Account Reactivated",
@@ -259,7 +276,14 @@ accountController.delete(
         req.io.emit(`${user._id}`);
 
         req.io.emit("user");
-
+        createAuditTrail(
+          req.user.id,
+          user._id,
+          "User",
+          "User",
+          "Delete",
+          `Deleted ${user.firstname} ${user.lastname}'s account`
+        );
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",
@@ -448,6 +472,14 @@ accountController.put(
         });
 
         if (user) {
+          createAuditTrail(
+            req.user.id,
+            user._id,
+            "User",
+            "User",
+            "Reset Password",
+            `Reset the password of ${user.firstname} ${user.lastname}`
+          );
           return res.status(200).json({
             success: true,
             message: "Password has been reset successfullyy",
@@ -626,6 +658,32 @@ accountController.put(
         });
 
         if (user) {
+          if (
+            user.userType === "responder" ||
+            user.userType === "dispatcher" ||
+            user.userType === "employee" ||
+            user.userType === "admin"
+          ) {
+            if (action === "info") {
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "User",
+                "Update",
+                `Updated ${user.firstname} ${user.lastname}'s account`
+              );
+            } else {
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "User",
+                "Update",
+                `Updated its account profile`
+              );
+            }
+          }
           req.io.emit("user");
           req.io.emit(`${req.params.id}`);
 
@@ -730,7 +788,21 @@ accountController.put(
         if (user) {
           req.io.emit(`${req.user.id}`);
           req.io.emit("user");
-
+          if (
+            user.userType === "responder" ||
+            user.userType === "dispatcher" ||
+            user.userType === "employee" ||
+            user.userType === "admin"
+          ) {
+            createAuditTrail(
+              req.user.id,
+              user._id,
+              "User",
+              "User",
+              "Update",
+              `Updated its account profile`
+            );
+          }
           return res.status(200).json({
             success: true,
             message: "Profile Picture Updated Successfully",
@@ -929,6 +1001,21 @@ accountController.put(
 
         if (user) {
           if (req.body.for) {
+            if (
+              user.userType === "responder" ||
+              user.userType === "dispatcher" ||
+              user.userType === "employee" ||
+              user.userType === "admin"
+            ) {
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "User",
+                "Update",
+                `Updated its account password`
+              );
+            }
             return res.status(200).json({
               success: true,
               message:

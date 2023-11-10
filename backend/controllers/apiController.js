@@ -75,7 +75,7 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     message: message,
   };
   /* SEMAPHORE */
-  return axios
+  /* return axios
 
     .post("https://api.semaphore.co/api/v4/messages", params)
     .then(function (response) {
@@ -83,8 +83,8 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     })
     .catch(function (error) {
       throw error;
-    });
-  //return true;
+    }); */
+  return true;
 };
 
 const sendSMS = async (phone, target, content) => {

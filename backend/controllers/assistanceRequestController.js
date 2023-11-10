@@ -3,7 +3,7 @@ const AssistanceRequest = require("../models/AssistanceRequest");
 const Team = require("../models/Team");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-
+const { createAuditTrail } = require("./auditTrailController");
 const isInMalolos = require("../middlewares/isInMalolos");
 const {
   isEmpty,
@@ -154,6 +154,14 @@ assistanceRequestController.post(
                 `${category} on ${street} ${municipality}.`,
                 "info"
               );
+              /*  createAuditTrail(
+                  req.user.id,
+                  assistanceRequest._id,
+                  "AssistanceRequest",
+                  "Assistance Request",
+                  "Add",
+                  `Added a new assistance request, ${category} on ${street} ${municipality}`
+                ); */
 
               return res.status(200).json({
                 success: true,
@@ -554,7 +562,14 @@ assistanceRequestController.put(
             `${category} on ${street} ${municipality}`,
             "info"
           );
-
+          /* createAuditTrail(
+            req.user.id,
+            assistanceRequest._id,
+            "AssistanceRequest",
+            "Assistance Request",
+            "Update",
+            `Updated assistance request, ${category} on ${street} ${municipality}`
+          ); */
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -734,6 +749,14 @@ assistanceRequestController.put(
               }`,
               "success"
             );
+            createAuditTrail(
+              req.user.id,
+              assistanceRequest._id,
+              "AssistanceRequest",
+              "Assistance Request",
+              "Verify",
+              `Verified assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+            );
 
             createNotification(
               req,
@@ -772,6 +795,14 @@ assistanceRequestController.put(
               // assistanceRequest,
             });
           } else if (action === "respond") {
+            createAuditTrail(
+              req.user.id,
+              assistanceRequest._id,
+              "AssistanceRequest",
+              "Assistance Request",
+              "Respond",
+              `Responded to assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+            );
             // sendSMS(
             //   assistanceRequest.userId.contactNumber,
             //   "notification",
@@ -800,6 +831,14 @@ assistanceRequestController.put(
               // assistanceRequest,
             });
           } else if (action === "resolve") {
+            createAuditTrail(
+              req.user.id,
+              assistanceRequest._id,
+              "AssistanceRequest",
+              "Assistance Request",
+              "Resolve",
+              `Resolved assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+            );
             req.io.emit(`resolved-${assistanceRequest.userId._id}`);
             req.io.emit(`resolved-assistance-request`, {
               assistanceRequest: assistanceRequest,
@@ -835,6 +874,14 @@ assistanceRequestController.put(
               // assistanceRequest,
             });
           } else if (action === "arrive") {
+            createAuditTrail(
+              req.user.id,
+              assistanceRequest._id,
+              "AssistanceRequest",
+              "Assistance Request",
+              "Arrive",
+              `Arrived at assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+            );
             // sendSMS(
             //   assistanceRequest.userId.contactNumber,
             //   "notification",
@@ -917,7 +964,16 @@ assistanceRequestController.delete(
         );
 
         if (assistanceRequest) {
+          createAuditTrail(
+            req.user.id,
+            assistanceRequest._id,
+            "AssistanceRequest",
+            "Assistance Request",
+            "Delete",
+            `Deleted assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+          );
           const userIds = await getUsersId("dispatcher");
+
           createNotification(
             req,
             userIds,
@@ -1046,7 +1102,14 @@ assistanceRequestController.put(
               //   }.`,
               //   ""
               // );
-
+              createAuditTrail(
+                req.user.id,
+                req.params.id,
+                "AssistanceRequest",
+                "Assistance Request",
+                "Closed",
+                `Closed assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              );
               createNotification(
                 req,
                 [assistanceRequest.userId._id],
@@ -1086,7 +1149,14 @@ assistanceRequestController.put(
                 teamHead._id,
                 ...teamMembers.map((member) => member._id),
               ];
-
+              /* createAuditTrail(
+                req.user.id,
+                req.params.id,
+                "AssistanceRequest",
+                "Assistance Request",
+                "Cancel",
+                `Cancelled assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              ); */
               const userIds = await getUsersId("dispatcher");
               createNotification(
                 req,
@@ -1132,6 +1202,14 @@ assistanceRequestController.put(
               });
             } else if (action === "unarchive") {
               dismissedRequestCount("unarchive", assistanceRequest.userId, req);
+              createAuditTrail(
+                req.user.id,
+                req.params.id,
+                "AssistanceRequest",
+                "Assistance Request",
+                "Unarchive",
+                `Unarchived assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              );
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",

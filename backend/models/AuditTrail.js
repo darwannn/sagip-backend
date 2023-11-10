@@ -1,23 +1,20 @@
 const mongoose = require("mongoose");
 mongoose.pluralize(null);
 
-const AuditLogSchema = new mongoose.Schema(
+const AuditTrailSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
     eventId: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       refPath: "docModel",
     },
     docModel: {
       type: String,
       required: true,
-    },
-    description: {
-      type: String,
-      default: "",
     },
     categoty: {
       type: String,
@@ -27,9 +24,13 @@ const AuditLogSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    description: {
+      type: String,
+      default: "",
+    },
     // hazard report
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("AuditLog", AuditLogSchema);
+module.exports = mongoose.model("AuditTrail", AuditTrailSchema);

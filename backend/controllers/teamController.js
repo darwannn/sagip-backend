@@ -3,7 +3,7 @@ const Team = require("../models/Team");
 const AssistanceRequest = require("../models/AssistanceRequest");
 const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-
+const { createAuditTrail } = require("./auditTrailController");
 const { isEmpty, getUsersId } = require("./functionController");
 
 const { sendSMS, sendBulkSMS } = require("./apiController");
@@ -11,6 +11,7 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+const { create } = require("../models/AuditTrail");
 
 teamController.post(
   "/add",
@@ -30,7 +31,15 @@ teamController.post(
 
         if (team) {
           req.io.emit("team");
-
+          createAuditTrail(
+            req.user.id,
+            team._id,
+            "Team",
+            "Team",
+            "Add",
+            /* "New team has been added." */
+            `Added a new team, ${team.name}`
+          );
           return res.status(200).json({
             success: true,
             message: "Added Successfully",
@@ -75,7 +84,15 @@ teamController.put("/reset", tokenMiddleware, async (req, res) => {
         "A new team rotation will be implemented. Please check your team assignment later.",
         "info"
       );
-
+      createAuditTrail(
+        req.user.id,
+        team._id,
+        "Team",
+        "Team",
+        "Reset Team Rotation",
+        /* "New team has been added." */
+        `Reset the team rotation`
+      );
       return res.status(200).json({
         success: true,
         message: "Reset Successfully",
@@ -333,7 +350,15 @@ teamController.put(
             "info"
           );
         }
-
+        createAuditTrail(
+          req.user.id,
+          team._id,
+          "Team",
+          "Team",
+          `Remove All Members`,
+          /* "New team has been added." */
+          `Removed all members from ${team.name}`
+        );
         return res.status(200).json({
           success: true,
           message: "Reset Successfully",
@@ -373,7 +398,14 @@ teamController.delete(
             `Your current team, ${team.name} has been deleted.`,
             "info"
           );
-
+          createAuditTrail(
+            req.user.id,
+            team._id,
+            "Team",
+            "Team",
+            `Delete`,
+            `Deleted team ${team.name}.`
+          );
           req.io.emit("team");
           req.io.emit(team._id);
         }
@@ -415,13 +447,17 @@ teamController.put(
             prevTeamId,
             { $pull: { members: userId } },
             { new: true }
-          );
+          )
+            .populate("members", "-password")
+            .populate("head", "-password");
         } else if (action === "head") {
           removedTeam = await Team.findByIdAndUpdate(
             prevTeamId,
             { head: null },
             { new: true }
-          );
+          )
+            .populate("members", "-password")
+            .populate("head", "-password");
         }
       } else if (
         prevTeamId === "" ||
@@ -433,13 +469,17 @@ teamController.put(
             newTeamId,
             { $push: { members: userId } },
             { new: true }
-          );
+          )
+            .populate("members", "-password")
+            .populate("head", "-password");
         } else if (action === "head") {
           team = await Team.findByIdAndUpdate(
             newTeamId,
             { head: userId },
             { new: true }
-          );
+          )
+            .populate("members", "-password")
+            .populate("head", "-password");
         }
       } else {
         removedTeam = await Team.findById(prevTeamId);
@@ -455,13 +495,17 @@ teamController.put(
             newTeamId,
             { $push: { members: userId } },
             { new: true }
-          );
+          )
+            .populate("members", "-password")
+            .populate("head", "-password");
         } else if (action === "head") {
           team = await Team.findByIdAndUpdate(
             newTeamId,
             { head: userId },
             { new: true }
-          );
+          )
+            .populate("members", "-password")
+            .populate("head", "-password");
         }
       }
 
@@ -475,6 +519,14 @@ teamController.put(
             `You have been remove from ${removedTeam.name}.`,
             "info"
           );
+          createAuditTrail(
+            req.user.id,
+            removedTeam._id,
+            "Team",
+            "Team",
+            `Unassign`,
+            `Unassigned ${userId.firstname} ${userId.lastname} from team ${removedTeam.name}`
+          );
         } else if (prevTeamId === "") {
           await createNotification(
             req,
@@ -486,6 +538,16 @@ teamController.put(
             }.`,
             "info"
           );
+          createAuditTrail(
+            req.user.id,
+            team._id,
+            "Team",
+            "Team",
+            `Assign`,
+            `Assigned ${userId.firstname} ${userId.lastname} to team ${
+              team.name
+            } as ${action === "head" ? "team leader " : "a " + action}`
+          );
         } else {
           await createNotification(
             req,
@@ -496,6 +558,16 @@ teamController.put(
               action === "head" ? "team leader " : "a " + action
             }.`,
             "info"
+          );
+          createAuditTrail(
+            req.user.id,
+            team._id,
+            "Team",
+            "Team",
+            `Reassign`,
+            `Reassigned ${userId.firstname} ${userId.lastname} to team ${
+              team.name
+            } as ${action === "head" ? "team leader " : "a " + action}`
           );
         }
 
@@ -574,6 +646,15 @@ teamController.put(
               "info"
             );
 
+          createAuditTrail(
+            req.user.id,
+            team._id,
+            "Team",
+            "Team",
+            "Update",
+            /* "Wellness check survey has been updated" */
+            `Updated team ${team.title}`
+          );
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -652,7 +733,14 @@ teamController.put(
                     `Your current team, ${team.name} has been archived.`,
                     "info"
                   );
-
+                  createAuditTrail(
+                    req.user.id,
+                    team._id,
+                    "Team",
+                    "Team",
+                    "Archive",
+                    `Archived team ${team.name}.`
+                  );
                   req.io.emit("team");
                 }
 
@@ -668,7 +756,14 @@ teamController.put(
               }
             } else if (action === "unarchive") {
               req.io.emit("team");
-
+              createAuditTrail(
+                req.user.id,
+                team._id,
+                "Team",
+                "Team",
+                "Unarchive",
+                `Unarchived team ${team.name}.`
+              );
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",

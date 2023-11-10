@@ -3,7 +3,7 @@ const moment = require("moment");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Team = require("../models/Team");
-
+const { createAuditTrail } = require("./auditTrailController");
 const { sendSMS, sendEmail } = require("./apiController");
 
 const { cloudinary } = require("../utils/config");
@@ -333,6 +333,15 @@ const handleArchive = async (action, id, req, res) => {
             message:
               "You have been logged out as your account has been disabled. Please contact us if you think this isn't right.",
           });
+
+          createAuditTrail(
+            req.user.id,
+            user._id,
+            "User",
+            "User",
+            "Archive",
+            `Archived ${user.firstName} ${user.lastName}'s account`
+          );
           return res.status(200).json({
             success: true,
             message: "Archived Successfully",

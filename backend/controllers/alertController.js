@@ -5,7 +5,7 @@ const User = require("../models/User");
 const axios = require("axios");
 const moment = require("moment");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-
+const { createAuditTrail } = require("./auditTrailController");
 const { isEmpty } = require("./functionController");
 
 const {
@@ -13,6 +13,7 @@ const {
   createNotificationAll,
 } = require("./notificationController");
 const { sendSMS, sendBulkSMS } = require("./apiController");
+const { create } = require("../models/AuditTrail");
 alertController.post(
   "/sms/add",
   tokenMiddleware,
@@ -38,6 +39,14 @@ alertController.post(
 
         if (alert) {
           req.io.emit("alert");
+          createAuditTrail(
+            req.user._id,
+            alert._id,
+            "Alert",
+            "Alert",
+            "Add",
+            `Added template, ${alert.alertTitle}`
+          );
           return res.status(200).json({
             success: true,
             message: "Added Successfully",
@@ -123,6 +132,14 @@ alertController.put(
 
         if (alert) {
           req.io.emit("alert");
+          createAuditTrail(
+            req.user._id,
+            alert._id,
+            "Alert",
+            "Alert",
+            "Update",
+            `Updated template, ${alert.alertTitle}`
+          );
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -157,6 +174,14 @@ alertController.delete(
     try {
       const alert = await Alert.findByIdAndDelete(req.params.id);
       if (alert) {
+        createAuditTrail(
+          req.user._id,
+          alert._id,
+          "Alert",
+          "Alert",
+          "Delete",
+          `Deleted template, ${alert.alertTitle}`
+        );
         req.io.emit("alert");
         return res.status(200).json({
           success: true,
@@ -255,6 +280,15 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       );
       /* console.log(smsRes); */
       if (smsResponse) {
+        createAuditTrail(
+          req.user._id,
+          req.user._id,
+          "User",
+          "Alert",
+          `Sent SMS Alert, ${alertTitle} to ${
+            location == "All" ? "Everyone" : location.join(", ")
+          }`
+        );
         return res
           .status(200)
           .json({ success: true, message: "SMS sent successfully" });

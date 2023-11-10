@@ -15,8 +15,9 @@ const {
   isLessThanSize,
   cloudinaryUploader,
 } = require("./functionController");
-
+const { createAuditTrail } = require("./auditTrailController");
 const multerMiddleware = require("../middlewares/multerMiddleware");
+const { create } = require("../models/AuditTrail");
 
 const folderPath = "sagip/media/safety-tips";
 
@@ -68,6 +69,15 @@ safetyTipController.post(
           if (safetyTip) {
             req.io.emit("safety-tips");
             if (status === "published") {
+              createAuditTrail(
+                req.user.id,
+                safetyTip._id,
+                "SafetyTip",
+                "Safety Tips",
+                "Publish",
+                `Published a new safety tip, ${title}.`
+              );
+
               createNotificationAll(
                 req,
                 safetyTip._id,
@@ -75,6 +85,15 @@ safetyTipController.post(
                 `Read the recently added safety tip: ${title}.`,
                 "info",
                 false
+              );
+            } else {
+              createAuditTrail(
+                req.user.id,
+                safetyTip._id,
+                "SafetyTip",
+                "Safety Tips",
+                "Draft",
+                `Created a new safety tip, ${title}.`
               );
             }
             return res.status(200).json({
@@ -284,7 +303,7 @@ safetyTipController.put(
           content,
           category,
           status,
-          authorId: req.user.id,
+          /* authorId: req.user.id, */
         };
 
         if (hasChanged && req.file) {
@@ -314,6 +333,7 @@ safetyTipController.put(
             });
           }
         }
+        const oldSafetyTip = await SafetyTip.findById(req.params.id);
         const safetyTip = await SafetyTip.findByIdAndUpdate(
           req.params.id,
           updateFields,
@@ -322,6 +342,47 @@ safetyTipController.put(
 
         if (safetyTip) {
           req.io.emit("safety-tips");
+          if (status === "published") {
+            if (oldSafetyTip.status === "draft") {
+              createAuditTrail(
+                req.user.id,
+                safetyTip._id,
+                "SafetyTip",
+                "Safety Tips",
+                "Reublish",
+                `Republished ${title}.`
+              );
+            } else {
+              createAuditTrail(
+                req.user.id,
+                safetyTip._id,
+                "SafetyTip",
+                "Safety Tips",
+                "Update",
+                `Updated ${title}.`
+              );
+            }
+          } else {
+            if (oldSafetyTip.status === "published") {
+              createAuditTrail(
+                req.user.id,
+                safetyTip._id,
+                "SafetyTip",
+                "Safety Tips",
+                "Redraft",
+                `redrafted ${title}.`
+              );
+            } else {
+              createAuditTrail(
+                req.user.id,
+                safetyTip._id,
+                "SafetyTip",
+                "Safety Tips",
+                "Update",
+                `Updated ${title}.`
+              );
+            }
+          }
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -370,6 +431,15 @@ safetyTipController.delete(
 
         if (safetyTip) {
           req.io.emit("safety-tips");
+          createAuditTrail(
+            req.user.id,
+            safetyTip._id,
+            "SafetyTip",
+            "Safety Tips",
+            "Delete",
+            `Deleted a safety tip, ${safetyTip.title}.`
+          );
+
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",
@@ -413,6 +483,16 @@ safetyTipController.put(
           (id) => !id.equals(req.user.id)
         );
         await safetyTip.save();
+        /*   createAuditTrail(
+          req.user.id,
+          safetyTip._id,
+          "SafetyTip",
+          "Safety Tips",
+          `${safetyTip.saves.includes(req.user.id) ? "Save" : "Unsave"}`,
+          `${
+            safetyTip.saves.includes(req.user.id) ? "Saved" : "Unsaved"
+          } a safety tip, ${safetyTip.title}.`
+        ); */
         return res.status(200).json({
           success: true,
           message: "Unsaved Successfully",
@@ -469,11 +549,27 @@ safetyTipController.put(
         if (safetyTip) {
           req.io.emit("safety-tips");
           if (action === "archive") {
+            createAuditTrail(
+              req.user.id,
+              safetyTip._id,
+              "SafetyTip",
+              "Safety Tips",
+              "Archive",
+              `Archived a safety tip, ${safetyTip.title}.`
+            );
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",
             });
           } else if (action === "unarchive") {
+            createAuditTrail(
+              req.user.id,
+              safetyTip._id,
+              "SafetyTip",
+              "Safety Tips",
+              "Unarchive",
+              `Unarchived a safety tip, ${safetyTip.title}.`
+            );
             return res.status(200).json({
               success: true,
               message: "Unrchived Successfully",

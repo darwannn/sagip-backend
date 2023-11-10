@@ -3,10 +3,11 @@ const AssistanceRequest = require("../models/AssistanceRequest");
 const PreAssessment = require("../models/PreAssessment");
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
-
+const { createAuditTrail } = require("./auditTrailController");
 const { isEmpty } = require("./functionController");
 const moment = require("moment");
 const multerMiddleware = require("../middlewares/multerMiddleware");
+const { create } = require("../models/Team");
 
 preAssessmentController.get("/:id", async (req, res) => {
   try {
@@ -166,6 +167,14 @@ preAssessmentController.post(
         );
         if (preAssessment && assistanceRequest) {
           req.io.emit("assistance-request");
+          /* createAuditTrail(
+            req.user.id,
+            preAssessment._id,
+            "PreAssessment",
+            "Incident Report",
+            "Answer",
+            `Submitted an incident report`
+          ); */
 
           return res.status(200).json({
             success: true,
@@ -307,7 +316,14 @@ preAssessmentController.put(
 
         if (preAssessment) {
           req.io.emit("assistance-request");
-
+          /* createAuditTrail(
+            req.user.id,
+            preAssessment._id,
+            "PreAssessment",
+            "Incident Report",
+            "Update",
+            `Updated an incident report`
+          ); */
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -359,7 +375,14 @@ preAssessmentController.delete(
 
       if (assistanceRequest && preAssessment) {
         req.io.emit("assistance-request");
-
+        /*  createAuditTrail(
+          req.user.id,
+          preAssessment._id,
+          "PreAssessment",
+          "Incident Report",
+          "Delete",
+          `Deleted an incident report`
+        ); */
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",

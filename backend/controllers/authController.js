@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
 const moment = require("moment");
-
+const { createAuditTrail } = require("./auditTrailController");
 const {
   isEmpty,
   isEmailExists,
@@ -36,6 +36,7 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+const { create } = require("../models/Team");
 authController.post("/register", async (req, res) => {
   try {
     const error = {};
@@ -375,6 +376,14 @@ authController.put(
                 await user.save();
                 req.io.emit("user");
                 if (action === "register") {
+                  /* createAuditTrail(
+                    user._id,
+                    user._id,
+                    "User",
+                    "User",
+                    "Register",
+                    `Successfully registered`
+                  ); */
                   createNotification(
                     req,
                     [req.user.id],
@@ -462,6 +471,21 @@ authController.put(
                       "Your contact number has been updated.",
                       "info"
                     ); */
+                    if (
+                      user.userType === "responder" ||
+                      user.userType === "dispatcher" ||
+                      user.userType === "employee" ||
+                      user.userType === "admin"
+                    ) {
+                      createAuditTrail(
+                        user._id,
+                        user._id,
+                        "User",
+                        "User",
+                        "Update",
+                        `Updated its contact number`
+                      );
+                    }
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
@@ -499,6 +523,21 @@ authController.put(
                     }
                   );
                   if (userEmail) {
+                    if (
+                      user.userType === "responder" ||
+                      user.userType === "dispatcher" ||
+                      user.userType === "employee" ||
+                      user.userType === "admin"
+                    ) {
+                      createAuditTrail(
+                        user._id,
+                        user._id,
+                        "User",
+                        "User",
+                        "Update",
+                        `Updated its email address`
+                      );
+                    }
                     /* createNotification(req,
                       [req.user.id],
                       req.user.id,
@@ -700,7 +739,21 @@ authController.post("/login", async (req, res) => {
                 user.isOnline = true;
                 user.lastOnlineDate = Date.now();
                 await user.save();
-
+                if (
+                  user.userType === "responder" ||
+                  user.userType === "dispatcher" ||
+                  user.userType === "employee" ||
+                  user.userType === "admin"
+                ) {
+                  createAuditTrail(
+                    user._id,
+                    user._id,
+                    "User",
+                    "User",
+                    "Login",
+                    `Logged in`
+                  );
+                }
                 return res.status(200).json({
                   success: true,
                   message: "Login Successfully",
@@ -788,6 +841,7 @@ authController.post("/login", async (req, res) => {
       return res.status(500).json(error);
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error: " + error,
@@ -951,6 +1005,22 @@ authController.put(
 
         if (user) {
           if (req.body.for) {
+            if (
+              user.userType === "responder" ||
+              user.userType === "dispatcher" ||
+              user.userType === "employee" ||
+              user.userType === "admin"
+            ) {
+              createAuditTrail(
+                user._id,
+                user._id,
+                "User",
+                "User",
+                "Change Password",
+                `Changed password`
+              );
+            }
+
             return res.status(200).json({
               success: true,
               message:
@@ -1066,6 +1136,22 @@ authController.post(
       });
 
       if (user) {
+        if (
+          user.userType === "responder" ||
+          user.userType === "dispatcher" ||
+          user.userType === "employee" ||
+          user.userType === "admin"
+        ) {
+          createAuditTrail(
+            user._id,
+            user._id,
+            "User",
+            "User",
+            "Logout",
+            `Logged out`
+          );
+        }
+
         return res.status(200).json({
           success: true,
           message: "Logout Successfully",
@@ -1155,7 +1241,15 @@ authController.put(
             `${user.firstname} ${user.lastname} has submitted  a verification request.`,
             "info"
           );
+          /* createAuditTrail(
+            user._id,
+            user._id,
+            "User",
+            "Verification Request",
+            "Verification Request",
+            `Submitted a verification request`
 
+          ); */
           return res.status(200).json({
             success: true,
             message: "Verification Request Submitted Successfully",
@@ -1367,7 +1461,14 @@ authController.put(
                 `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
                 "error"
               );
-
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "Verification Request",
+                "Reject",
+                `Rejected a verification request of ${user.firstname} ${user.lastname}`
+              );
               return res.status(200).json({
                 success: true,
                 message: "Verification Request Rejected",
@@ -1381,6 +1482,14 @@ authController.put(
                 ""
               ); */
 
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "Verification Request",
+                "Approve",
+                `Approved a verification request of ${user.firstname} ${user.lastname}`
+              );
               createNotification(
                 req,
                 [user._id],

@@ -14,12 +14,13 @@ const {
 
 const multerMiddleware = require("../middlewares/multerMiddleware");
 const folderPath = "sagip/media/hazard-report";
-
+const { createAuditTrail } = require("./auditTrailController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
+const { create } = require("../models/Team");
 hazardReportController.post(
   "/add",
   tokenMiddleware,
@@ -106,6 +107,15 @@ hazardReportController.post(
               `${category} on ${street} ${municipality}.`,
               "info"
             );
+            /*   createAuditTrail(
+              req.user.id,
+              hazardReport._id,
+              "HazardReport",
+              "Hazport Report",
+              "Add",
+              `Added a new hazard report, ${category} on ${street} ${municipality}`
+            ); */
+
             return res.status(200).json({
               success: true,
               message: "Added Successfully",
@@ -347,6 +357,14 @@ hazardReportController.put(
         );
         if (hazardReport) {
           req.io.emit("hazard-report");
+          /* createAuditTrail(
+            req.user.id,
+            hazardReport._id,
+            "HazardReport",
+            "Hazport Report",
+            "Update",
+            `Updated a hazard report, ${category} on ${street} ${municipality}`
+          ); */
           const dispatcherIds = await getUsersId("dispatcher");
           createNotification(
             req,
@@ -449,6 +467,14 @@ hazardReportController.put(
               "info",
               true
             );
+            createAuditTrail(
+              req.user.id,
+              hazardReport._id,
+              "HazardReport",
+              "Hazport Report",
+              "Verify",
+              `Verified a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+            );
             return res.status(200).json({
               success: true,
               message: "Hazard Report Verified",
@@ -465,7 +491,14 @@ hazardReportController.put(
               }, has been resolved. Thank you for bringing this to our attention and helping to maintain safety in our community.`,
               "success"
             );
-
+            createAuditTrail(
+              req.user.id,
+              hazardReport._id,
+              "HazardReport",
+              "Hazport Report",
+              "Resolve",
+              `Resolved a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+            );
             return res.status(200).json({
               success: true,
               message: "Hazard Report Resolved",
@@ -539,7 +572,14 @@ hazardReportController.delete(
             } request has been cancelled.`,
             "info"
           );
-
+          createAuditTrail(
+            req.user.id,
+            hazardReport._id,
+            "HazardReport",
+            "Hazport Report",
+            "Delete",
+            `Deleted a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+          );
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",
@@ -629,6 +669,14 @@ hazardReportController.put(
                 }.`,
                 "error"
               );
+              createAuditTrail(
+                req.user.id,
+                hazardReport._id,
+                "HazardReport",
+                "Hazport Report",
+                "Close",
+                `Closed a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+              );
               return res.status(200).json({
                 success: true,
                 message: "Archived Successfully",
@@ -637,6 +685,14 @@ hazardReportController.put(
               req.io.emit("hazard-report");
               req.io.emit(`${hazardReport.userId}`);
               dismissedRequestCount("unarchive", hazardReport.userId, req);
+              createAuditTrail(
+                req.user.id,
+                hazardReport._id,
+                "HazardReport",
+                "Hazport Report",
+                "Unarchive",
+                `Unarchived a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+              );
               return res.status(200).json({
                 success: true,
                 message: "Unrchived Successfully",

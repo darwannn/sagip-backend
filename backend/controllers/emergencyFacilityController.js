@@ -2,7 +2,7 @@ const emergencyFacilityController = require("express").Router();
 const EmergencyFacility = require("../models/EmergencyFacility");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const multerMiddleware = require("../middlewares/multerMiddleware");
-
+const { createAuditTrail } = require("./auditTrailController");
 const folderPath = "sagip/media/emergency-facility";
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 const {
@@ -89,7 +89,14 @@ emergencyFacilityController.post(
             }
 
             req.io.emit("emergency-facility");
-
+            createAuditTrail(
+              req.user._id,
+              emergencyFacility._id,
+              "EmergencyFacility",
+              "Emergency Facility",
+              "Add",
+              `Added ${name}`
+            );
             return res.status(200).json({
               success: true,
               message: "Added successfully",
@@ -294,6 +301,15 @@ emergencyFacilityController.put(
         if (emergencyFacility) {
           console.log("res");
           req.io.emit("emergency-facility");
+          createAuditTrail(
+            req.user._id,
+            emergencyFacility._id,
+            "EmergencyFacility",
+            "Emergency Facility",
+            "Update",
+            `Updated ${name}`
+          );
+          req.io.emit("emergency-facility");
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -347,6 +363,15 @@ emergencyFacilityController.delete(
 
         if (emergencyFacility) {
           req.io.emit("emergency-facility");
+          createAuditTrail(
+            req.user._id,
+            emergencyFacility._id,
+            "EmergencyFacility",
+            "Emergency Facility",
+            "Delete",
+            `Deleted ${emergencyFacility.name}`
+          );
+
           return res.status(200).json({
             success: true,
             message: "Deleted Successfully",
@@ -406,11 +431,27 @@ emergencyFacilityController.put(
         if (emergencyFacility) {
           req.io.emit("emergency-facility");
           if (action === "archive") {
+            createAuditTrail(
+              req.user._id,
+              emergencyFacility._id,
+              "EmergencyFacility",
+              "Emergency Facility",
+              "Archive",
+              `Archived ${emergencyFacility.name}`
+            );
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",
             });
           } else if (action === "unarchive") {
+            createAuditTrail(
+              req.user._id,
+              emergencyFacility._id,
+              "EmergencyFacility",
+              "Emergency Facility",
+              "Unarchive",
+              `Unarchived ${emergencyFacility.name}`
+            );
             return res.status(200).json({
               success: true,
               message: "Unrchived Successfully",

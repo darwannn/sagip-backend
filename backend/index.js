@@ -8,6 +8,7 @@ const socketIO = require("socket.io");
 const authController = require("./controllers/authController");
 const accountController = require("./controllers/accountController");
 const { alertController } = require("./controllers/alertController");
+
 const { apiController } = require("./controllers/apiController");
 const safetyTipController = require("./controllers/safetyTipController");
 const emergencyFacilityController = require("./controllers/emergencyFacilityController");
@@ -21,6 +22,7 @@ const {
 const { cronJobController } = require("./controllers/cronJobController");
 const wellnessSurveyController = require("./controllers/wellnessSurveyController");
 const statisticsController = require("./controllers/statisticsController");
+const { auditTrailController } = require("./controllers/auditTrailController");
 
 const app = express();
 const server = http.createServer(app);
@@ -57,6 +59,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/cron-job", cronJobController);
+app.use("/audit-trail", auditTrailController);
 app.use("/auth", authController);
 app.use("/account", accountController);
 app.use("/safety-tips", safetyTipController);

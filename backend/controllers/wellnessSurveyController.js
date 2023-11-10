@@ -5,6 +5,7 @@ const User = require("../models/User");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { isEmpty } = require("./functionController");
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
+const { createAuditTrail } = require("./auditTrailController");
 const {
   createNotification,
   createNotificationAll,
@@ -48,6 +49,16 @@ wellnessSurveyController.post(
 
           if (wellnessSurvey) {
             req.io.emit("wellness-survey");
+            createAuditTrail(
+              req.user.id,
+              wellnessSurvey._id,
+              "WellnessSurvey",
+              "Wellness Check Survey",
+              "Publish",
+              /*  "New wellness check survey has been published" */
+              `Published a new wellness check survey, ${wellnessSurvey.title}`
+            );
+
             if (status === "active") {
               createNotificationAll(
                 req,
@@ -338,6 +349,19 @@ wellnessSurveyController.put(
       if (Object.keys(error).length === 0) {
         if (moment(endDate).isBefore(moment(), "day")) {
           status = "inactive";
+          /* if (
+            activeWellnessSurvey.length !== 0 &&
+            activeWellnessSurvey[0]._id.equals(req.params.id)
+          ) {
+            createAuditTrail(
+              req.user.id,
+              req.params.id,
+              "WellnessSurvey",
+              "Wellness Check Survey",
+              "Finish",
+              `Finished wellness check survey ${activeWellnessSurvey[0].title}`
+            );
+          } */
         }
         if (
           !(
@@ -357,16 +381,72 @@ wellnessSurveyController.put(
 
           if (wellnessSurvey) {
             req.io.emit("wellness-survey");
+
             if (status === "active") {
               console.log("update notif");
-              createNotificationAll(
-                req,
-                wellnessSurvey._id,
-                "Wellness Check Survey",
-                `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
-                "info",
-                false
-              );
+              if (
+                activeWellnessSurvey.length !== 0 &&
+                activeWellnessSurvey[0]._id.equals(req.params.id)
+              ) {
+                createAuditTrail(
+                  req.user.id,
+                  wellnessSurvey._id,
+                  "WellnessSurvey",
+                  "Wellness Check Survey",
+                  "Update",
+                  /* "Wellness check survey has been updated" */
+                  `Updated wellness check survey, ${wellnessSurvey.title}`
+                );
+              } else {
+                createNotificationAll(
+                  req,
+                  wellnessSurvey._id,
+                  "Wellness Check Survey",
+                  `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
+                  "info",
+                  false
+                );
+                createAuditTrail(
+                  req.user.id,
+                  wellnessSurvey._id,
+                  "WellnessSurvey",
+                  "Wellness Check Survey",
+                  "Publish",
+                  `Published a new wellness check survey, ${wellnessSurvey.title}`
+                );
+              }
+            } else if (status === "inactive") {
+              if (
+                activeWellnessSurvey.length !== 0 &&
+                activeWellnessSurvey[0]._id.equals(req.params.id)
+              ) {
+                createAuditTrail(
+                  req.user.id,
+                  wellnessSurvey._id,
+                  "WellnessSurvey",
+                  "Wellness Check Survey",
+                  "Finish",
+                  `Finished wellness check survey, ${wellnessSurvey.title}`
+                );
+              } else {
+                createNotificationAll(
+                  req,
+                  wellnessSurvey._id,
+                  "Wellness Check Survey",
+                  `Recent events have not been good. Please tell us how you are doing after the ${title}.`,
+                  "info",
+                  false
+                );
+                createAuditTrail(
+                  req.user.id,
+                  wellnessSurvey._id,
+                  "WellnessSurvey",
+                  "Wellness Check Survey",
+                  "Update",
+                  /* "Wellness check survey has been updated" */
+                  `Updated wellness check survey, ${wellnessSurvey.title}`
+                );
+              }
             }
 
             return res.status(200).json({
@@ -394,6 +474,7 @@ wellnessSurveyController.put(
         return res.status(400).json(error);
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -429,6 +510,15 @@ wellnessSurveyController.put(
 
       if (wellnessSurvey) {
         req.io.emit("wellness-survey");
+        /* createAuditTrail(
+          req.user.id,
+          wellnessSurvey._id,
+          "WellnessSurvey",
+          "Wellness Check Survey",
+          "Answer",
+
+          `Answered ${answer} to wellness check survey, ${wellnessSurvey.title}`
+        ); */
         return res.json({
           success: true,
           message: "Answered Submitted Successfully",
@@ -466,6 +556,15 @@ wellnessSurveyController.delete(
         req.io.emit("wellness-survey");
         /* if (wellnessSurvey.status === "active") {
         } */
+        createAuditTrail(
+          req.user.id,
+          wellnessSurvey._id,
+          "WellnessSurvey",
+          "Wellness Check Survey",
+          "Delete",
+          /*   "Wellness check survey has been deleted" */
+          `Deleted wellness check survey, ${wellnessSurvey.title}`
+        );
         return res.status(200).json({
           success: true,
           message: "Deleted Successfully",
@@ -521,11 +620,29 @@ wellnessSurveyController.put(
           /* if (wellnessSurvey.status === "active") {
           } */
           if (action === "archive") {
+            createAuditTrail(
+              req.user.id,
+              wellnessSurvey._id,
+              "WellnessSurvey",
+              "Wellness Check Survey",
+              "Archive",
+              /* "Wellness check survey has been archived" */
+              `Archived wellness check survey, ${wellnessSurvey.title}`
+            );
             return res.status(200).json({
               success: true,
               message: "Archived Successfully",
             });
           } else if (action === "unarchive") {
+            createAuditTrail(
+              req.user.id,
+              wellnessSurvey._id,
+              "WellnessSurvey",
+              "Wellness Check Survey",
+              "Unarchive",
+              /* "Wellness check survey has been unarchived" */
+              `Unarchived wellness check survey, ${wellnessSurvey.title}`
+            );
             return res.status(200).json({
               success: true,
               message: "Unrchived Successfully",
