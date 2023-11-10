@@ -285,6 +285,7 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
           req.user._id,
           "User",
           "Alert",
+          "Send SMS",
           `Sent SMS Alert, ${alertTitle} to ${
             location == "All" ? "Everyone" : location.join(", ")
           }`

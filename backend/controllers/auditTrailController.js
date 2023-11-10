@@ -61,7 +61,7 @@ const createAuditTrail = async (
   userId,
   actionId,
   docModel,
-  categoty,
+  category,
   action,
   description
 ) => {
@@ -72,7 +72,7 @@ const createAuditTrail = async (
       actionId,
       docModel,
       description,
-      categoty,
+      category,
       action,
     });
 
