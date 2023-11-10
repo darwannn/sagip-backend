@@ -13,7 +13,7 @@ auditTrailController.get(
         isArchived: false,
       } */)
         .populate("userId", "-password")
-        .populate("eventId");
+        .populate("actionId");
 
       if (auditTrail) {
         return res.status(200).json(auditTrail);
@@ -38,7 +38,7 @@ auditTrailController.get(
     try {
       const auditTrail = await AuditTrail.findById(req.params.id)
         .populate("userId", "-password")
-        .populate("eventId");
+        .populate("actionId");
 
       if (auditTrail) {
         return res.status(200).json(auditTrail);
@@ -59,7 +59,7 @@ auditTrailController.get(
 
 const createAuditTrail = async (
   userId,
-  eventId,
+  actionId,
   docModel,
   categoty,
   action,
@@ -69,7 +69,7 @@ const createAuditTrail = async (
     console.log("AuditTrail");
     const auditTrail = await AuditTrail.create({
       userId,
-      eventId,
+      actionId,
       docModel,
       description,
       categoty,

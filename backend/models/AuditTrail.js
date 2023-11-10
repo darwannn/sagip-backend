@@ -7,7 +7,7 @@ const AuditTrailSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
-    eventId: {
+    actionId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       refPath: "docModel",
