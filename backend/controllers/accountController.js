@@ -658,12 +658,7 @@ accountController.put(
         });
 
         if (user) {
-          if (
-            user.userType === "responder" ||
-            user.userType === "dispatcher" ||
-            user.userType === "employee" ||
-            user.userType === "admin"
-          ) {
+          if (!user.userType === "resident") {
             if (action === "info") {
               createAuditTrail(
                 req.user.id,
@@ -788,12 +783,7 @@ accountController.put(
         if (user) {
           req.io.emit(`${req.user.id}`);
           req.io.emit("user");
-          if (
-            user.userType === "responder" ||
-            user.userType === "dispatcher" ||
-            user.userType === "employee" ||
-            user.userType === "admin"
-          ) {
+          if (!user.userType === "resident") {
             createAuditTrail(
               req.user.id,
               user._id,
@@ -1001,12 +991,7 @@ accountController.put(
 
         if (user) {
           if (req.body.for) {
-            if (
-              user.userType === "responder" ||
-              user.userType === "dispatcher" ||
-              user.userType === "employee" ||
-              user.userType === "admin"
-            ) {
+            if (!user.userType === "resident") {
               createAuditTrail(
                 req.user.id,
                 user._id,

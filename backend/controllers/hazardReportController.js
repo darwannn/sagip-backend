@@ -107,14 +107,15 @@ hazardReportController.post(
               `${category} on ${street} ${municipality}.`,
               "info"
             );
-            /*   createAuditTrail(
+            // resident uncomment
+            createAuditTrail(
               req.user.id,
               hazardReport._id,
               "HazardReport",
               "Hazport Report",
               "Add",
               `Added a new hazard report, ${category} on ${street} ${municipality}`
-            ); */
+            );
 
             return res.status(200).json({
               success: true,
@@ -357,14 +358,15 @@ hazardReportController.put(
         );
         if (hazardReport) {
           req.io.emit("hazard-report");
-          /* createAuditTrail(
+          // resident uncomment
+          createAuditTrail(
             req.user.id,
             hazardReport._id,
             "HazardReport",
             "Hazport Report",
             "Update",
             `Updated a hazard report, ${category} on ${street} ${municipality}`
-          ); */
+          );
           const dispatcherIds = await getUsersId("dispatcher");
           createNotification(
             req,
@@ -572,6 +574,7 @@ hazardReportController.delete(
             } request has been cancelled.`,
             "info"
           );
+          // resident uncomment
           createAuditTrail(
             req.user.id,
             hazardReport._id,

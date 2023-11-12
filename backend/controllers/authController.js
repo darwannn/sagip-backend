@@ -376,14 +376,15 @@ authController.put(
                 await user.save();
                 req.io.emit("user");
                 if (action === "register") {
-                  /* createAuditTrail(
+                  //resident uncomment
+                  createAuditTrail(
                     user._id,
                     user._id,
                     "User",
                     "User",
                     "Register",
                     `Successfully registered`
-                  ); */
+                  );
                   createNotification(
                     req,
                     [req.user.id],
@@ -433,7 +434,18 @@ authController.put(
                       ""
                     ),
                   });
-                if (action === "login" || action === "attempt")
+                if (action === "login" || action === "attempt") {
+                  //resident uncomment
+                  /* if (!user.userType === "resident") { */
+                  createAuditTrail(
+                    user._id,
+                    user._id,
+                    "User",
+                    "User",
+                    "Verify",
+                    `Verified its account`
+                  );
+                  /* } */
                   return res.status(200).json({
                     success: true,
                     message:
@@ -453,6 +465,7 @@ authController.put(
                       ""
                     ),
                   });
+                }
                 if (action === "contact") {
                   let { contactNumber } = req.body;
 
@@ -471,21 +484,17 @@ authController.put(
                       "Your contact number has been updated.",
                       "info"
                     ); */
-                    if (
-                      user.userType === "responder" ||
-                      user.userType === "dispatcher" ||
-                      user.userType === "employee" ||
-                      user.userType === "admin"
-                    ) {
-                      createAuditTrail(
-                        user._id,
-                        user._id,
-                        "User",
-                        "User",
-                        "Update",
-                        `Updated its contact number`
-                      );
-                    }
+                    /* if (!user.userType === "resident") { */
+                    //resident uncomment
+                    createAuditTrail(
+                      user._id,
+                      user._id,
+                      "User",
+                      "User",
+                      "Update",
+                      `Updated its contact number`
+                    );
+                    /* } */
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
@@ -523,21 +532,17 @@ authController.put(
                     }
                   );
                   if (userEmail) {
-                    if (
-                      user.userType === "responder" ||
-                      user.userType === "dispatcher" ||
-                      user.userType === "employee" ||
-                      user.userType === "admin"
-                    ) {
-                      createAuditTrail(
-                        user._id,
-                        user._id,
-                        "User",
-                        "User",
-                        "Update",
-                        `Updated its email address`
-                      );
-                    }
+                    /* if (!user.userType === "resident") { */
+                    //resident uncomment
+                    createAuditTrail(
+                      user._id,
+                      user._id,
+                      "User",
+                      "User",
+                      "Update",
+                      `Updated its email address`
+                    );
+                    /*  } */
                     /* createNotification(req,
                       [req.user.id],
                       req.user.id,
@@ -739,12 +744,7 @@ authController.post("/login", async (req, res) => {
                 user.isOnline = true;
                 user.lastOnlineDate = Date.now();
                 await user.save();
-                if (
-                  user.userType === "responder" ||
-                  user.userType === "dispatcher" ||
-                  user.userType === "employee" ||
-                  user.userType === "admin"
-                ) {
+                if (!user.userType === "resident") {
                   createAuditTrail(
                     user._id,
                     user._id,
@@ -1005,12 +1005,7 @@ authController.put(
 
         if (user) {
           if (req.body.for) {
-            if (
-              user.userType === "responder" ||
-              user.userType === "dispatcher" ||
-              user.userType === "employee" ||
-              user.userType === "admin"
-            ) {
+            if (!user.userType === "resident") {
               createAuditTrail(
                 user._id,
                 user._id,
@@ -1136,12 +1131,7 @@ authController.post(
       });
 
       if (user) {
-        if (
-          user.userType === "responder" ||
-          user.userType === "dispatcher" ||
-          user.userType === "employee" ||
-          user.userType === "admin"
-        ) {
+        if (!user.userType === "resident") {
           createAuditTrail(
             user._id,
             user._id,
@@ -1241,15 +1231,15 @@ authController.put(
             `${user.firstname} ${user.lastname} has submitted  a verification request.`,
             "info"
           );
-          /* createAuditTrail(
+          //resident uncomment
+          createAuditTrail(
             user._id,
             user._id,
             "User",
             "Verification Request",
             "Verification Request",
             `Submitted a verification request`
-
-          ); */
+          );
           return res.status(200).json({
             success: true,
             message: "Verification Request Submitted Successfully",

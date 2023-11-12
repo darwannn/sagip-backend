@@ -154,14 +154,15 @@ assistanceRequestController.post(
                 `${category} on ${street} ${municipality}.`,
                 "info"
               );
-              /*  createAuditTrail(
-                  req.user.id,
-                  assistanceRequest._id,
-                  "AssistanceRequest",
-                  "Assistance Request",
-                  "Add",
-                  `Added a new assistance request, ${category} on ${street} ${municipality}`
-                ); */
+              //uncomment resident
+              createAuditTrail(
+                req.user.id,
+                assistanceRequest._id,
+                "AssistanceRequest",
+                "Assistance Request",
+                "Add",
+                `Added a new assistance request, ${category} on ${street} ${municipality}`
+              );
 
               return res.status(200).json({
                 success: true,
@@ -562,14 +563,15 @@ assistanceRequestController.put(
             `${category} on ${street} ${municipality}`,
             "info"
           );
-          /* createAuditTrail(
+          //uncomment resident
+          createAuditTrail(
             req.user.id,
             assistanceRequest._id,
             "AssistanceRequest",
             "Assistance Request",
             "Update",
             `Updated assistance request, ${category} on ${street} ${municipality}`
-          ); */
+          );
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -964,6 +966,7 @@ assistanceRequestController.delete(
         );
 
         if (assistanceRequest) {
+          //resident uncomment
           createAuditTrail(
             req.user.id,
             assistanceRequest._id,
@@ -1149,14 +1152,15 @@ assistanceRequestController.put(
                 teamHead._id,
                 ...teamMembers.map((member) => member._id),
               ];
-              /* createAuditTrail(
+              //resident uncomment
+              createAuditTrail(
                 req.user.id,
                 req.params.id,
                 "AssistanceRequest",
                 "Assistance Request",
                 "Cancel",
                 `Cancelled assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
-              ); */
+              );
               const userIds = await getUsersId("dispatcher");
               createNotification(
                 req,
