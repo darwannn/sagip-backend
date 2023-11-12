@@ -371,7 +371,7 @@ hazardReportController.put(
             "Update",
             `Updated a hazard report, ${hazardReport.category}${
               hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
-            }`
+            } has been updated.`
           );
           const dispatcherIds = await getUsersId("dispatcher");
           createNotification(

@@ -151,7 +151,11 @@ assistanceRequestController.post(
                 userIds,
                 req.user.id,
                 "New Emergency Request",
-                `${category} on ${street} ${municipality}.`,
+                `${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                }.`,
                 "info"
               );
               //uncomment resident
@@ -161,7 +165,11 @@ assistanceRequestController.post(
                 "AssistanceRequest",
                 "Assistance Request",
                 "Add",
-                `Added a new assistance request, ${category} on ${street} ${municipality}`
+                `Added a new assistance request, ${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                }`
               );
 
               return res.status(200).json({
@@ -560,9 +568,14 @@ assistanceRequestController.put(
             userIds,
             req.user.id,
             "Emergency Request Updated",
-            `${category} on ${street} ${municipality}`,
+            `${assistanceRequest.category}${
+              assistanceRequest.street !== ""
+                ? ` on ${assistanceRequest.street}`
+                : ""
+            } has been updated.`,
             "info"
           );
+
           //uncomment resident
           createAuditTrail(
             req.user.id,
@@ -570,7 +583,11 @@ assistanceRequestController.put(
             "AssistanceRequest",
             "Assistance Request",
             "Update",
-            `Updated assistance request, ${category} on ${street} ${municipality}`
+            `Updated assistance request, ${assistanceRequest.category}${
+              assistanceRequest.street !== ""
+                ? ` on ${assistanceRequest.street}`
+                : ""
+            }`
           );
           return res.status(200).json({
             success: true,
@@ -757,7 +774,11 @@ assistanceRequestController.put(
               "AssistanceRequest",
               "Assistance Request",
               "Verify",
-              `Verified assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              `Verified assistance request, ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`
             );
 
             createNotification(
@@ -803,7 +824,11 @@ assistanceRequestController.put(
               "AssistanceRequest",
               "Assistance Request",
               "Respond",
-              `Responded to assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              `Responded to assistance request, ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`
             );
             // sendSMS(
             //   assistanceRequest.userId.contactNumber,
@@ -839,7 +864,11 @@ assistanceRequestController.put(
               "AssistanceRequest",
               "Assistance Request",
               "Resolve",
-              `Resolved assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              `Resolved assistance request, ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`
             );
             req.io.emit(`resolved-${assistanceRequest.userId._id}`);
             req.io.emit(`resolved-assistance-request`, {
@@ -882,7 +911,11 @@ assistanceRequestController.put(
               "AssistanceRequest",
               "Assistance Request",
               "Arrive",
-              `Arrived at assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+              `Arrived at assistance request, ${assistanceRequest.category}${
+                assistanceRequest.street !== ""
+                  ? ` on ${assistanceRequest.street}`
+                  : ""
+              }`
             );
             // sendSMS(
             //   assistanceRequest.userId.contactNumber,
@@ -973,7 +1006,11 @@ assistanceRequestController.delete(
             "AssistanceRequest",
             "Assistance Request",
             "Delete",
-            `Deleted assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+            `Deleted assistance request, ${assistanceRequest.category}${
+              assistanceRequest.street !== ""
+                ? ` on ${assistanceRequest.street}`
+                : ""
+            }`
           );
           const userIds = await getUsersId("dispatcher");
 
@@ -1111,7 +1148,11 @@ assistanceRequestController.put(
                 "AssistanceRequest",
                 "Assistance Request",
                 "Closed",
-                `Closed assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+                `Closed assistance request, ${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                }`
               );
               createNotification(
                 req,
@@ -1159,7 +1200,11 @@ assistanceRequestController.put(
                 "AssistanceRequest",
                 "Assistance Request",
                 "Cancel",
-                `Cancelled assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+                `Cancelled assistance request, ${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                }`
               );
               const userIds = await getUsersId("dispatcher");
               createNotification(
@@ -1212,7 +1257,11 @@ assistanceRequestController.put(
                 "AssistanceRequest",
                 "Assistance Request",
                 "Unarchive",
-                `Unarchived assistance request, ${assistanceRequest.category} on ${assistanceRequest.street} ${assistanceRequest.municipality}`
+                `Unarchived assistance request, ${assistanceRequest.category}${
+                  assistanceRequest.street !== ""
+                    ? ` on ${assistanceRequest.street}`
+                    : ""
+                }`
               );
               return res.status(200).json({
                 success: true,
