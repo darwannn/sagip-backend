@@ -1002,7 +1002,7 @@ assistanceRequestController.delete(
 
         if (assistanceRequest) {
           //resident uncomment
-          createAuditTrail(
+          /*  createAuditTrail(
             req.user.id,
             assistanceRequest._id,
             "AssistanceRequest",
@@ -1013,7 +1013,7 @@ assistanceRequestController.delete(
                 ? ` on ${assistanceRequest.street}`
                 : ""
             }`
-          );
+          ); */
           const userIds = await getUsersId("dispatcher");
 
           createNotification(
@@ -1107,7 +1107,7 @@ assistanceRequestController.put(
                   dateCancelled: Date.now(),
                 },
               },
-              assignedTeam: null,
+              /* assignedTeam: null, */
             };
           } else if (action === "unarchive") {
             updateFields = {
@@ -1197,7 +1197,7 @@ assistanceRequestController.put(
                 ...teamMembers.map((member) => member._id),
               ];
               //resident uncomment
-              createAuditTrail(
+              /* createAuditTrail(
                 req.user.id,
                 req.params.id,
                 "AssistanceRequest",
@@ -1208,7 +1208,7 @@ assistanceRequestController.put(
                     ? ` on ${assistanceRequest.street}`
                     : ""
                 }`
-              );
+              ); */
               const userIds = await getUsersId("dispatcher");
               createNotification(
                 req,

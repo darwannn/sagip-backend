@@ -377,14 +377,14 @@ authController.put(
                 req.io.emit("user");
                 if (action === "register") {
                   //resident uncomment
-                  createAuditTrail(
+                  /*  createAuditTrail(
                     user._id,
                     user._id,
                     "User",
                     "User",
                     "Register",
                     `Registered to SAGIP`
-                  );
+                  ); */
                   createNotification(
                     req,
                     [req.user.id],
@@ -436,16 +436,16 @@ authController.put(
                   });
                 if (action === "login" || action === "attempt") {
                   //resident uncomment
-                  /*  if (!(user.userType === "resident")) { */
-                  createAuditTrail(
-                    user._id,
-                    user._id,
-                    "User",
-                    "User",
-                    "Verify",
-                    `Verified its account`
-                  );
-                  /* } */
+                  if (!(user.userType === "resident")) {
+                    createAuditTrail(
+                      user._id,
+                      user._id,
+                      "User",
+                      "User",
+                      "Verify",
+                      `Verified its account`
+                    );
+                  }
                   return res.status(200).json({
                     success: true,
                     message:
@@ -484,17 +484,17 @@ authController.put(
                       "Your contact number has been updated.",
                       "info"
                     ); */
-                    /* if (!(user.userType === "resident")) { */
-                    //resident uncomment
-                    createAuditTrail(
-                      user._id,
-                      user._id,
-                      "User",
-                      "User",
-                      "Update",
-                      `Updated its contact number`
-                    );
-                    /* } */
+                    if (!(user.userType === "resident")) {
+                      //resident uncomment
+                      createAuditTrail(
+                        user._id,
+                        user._id,
+                        "User",
+                        "User",
+                        "Update",
+                        `Updated its contact number`
+                      );
+                    }
                     return res.status(200).json({
                       success: true,
                       message: "Contact Number Updated Successfully",
@@ -533,28 +533,28 @@ authController.put(
                     }
                   );
                   if (userEmail) {
-                    /*  if (!(user.userType === "resident")) { */
-                    //resident uncomment
-                    if (oldUserEmail.emailStatus !== userEmail.emailStatus) {
-                      createAuditTrail(
-                        user._id,
-                        user._id,
-                        "User",
-                        "User",
-                        "Verify",
-                        ` Verified its email address`
-                      );
-                    } else {
-                      createAuditTrail(
-                        user._id,
-                        user._id,
-                        "User",
-                        "User",
-                        "Update",
-                        `Updated its email address`
-                      );
+                    if (!(user.userType === "resident")) {
+                      //resident uncomment
+                      if (oldUserEmail.emailStatus !== userEmail.emailStatus) {
+                        createAuditTrail(
+                          user._id,
+                          user._id,
+                          "User",
+                          "User",
+                          "Verify",
+                          ` Verified its email address`
+                        );
+                      } else {
+                        createAuditTrail(
+                          user._id,
+                          user._id,
+                          "User",
+                          "User",
+                          "Update",
+                          `Updated its email address`
+                        );
+                      }
                     }
-                    /*  } */
                     /* createNotification(req,
                       [req.user.id],
                       req.user.id,
@@ -1248,14 +1248,14 @@ authController.put(
             "info"
           );
           //resident uncomment
-          createAuditTrail(
+          /* createAuditTrail(
             user._id,
             user._id,
             "User",
             "Verification Request",
             "Verification Request",
             `Submitted a verification request`
-          );
+          ); */
           return res.status(200).json({
             success: true,
             message: "Verification Request Submitted Successfully",

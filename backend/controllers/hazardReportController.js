@@ -110,7 +110,7 @@ hazardReportController.post(
               "info"
             );
             // resident uncomment
-            createAuditTrail(
+            /* createAuditTrail(
               req.user.id,
               hazardReport._id,
               "HazardReport",
@@ -119,7 +119,7 @@ hazardReportController.post(
               `Added a new hazard report, ${hazardReport.category}${
                 hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
               }`
-            );
+            ); */
 
             return res.status(200).json({
               success: true,
@@ -363,7 +363,7 @@ hazardReportController.put(
         if (hazardReport) {
           req.io.emit("hazard-report");
           // resident uncomment
-          createAuditTrail(
+          /* createAuditTrail(
             req.user.id,
             hazardReport._id,
             "HazardReport",
@@ -372,7 +372,7 @@ hazardReportController.put(
             `Updated a hazard report, ${hazardReport.category}${
               hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
             } has been updated.`
-          );
+          ); */
           const dispatcherIds = await getUsersId("dispatcher");
           createNotification(
             req,
@@ -588,7 +588,7 @@ hazardReportController.delete(
             "info"
           );
           // resident uncomment
-          createAuditTrail(
+          /* createAuditTrail(
             req.user.id,
             hazardReport._id,
             "HazardReport",
@@ -597,7 +597,7 @@ hazardReportController.delete(
             `Deleted a hazard report, ${hazardReport.category}${
               hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
             }`
-          );
+          ); */
           return res.status(200).json({
             success: true,
             message: "Deleted successfully",

@@ -498,7 +498,7 @@ wellnessSurveyController.put(
       if (wellnessSurvey) {
         req.io.emit("wellness-survey");
         //resident uncomment
-        createAuditTrail(
+        /* createAuditTrail(
           req.user.id,
           wellnessSurvey._id,
           "WellnessSurvey",
@@ -506,7 +506,7 @@ wellnessSurveyController.put(
           "Answer",
 
           `Answered ${answer} to wellness check survey, ${wellnessSurvey.title}`
-        );
+        ); */
         return res.json({
           success: true,
           message: "Answered Submitted Successfully",
