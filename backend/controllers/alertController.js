@@ -287,8 +287,8 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
           "User",
           "Alert",
           "SMS Alert",
-          `Sent SMS Alert, ${alertTitle} to ${
-            location == "All" ? "Everyone" : location.join(", ")
+          `Sent SMS alert ${alertTitle} to ${
+            location == "All" ? "everyone" : location.join(", ")
           }`
         );
 
@@ -378,7 +378,7 @@ const getInfoByBarangay = async (municipality, location) => {
 };
 
 alertController.put(
-  "/:action/:id",
+  "/sms/:action/:id",
   tokenMiddleware,
   /* userTypeMiddleware([
     "employee",

@@ -95,7 +95,7 @@ emergencyFacilityController.post(
               "EmergencyFacility",
               "Emergency Facility",
               "Add",
-              `Added ${name}`
+              `Added a new ${category}, ${name}`
             );
             return res.status(200).json({
               success: true,
@@ -307,7 +307,7 @@ emergencyFacilityController.put(
             "EmergencyFacility",
             "Emergency Facility",
             "Update",
-            `Updated ${name}`
+            `Updated the ${category}, ${name}`
           );
           req.io.emit("emergency-facility");
           return res.status(200).json({
@@ -369,7 +369,7 @@ emergencyFacilityController.delete(
             "EmergencyFacility",
             "Emergency Facility",
             "Delete",
-            `Deleted ${emergencyFacility.name}`
+            `Deleted the ${emergencyFacility.category}, ${emergencyFacility.name}`
           );
 
           return res.status(200).json({
@@ -437,7 +437,7 @@ emergencyFacilityController.put(
               "EmergencyFacility",
               "Emergency Facility",
               "Archive",
-              `Archived ${emergencyFacility.name}`
+              `Archived the ${emergencyFacility.category}, ${emergencyFacility.name}`
             );
             return res.status(200).json({
               success: true,
@@ -450,7 +450,7 @@ emergencyFacilityController.put(
               "EmergencyFacility",
               "Emergency Facility",
               "Unarchive",
-              `Unarchived ${emergencyFacility.name}`
+              `Unarchived the ${emergencyFacility.category}, ${emergencyFacility.name}`
             );
             return res.status(200).json({
               success: true,

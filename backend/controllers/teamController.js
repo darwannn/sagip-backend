@@ -86,10 +86,10 @@ teamController.put("/reset", tokenMiddleware, async (req, res) => {
       );
       createAuditTrail(
         req.user.id,
-        team._id,
+        req.user.id,
         "Team",
         "Team",
-        "Reset Team Rotation",
+        "Reset",
         /* "New team has been added." */
         `Reset the team rotation`
       );
@@ -355,8 +355,7 @@ teamController.put(
           team._id,
           "Team",
           "Team",
-          `Remove All Members`,
-          /* "New team has been added." */
+          "Remove",
           `Removed all members from ${team.name}`
         );
         return res.status(200).json({
@@ -519,15 +518,18 @@ teamController.put(
             `You have been remove from ${removedTeam.name}.`,
             "info"
           );
-          createAuditTrail(
-            req.user.id,
-            removedTeam._id,
-            "Team",
-            "Team",
-            `Unassign`,
-            `Unassigned ${userId.firstname} ${userId.lastname} from team ${removedTeam.name}`
-          );
+          const removedUser = await User.findById(userId);
+          if (removedUser)
+            createAuditTrail(
+              req.user.id,
+              removedTeam._id,
+              "Team",
+              "Team",
+              `Unassign`,
+              `Unassigned ${removedUser.firstname} ${removedUser.lastname} from team ${removedTeam.name}`
+            );
         } else if (prevTeamId === "") {
+          const assignedUser = await User.findById(userId);
           await createNotification(
             req,
             [userId],
@@ -544,9 +546,11 @@ teamController.put(
             "Team",
             "Team",
             `Assign`,
-            `Assigned ${userId.firstname} ${userId.lastname} to team ${
-              team.name
-            } as ${action === "head" ? "team leader " : "a " + action}`
+            `Assigned ${assignedUser.firstname} ${
+              assignedUser.lastname
+            } to team ${team.name} as ${
+              action === "head" ? "team leader " : "a " + action
+            }`
           );
         } else {
           await createNotification(
@@ -559,15 +563,18 @@ teamController.put(
             }.`,
             "info"
           );
+          const reassignedUser = await User.findById(userId);
           createAuditTrail(
             req.user.id,
             team._id,
             "Team",
             "Team",
             `Reassign`,
-            `Reassigned ${userId.firstname} ${userId.lastname} to team ${
-              team.name
-            } as ${action === "head" ? "team leader " : "a " + action}`
+            `Reassigned ${reassignedUser.firstname} ${
+              reassignedUser.lastname
+            } to team ${team.name} as ${
+              action === "head" ? "team leader " : "a " + action
+            }`
           );
         }
 
@@ -621,13 +628,16 @@ teamController.put(
       if (Object.keys(error).length === 0) {
         const updateFields = { head, members };
 
+        const oldTeam = await Team.findById(req.params.id);
         const team = await Team.findByIdAndUpdate(req.params.id, updateFields, {
           new: true,
-        });
+        })
+          .populate("head", "-password")
+          .populate("members", "-password");
 
         if (team) {
           req.io.emit("team");
-          if (!isEmpty(head))
+          if (!isEmpty(head)) {
             await createNotification(
               req,
               [head],
@@ -636,25 +646,52 @@ teamController.put(
               `You have been assigned to ${team.name} as team leader.`,
               "info"
             );
-          if (members.length !== 0)
-            await createNotification(
-              req,
-              members,
+            createAuditTrail(
+              req.user.id,
               team._id,
-              `Team Assignment `,
-              `You have been assigned to ${team.name} as a member.`,
-              "info"
+              "Team",
+              "Team",
+              "Assign",
+              `Assigned ${team.head.firstname} ${team.head.lastname} to team ${team.name} as leader`
+            );
+          }
+          if (members.length !== 0) {
+            const newMember = members.filter(
+              (member) => !oldTeam.members.includes(member)
             );
 
-          createAuditTrail(
+            console.log(newMember);
+            if (newMember.length > 0) {
+              await createNotification(
+                req,
+                newMember,
+                team._id,
+                `Team Assignment `,
+                `You have been assigned to ${team.name} as a member.`,
+                "info"
+              );
+              const newUserMember = await User.findById(newMember[0]);
+              if (newUserMember)
+                createAuditTrail(
+                  req.user.id,
+                  team._id,
+                  "Team",
+                  "Team",
+                  "Assign",
+                  `Assigned ${newUserMember.firstname} ${newUserMember.lastname} to team ${team.name} as member`
+                );
+            }
+          }
+
+          /* createAuditTrail(
             req.user.id,
             team._id,
             "Team",
             "Team",
             "Update",
-            /* "Wellness check survey has been updated" */
-            `Updated team ${team.title}`
-          );
+           
+            `Updated team ${team.name}`
+          ); */
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -733,16 +770,16 @@ teamController.put(
                     `Your current team, ${team.name} has been archived.`,
                     "info"
                   );
-                  createAuditTrail(
-                    req.user.id,
-                    team._id,
-                    "Team",
-                    "Team",
-                    "Archive",
-                    `Archived team ${team.name}.`
-                  );
                   req.io.emit("team");
                 }
+                createAuditTrail(
+                  req.user.id,
+                  team._id,
+                  "Team",
+                  "Team",
+                  "Archive",
+                  `Archived team ${team.name}.`
+                );
 
                 return res.status(200).json({
                   success: true,

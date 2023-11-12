@@ -104,7 +104,9 @@ hazardReportController.post(
               userIds,
               req.user.id,
               "New Hazport Report",
-              `${category} on ${street} ${municipality}.`,
+              `${hazardReport.category}${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }.`,
               "info"
             );
             // resident uncomment
@@ -114,7 +116,9 @@ hazardReportController.post(
               "HazardReport",
               "Hazport Report",
               "Add",
-              `Added a new hazard report, ${category} on ${street} ${municipality}`
+              `Added a new hazard report, ${hazardReport.category}${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }`
             );
 
             return res.status(200).json({
@@ -365,15 +369,20 @@ hazardReportController.put(
             "HazardReport",
             "Hazport Report",
             "Update",
-            `Updated a hazard report, ${category} on ${street} ${municipality}`
+            `Updated a hazard report, ${hazardReport.category}${
+              hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+            }`
           );
           const dispatcherIds = await getUsersId("dispatcher");
           createNotification(
             req,
             dispatcherIds,
             req.user.id,
-            "Hazard Report Cancelled",
-            `${category} on ${street} ${municipality} has been cancelled.`,
+            "Hazard Report Updated",
+            `${hazardReport.category}${
+              hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+            }.`,
+
             "info"
           );
 
@@ -475,7 +484,9 @@ hazardReportController.put(
               "HazardReport",
               "Hazport Report",
               "Verify",
-              `Verified a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+              `Verified a hazard report, ${hazardReport.category}${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }`
             );
             return res.status(200).json({
               success: true,
@@ -499,7 +510,9 @@ hazardReportController.put(
               "HazardReport",
               "Hazport Report",
               "Resolve",
-              `Resolved a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+              `Resolved a hazard report, ${hazardReport.category}${
+                hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+              }`
             );
             return res.status(200).json({
               success: true,
@@ -581,7 +594,9 @@ hazardReportController.delete(
             "HazardReport",
             "Hazport Report",
             "Delete",
-            `Deleted a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+            `Deleted a hazard report, ${hazardReport.category}${
+              hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+            }`
           );
           return res.status(200).json({
             success: true,
@@ -678,7 +693,9 @@ hazardReportController.put(
                 "HazardReport",
                 "Hazport Report",
                 "Close",
-                `Closed a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+                `Closed a hazard report, ${hazardReport.category}${
+                  hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+                }`
               );
               return res.status(200).json({
                 success: true,
@@ -694,7 +711,9 @@ hazardReportController.put(
                 "HazardReport",
                 "Hazport Report",
                 "Unarchive",
-                `Unarchived a hazard report, ${hazardReport.category} on ${hazardReport.street} ${hazardReport.municipality}`
+                `Unarchived a hazard report, ${hazardReport.category}${
+                  hazardReport.street !== "" ? ` on ${hazardReport.street}` : ""
+                }`
               );
               return res.status(200).json({
                 success: true,

@@ -61,8 +61,8 @@ accountController.get("/", async (req, res) => {
 
 accountController.post(
   "/add",
-  /*  tokenMiddleware,
-  userTypeMiddleware([
+  tokenMiddleware,
+  /*  userTypeMiddleware([
     
     "admin",
   ]), */
@@ -161,6 +161,7 @@ accountController.post(
 
         if (user) {
           req.io.emit("user");
+          console.log(user._id);
           createAuditTrail(
             req.user.id,
             user._id,
@@ -188,6 +189,7 @@ accountController.post(
         return res.status(400).json(error);
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -477,8 +479,8 @@ accountController.put(
             user._id,
             "User",
             "User",
-            "Reset Password",
-            `Reset the password of ${user.firstname} ${user.lastname}`
+            "Reset",
+            `Reset ${user.firstname} ${user.lastname}'s password `
           );
           return res.status(200).json({
             success: true,
@@ -502,6 +504,7 @@ accountController.put(
 
 accountController.put(
   "/:action/update/:id",
+  tokenMiddleware,
   /*  userTypeMiddleware([
     "resident",
     "responder",
@@ -653,22 +656,45 @@ accountController.put(
           }
         }
 
+        const oldUser = await User.findById(req.params.id);
         const user = await User.findByIdAndUpdate(req.params.id, updateFields, {
           new: true,
         });
 
         if (user) {
-          if (!(user.userType === "resident")) {
-            if (action === "info") {
+          if (req.params.action === "info") {
+            if (oldUser.userType !== user.userType) {
               createAuditTrail(
                 req.user.id,
                 user._id,
                 "User",
                 "User",
                 "Update",
-                `Updated ${user.firstname} ${user.lastname}'s account`
+                `Updated ${user.firstname} ${user.lastname}'s account role to ${user.userType}`
+              );
+            } else if (oldUser.isBanned !== user.isBanned) {
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "User",
+                `${user.isBanned ? "Ban" : "Unban"}`,
+                `${user.isBanned ? "Banned" : "Unbanned"} ${user.firstname} ${
+                  user.lastname
+                }'s account`
               );
             } else {
+              createAuditTrail(
+                req.user.id,
+                user._id,
+                "User",
+                "User",
+                "Update",
+                `Updated ${user.firstname} ${user.lastname}'s account information`
+              );
+            }
+          } else {
+            if (!(user.userType === "resident")) {
               createAuditTrail(
                 req.user.id,
                 user._id,
@@ -709,6 +735,7 @@ accountController.put(
         return res.status(400).json(error);
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -990,17 +1017,17 @@ accountController.put(
         });
 
         if (user) {
+          if (!(user.userType === "resident")) {
+            createAuditTrail(
+              req.user.id,
+              user._id,
+              "User",
+              "User",
+              "Update",
+              `Updated its password`
+            );
+          }
           if (req.body.for) {
-            if (!(user.userType === "resident")) {
-              createAuditTrail(
-                req.user.id,
-                user._id,
-                "User",
-                "User",
-                "Update",
-                `Updated its account password`
-              );
-            }
             return res.status(200).json({
               success: true,
               message:

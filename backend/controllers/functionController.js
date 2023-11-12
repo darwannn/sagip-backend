@@ -340,7 +340,7 @@ const handleArchive = async (action, id, req, res) => {
             "User",
             "User",
             "Archive",
-            `Archived ${user.firstName} ${user.lastName}'s account`
+            `Archived ${user.firstname} ${user.lastname}'s account`
           );
           return res.status(200).json({
             success: true,
@@ -348,6 +348,15 @@ const handleArchive = async (action, id, req, res) => {
           });
         } else if (action === "unarchive") {
           req.io.emit(`${id}`);
+
+          createAuditTrail(
+            req.user.id,
+            user._id,
+            "User",
+            "User",
+            "Unarchive",
+            `Unarchived ${user.firstname} ${user.lastname}'s account`
+          );
           return res.status(200).json({
             success: true,
             message: "Unrchived Successfully",

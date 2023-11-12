@@ -383,7 +383,7 @@ authController.put(
                     "User",
                     "User",
                     "Register",
-                    `Successfully registered`
+                    `Registered to SAGIP`
                   );
                   createNotification(
                     req,
@@ -524,6 +524,7 @@ authController.put(
                 if (action === "email") {
                   let { email } = req.body;
 
+                  const oldUserEmail = await User.findById(req.user.id);
                   const userEmail = await User.findByIdAndUpdate(
                     req.user.id,
                     { email, emailStatus: "verified" },
@@ -534,14 +535,25 @@ authController.put(
                   if (userEmail) {
                     /*  if (!(user.userType === "resident")) { */
                     //resident uncomment
-                    createAuditTrail(
-                      user._id,
-                      user._id,
-                      "User",
-                      "User",
-                      "Update",
-                      `Updated its email address`
-                    );
+                    if (oldUserEmail.emailStatus !== userEmail.emailStatus) {
+                      createAuditTrail(
+                        user._id,
+                        user._id,
+                        "User",
+                        "User",
+                        "Verify",
+                        ` Verified its email address`
+                      );
+                    } else {
+                      createAuditTrail(
+                        user._id,
+                        user._id,
+                        "User",
+                        "User",
+                        "Update",
+                        `Updated its email address`
+                      );
+                    }
                     /*  } */
                     /* createNotification(req,
                       [req.user.id],
@@ -603,6 +615,7 @@ authController.put(
         });
       }
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -1008,18 +1021,17 @@ authController.put(
         });
 
         if (user) {
+          if (!(user.userType === "resident")) {
+            createAuditTrail(
+              user._id,
+              user._id,
+              "User",
+              "User",
+              "Change Password",
+              `Changed its password`
+            );
+          }
           if (req.body.for) {
-            if (!(user.userType === "resident")) {
-              createAuditTrail(
-                user._id,
-                user._id,
-                "User",
-                "User",
-                "Change Password",
-                `Changed password`
-              );
-            }
-
             return res.status(200).json({
               success: true,
               message:
@@ -1462,7 +1474,7 @@ authController.put(
                 "User",
                 "Verification Request",
                 "Reject",
-                `Rejected a verification request of ${user.firstname} ${user.lastname}`
+                `Rejected the verification request of ${user.firstname} ${user.lastname}`
               );
               return res.status(200).json({
                 success: true,
@@ -1483,7 +1495,7 @@ authController.put(
                 "User",
                 "Verification Request",
                 "Approve",
-                `Approved a verification request of ${user.firstname} ${user.lastname}`
+                `Approved the verification request of ${user.firstname} ${user.lastname}`
               );
               createNotification(
                 req,
