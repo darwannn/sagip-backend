@@ -436,7 +436,7 @@ authController.put(
                   });
                 if (action === "login" || action === "attempt") {
                   //resident uncomment
-                  /* if (!user.userType === "resident") { */
+                  /*  if (!(user.userType === "resident")) { */
                   createAuditTrail(
                     user._id,
                     user._id,
@@ -484,7 +484,7 @@ authController.put(
                       "Your contact number has been updated.",
                       "info"
                     ); */
-                    /* if (!user.userType === "resident") { */
+                    /* if (!(user.userType === "resident")) { */
                     //resident uncomment
                     createAuditTrail(
                       user._id,
@@ -532,7 +532,7 @@ authController.put(
                     }
                   );
                   if (userEmail) {
-                    /* if (!user.userType === "resident") { */
+                    /*  if (!(user.userType === "resident")) { */
                     //resident uncomment
                     createAuditTrail(
                       user._id,
@@ -744,7 +744,11 @@ authController.post("/login", async (req, res) => {
                 user.isOnline = true;
                 user.lastOnlineDate = Date.now();
                 await user.save();
-                if (!user.userType === "resident") {
+                console.log("audit1");
+                console.log(user.userType === "resident");
+                console.log(user.userType);
+                if (!(user.userType === "resident")) {
+                  console.log("audit");
                   createAuditTrail(
                     user._id,
                     user._id,
@@ -1005,7 +1009,7 @@ authController.put(
 
         if (user) {
           if (req.body.for) {
-            if (!user.userType === "resident") {
+            if (!(user.userType === "resident")) {
               createAuditTrail(
                 user._id,
                 user._id,
@@ -1131,7 +1135,7 @@ authController.post(
       });
 
       if (user) {
-        if (!user.userType === "resident") {
+        if (!(user.userType === "resident")) {
           createAuditTrail(
             user._id,
             user._id,
@@ -1451,6 +1455,7 @@ authController.put(
                 `We regret to inform you that your verification request has been rejected. If you have any questions or need further assistance, please don't hesitate to reach out.`,
                 "error"
               );
+
               createAuditTrail(
                 req.user.id,
                 user._id,
