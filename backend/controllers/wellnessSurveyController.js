@@ -349,19 +349,6 @@ wellnessSurveyController.put(
       if (Object.keys(error).length === 0) {
         if (moment(endDate).isBefore(moment(), "day")) {
           status = "inactive";
-          /* if (
-            activeWellnessSurvey.length !== 0 &&
-            activeWellnessSurvey[0]._id.equals(req.params.id)
-          ) {
-            createAuditTrail(
-              req.user.id,
-              req.params.id,
-              "WellnessSurvey",
-              "Wellness Check Survey",
-              "Finish",
-              `Finished wellness check survey ${activeWellnessSurvey[0].title}`
-            );
-          } */
         }
         if (
           !(
@@ -411,8 +398,8 @@ wellnessSurveyController.put(
                   wellnessSurvey._id,
                   "WellnessSurvey",
                   "Wellness Check Survey",
-                  "Publish",
-                  `Published a new wellness check survey, ${wellnessSurvey.title}`
+                  "Republish",
+                  `Republished wellness check survey, ${wellnessSurvey.title}`
                 );
               }
             } else if (status === "inactive") {
@@ -510,7 +497,8 @@ wellnessSurveyController.put(
 
       if (wellnessSurvey) {
         req.io.emit("wellness-survey");
-        /* createAuditTrail(
+        //resident uncomment
+        createAuditTrail(
           req.user.id,
           wellnessSurvey._id,
           "WellnessSurvey",
@@ -518,7 +506,7 @@ wellnessSurveyController.put(
           "Answer",
 
           `Answered ${answer} to wellness check survey, ${wellnessSurvey.title}`
-        ); */
+        );
         return res.json({
           success: true,
           message: "Answered Submitted Successfully",

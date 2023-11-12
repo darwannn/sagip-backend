@@ -75,7 +75,7 @@ safetyTipController.post(
                 "SafetyTip",
                 "Safety Tips",
                 "Publish",
-                `Published a new safety tip, ${title}.`
+                `Published a new safety tip, ${title}`
               );
 
               createNotificationAll(
@@ -93,7 +93,7 @@ safetyTipController.post(
                 "SafetyTip",
                 "Safety Tips",
                 "Draft",
-                `Created a new safety tip, ${title}.`
+                `Created a new safety tip, ${title}`
               );
             }
             return res.status(200).json({
@@ -349,8 +349,8 @@ safetyTipController.put(
                 safetyTip._id,
                 "SafetyTip",
                 "Safety Tips",
-                "Reublish",
-                `Republished ${title}.`
+                "Republish",
+                `Republished ${title}`
               );
             } else {
               createAuditTrail(
@@ -359,7 +359,7 @@ safetyTipController.put(
                 "SafetyTip",
                 "Safety Tips",
                 "Update",
-                `Updated ${title}.`
+                `Updated ${title}`
               );
             }
           } else {
@@ -370,7 +370,7 @@ safetyTipController.put(
                 "SafetyTip",
                 "Safety Tips",
                 "Redraft",
-                `redrafted ${title}.`
+                `Redrafted ${title}`
               );
             } else {
               createAuditTrail(
@@ -379,7 +379,7 @@ safetyTipController.put(
                 "SafetyTip",
                 "Safety Tips",
                 "Update",
-                `Updated ${title}.`
+                `Updated ${title}`
               );
             }
           }
@@ -437,7 +437,7 @@ safetyTipController.delete(
             "SafetyTip",
             "Safety Tips",
             "Delete",
-            `Deleted a safety tip, ${safetyTip.title}.`
+            `Deleted a safety tip, ${safetyTip.title}`
           );
 
           return res.status(200).json({
@@ -483,7 +483,8 @@ safetyTipController.put(
           (id) => !id.equals(req.user.id)
         );
         await safetyTip.save();
-        /*   createAuditTrail(
+        //resident uncomment
+        createAuditTrail(
           req.user.id,
           safetyTip._id,
           "SafetyTip",
@@ -491,8 +492,8 @@ safetyTipController.put(
           `${safetyTip.saves.includes(req.user.id) ? "Save" : "Unsave"}`,
           `${
             safetyTip.saves.includes(req.user.id) ? "Saved" : "Unsaved"
-          } a safety tip, ${safetyTip.title}.`
-        ); */
+          } a safety tip, ${safetyTip.title}`
+        );
         return res.status(200).json({
           success: true,
           message: "Unsaved Successfully",
@@ -555,7 +556,7 @@ safetyTipController.put(
               "SafetyTip",
               "Safety Tips",
               "Archive",
-              `Archived a safety tip, ${safetyTip.title}.`
+              `Archived a safety tip, ${safetyTip.title}`
             );
             return res.status(200).json({
               success: true,
@@ -568,7 +569,7 @@ safetyTipController.put(
               "SafetyTip",
               "Safety Tips",
               "Unarchive",
-              `Unarchived a safety tip, ${safetyTip.title}.`
+              `Unarchived a safety tip, ${safetyTip.title}`
             );
             return res.status(200).json({
               success: true,
