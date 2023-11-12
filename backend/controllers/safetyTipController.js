@@ -489,16 +489,23 @@ safetyTipController.put(
           safetyTip._id,
           "SafetyTip",
           "Safety Tips",
-          `${safetyTip.saves.includes(req.user.id) ? "Save" : "Unsave"}`,
-          `${
-            safetyTip.saves.includes(req.user.id) ? "Saved" : "Unsaved"
-          } a safety tip, ${safetyTip.title}`
+          "Unsave",
+          `Unsaved a safety tip, ${safetyTip.title}`
         );
         return res.status(200).json({
           success: true,
           message: "Unsaved Successfully",
         });
       } else {
+        //resident uncomment
+        createAuditTrail(
+          req.user.id,
+          safetyTip._id,
+          "SafetyTip",
+          "Safety Tips",
+          "Save",
+          `Saved a safety tip, ${safetyTip.title}`
+        );
         safetyTip.saves.push(req.user.id);
         await safetyTip.save();
 
