@@ -773,8 +773,10 @@ assistanceRequestController.put(
               assistanceRequest._id,
               "AssistanceRequest",
               "Assistance Request",
-              "Verify",
-              `Verified assistance request, ${assistanceRequest.category}${
+              "Assign",
+              `Assigned ${team.name} to respond on ${
+                assistanceRequest.category
+              }${
                 assistanceRequest.street !== ""
                   ? ` on ${assistanceRequest.street}`
                   : ""

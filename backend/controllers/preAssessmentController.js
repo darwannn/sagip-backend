@@ -173,7 +173,11 @@ preAssessmentController.post(
             "PreAssessment",
             "Incident Report",
             "Add",
-            `Submitted an incident report`
+            `Added an incident report for ${assistanceRequest.category}${
+              assistanceRequest.street !== ""
+                ? ` on ${assistanceRequest.street}`
+                : ""
+            }`
           );
 
           return res.status(200).json({
