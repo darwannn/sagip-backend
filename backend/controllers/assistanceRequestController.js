@@ -1105,6 +1105,7 @@ assistanceRequestController.put(
                   dateCancelled: Date.now(),
                 },
               },
+              assignedTeam: null,
             };
           } else if (action === "unarchive") {
             updateFields = {
@@ -1216,7 +1217,7 @@ assistanceRequestController.put(
                   assistanceRequest.street !== ""
                     ? ` on ${assistanceRequest.street}`
                     : ""
-                } request has been cancelled due to: ${reason}${
+                } has been cancelled due to: ${reason}${
                   isEmpty(note) ? "" : `<br><br>${note}`
                 }.`,
                 "info"

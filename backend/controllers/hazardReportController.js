@@ -639,10 +639,10 @@ hazardReportController.put(
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        if (isEmpty(reason)) error["reason"] = "Required field";
         if (Object.keys(error).length === 0) {
           console.log(action);
           if (action === "archive") {
+            if (isEmpty(reason)) error["reason"] = "Required field";
             updateFields = {
               isArchived: true,
               status: "cancelled",
