@@ -66,7 +66,6 @@ const createAuditTrail = async (
   description
 ) => {
   try {
-    console.log("AuditTrail");
     const auditTrail = await AuditTrail.create({
       userId,
       actionId,
@@ -82,13 +81,6 @@ const createAuditTrail = async (
       return false;
     }
   } catch (error) {
-    console.log(userId);
-    console.log(actionId);
-    console.log(docModel);
-    console.log(category);
-    console.log(action);
-    console.log(description);
-    console.log(error);
     return false;
   }
 };

@@ -1,8 +1,6 @@
 const apiController = require("express").Router();
 const axios = require("axios");
 const moment = require("moment");
-const User = require("../models/User");
-
 const nodemailer = require("nodemailer");
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 
@@ -17,13 +15,11 @@ apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
     };
 
     if (req.io.emit(event, data)) {
-      console.log("true");
       return res.status(200).json({
         success: true,
         message: "Web socket sent successfully",
       });
     } else {
-      console.log("false");
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
@@ -37,9 +33,6 @@ apiController.put("/web-socket", tokenMiddleware, async (req, res) => {
 });
 
 const sendBulkSMS = async (content, target, contactNumbers) => {
-  console.log("=========contactNumbers=============");
-  console.log(contactNumbers);
-  console.log("====================================");
 
   let message = "";
   const from = "SAGIP - Malolos CDRRMO:\n\n";
@@ -48,34 +41,15 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
   } else if (target === "notification") {
     message = `${from}${content}`;
   }
-  /* SMS Gateway */
-  /*  const smsData = contactNumbers.map((contactNumber) => ({
-    sendto: contactNumber,
-    body: message,
-    sim: "0",
-    device_id: process.env.DEVICE_ID,
-    urgent: "1",
-  }));
-  const params = {
-    token: process.env.SMS_API,
-    smsdata: smsData,
-  };
-  return axios
-    .post("https://smsgateway24.com/getdata/addalotofsms", params)
-    .then(function (response) {
-      return response.data.error === 0 ? true : false;
-    })
-    .catch(function (error) {
-      throw error;
-    }); */
+  
   const numbersString = contactNumbers.join(",");
   const params = {
     apikey: process.env.SEMAPHORE_API_KEY,
     number: numbersString,
     message: message,
   };
-  /* SEMAPHORE */
-  /* return axios
+
+  return axios
 
     .post("https://api.semaphore.co/api/v4/messages", params)
     .then(function (response) {
@@ -83,8 +57,8 @@ const sendBulkSMS = async (content, target, contactNumbers) => {
     })
     .catch(function (error) {
       throw error;
-    }); */
-  return true;
+    });
+
 };
 
 const sendSMS = async (phone, target, content) => {
@@ -107,36 +81,13 @@ const sendSMS = async (phone, target, content) => {
   } else {
     message = `${from}Your SAGIP verification code is ${content}. The code will expire after 15 minutes.`;
   }
-  /* SMS Gateway */
-  /*   const encodedMessage = message;
-
-  const smsData = {
-    token: process.env.SMS_API,
-    sendto: phone,
-    body: message,
-    sim: "0",
-    device_id: process.env.DEVICE_ID,
-    urgent: "1",
-  };
-
-  return axios
-    .post("https://smsgateway24.com/getdata/addsms", null, {
-      params: smsData,
-    })
-    .then(function (response) {
-      console.log(response);
-      return response.data.error === 0 ? true : false;
-    })
-    .catch(function (error) {
-      throw error;
-    }); */
 
   const params = {
     apikey: process.env.SEMAPHORE_API_KEY,
     number: phone,
     message: message,
   };
-  /* SEMAPHORE */
+
   return axios
 
     .post("https://api.semaphore.co/api/v4/messages", params)
@@ -146,11 +97,6 @@ const sendSMS = async (phone, target, content) => {
     .catch(function (error) {
       throw error;
     });
-
-  /* console.log("send sms");
-  return { error: 0, message: "testing" };
-
-  return await send(contactNumber, message); */
 };
 
 async function sendEmail(to, target, code) {
@@ -259,8 +205,6 @@ async function sendEmail(to, target, code) {
       auth: {
         user: process.env.NODEMAILER_EMAIL,
         pass: process.env.NODEMAILER_PASSWORD,
-        /*  user: "sagip.cityofmalolos.drrmo@gmail.com",
-        pass: "agehxjemnwwohrig", */
       },
     });
 
@@ -272,9 +216,8 @@ async function sendEmail(to, target, code) {
       html,
     });
 
-    console.log(info.messageId);
   } catch (error) {
-    console.log(error);
+    console.log("Nodemailer failed", error);
   }
 }
 

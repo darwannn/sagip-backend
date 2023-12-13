@@ -36,7 +36,7 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
-const { create } = require("../models/Team");
+
 authController.post("/register", async (req, res) => {
   try {
     const error = {};
@@ -94,15 +94,10 @@ authController.post("/register", async (req, res) => {
     if (isEmpty(birthdate)) error["birthdate"] = "Required field";
     if (isEmpty(gender)) error["gender"] = "Required field";
 
-    /*  if (isResident === "true") {
-      region = "Region III";
-      province = "Bulacan";
-      municipality = "Malolos";
-    } else { */
     if (isEmpty(region)) error["region"] = "Required field";
     if (isEmpty(province)) error["province"] = "Required field";
     if (isEmpty(municipality)) error["municipality"] = "Required field";
-    /*  } */
+
     if (isEmpty(barangay)) error["barangay"] = "Required field";
     if (isEmpty(street)) error["street"] = "Required field";
 
@@ -164,16 +159,13 @@ authController.post("/register", async (req, res) => {
         userType: "resident",
         status: "unverified",
         isOnline: true,
-        /*      lastOnlineDate: Date.now, */
       });
 
       if (user) {
         req.io.emit("user");
 
         sendSMS(user.contactNumber, "register", verificationCode);
-        // sendEmail(user.email, "register", verificationCode);
 
-        /*  if (verificationCode !== 0) { */
         return res.status(200).json({
           success: true,
           message: "A verification has been sent to your contact number",
@@ -192,12 +184,7 @@ authController.post("/register", async (req, res) => {
             user._doc.contactNumber
           ),
         });
-        /* } else {
-          return res.status(200).json({
-            success: true,
-            message: "Created Successfully",
-          });
-        } */
+
       } else {
         return res.status(500).json({
           success: false,
@@ -326,7 +313,6 @@ authController.put(
       const { code } = req.body;
       const userId = req.user.id;
       let action = req.params.action.toLowerCase();
-      console.log(code);
       if (
         action === "register" ||
         action === "forgot-password" ||
@@ -349,7 +335,7 @@ authController.put(
 
             if (!codeExpirationMoment.isAfter(currentMoment)) {
               const user = await updateVerificationCode(req.user.id);
-              /*  if (user) { */
+  
               sendSMS(user.contactNumber, "register", user.verificationCode);
               sendEmail(user.email, "register", user.verificationCode);
 
@@ -359,12 +345,7 @@ authController.put(
                   "Verification code has expired. A new verification code has been sent",
                 message: "input error",
               });
-              /* } else {
-                return res.status(200).json({
-                  success: false,
-                  message: "Internal Server Error",
-                });
-              } */
+    
             } else {
               if (parseInt(code) === user.verificationCode) {
                 if (user.codeExpiration)
@@ -376,7 +357,7 @@ authController.put(
                 await user.save();
                 req.io.emit("user");
                 if (action === "register") {
-                  //resident uncomment
+                
                   /*  createAuditTrail(
                     user._id,
                     user._id,
@@ -403,7 +384,7 @@ authController.put(
                       id: user._doc._id,
                       userType: user._doc.userType,
                       status: user._doc.status,
-                      /* email: user._doc.email, */
+            
                     },
                     token: generateToken(
                       "login",
@@ -435,7 +416,7 @@ authController.put(
                     ),
                   });
                 if (action === "login" || action === "attempt") {
-                  //resident uncomment
+                 
                   if (!(user.userType === "resident")) {
                     createAuditTrail(
                       user._id,
@@ -485,7 +466,7 @@ authController.put(
                       "info"
                     ); */
                     if (!(user.userType === "resident")) {
-                      //resident uncomment
+                      
                       createAuditTrail(
                         user._id,
                         user._id,
@@ -503,7 +484,6 @@ authController.put(
                         id: user._doc._id,
                         userType: user._doc.userType,
                         status: user._doc.status,
-                        /*     email: user._doc.email, */
                       },
                       token: generateToken(
                         "login",
@@ -534,7 +514,7 @@ authController.put(
                   );
                   if (userEmail) {
                     if (!(user.userType === "resident")) {
-                      //resident uncomment
+                    
                       if (oldUserEmail.emailStatus !== userEmail.emailStatus) {
                         createAuditTrail(
                           user._id,
@@ -570,7 +550,6 @@ authController.put(
                         id: user._doc._id,
                         userType: user._doc.userType,
                         status: user._doc.status,
-                        /*     email: user._doc.email, */
                       },
                       token: generateToken(
                         "login",
@@ -615,7 +594,6 @@ authController.put(
         });
       }
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -698,13 +676,6 @@ authController.post("/login", async (req, res) => {
         user.codeExpiration = moment().add(15, "minutes");
         await user.save();
         let identifierType = await checkIdentifierType(identifier);
-        // let generatedCode = await generateCode();
-        // console.log(accountExists.id);
-
-        // const user = await User.findByIdAndUpdate(accountExists.id, {
-        //   verificationCode: generatedCode,
-        //   codeExpiration: codeExpiration,
-        // });
 
         if (user) {
           if (identifierType === "email") {
@@ -748,20 +719,14 @@ authController.post("/login", async (req, res) => {
               });
             } else {
               if (!(user.status === "unverified")) {
-                /*    if (!user.isArchived) { */
-                // Check if the user has exceeded the maximum number of attempts
-
-                // Reset the attempt number if the password is correct
-                /* if (!user.archivedDate) { */
+           
                 user.attempt = 0;
                 user.isOnline = true;
                 user.lastOnlineDate = Date.now();
                 await user.save();
-                console.log("audit1");
-                console.log(user.userType === "resident");
-                console.log(user.userType);
+
                 if (!(user.userType === "resident")) {
-                  console.log("audit");
+
                   createAuditTrail(
                     user._id,
                     user._id,
@@ -790,26 +755,9 @@ authController.post("/login", async (req, res) => {
                     ""
                   ),
                 });
-                /*   } else {
-                //  const data = calculateArchivedDate();
-                if (data) {
-                    //  const { daysLeft, deletionDate } = data;
-                  return res.status(200).json({
-                    isArchived: true,
-                    success: false,
-                  //   daysLeft,
-                  // deletionDate,
-                  // message: `Your account is scheduled for Deltetion on ${deletionDate}. 
-                  // To keep your account deletion scheduled in ${daysLeft}, you can simply log out.`,
-                    message: `Your account is disabled`,
-                  });
-                }
-              } */
+  
               } else {
-                /* return res.status(500).json({
-                success: false,
-                message: "Internal Server Error: " + error,
-              }); */
+              
                 const userVerificationCode = await updateVerificationCode(
                   user._id
                 );
@@ -820,7 +768,6 @@ authController.post("/login", async (req, res) => {
                 );
 
                 if (userVerificationCode) {
-                  console.log("Code: " + userVerificationCode.verificationCode);
                   return res.status(200).json({
                     success: false,
                     message: `Please verify your contact number.Verification code has been send to ${userVerificationCode.contactNumber}`,
@@ -858,7 +805,6 @@ authController.post("/login", async (req, res) => {
       return res.status(500).json(error);
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error: " + error,
@@ -1087,11 +1033,9 @@ authController.put(
       const user = await updateVerificationCode(req.user.id);
 
       if (user) {
-        console.log("Code: " + user.verificationCode);
         let identifierType = await checkIdentifierType(identifier);
 
         if (identifierType === "email") {
-          console.log("Email");
           if (action === "forgot-password") {
             sendEmail(identifier, "forgot-password", user.verificationCode);
           } else if (action === "attempt") {
@@ -1100,7 +1044,6 @@ authController.put(
             sendEmail(identifier, "email-verification", user.verificationCode);
           }
         } else if (identifierType === "contactNumber") {
-          console.log("SMS");
           if (action === "forgot-password") {
             sendSMS(identifier, "forgot-password", user.verificationCode);
           } else if (action === "attempt") {
@@ -1247,7 +1190,7 @@ authController.put(
             `${user.firstname} ${user.lastname} has submitted  a verification request.`,
             "info"
           );
-          //resident uncomment
+        
           /* createAuditTrail(
             user._id,
             user._id,
@@ -1365,7 +1308,6 @@ authController.get(
   async (req, res) => {
     try {
       const user = await User.findById(req.params.id);
-      /*   if (user.verificationRequestDate === undefined) { */
       if (
         (user.verificationRequestDate === undefined &&
           user.verificationPicture.length <= 0) ||
@@ -1379,12 +1321,6 @@ authController.get(
       } else {
         return res.status(200).json({ success: true, ...user._doc });
       }
-      /*  } else {
-        return res.status(500).json({
-          success: false,
-          message: "pending request",
-        });
-      } */
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -1481,7 +1417,6 @@ authController.put(
                 message: "Verification Request Rejected",
               });
             } else if (action === "approve") {
-              /* sms uncomment */
               /*  sendSMS(
                 user.contactNumber,
                 "verification-request",

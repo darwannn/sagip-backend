@@ -17,7 +17,6 @@ const {
 } = require("./functionController");
 const { createAuditTrail } = require("./auditTrailController");
 const multerMiddleware = require("../middlewares/multerMiddleware");
-const { create } = require("../models/AuditTrail");
 
 const folderPath = "sagip/media/safety-tips";
 
@@ -483,7 +482,7 @@ safetyTipController.put(
           (id) => !id.equals(req.user.id)
         );
         await safetyTip.save();
-        //resident uncomment
+
         /* createAuditTrail(
           req.user.id,
           safetyTip._id,
@@ -497,7 +496,7 @@ safetyTipController.put(
           message: "Unsaved Successfully",
         });
       } else {
-        //resident uncomment
+
         /* createAuditTrail(
           req.user.id,
           safetyTip._id,
@@ -535,7 +534,6 @@ safetyTipController.put(
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        console.log(action);
         if (action === "archive") {
           updateFields = {
             isArchived: true,

@@ -20,7 +20,7 @@ const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
-const { create } = require("../models/Team");
+
 hazardReportController.post(
   "/add",
   tokenMiddleware,
@@ -109,7 +109,7 @@ hazardReportController.post(
               }.`,
               "info"
             );
-            // resident uncomment
+          
             /* createAuditTrail(
               req.user.id,
               hazardReport._id,
@@ -209,9 +209,7 @@ hazardReportController.get("/myreport", tokenMiddleware, async (req, res) => {
       archivedDate: { $exists: false },
       isArchived: false,
     }).populate("userId", "-password");
-    console.log("====================================");
-    console.log(hazardReport);
-    console.log("====================================");
+
     if (hazardReport) {
       hazardReport.sort((a, b) => a.createdAt - b.createdAt);
       return res.status(200).json(hazardReport);
@@ -362,7 +360,7 @@ hazardReportController.put(
         );
         if (hazardReport) {
           req.io.emit("hazard-report");
-          // resident uncomment
+          
           /* createAuditTrail(
             req.user.id,
             hazardReport._id,
@@ -587,7 +585,7 @@ hazardReportController.delete(
             } request has been cancelled.`,
             "info"
           );
-          // resident uncomment
+
           /* createAuditTrail(
             req.user.id,
             hazardReport._id,
@@ -640,7 +638,6 @@ hazardReportController.put(
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
         if (Object.keys(error).length === 0) {
-          console.log(action);
           if (action === "archive") {
             if (isEmpty(reason)) error["reason"] = "Required field";
             updateFields = {

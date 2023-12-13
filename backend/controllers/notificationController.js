@@ -165,7 +165,7 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
               failedTokens.push(tokens[idx]);
             }
           });
-          console.log("List of tokens that caused failures: " + failedTokens);
+          console.log("List of tokens that caused failures:", failedTokens);
         }
       })
       .catch((error) => {
@@ -175,7 +175,6 @@ const createPushNotificationToken = (title, body, tokens, linkId) => {
 };
 
 const createPushNotificationTopic = (title, body, topic, linkId) => {
-  /* if (tokens.length !== 0) { */
   title = title.replace(/<br>/g, "\n");
   body = body.replace(/<br>/g, "\n");
   const message = {
@@ -200,7 +199,6 @@ const createPushNotificationTopic = (title, body, topic, linkId) => {
       console.log("Failed to send notification:", error);
     });
 };
-/* }; */
 
 const createRandomTag = () => {
   const randomTag = Math.floor(Math.random() * 1000000).toString();

@@ -1,5 +1,4 @@
 const alertController = require("express").Router();
-
 const Alert = require("../models/Alert");
 const User = require("../models/User");
 const axios = require("axios");
@@ -13,7 +12,6 @@ const {
   createNotificationAll,
 } = require("./notificationController");
 const { sendSMS, sendBulkSMS } = require("./apiController");
-const { create } = require("../models/AuditTrail");
 alertController.post(
   "/sms/add",
   tokenMiddleware,
@@ -205,8 +203,6 @@ alertController.delete(
 alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
   const error = {};
   let { alertTitle, alertMessage, location } = req.body;
-  console.log(/* req.user */);
-  console.log(req.user);
   if (alertTitle === "") {
     error["alertTitle"] = "Required field";
   }
@@ -268,18 +264,13 @@ alertController.post("/sms/send", tokenMiddleware, async (req, res) => {
       }
     }
 
-    /*  console.log(contactNumbers);
-    console.log(fcmTokens); */
-
     try {
       const smsResponse = true;
-      /* console.log(smsResponse); */
       const smsRes = await sendBulkSMS(
         `${alertTitle}\n\n${alertMessage}`,
         "alert",
         contactNumbers
       );
-      /* console.log(smsRes); */
       if (smsResponse) {
         createAuditTrail(
           req.user.id,
@@ -362,7 +353,6 @@ const getInfoByMunicipality = async (municipality) => {
 
 const getInfoByBarangay = async (municipality, location) => {
   try {
-    /* console.log(municipality); */
     const users = await User.find({
       municipality: municipality,
       barangay: { $in: location },
@@ -370,7 +360,6 @@ const getInfoByBarangay = async (municipality, location) => {
 
     const contactNumbers = users.map((user) => user.contactNumber);
     const fcmTokens = users.flatMap((user) => user.fcmToken);
-    /* console.log(contactNumbers, fcmTokens); */
     return { contactNumbers, fcmTokens };
   } catch (error) {
     return "Internal Server Error: " + error;
@@ -389,7 +378,6 @@ alertController.put(
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        console.log(action);
         if (action === "archive") {
           updateFields = {
             isArchived: true,
@@ -518,7 +506,6 @@ async function getTyphoonSignal() {
       try {
         parseResponse = await axios.head(parseUrl);
       } catch (error) {
-        console.log("Error: Unable to retrieve data from URL.");
         const downloadUrl = `https://pagasa.chlod.net/api/v1/bulletin/download/${filename}`;
         const downloadResponse = await axios.get(downloadUrl);
         const datas = downloadResponse.data;
@@ -579,13 +566,6 @@ async function getTyphoonSignal() {
               success: true,
               message: "no signal",
               signal: 0,
-              /*  success: true,
-              signal: `2`,
-              message: `Malolos is under Signal No.2`,
-              track: `https://pubfiles.pagasa.dost.gov.ph/tamss/weather/track_goring.png`,
-              name: "Goring",
-              category: "Typhoon",
-              updatedAt: Date.now(), */
             };
           }
         }

@@ -26,12 +26,6 @@ const { auditTrailController } = require("./controllers/auditTrailController");
 
 const app = express();
 const server = http.createServer(app);
-/* const io = socketIO(server, {
-  cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  },
-});  */
 
 const io = require("socket.io")(server, { cors: { origin: "*" } });
 
