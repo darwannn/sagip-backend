@@ -1,25 +1,8 @@
-
-
-# testing
 /frontend/coverage
-
-# production
 /frontend/build
-
-
-
-
-#.install backend.cmd
-#.install frontend.cmd
-#.run frontend.cmd
-#.run backend.cmd
-#.gitignore
-#.run.cmd
-
 backend/sagip-5756f-firebase-adminsdk-1r9yo-7cb34db90a.json
 /backend/.pnp
 /backend.pnp.js
-
 /backend/node_modules
 backend/.env
 frontend/.env
