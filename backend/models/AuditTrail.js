@@ -28,7 +28,6 @@ const AuditTrailSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    // hazard report
   },
   { timestamps: true }
 );

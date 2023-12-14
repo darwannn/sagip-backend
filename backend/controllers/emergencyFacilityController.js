@@ -299,7 +299,6 @@ emergencyFacilityController.put(
         );
 
         if (emergencyFacility) {
-          console.log("res");
           req.io.emit("emergency-facility");
           createAuditTrail(
             req.user.id,
@@ -409,7 +408,6 @@ emergencyFacilityController.put(
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        console.log(action);
         if (action === "archive") {
           updateFields = {
             isArchived: true,

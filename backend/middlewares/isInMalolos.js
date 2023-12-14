@@ -7,11 +7,6 @@ const isInMalolos = async (req, res, next) => {
     if (isEmpty(latitude)) error["latitude"] = "Mark a location";
     if (isEmpty(longitude)) error["longitude"] = "Mark a location";
     if (Object.keys(error).length === 0) {
-      console.log(isEmpty(latitude));
-      console.log("latitude");
-      console.log(latitude);
-      console.log(longitude);
-
       const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
 
       const response = await axios.get(geocodeUrl);
@@ -63,34 +58,13 @@ const isInMalolos = async (req, res, next) => {
             longitude: "Unfortunately, the selected area is outside Malolos",
             message: "input error",
           });
-          /*  let combinedStreet = streetNumber
-            ? `${streetNumber} ${streetName}`
-            : streetName;
-
-          console.log(combinedStreet);
-          console.log(municipalityName);
-
-          if (combinedStreet !== "") {
-            if (
-              !combinedStreet.toLowerCase().includes("highway") &&
-              !combinedStreet.toLowerCase().includes("road")
-            )
-              combinedStreet = `${combinedStreet} Street`;
-          }
-          req.body.street = combinedStreet;
-          req.body.municipality = municipalityName;
-          next(); */
+          
         } else {
           let combinedStreet = streetNumber
             ? `${streetNumber} ${streetName}`
             : streetName;
-
-          console.log(combinedStreet);
-          console.log(municipalityName);
-
           if (combinedStreet !== "") {
-            console.log(combinedStreet.toLowerCase());
-            console.log(!combinedStreet.toLowerCase().includes("highway"));
+
             if (
               !combinedStreet.toLowerCase().includes("highway") &&
               !combinedStreet.toLowerCase().includes("road")

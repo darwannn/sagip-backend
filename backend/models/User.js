@@ -135,8 +135,6 @@ const userSchema = mongoose.Schema(
 );
 
 userSchema.pre("remove", async function (next) {
-  console.log(this._id);
-
   const HazardReport = mongoose.model("HazardReport");
   const AssistanceRequest = mongoose.model("AssistanceRequest");
   const Notification = mongoose.model("Notification");

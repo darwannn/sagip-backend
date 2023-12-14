@@ -51,7 +51,6 @@ assistanceRequestController.post(
       let { answers, description, category } = req.body;
       let status = "";
       const action = req.params.action.toLowerCase();
-      console.log("actoin", action);
       if (action === "add" || action === "auto-add") {
         if (action === "add") {
           /*  if (isEmpty(answers)) error["answers"] = "Required field"; */
@@ -100,10 +99,8 @@ assistanceRequestController.post(
             let proof = req.file
               ? `${cloud.original_filename}.${cloud.format}`
               : "";
-
             answers = answers && answers.length !== 0 ? answers : [];
 
-            /* adds defailt value when auto sending */
             status = "unverified";
             if (action === "auto-add") {
               if (isEmpty(proof)) {
@@ -158,19 +155,19 @@ assistanceRequestController.post(
                 }.`,
                 "info"
               );
-              //uncomment resident
-              createAuditTrail(
-                req.user.id,
-                assistanceRequest._id,
-                "AssistanceRequest",
-                "Assistance Request",
-                "Add",
-                `Added a new assistance request, ${assistanceRequest.category}${
-                  assistanceRequest.street !== ""
-                    ? ` on ${assistanceRequest.street}`
-                    : ""
-                }`
-              );
+              
+              // createAuditTrail(
+              //   req.user.id,
+              //   assistanceRequest._id,
+              //   "AssistanceRequest",
+              //   "Assistance Request",
+              //   "Add",
+              //   `Added a new assistance request, ${assistanceRequest.category}${
+              //     assistanceRequest.street !== ""
+              //       ? ` on ${assistanceRequest.street}`
+              //       : ""
+              //   }`
+              // );
 
               return res.status(200).json({
                 success: true,
@@ -575,20 +572,20 @@ assistanceRequestController.put(
             } has been updated.`,
             "info"
           );
-
-          //uncomment resident
-          createAuditTrail(
-            req.user.id,
-            assistanceRequest._id,
-            "AssistanceRequest",
-            "Assistance Request",
-            "Update",
-            `Updated assistance request, ${assistanceRequest.category}${
-              assistanceRequest.street !== ""
-                ? ` on ${assistanceRequest.street}`
-                : ""
-            }`
-          );
+          
+          // createAuditTrail(
+          //   req.user.id,
+          //   assistanceRequest._id,
+          //   "AssistanceRequest",
+          //   "Assistance Request",
+          //   "Update",
+          //   `Updated assistance request, ${assistanceRequest.category}${
+          //     assistanceRequest.street !== ""
+          //       ? ` on ${assistanceRequest.street}`
+          //       : ""
+          //   }`
+          // );
+          
           return res.status(200).json({
             success: true,
             message: "Updated Successfully",
@@ -741,8 +738,7 @@ assistanceRequestController.put(
 
             const teamMembers = [team.head, ...team.members];
 
-            /* sms uncomment */
-            /* await sendBulkSMS(
+            await sendBulkSMS(
               `Your team has been assigned to respond to ${
                 assistanceRequest.category
               }${
@@ -752,7 +748,7 @@ assistanceRequestController.put(
               }`,
               "notification",
               respondersContant
-            ); */
+            );
 
             createNotification(
               req,
@@ -797,7 +793,7 @@ assistanceRequestController.put(
               } has been assigned to assist you.`,
               "success"
             );
-            /* sms uncomment */
+            
             sendSMS(
               assistanceRequest.userId.contactNumber,
               "notification",
@@ -1001,7 +997,7 @@ assistanceRequestController.delete(
         );
 
         if (assistanceRequest) {
-          //resident uncomment
+          
           /*  createAuditTrail(
             req.user.id,
             assistanceRequest._id,
@@ -1196,7 +1192,7 @@ assistanceRequestController.put(
                 teamHead._id,
                 ...teamMembers.map((member) => member._id),
               ];
-              //resident uncomment
+              
               /* createAuditTrail(
                 req.user.id,
                 req.params.id,

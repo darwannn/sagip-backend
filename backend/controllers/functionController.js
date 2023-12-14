@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Team = require("../models/Team");
 const { createAuditTrail } = require("./auditTrailController");
-const { sendSMS, sendEmail } = require("./apiController");
 
 const { cloudinary } = require("../utils/config");
 
@@ -236,14 +235,14 @@ const cloudinaryUploader = async (
           cloudinaryResult = result;
         });
     } else if (action === "destroy") {
-      /* await cloudinary.uploader
+      await cloudinary.uploader
         .destroy(`${folderPath}/${public_id.replace(/\.[^/.]+$/, "")}`, {
           type: "upload",
           resource_type: resource_type,
         })
         .then(async (result) => {
           cloudinaryResult = result;
-        }); */
+        });
       cloudinaryResult = "result";
     }
   } catch (error) {

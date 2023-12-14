@@ -31,13 +31,9 @@ wellnessSurveyController.post(
       const activeWellnessSurvey = await WellnessSurvey.find({
         status: "active",
       });
-      /*   const activeWellnessSurvey = await WellnessSurvey.find({
-        isActive: true,
-      }); */
 
       if (Object.keys(error).length === 0) {
         if (!(activeWellnessSurvey.length !== 0 && status === "active")) {
-          /* error["category"] = "There is already an active survey"; */
 
           const wellnessSurvey = await WellnessSurvey.create({
             title,
@@ -55,7 +51,6 @@ wellnessSurveyController.post(
               "WellnessSurvey",
               "Wellness Check Survey",
               "Publish",
-              /*  "New wellness check survey has been published" */
               `Published a new wellness check survey, ${wellnessSurvey.title}`
             );
 
@@ -134,7 +129,6 @@ wellnessSurveyController.get("/report/:id", async (req, res) => {
     const barangay = barangays.map((barangay) => barangay.brgyDesc);
     barangay.sort((a, b) => a.localeCompare(b));
 
-    /*  const wellnessSurvey = await WellnessSurvey.findById(req.params.id) */
     const wellnessSurvey = await WellnessSurvey.findOne({
       _id: req.params.id,
       archivedDate: { $exists: false },
@@ -370,7 +364,6 @@ wellnessSurveyController.put(
             req.io.emit("wellness-survey");
 
             if (status === "active") {
-              console.log("update notif");
               if (
                 activeWellnessSurvey.length !== 0 &&
                 activeWellnessSurvey[0]._id.equals(req.params.id)
@@ -461,7 +454,6 @@ wellnessSurveyController.put(
         return res.status(400).json(error);
       }
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -485,7 +477,7 @@ wellnessSurveyController.put(
       const activeWellnessSurvey = await WellnessSurvey.findOne({
         status: "active",
       });
-      console.log(activeWellnessSurvey._id);
+
       const update = {};
       update[answer] = req.user.id;
 
@@ -497,7 +489,7 @@ wellnessSurveyController.put(
 
       if (wellnessSurvey) {
         req.io.emit("wellness-survey");
-        //resident uncomment
+  
         /* createAuditTrail(
           req.user.id,
           wellnessSurvey._id,
@@ -542,15 +534,14 @@ wellnessSurveyController.delete(
       );
       if (wellnessSurvey) {
         req.io.emit("wellness-survey");
-        /* if (wellnessSurvey.status === "active") {
-        } */
+     
         createAuditTrail(
           req.user.id,
           wellnessSurvey._id,
           "WellnessSurvey",
           "Wellness Check Survey",
           "Delete",
-          /*   "Wellness check survey has been deleted" */
+  
           `Deleted wellness check survey, ${wellnessSurvey.title}`
         );
         return res.status(200).json({
@@ -583,7 +574,6 @@ wellnessSurveyController.put(
       let updateFields = {};
       let action = req.params.action.toLowerCase();
       if (action === "unarchive" || action === "archive") {
-        console.log(action);
         if (action === "archive") {
           updateFields = {
             isArchived: true,
@@ -605,8 +595,6 @@ wellnessSurveyController.put(
 
         if (wellnessSurvey) {
           req.io.emit("wellness-survey");
-          /* if (wellnessSurvey.status === "active") {
-          } */
           if (action === "archive") {
             createAuditTrail(
               req.user.id,
@@ -614,7 +602,6 @@ wellnessSurveyController.put(
               "WellnessSurvey",
               "Wellness Check Survey",
               "Archive",
-              /* "Wellness check survey has been archived" */
               `Archived wellness check survey, ${wellnessSurvey.title}`
             );
             return res.status(200).json({
@@ -628,7 +615,6 @@ wellnessSurveyController.put(
               "WellnessSurvey",
               "Wellness Check Survey",
               "Unarchive",
-              /* "Wellness check survey has been unarchived" */
               `Unarchived wellness check survey, ${wellnessSurvey.title}`
             );
             return res.status(200).json({

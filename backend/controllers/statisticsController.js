@@ -113,27 +113,23 @@ statisticsController.get(
         const unverifiedUsers = users.filter((user) => {
           return user.status !== "verified" && user.userType === "resident";
         }).length;
-        /* team */
+    
         const responses =
           teams?.reduce((acc, team) => acc + team.response, 0) || 0;
         return res.status(200).json({
-          /* facility */
+
           emergencyFacilities: emergencyFacilities.length,
-          /* request  */
+       
           pendingAssistanceRequests,
-          /* report */
           pendingHazardReports,
-          /* articles */
           articles: articles.length,
           publishedArticles,
-          draftArticles,
-          /* users */
+          draftArticles,       
           users: users.length,
           residents: residents,
           staffs: staffs.length,
           responses,
           usersThisMonth: usersThisMonth,
-          /* activeUsersThisMonth: activeUsersThisMonth, */
 
           verifiedUsers,
           unverifiedUsers,

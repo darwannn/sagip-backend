@@ -138,7 +138,6 @@ teamController.get("/", async (req, res) => {
 teamController.get("/myteam", tokenMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log(userId);
     const team = await Team.findOne({
       $or: [{ members: userId }, { head: userId }],
     })
@@ -660,7 +659,6 @@ teamController.put(
               (member) => !oldTeam.members.includes(member)
             );
 
-            console.log(newMember);
             if (newMember.length > 0) {
               await createNotification(
                 req,

@@ -1,8 +1,8 @@
+const moment = require("moment");
 const accountController = require("express").Router();
 const User = require("../models/User");
-
 const bcrypt = require("bcryptjs");
-
+const { sendSMS, sendEmail } = require("./apiController");
 const {
   isEmpty,
   isImage,
@@ -24,21 +24,17 @@ const {
 
 const tokenMiddleware = require("../middlewares/tokenMiddleware");
 const { createAuditTrail } = require("./auditTrailController");
-const currentDate = new Date();
-
 const multerMiddleware = require("../middlewares/multerMiddleware");
-
 const folderPath = "sagip/media/user";
 
 const userTypeMiddleware = require("../middlewares/userTypeMiddleware");
 
-const { sendSMS, sendEmail } = require("./apiController");
 const {
   createNotification,
   createNotificationAll,
 } = require("./notificationController");
-const moment = require("moment");
 const { create } = require("../models/AuditTrail");
+
 accountController.get("/", async (req, res) => {
   try {
     const user = await User.find({});
@@ -63,7 +59,6 @@ accountController.post(
   "/add",
   tokenMiddleware,
   /*  userTypeMiddleware([
-    
     "admin",
   ]), */
   async (req, res) => {
@@ -161,7 +156,6 @@ accountController.post(
 
         if (user) {
           req.io.emit("user");
-          console.log(user._id);
           createAuditTrail(
             req.user.id,
             user._id,
@@ -189,7 +183,6 @@ accountController.post(
         return res.status(400).json(error);
       }
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -370,12 +363,10 @@ accountController.put(
         if (Object.keys(error).length == 0) {
           const user = await updateVerificationCode(req.user.id);
           if (action === "contact-number") {
-            console.log("send sms");
             sendSMS(contactNumber, "sms-verification", user.verificationCode);
           }
 
           if (action === "email" || action === "verify-email") {
-            console.log("send email");
             sendEmail(email, "email-verification", user.verificationCode);
           }
           if (user) {
@@ -735,7 +726,6 @@ accountController.put(
         return res.status(400).json(error);
       }
     } catch (error) {
-      console.log(error);
       return res.status(500).json({
         success: false,
         message: "Internal Server Error: " + error,
@@ -1056,7 +1046,6 @@ accountController.put(
       }
 
       if (Object.keys(error).length != 0) {
-        console.log("error");
         error["message"] = "input error";
         res.status(400).json(error);
       }
