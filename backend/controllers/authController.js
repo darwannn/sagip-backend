@@ -184,7 +184,6 @@ authController.post("/register", async (req, res) => {
             user._doc.contactNumber
           ),
         });
-
       } else {
         return res.status(500).json({
           success: false,
@@ -335,7 +334,7 @@ authController.put(
 
             if (!codeExpirationMoment.isAfter(currentMoment)) {
               const user = await updateVerificationCode(req.user.id);
-  
+
               sendSMS(user.contactNumber, "register", user.verificationCode);
               sendEmail(user.email, "register", user.verificationCode);
 
@@ -345,19 +344,17 @@ authController.put(
                   "Verification code has expired. A new verification code has been sent",
                 message: "input error",
               });
-    
             } else {
               if (parseInt(code) === user.verificationCode) {
                 if (user.codeExpiration)
                   if (user.status == "unverified") {
-                    user.status = "pending";
+                    user.status = "semi-verified";
                   }
                 user.attempt = 0;
                 user.verificationCode = 0;
                 await user.save();
                 req.io.emit("user");
                 if (action === "register") {
-                
                   /*  createAuditTrail(
                     user._id,
                     user._id,
@@ -384,7 +381,6 @@ authController.put(
                       id: user._doc._id,
                       userType: user._doc.userType,
                       status: user._doc.status,
-            
                     },
                     token: generateToken(
                       "login",
@@ -416,7 +412,6 @@ authController.put(
                     ),
                   });
                 if (action === "login" || action === "attempt") {
-                 
                   if (!(user.userType === "resident")) {
                     createAuditTrail(
                       user._id,
@@ -466,7 +461,6 @@ authController.put(
                       "info"
                     ); */
                     if (!(user.userType === "resident")) {
-                      
                       createAuditTrail(
                         user._id,
                         user._id,
@@ -514,7 +508,6 @@ authController.put(
                   );
                   if (userEmail) {
                     if (!(user.userType === "resident")) {
-                    
                       if (oldUserEmail.emailStatus !== userEmail.emailStatus) {
                         createAuditTrail(
                           user._id,
@@ -719,14 +712,12 @@ authController.post("/login", async (req, res) => {
               });
             } else {
               if (!(user.status === "unverified")) {
-           
                 user.attempt = 0;
                 user.isOnline = true;
                 user.lastOnlineDate = Date.now();
                 await user.save();
 
                 if (!(user.userType === "resident")) {
-
                   createAuditTrail(
                     user._id,
                     user._id,
@@ -755,9 +746,7 @@ authController.post("/login", async (req, res) => {
                     ""
                   ),
                 });
-  
               } else {
-              
                 const userVerificationCode = await updateVerificationCode(
                   user._id
                 );
@@ -1190,7 +1179,7 @@ authController.put(
             `${user.firstname} ${user.lastname} has submitted  a verification request.`,
             "info"
           );
-        
+
           /* createAuditTrail(
             user._id,
             user._id,
@@ -1238,7 +1227,7 @@ authController.get(
       user = user.filter(
         (record) =>
           record.verificationPicture.length !== 0 &&
-          record.status === "pending" &&
+          record.status === "semi-verified" &&
           record.verificationRequestDate
       );
 
