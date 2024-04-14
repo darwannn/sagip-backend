@@ -15,12 +15,17 @@ statisticsController.get(
   "/",
   /* tokenMiddleware, */ async (req, res) => {
     try {
-      const users = await User.find({});
-      const articles = await SafetyTip.find({});
-      const assistanceRequests = await AssistanceRequest.find({});
-      const hazardReports = await HazardReport.find({});
-      const emergencyFacilities = await EmergencyFacility.find({});
-      const teams = await Team.find({});
+      const users = await User.find({ isArchived: false });
+      const articles = await SafetyTip.find({ isArchived: false });
+      const assistanceRequests = await AssistanceRequest.find({
+        isArchived: false,
+      });
+      const hazardReports = await HazardReport.find({ isArchived: false });
+
+      const emergencyFacilities = await EmergencyFacility.find({
+        isArchived: false,
+      });
+      const teams = await Team.find({ isArchived: false });
 
       const newAssistanceRequest = assistanceRequests.filter(
         (request) =>
@@ -113,18 +118,17 @@ statisticsController.get(
         const unverifiedUsers = users.filter((user) => {
           return user.status !== "verified" && user.userType === "resident";
         }).length;
-    
+
         const responses =
           teams?.reduce((acc, team) => acc + team.response, 0) || 0;
         return res.status(200).json({
-
           emergencyFacilities: emergencyFacilities.length,
-       
+
           pendingAssistanceRequests,
           pendingHazardReports,
           articles: articles.length,
           publishedArticles,
-          draftArticles,       
+          draftArticles,
           users: users.length,
           residents: residents,
           staffs: staffs.length,
